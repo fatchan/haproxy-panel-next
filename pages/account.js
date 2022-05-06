@@ -11,7 +11,7 @@ const Account = ({ user, maps, acls, globalAcl, csrf }) => {
 	const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0
 
 	// Links to each map and bubble/pill for map counts
-	const mapLinks = maps.map(map => <MapLink map={map} />);
+	const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
 
 	return (
 		<>
@@ -110,7 +110,7 @@ const Account = ({ user, maps, acls, globalAcl, csrf }) => {
 };
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user, ...query } }
+	return { props: { user: res.locals.user || {}, ...query } }
 }
 
 export default Account;

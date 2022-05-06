@@ -23,12 +23,10 @@ const testRouter = (server, app) => {
 		});
 		
 		const useSession = (req, res, next) => {
-			console.log('useSession', req.path)
 			sessionStore(req, res, next);
 		};
 		
 		const fetchSession = async (req, res, next) => {
-			console.log('fetchSession')
 			if (req.session.user) {
 				const account = await db.db.collection('accounts').findOne({_id:req.session.user});
 				if (account) {
@@ -46,7 +44,6 @@ const testRouter = (server, app) => {
 		};
 		
 		const checkSession = (req, res, next) => {
-			console.log('checkSession')
 			if (!res.locals.user) {
 				return res.redirect('/login');
 			}
@@ -57,13 +54,14 @@ const testRouter = (server, app) => {
 
 		//HAProxy-sdk middleware
 		const useHaproxy = (req, res, next) => {
-			console.log('useHaproxy')
 			if (res.locals.user.clusters.length === 0) {
 				return next();
 			}
 			try {
 				//uses cluster from account
 				res.locals.haproxy = new HAProxy(res.locals.user.clusters[res.locals.user.activeCluster]);
+				res.locals.fMap = server.locals.fMap;
+				res.locals.mapValueNames = server.locals.mapValueNames;
 				next();
 			} catch (e) {
 				res.status(500).send(e);
@@ -92,12 +90,15 @@ const testRouter = (server, app) => {
 		server.post('/logout', useSession, accountsController.logout);
 		server.post('/register', useSession, accountsController.register);
 
+		const mapNames = [process.env.BLOCKED_MAP_NAME, process.env.MAINTENANCE_MAP_NAME, process.env.WHITELIST_MAP_NAME, process.env.BLOCKED_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.HOSTS_MAP_NAME]
+			, mapNamesOrString = mapNames.join('|');
+
 		//authed pages that dont require a cluster
 		server.get('/account', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountsController.accountPage.bind(null, app));
-		server.get('/domains', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsPage);
-		server.get('/clusters', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountsController.clustersPage);
-		server.get(`/maps/:name(${process.env.BLOCKED_MAP_NAME}|${process.env.MAINTENANCE_MAP_NAME}|${process.env.WHITELIST_MAP_NAME}|${process.env.BLOCKED_MAP_NAME}|${process.env.DDOS_MAP_NAME}|${process.env.HOSTS_MAP_NAME})`,
-			useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.getMapHtml);
+		server.get('/clusters', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountsController.clustersPage.bind(null, app));
+		server.get('/domains', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsPage.bind(null, app));
+		server.get(`/map/:name(${mapNamesOrString})`,
+			useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.getMapHtml.bind(null, app));
 
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
@@ -107,9 +108,9 @@ const testRouter = (server, app) => {
 		server.post('/cluster/delete', accountsController.deleteClusters);
 		server.post('/domain/add', domainsController.addDomain);
 		server.post('/domain/delete', domainsController.deleteDomain);
-		server.post(`/maps/:name(${process.env.BLOCKED_MAP_NAME}|${process.env.MAINTENANCE_MAP_NAME}|${process.env.WHITELIST_MAP_NAME}|${process.env.DDOS_MAP_NAME}|${process.env.HOSTS_MAP_NAME})/add`,
+		server.post(`/map/:name(${mapNamesOrString})/add`,
 			mapsController.patchMapForm); //add to MAP
-		server.post(`/maps/:name(${process.env.BLOCKED_MAP_NAME}|${process.env.MAINTENANCE_MAP_NAME}|${process.env.WHITELIST_MAP_NAME}|${process.env.DDOS_MAP_NAME}|${process.env.HOSTS_MAP_NAME})/delete`,
+		server.post(`/map/:name(${mapNamesOrString})/delete`,
 			mapsController.deleteMapForm); //delete from MAP
 		server.post('/forms', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, clusterRouter);
 

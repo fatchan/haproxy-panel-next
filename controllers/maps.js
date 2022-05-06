@@ -5,7 +5,7 @@ const url = require('url');
  * GET /maps/:name
  * Show map filtering to users domains
  */
-exports.getMapHtml = async (req, res, next) => {
+exports.getMapHtml = async (app, req, res, next) => {
 	let map,
 		mapId,
 		showValues = false;
@@ -45,7 +45,7 @@ exports.getMapHtml = async (req, res, next) => {
 			return res.status(400).send('invalid map');
 	}
 
-	res.render('map', {
+	return app.render(req, res, '/map', {
 		mapId,
 		map,
 		csrf: req.csrfToken(),
