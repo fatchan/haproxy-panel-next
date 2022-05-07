@@ -16,32 +16,7 @@ const Account = (props) => {
     }, []);
 
 	if (!accountData.user) {
-		return (
-			<>
-				
-				<Head>
-					<title>Account</title>
-				</Head>
-
-				<h5 className="fw-bold">
-					Controls:
-				</h5>
-				
-				<div className="list-group">
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-				</div>
-				
-			</>
-		);
+		return (<>Loading...</>);
 	}
 
 	const { user, maps, acls, globalAcl, csrf } = accountData;

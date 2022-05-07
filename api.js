@@ -9,11 +9,9 @@ export default async function ApiCall(route, method, body, stateCallback, finish
 			options.body = body;
 			options.headers = { 'Content-Type': 'application/json' };
 		}
-		console.log(options)
 		NProgress.start();
 		let response = await fetch(route, options)
 			.then(res => res.json());
-		console.log(response)
 		stateCallback && stateCallback(response);
 	} catch(e) {
 		console.error(e);

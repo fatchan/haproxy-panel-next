@@ -16,32 +16,7 @@ export default function Domains(props) {
     }, []);
 
 	if (!accountData.user) {
-	   return (
-			<>
-				
-				<Head>
-					<title>Domains</title>
-				</Head>
-
-				<h5 className="fw-bold">
-					Available Domains:
-				</h5>
-				
-				<div className="list-group">
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-					<LoadingPlaceholder />
-				</div>
-				
-			</>
-		);
+	   return (<>Loading...</>);
 	}
 
 	const { user, csrf } = accountData;
