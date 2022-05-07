@@ -4,16 +4,19 @@ import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ApiCall from '../api.js';
+import { useRouter } from 'next/router';
 
 const Account = (props) => {
+
+	const router = useRouter();
 
 	const [accountData, setAccountData] = useState(props);
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/account.json', 'GET', null, setAccountData);
+	    	ApiCall('/account.json', 'GET', null, setAccountData, null, router);
 	    }
-    }, []);
+    }, [accountData.user, router]);
 
 	if (!accountData.user) {
 		return (<>Loading...</>);
@@ -32,14 +35,14 @@ const Account = (props) => {
 
 	async function switchCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5, router);
+		await ApiCall('/account.json', 'GET', null, setAccountData, null, router);
 	}
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
-		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5, router);
+		await ApiCall('/account.json', 'GET', null, setAccountData, null, router);
 	}
 
 	return (
@@ -129,10 +132,10 @@ const Account = (props) => {
 					</a>
 				</Link>
 				
+				{/* Map links */}
+				{mapLinks}
+				
 			</div>
-
-			{/* Map links */}
-			{mapLinks}
 			
 		</>
 	)

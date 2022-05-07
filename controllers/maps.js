@@ -23,11 +23,11 @@ exports.mapData = async (req, res, next) => {
 	switch (req.params.name) {
 		case process.env.DDOS_MAP_NAME:
 			showValues = true;
-		case process.env.MAINTENANCE_MAP_NAME:
 		case process.env.HOSTS_MAP_NAME:
 			if (process.env.CUSTOM_BACKENDS_ENABLED) {
 				showValues = true;
 			}
+		case process.env.MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
 				const [id, key, value] = a.split(' ');
 				const { hostname, pathname } = url.parse(`https://${key}`);

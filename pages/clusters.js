@@ -3,39 +3,42 @@ import Head from 'next/head';
 import Link from 'next/link';
 import BackButton from '../components/BackButton.js'
 import ApiCall from '../api.js'
+import { useRouter } from 'next/router';
 
 export default function Clusters(props) {
+
+	const router = useRouter();
 
 	const [accountData, setAccountData] = useState(props);
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/account.json', 'GET', null, setAccountData);
+	    	ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
 	    }
-    }, []);
+    }, [accountData.user, router]);
 
 	if (!accountData.user) {
 	    return <>Loading...</>; //TODO: page with animated css placeholder boxes
 	}
 
-	const { user, maps, acls, globalAcl, csrf } = accountData;
+	const { user, csrf } = accountData;
 
 	async function addCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5, router);
+		await ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
 	}
 
 	async function deleteCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5, router);
+		await ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
 	}
 
-	const domainList = user.clusters.map(c => {
+	const domainList = user.clusters.map((c, i) => {
 		//TODO: refactor, to component
 		return (
-			<tr className="align-middle">
+			<tr key={c} className="align-middle">
 				<td className="col-1 text-center">
 					<form onSubmit={deleteCluster} action="/forms/cluster/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />

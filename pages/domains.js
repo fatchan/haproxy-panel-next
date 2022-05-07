@@ -3,17 +3,20 @@ import Head from 'next/head';
 import Link from 'next/link';
 import BackButton from '../components/BackButton.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
-import ApiCall from '../api.js'
+import ApiCall from '../api.js';
+import { useRouter } from 'next/router';
 
 export default function Domains(props) {
+
+	const router = useRouter();
 
 	const [accountData, setAccountData] = useState(props);
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/domains.json', 'GET', null, setAccountData);
+	    	ApiCall('/domains.json', 'GET', null, setAccountData, null, router);
 	    }
-    }, []);
+    }, [accountData.user, router]);
 
 	if (!accountData.user) {
 	   return (<>Loading...</>);
@@ -23,20 +26,20 @@ export default function Domains(props) {
 
 	async function addDomain(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
-		await ApiCall('/domains.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5, router);
+		await ApiCall('/domains.json', 'GET', null, setAccountData, null, router);
 	}
 
 	async function deleteDomain(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
-		await ApiCall('/domains.json', 'GET', null, setAccountData);
+		await ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5, router);
+		await ApiCall('/domains.json', 'GET', null, setAccountData, null, router);
 	}
 
-	const domainList = user.domains.map(d => {
+	const domainList = user.domains.map((d, i) => {
 		//TODO: refactor, to component
 		return (
-			<tr className="align-middle">
+			<tr key={i} className="align-middle">
 				<td className="col-1 text-center">
 					<form onSubmit={deleteDomain} action="/forms/domain/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />

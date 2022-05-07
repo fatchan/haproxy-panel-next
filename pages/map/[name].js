@@ -9,15 +9,16 @@ import ApiCall from '../../api.js';
 const MapPage = (props) => {
 
 	const router = useRouter();
+	
 	const { name: mapName } = router.query;
 
 	const [mapData, setMapData] = useState(props);
 
     React.useEffect(() => {
     	if (!mapData.user) {
-    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData);
+    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, null, router);
 	    }
-    }, []);
+    }, [mapData.user, mapName, router]);
 
 	if (!mapData.user) {
 	    return <>Loading...</>; //todo: page with animated css placeholder boxes
@@ -27,15 +28,15 @@ const MapPage = (props) => {
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, 0.5);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData);
+		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, 0.5, router);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, null, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, 0.5);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData);
+		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, 0.5, router);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, null, router);
 	}
 
 	const mapRows = map.map((row, i) => {
@@ -59,7 +60,7 @@ const MapPage = (props) => {
 	switch (mapId.name) {
 		case "ddos": {
 			const mapValueOptions = Object.entries(mapValueNames)
-				.map(entry => (<option value={entry[0]}>{entry[1]}</option>))
+				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>))
 			formElements = (
 				<>
 					<input type="hidden" name="_csrf" value={csrf} />
@@ -77,7 +78,7 @@ const MapPage = (props) => {
 		case "maintenance": {
 			const activeDomains = map.map(e => e.split(' ')[1]);
 			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
-			const domainSelectOptions = inactiveDomains.map(d => (<option value={d}>{d}</option>));
+			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
 					<input type="hidden" name="_csrf" value={csrf} />

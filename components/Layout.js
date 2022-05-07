@@ -9,7 +9,7 @@ export default function Layout({ children }) {
 				<meta name="viewport" content="width=device-width initial-scale=1"/>
 			</Head>
 			<div className="container col-lg-6">
-				<header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom border-dark">
+				<header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-2">
 					<ul className="nav col-4 mb-2 mb-md-0">
 						<li><Link href="/"><a className="nav-link px-2 link-dark">Home</a></Link></li>
 					</ul>
@@ -22,7 +22,7 @@ export default function Layout({ children }) {
 			</div>
 			<footer className="py-3 mt-auto">
 				<p className="text-center text-muted">
-					<a href="https://gitgud.io/fatchan/haproxy-protection/">Open Source Bot Protection</a> + <a href="https://gitgud.io/fatchan/haproxy-panel/">Control Panel</a>
+					<a href="https://gitgud.io/fatchan/haproxy-protection/">Open Source Bot Protection</a> + <a href="https://gitgud.io/fatchan/haproxy-panel-next/">Control Panel</a>
 				</p>
 			</footer>
 		</>

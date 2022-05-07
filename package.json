@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
+    "lint": "next lint",
     "start": "NODE_ENV=production node server.js"
   },
   "keywords": [],
@@ -30,5 +31,9 @@
     "react": "^18.1.0",
     "react-content-loader": "^6.2.0",
     "react-dom": "^18.1.0"
+  },
+  "devDependencies": {
+    "eslint": "8.15.0",
+    "eslint-config-next": "12.1.6"
   }
 }
