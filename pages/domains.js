@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import BackButton from '../components/BackButton.js'
+import BackButton from '../components/BackButton.js';
+import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ApiCall from '../api.js'
 
 export default function Domains(props) {
@@ -10,26 +11,51 @@ export default function Domains(props) {
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/account.json', 'GET', null, setAccountData);
+	    	ApiCall('/domains.json', 'GET', null, setAccountData);
 	    }
     }, []);
 
 	if (!accountData.user) {
-	    return <>Loading...</>; //TODO: page with animated css placeholder boxes
+	   return (
+			<>
+				
+				<Head>
+					<title>Domains</title>
+				</Head>
+
+				<h5 className="fw-bold">
+					Available Domains:
+				</h5>
+				
+				<div className="list-group">
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+				</div>
+				
+			</>
+		);
 	}
 
-	const { user, maps, acls, globalAcl, csrf } = accountData;
+	const { user, csrf } = accountData;
 
 	async function addDomain(e) {
 		e.preventDefault();
 		await ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/domains.json', 'GET', null, setAccountData);
 	}
 
 	async function deleteDomain(e) {
 		e.preventDefault();
 		await ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
-		await ApiCall('/account.json', 'GET', null, setAccountData);
+		await ApiCall('/domains.json', 'GET', null, setAccountData);
 	}
 
 	const domainList = user.domains.map(d => {
@@ -57,7 +83,7 @@ export default function Domains(props) {
 			</Head>
 
 			<h5 className="fw-bold">
-				Your Domains ({user.domains.length}):
+				Available Domains:
 			</h5>
 
 			{/* Domains table */}

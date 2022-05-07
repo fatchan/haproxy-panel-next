@@ -16,7 +16,7 @@ exports.domainsPage = async (app, req, res) => {
  * GET /domains.json
  * domains json data
  */
-exports.domainsJSON = async (req, res) => {
+exports.domainsJson = async (req, res) => {
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,

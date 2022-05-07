@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
+import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ApiCall from '../api.js';
 
 const Account = (props) => {
@@ -15,7 +16,32 @@ const Account = (props) => {
     }, []);
 
 	if (!accountData.user) {
-	    return <>Loading...</>; //todo: page with animated css placeholder boxes
+		return (
+			<>
+				
+				<Head>
+					<title>Account</title>
+				</Head>
+
+				<h5 className="fw-bold">
+					Controls:
+				</h5>
+				
+				<div className="list-group">
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+					<LoadingPlaceholder />
+				</div>
+				
+			</>
+		);
 	}
 
 	const { user, maps, acls, globalAcl, csrf } = accountData;

@@ -104,7 +104,9 @@ const testRouter = (server, app) => {
 		
 		server.get('/clusters', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersPage.bind(null, app));
 		server.get('/clusters.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersJson);
+
 		server.get('/domains', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsPage.bind(null, app));
+		server.get('/domains.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsJson);
 
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
