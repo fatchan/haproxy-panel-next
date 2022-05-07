@@ -16,7 +16,7 @@ const testRouter = (server, app) => {
 			rolling: true,
 			cookie: {
 				httpOnly: true,
-				secure: !dev,
+				secure: false, //!dev, //TODO: check https
 				sameSite: 'strict',
 				maxAge: 1000 * 60 * 60 * 24 * 7, //week
 			}
@@ -87,9 +87,9 @@ const testRouter = (server, app) => {
 		server.get('/register', useSession, fetchSession, (req, res, next) => { return app.render(req, res, '/register') });
 
 		//register/login/logout forms
-		server.post('/login', useSession, accountController.login);
-		server.post('/logout', useSession, accountController.logout);
-		server.post('/register', useSession, accountController.register);
+		server.post('/forms/login', useSession, accountController.login);
+		server.post('/forms/logout', useSession, accountController.logout);
+		server.post('/forms/register', useSession, accountController.register);
 
 		const mapNames = [process.env.BLOCKED_MAP_NAME, process.env.MAINTENANCE_MAP_NAME, process.env.WHITELIST_MAP_NAME,
 				process.env.BLOCKED_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.HOSTS_MAP_NAME]
@@ -108,15 +108,15 @@ const testRouter = (server, app) => {
 
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
-		server.post('/global/toggle', accountController.globalToggle);
-		server.post('/cluster', clustersController.setCluster);
-		server.post('/cluster/add', clustersController.addCluster);
-		server.post('/cluster/delete', clustersController.deleteClusters);
-		server.post('/domain/add', domainsController.addDomain);
-		server.post('/domain/delete', domainsController.deleteDomain);
-		server.post(`/map/:name(${mapNamesOrString})/add`, mapsController.patchMapForm); //add to MAP
-		server.post(`/map/:name(${mapNamesOrString})/delete`, mapsController.deleteMapForm); //delete from MAP
-		server.post('/forms', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, clusterRouter);
+		clusterRouter.post('/global/toggle', accountController.globalToggle);
+		clusterRouter.post('/cluster', clustersController.setCluster);
+		clusterRouter.post('/cluster/add', clustersController.addCluster);
+		clusterRouter.post('/cluster/delete', clustersController.deleteClusters);
+		clusterRouter.post('/domain/add', domainsController.addDomain);
+		clusterRouter.post('/domain/delete', domainsController.deleteDomain);
+		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, mapsController.patchMapForm); //add to MAP
+		clusterRouter.post(`/map/:name(${mapNamesOrString})/delete`, mapsController.deleteMapForm); //delete from MAP
+		server.use('/forms', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, clusterRouter);
 
 };
 

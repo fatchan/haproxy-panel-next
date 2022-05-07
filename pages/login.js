@@ -1,13 +1,13 @@
 import Head from 'next/head';
 
-const Login = ({ isLoggedIn }) => (
+const Login = () => (
 	<>
 		<Head>
 			<title>Login</title>
 		</Head>
 
 		<h5 className="fw-bold">Login</h5>
-		<form action="/login" method="POST">
+		<form action="/forms/login" method="POST">
 			<div className="mb-2">
 				<label className="form-label">Username
 					<input className="form-control" type="text" name="username" maxLength="50" required="required"/>
@@ -23,10 +23,5 @@ const Login = ({ isLoggedIn }) => (
 
 	</>
 );
-
-// This gets called on every request
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-  return { props: { isLoggedIn: res.locals.user != null } }
-}
 
 export default Login;

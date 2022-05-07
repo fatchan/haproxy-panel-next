@@ -6,9 +6,20 @@ const { deleteFromMap } = require('../util.js');
  * GET /domains
  * domains page
  */
-exports.domainsPage = async (req, res) => {
-	return res.render('domains', {
+exports.domainsPage = async (app, req, res) => {
+	return app.render(req, res, '/domains', {
 		csrf: req.csrfToken(),
+	});
+};
+
+/**
+ * GET /domains.json
+ * domains json data
+ */
+exports.domainsJSON = async (req, res) => {
+	return res.json({
+		csrf: req.csrfToken(),
+		user: res.locals.user,
 	});
 };
 
@@ -48,6 +59,7 @@ exports.deleteDomain = async (req, res) => {
 	}
 
 	//will fail if domain is only in the hosts map for a different cluster, so we wont do it (for now)
+	//but will cause permission problems "invalid input" when trying to delete it from the other cluster later... hmmm...
 	//await deleteFromMap(res.locals.haproxy, process.env.HOSTS_MAP_NAME, [req.body.domain]);
 
 	await db.db.collection('accounts')

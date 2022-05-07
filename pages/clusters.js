@@ -4,7 +4,7 @@ import Link from 'next/link';
 import BackButton from '../components/BackButton.js'
 import ApiCall from '../api.js'
 
-export default function Domains(props) {
+export default function Clusters(props) {
 
 	const [accountData, setAccountData] = useState(props);
 
@@ -20,31 +20,31 @@ export default function Domains(props) {
 
 	const { user, maps, acls, globalAcl, csrf } = accountData;
 
-	async function addDomain(e) {
+	async function addCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
+		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5);
 		await ApiCall('/account.json', 'GET', null, setAccountData);
 	}
 
-	async function deleteDomain(e) {
+	async function deleteCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, 0.5);
+		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5);
 		await ApiCall('/account.json', 'GET', null, setAccountData);
 	}
 
-	const domainList = user.domains.map(d => {
+	const domainList = user.clusters.map(c => {
 		//TODO: refactor, to component
 		return (
 			<tr className="align-middle">
 				<td className="col-1 text-center">
-					<form onSubmit={deleteDomain} action="/forms/domain/delete" method="post">
+					<form onSubmit={deleteCluster} action="/forms/cluster/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="domain" value={d} />
+						<input type="hidden" name="cluster" value={c} />
 						<input className="btn btn-danger" type="submit" value="×" />
 					</form>
 				</td>
 				<td>
-					{d}
+					{c}
 				</td>
 			</tr>
 		);
@@ -53,14 +53,14 @@ export default function Domains(props) {
 	return (
 		<>
 			<Head>
-				<title>Domains</title>
+				<title>Clusters</title>
 			</Head>
 
 			<h5 className="fw-bold">
-				Your Domains ({user.domains.length}):
+				Clusters ({user.clusters.length}):
 			</h5>
 
-			{/* Domains table */}
+			{/* Clusters table */}
 			<div className="table-responsive">
 				<table className="table table-bordered text-nowrap">
 					<tbody>
@@ -70,10 +70,10 @@ export default function Domains(props) {
 						{/* Add new domain form */}
 						<tr className="align-middle">
 							<td className="col-1 text-center" colSpan="3">
-								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
+								<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="domain" placeholder="domain" required />
+									<input className="form-control mx-3" type="text" name="cluster" placeholder="tcp://host1:port,tcp://host2:port,..." required />
 													
 								</form>
 							</td>

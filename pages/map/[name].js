@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
+import ApiCall from '../../api.js';
 
 const MapPage = (props) => {
 
@@ -14,24 +15,31 @@ const MapPage = (props) => {
 
     React.useEffect(() => {
     	if (!mapData.user) {
-			async function getAccount() {
-				const response = await fetch(`/map/${mapName}.json`)
-					.then(res => res.json());
-				console.log(response)
-				setMapData(response);
-	    	}
-	    	getAccount();
+    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData);
 	    }
     }, []);
 
 	if (!mapData.user) {
-	    return <>Loading...</>;
+	    return <>Loading...</>; //todo: page with animated css placeholder boxes
 	}
 
 	const { user, mapValueNames, mapId, map, csrf, name, showValues } = mapData;
 
+	async function addToMap(e) {
+		e.preventDefault();
+		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, 0.5);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData);
+		e.target.reset();
+	}
+
+	async function deleteFromMap(e) {
+		e.preventDefault();
+		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, 0.5);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData);
+	}
+
 	const mapRows = map.map((row, i) => {
-		//todo: address prop drilling
+		//TODO: address prop drilling
 		return (
 			<MapRow
 				key={i}
@@ -40,25 +48,48 @@ const MapPage = (props) => {
 				csrf={csrf}
 				showValues={showValues}
 				mapValueNames={mapValueNames}
+				onDeleteSubmit={deleteFromMap}
 			/>
 		)
 	});
 
+
 	let formElements;
-	//todo: env var case map names
+	//TODO: env var case map names
 	switch (mapId.name) {
-		case "ddos":
+		case "ddos": {
+			const mapValueOptions = Object.entries(mapValueNames)
+				.map(entry => (<option value={entry[0]}>{entry[1]}</option>))
 			formElements = (
 				<>
 					<input type="hidden" name="_csrf" value={csrf} />
 					<input className="btn btn-success" type="submit" value="+" />
-					<input className="form-control mx-3" type="text" name="key" placeholder="ip or subnet" required />
+					<input className="form-control mx-3" type="text" name="key" placeholder="domain/path" required />
+					<select className="form-select mx-3" name="value" required>
+						<option selected />
+						{mapValueOptions}
+					</select>
 				</>
 			);
 			break;
+		}
 		case "hosts":
-		case "maintenance":
+		case "maintenance": {
+			const activeDomains = map.map(e => e.split(' ')[1]);
+			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
+			const domainSelectOptions = inactiveDomains.map(d => (<option value={d}>{d}</option>));
+			formElements = (
+				<>
+					<input type="hidden" name="_csrf" value={csrf} />
+					<input className="btn btn-success" type="submit" value="+" />
+					<select className="form-select mx-3" name="key" required>
+						<option selected />
+						{domainSelectOptions}
+					</select>
+				</>
+			);
 			break;
+		}
 		case "blocked":
 		case "whitelist":
 			formElements = (
@@ -91,24 +122,26 @@ const MapPage = (props) => {
 					<tbody>
 
 						{/* header row */}
-						<tr>
-							<th />
-							<th>
-								{mapId.columnNames[0]}
-							</th>
-							{showValues === true && (
+						{mapRows.length > 0 && (
+							<tr>
+								<th />
 								<th>
-									{mapId.columnNames[1]}
+									{mapId.columnNames[0]}
 								</th>
-							)}
-						</tr>
+								{showValues === true && (
+									<th>
+										{mapId.columnNames[1]}
+									</th>
+								)}
+							</tr>
+						)}
 						
 						{mapRows}
 
 						{/* Add new row form */}
 						<tr className="align-middle">
 							<td className="col-1 text-center" colSpan="3">
-								<form className="d-flex" action={`/map/${mapId.name}/add`} method="post">
+								<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapId.name}/add`} method="post">
 									{formElements}
 								</form>
 							</td>

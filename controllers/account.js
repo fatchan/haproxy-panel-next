@@ -3,7 +3,7 @@ const db = require('../db.js');
 const { validClustersString, makeArrayIfSingle, extractMap } = require('../util.js');
 
 /**
- * account data
+ * account page data shared between html/json routes
  */
 exports.accountData = async (req, res, next) => {
 	let maps = []
@@ -39,20 +39,26 @@ exports.accountData = async (req, res, next) => {
 	}
 };
 
-// SSR page / first loac
+/**
+ * GET /account
+ * account page html
+ */
 exports.accountPage = async (app, req, res, next) => {
 	const data = await exports.accountData(req, res, next);
-	return app.render(req, res, '/account', data);
+	return app.render(req, res, '/account', { ...data, user: res.locals.user });
 }
 
-// JSON for CSR / later page switching
+/**
+ * GET /account.json
+ * account page json data
+ */
 exports.accountJson = async (req, res, next) => {
 	const data = await exports.accountData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
 
 /**
- * POST /global/toggle
+ * POST /forms/global/toggle
  * toggle global ACL
  */
 exports.globalToggle = async (req, res, next) => {
@@ -85,11 +91,11 @@ exports.globalToggle = async (req, res, next) => {
 };
 
 /**
- * POST /login
+ * POST /forms/login
  * login
  */
 exports.login = async (req, res) => {
-	const username = req.body.username; //.toLowerCase();
+	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
 	const account = await db.db.collection('accounts').findOne({_id:username});
 	if (!account) {
@@ -104,18 +110,18 @@ exports.login = async (req, res) => {
 };
 
 /**
- * POST /register
+ * POST /forms/register
  * regiser
  */
 exports.register = async (req, res) => {
-	const username = req.body.username; //.toLowerCase();
+	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
 	const rPassword = req.body.repeat_password;
 
 	if (!username || typeof username !== "string" || username.length === 0
 		|| !password || typeof password !== "string" || password.length === 0
 		|| !rPassword || typeof rPassword !== "string" || rPassword.length === 0) {
-		//todo: length limits, copy jschan input validator
+		//todo: length limits, make jschan input validator LGPL lib and use here
 		return res.status(400).send('Invalid inputs');
 	}
 
@@ -123,7 +129,7 @@ exports.register = async (req, res) => {
 		return res.status(400).send('Passwords did not match');
 	}
 
-	const existingAccount = await db.db.collection('accounts').findOne({ _id: req.body.username });
+	const existingAccount = await db.db.collection('accounts').findOne({ _id: username });
 	if (existingAccount) {
 		return res.status(409).send('Account already exists with that username');
 	}
@@ -132,7 +138,8 @@ exports.register = async (req, res) => {
 
 	await db.db.collection('accounts')
 		.insertOne({
-			_id: req.body.username,
+			_id: username,
+			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
 			clusters: [],
@@ -144,7 +151,7 @@ exports.register = async (req, res) => {
 };
 
 /**
- * POST /logout
+ * POST /forms/logout
  * logout
  */
 exports.logout = (req, res) => {

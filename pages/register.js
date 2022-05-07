@@ -7,7 +7,7 @@ const Register = () => (
 		</Head>
 
 		<h5 className="fw-bold">Register</h5>
-		<form action="/register" method="POST">
+		<form action="/forms/register" method="POST">
 			<div className="mb-2">
 				<label className="form-label">Username
 					<input className="form-control" type="text" name="username" maxLength="50" required="required"/>

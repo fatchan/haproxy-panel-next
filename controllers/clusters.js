@@ -2,13 +2,16 @@ const db = require('../db.js');
 const { validClustersString, makeArrayIfSingle, extractMap } = require('../util.js');
 
 exports.clustersPage = async (app, req, res, next) => {
-	return res.render('clusters', {
+	return app.render(req, res, '/clusters', {
 		csrf: req.csrfToken(),
 	});
 };
 
-exports.clustersJson = async (app, req, res, next) => {
-	return res.json({ user: res.locals.user });
+exports.clustersJson = async (req, res, next) => {
+	return res.json({
+		csrf: req.csrfToken(),
+		user: res.locals.user,
+	});
 }
 
 /**
@@ -52,7 +55,7 @@ exports.setCluster = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
 		return res.status(403).send('only admin can change cluster');
 	}
-	if (!req.body || !req.body.cluster) {
+	if (req.body == null || req.body.cluster == null) {
 		return res.status(400).send('invalid cluster');
 	}
 	req.body.cluster = parseInt(req.body.cluster, 10) || 0;

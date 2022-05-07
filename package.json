@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
-    "export": "next export"
+    "start": "NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "Thomas Lynch (fatchan) <tom@69420.me>",
@@ -27,6 +26,7 @@
     "gulp": "^4.0.2",
     "ip6addr": "^0.2.5",
     "next": "^12.1.6",
+    "nprogress": "^0.2.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
   }

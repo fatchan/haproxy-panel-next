@@ -114,7 +114,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 
 		await deleteFromMap(res.locals.haproxy, req.params.name, req.body.key);
-		return res.redirect(`/maps/${req.params.name}`);
+		return res.redirect(`/map/${req.params.name}`);
 	} catch (e) {
 		return next(e);
 	}
@@ -254,7 +254,7 @@ exports.patchMapForm = async (req, res, next) => {
 			const mapId = await getMapId(res.locals.haproxy, req.params.name);
 			await res.locals.haproxy
 				.addMap(mapId.index, req.body.key, value);
-			return res.redirect(`/maps/${req.params.name}`);
+			return res.redirect(`/map/${req.params.name}`);
 		} catch (e) {
 			return next(e);
 		}

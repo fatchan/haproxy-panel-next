@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
+import ApiCall from '../api.js';
 
 const Account = (props) => {
 
@@ -9,17 +10,12 @@ const Account = (props) => {
 
     React.useEffect(() => {
     	if (!accountData.user) {
-			async function getAccount() {
-				const response = await fetch('/account.json')
-					.then(res => res.json());
-				setAccountData(response);
-	    	}
-	    	getAccount();
+	    	ApiCall('/account.json', 'GET', null, setAccountData);
 	    }
     }, []);
 
 	if (!accountData.user) {
-	    return <>Loading...</>;
+	    return <>Loading...</>; //todo: page with animated css placeholder boxes
 	}
 
 	const { user, maps, acls, globalAcl, csrf } = accountData;
@@ -33,9 +29,21 @@ const Account = (props) => {
 	// Links to each map and bubble/pill for map counts
 	const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
 
+	async function switchCluster(e) {
+		e.preventDefault();
+		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5);
+		await ApiCall('/account.json', 'GET', null, setAccountData);
+	}
+
+	async function toggleGlobal(e) {
+		e.preventDefault();
+		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5);
+		await ApiCall('/account.json', 'GET', null, setAccountData);
+	}
+
 	return (
 		<>
-		
+			
 			<Head>
 				<title>Account</title>
 			</Head>
@@ -53,7 +61,7 @@ const Account = (props) => {
 							<span className="fw-bold">
 								Global Override
 							</span>
-							<form action="/global/toggle" method="post">
+							<form onSubmit={toggleGlobal} action="/forms/global/toggle" method="post">
 								<input type="hidden" name="_csrf" value={csrf} />
 								<input className="btn btn-sm btn-primary" type="submit" value="Toggle" />
 							</form>
@@ -84,12 +92,12 @@ const Account = (props) => {
 							<div className="fw-bold">
 								Servers ({user.clusters[user.activeCluster].split(',').length})
 								<span className="fw-normal">
-									: {user.clusters[user.activeCluster]}
+									: {user.clusters[user.activeCluster].split(',').map(x => x.substring(0, x.length/2)+'...').join(', ')}
 								</span>
 							</div>
 						</div>
 						<span className="ml-auto d-flex flex-row">
-							<form action="/cluster" method="post">
+							<form onSubmit={switchCluster} action="/forms/cluster" method="post">
 								<input type="hidden" name="_csrf" value={csrf}/>
 								<input type="hidden" name="cluster" value={nextCluster}/>
 								<input className="btn btn-primary px-2 py-0" type="submit" value="&gt;"/>
