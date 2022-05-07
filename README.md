@@ -4,6 +4,7 @@ Work in progress. Not recommended for production deployment. No instructions or 
 
 Internally uses [haproxy-sdk](https://github.com/jackpinetech/haproxy-sdk).
 Intended for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-protection).
+
 Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Communicates with the HAProxy socket to update maps, acls, etc.
 
 ##### Features:
