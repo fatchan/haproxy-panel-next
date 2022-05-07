@@ -5,7 +5,7 @@ const url = require('url');
  * GET /maps/:name
  * Show map filtering to users domains
  */
-exports.getMapHtml = async (app, req, res, next) => {
+exports.mapData = async (req, res, next) => {
 	let map,
 		mapId,
 		showValues = false;
@@ -45,14 +45,25 @@ exports.getMapHtml = async (app, req, res, next) => {
 			return res.status(400).send('invalid map');
 	}
 
-	return app.render(req, res, '/map', {
+	return {
+		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'hCaptcha' },
 		mapId,
 		map,
 		csrf: req.csrfToken(),
 		name: req.params.name,
 		showValues,
-	});
+	};
 
+};
+
+exports.mapPage = async (app, req, res, next) => {
+	const data = await exports.mapData(req, res, next);
+	return app.render(req, res, '/map/[mapname]', data);
+};
+
+exports.mapJson = async (req, res, next) => {
+	const data = await exports.mapData(req, res, next);
+	return res.json({ ...data, user: res.locals.user });
 };
 
 /**

@@ -11,11 +11,11 @@ export default function App({ Component, pageProps }) {
 			footer { margin-top: auto; }
 			.btn { font-weight: bold; }
 			@media (prefers-color-scheme: dark) {
-				:root { --bs-body-color: #fff; --bs-body-bg: #33393B; }
+				:root { --bs-body-color: #fff; --bs-body-bg: #000000; }
 				.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }
-				.list-group-item { color: #fff; background-color: #33393B; }
-				input:not(.btn), option, select { color: #fff!important; background-color: #33393B!important; }
-				.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #4f5355; }
+				.list-group-item { color: #fff; background-color: #111111; }
+				input:not(.btn), option, select { color: #fff!important; background-color: #111111!important; }
+				.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #1F1F1F; }
 				.table { color: #fff; border-color: transparent !important; }
 			}
 		`}

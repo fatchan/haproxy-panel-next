@@ -1,8 +1,28 @@
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
 
-const Account = ({ user, maps, acls, globalAcl, csrf }) => {
+const Account = (props) => {
+
+	const [accountData, setAccountData] = useState(props);
+
+    React.useEffect(() => {
+    	if (!accountData.user) {
+			async function getAccount() {
+				const response = await fetch('/account.json')
+					.then(res => res.json());
+				setAccountData(response);
+	    	}
+	    	getAccount();
+	    }
+    }, []);
+
+	if (!accountData.user) {
+	    return <>Loading...</>;
+	}
+
+	const { user, maps, acls, globalAcl, csrf } = accountData;
 
 	// isAdmin for showing global override option
 	const isAdmin = user.username === 'admin';
@@ -110,7 +130,7 @@ const Account = ({ user, maps, acls, globalAcl, csrf }) => {
 };
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user || {}, ...query } }
+	return { props: { user: res.locals.user || null, ...query } }
 }
 
 export default Account;

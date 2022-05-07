@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function MapLink({ map }) {
 	return (
-		<Link href={`/map/${map.name}`}>
+		<Link href={`/map/[name]?name=${map.name}`} as={`/map/${map.name}`}>
 			<a className="list-group-item list-group-item-action d-flex align-items-start">
 				<span className="ms-2 me-auto">
 					<span className="fw-bold">

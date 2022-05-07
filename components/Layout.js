@@ -9,7 +9,7 @@ export default function Layout({ children }) {
 				<meta name="viewport" content="width=device-width initial-scale=1"/>
 			</Head>
 			<div className="container col-lg-6">
-				<header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+				<header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom border-dark">
 					<ul className="nav col-4 mb-2 mb-md-0">
 						<li><Link href="/"><a className="nav-link px-2 link-dark">Home</a></Link></li>
 					</ul>

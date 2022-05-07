@@ -31,8 +31,6 @@ app.prepare()
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);
-		server.locals.mapValueNames = { '0': 'None', '1': 'Proof-of-work', '2': 'hCaptcha' };
-		server.locals.fMap = require('./util.js').fMap;
 
 		const testRouter = require('./router.js');
 		testRouter(server, app);

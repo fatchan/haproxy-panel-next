@@ -1,8 +1,34 @@
+import { useRouter } from "next/router";
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import MapRow from '../components/MapRow.js';
+import MapRow from '../../components/MapRow.js';
+import BackButton from '../../components/BackButton.js';
 
-const MapPage = ({ user, fMap, mapValueNames, mapId, map, csrf, name, showValues }) => {
+const MapPage = (props) => {
+
+	const router = useRouter();
+	const { name: mapName } = router.query;
+
+	const [mapData, setMapData] = useState(props);
+
+    React.useEffect(() => {
+    	if (!mapData.user) {
+			async function getAccount() {
+				const response = await fetch(`/map/${mapName}.json`)
+					.then(res => res.json());
+				console.log(response)
+				setMapData(response);
+	    	}
+	    	getAccount();
+	    }
+    }, []);
+
+	if (!mapData.user) {
+	    return <>Loading...</>;
+	}
+
+	const { user, mapValueNames, mapId, map, csrf, name, showValues } = mapData;
 
 	const mapRows = map.map((row, i) => {
 		//todo: address prop drilling
@@ -93,11 +119,7 @@ const MapPage = ({ user, fMap, mapValueNames, mapId, map, csrf, name, showValues
 			</div>
 
 			{/* back to account */}
-			<Link href="/account">
-				<a className="btn btn-primary">
-					Back
-				</a>
-			</Link>
+			<BackButton to="/account" />
 			
 		</>
 	);
@@ -105,8 +127,12 @@ const MapPage = ({ user, fMap, mapValueNames, mapId, map, csrf, name, showValues
 };
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	const { user, fMap, mapValueNames } = res.locals;
-	return { props: { user, fMap, mapValueNames, ...query } };
+	return {
+		props: {
+			user: res.locals.user || null,
+			...query
+		}
+	};
 }
 
 export default MapPage;

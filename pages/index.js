@@ -1,6 +1,13 @@
+import Head from 'next/head';
+import Link from 'next/link';
+
 const Index = () => (
 	<>
-		<p>Hello World</p>
+		<Head>
+			<title>Homepage</title>
+		</Head>
+
+		<Link href="/account">Account Page</Link>
 	</>
 );
 
