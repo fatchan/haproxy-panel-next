@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  haproxy_panel_next:
+    restart: always
+    build: .
+    ports:
+      - "10.0.0.44:3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/opt
+  haproxy_panel_mongo:
+    restart: always
+    image: mongo:latest
+#    volumes:
+#      - mongodb_data_container:/data/db
+
+networks:
+  default:
+    name: haproxy_panel_next
+volumes:
+  mongodb_data_container:

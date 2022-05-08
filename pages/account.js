@@ -87,7 +87,7 @@ const Account = (props) => {
 								</span>
 							</div>
 						</div>
-						<span className="ml-auto badge bg-info rounded-pill">
+						<span className="ml-auto badge bg-info rounded-pill" style={{ maxHeight: "1.6em" }}>
 							Cluster: 1
 						</span>
 					</div>
@@ -107,7 +107,7 @@ const Account = (props) => {
 								<input className="btn btn-primary px-2 py-0" type="submit" value="&gt;"/>
 							</form>
 							<Link href="/clusters">
-								<a className="btn btn-success px-2 py-0 ms-2">
+								<a className="btn btn-success px-2 py-0 ms-2" style={{ maxHeight: "1.6em" }}>
 									+
 								</a>
 							</Link>

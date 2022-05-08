@@ -7,7 +7,7 @@
     "dev": "node server.js",
     "build": "next build",
     "lint": "next lint",
-    "start": "NODE_ENV=production node server.js"
+    "start": "node_modules/gulp/bin/gulp.js; NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "Thomas Lynch (fatchan) <tom@69420.me>",
