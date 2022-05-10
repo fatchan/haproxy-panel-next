@@ -19,53 +19,42 @@ const Account = (props) => {
 	    	ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
 	    }
     }, [accountData.user, router]);
+	
+	const loadingSection = (
+		<div className="list-group-item list-group-item-action d-flex align-items-start">
+			<LoadingPlaceholder />
+		</div>
+	);
 
-	if (!accountData.user) {
-		return (
+	let innerData;
+	
+	if (accountData.user != null) {
+	
+		const { user, maps, acls, globalAcl, csrf } = accountData;
+
+		// isAdmin for showing global override option
+		const isAdmin = user.username === 'admin';
+
+		// Next cluster number for > browse button
+		const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0
+
+		// Links to each map and bubble/pill for map counts
+		const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
+
+		async function switchCluster(e) {
+			e.preventDefault();
+			await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, setError, 0.5, router);
+			await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
+		}
+
+		async function toggleGlobal(e) {
+			e.preventDefault();
+			await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, setError, 0.5, router);
+			await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
+		}
+
+		innerData = (
 			<>
-				Loading...
-				{error && <ErrorAlert error={error} />}
-			</>
-		);
-	}
-
-	const { user, maps, acls, globalAcl, csrf } = accountData;
-
-	// isAdmin for showing global override option
-	const isAdmin = user.username === 'admin';
-
-	// Next cluster number for > browse button
-	const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0
-
-	// Links to each map and bubble/pill for map counts
-	const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
-
-	async function switchCluster(e) {
-		e.preventDefault();
-		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, setError, 0.5, router);
-		await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
-	}
-
-	async function toggleGlobal(e) {
-		e.preventDefault();
-		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, setError, 0.5, router);
-		await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
-	}
-
-	return (
-		<>
-			
-			<Head>
-				<title>Account</title>
-			</Head>
-
-			{error && <ErrorAlert error={error} />}
-
-			<h5 className="fw-bold">
-				Controls:
-			</h5>
-			
-			<div className="list-group">
 			
 				{/* Global overide */}
 				{isAdmin === true && (
@@ -143,6 +132,37 @@ const Account = (props) => {
 				
 				{/* Map links */}
 				{mapLinks}
+				
+			</>
+		);
+
+	} else {
+
+	
+		innerData = (
+			<>
+				{Array(9).fill(loadingSection)}			
+			</>			
+		);
+		
+	}
+
+	return (
+		<>
+			
+			<Head>
+				<title>Account</title>
+			</Head>
+
+			{error && <ErrorAlert error={error} />}
+
+			<h5 className="fw-bold">
+				Controls:
+			</h5>
+			
+			<div className="list-group">
+
+			{innerData}
 				
 			</div>
 			
