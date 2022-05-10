@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import BackButton from '../components/BackButton.js'
+import ErrorAlert from '../components/ErrorAlert.js';
 import ApiCall from '../api.js'
 import { useRouter } from 'next/router';
 
@@ -10,15 +11,21 @@ export default function Clusters(props) {
 	const router = useRouter();
 
 	const [accountData, setAccountData] = useState(props);
+	const [error, setError] = useState();
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
+	    	ApiCall('/clusters.json', 'GET', null, setAccountData,setError,  null, router);
 	    }
     }, [accountData.user, router]);
 
 	if (!accountData.user) {
-	    return <>Loading...</>; //TODO: page with animated css placeholder boxes
+		return (
+			<>
+				Loading...
+				{error && <ErrorAlert error={error} />}
+			</>
+		);
 	}
 
 	const { user, csrf } = accountData;
@@ -58,6 +65,8 @@ export default function Clusters(props) {
 			<Head>
 				<title>Clusters</title>
 			</Head>
+
+			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Clusters ({user.clusters.length}):

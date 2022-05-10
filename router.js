@@ -4,7 +4,8 @@ const HAProxy = require('@fatchan/haproxy-sdk')
 	, session = require('express-session')
 	, MongoStore = require('connect-mongo')
 	, db = require('./db.js')
-	, csrf = require('csurf');
+	, csrf = require('csurf')
+	, { dynamicResponse } = require('./util.js');
 
 const testRouter = (server, app) => {
 
@@ -45,7 +46,7 @@ const testRouter = (server, app) => {
 		
 		const checkSession = (req, res, next) => {
 			if (!res.locals.user) {
-				return res.redirect('/login');
+				return dynamicResponse(req, res, 302, { redirect: '/login' });
 			}
 			next();
 		};
@@ -64,7 +65,7 @@ const testRouter = (server, app) => {
 				res.locals.mapValueNames = server.locals.mapValueNames;
 				next();
 			} catch (e) {
-				res.status(500).send(e);
+				return dynamicResponse(req, res, 500, { error: e });
 			}
 		};
 
@@ -72,7 +73,7 @@ const testRouter = (server, app) => {
 			if (res.locals.user.clusters.length > 0) {
 				return next();
 			}
-			res.redirect('/clusters');
+			return dynamicResponse(req, res, 302, { redirect: '/clusters' });
 		};
 
 		//Controllers

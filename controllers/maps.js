@@ -1,4 +1,4 @@
-const { deleteFromMap, getMapId } = require('../util.js');
+const { deleteFromMap, getMapId, dynamicResponse } = require('../util.js');
 const { createCIDR, parse } = require('ip6addr');
 const url = require('url');
 /**
@@ -12,7 +12,7 @@ exports.mapData = async (req, res, next) => {
 	try {
 		mapId = await getMapId(res.locals.haproxy, req.params.name);
 		if (!mapId) {
-			return res.status(400).send('invalid map');
+			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 		}
 		map = await res.locals.haproxy
 			.showMap(mapId.index);
@@ -42,7 +42,7 @@ exports.mapData = async (req, res, next) => {
 			});
 			break;
 		default:
-			return res.status(400).send('invalid map');
+			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 	}
 
 	return {
@@ -72,7 +72,7 @@ exports.mapJson = async (req, res, next) => {
  */
 exports.deleteMapForm = async (req, res, next) => {
 	if(!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
-		res.status(400).send('invalid value');
+		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
 
 	if (req.params.name === process.env.HOSTS_MAP_NAME
@@ -81,7 +81,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
-			return res.status(403).send('no permission for that domain');
+			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 		}
 	} else if (req.params.name === process.env.BLOCKED_MAP_NAME
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
@@ -114,7 +114,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 
 		await deleteFromMap(res.locals.haproxy, req.params.name, req.body.key);
-		return res.redirect(`/map/${req.params.name}`);
+		return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 	} catch (e) {
 		return next(e);
 	}
@@ -132,7 +132,7 @@ exports.patchMapForm = async (req, res, next) => {
 		//ddos must have valid 0, 1, 2
 		if (req.params.name === process.env.DDOS_MAP_NAME
 			&& (!req.body.value || !['0', '1', '2'].includes(req.body.value))) {
-			return res.status(400).send('invalid value');
+			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 		}
 
 		//ddos and hosts must have valid hostname
@@ -142,7 +142,7 @@ exports.patchMapForm = async (req, res, next) => {
 			const { hostname, pathname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
-				return res.status(403).send('no permission for that domain');
+				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 			}
 		}
 
@@ -158,7 +158,7 @@ exports.patchMapForm = async (req, res, next) => {
 			} catch (e) { parsedSubnet = null; /*invalid subnet or just an ip*/ }
 			const parsedIpOrSubnet = parsedIp || parsedSubnet;
 			if (!parsedIpOrSubnet) {
-				return res.status(400).send('invalid input');
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			req.body.key = parsedIpOrSubnet.toString({zeroElide: false, zeroPad:false});
 		}
@@ -169,11 +169,11 @@ exports.patchMapForm = async (req, res, next) => {
 			try {
 				parsedValue = url.parse(`https://${req.body.value}`)
 				if (!parsedValue.host || !parsedValue.port) {
-					return res.status(400).send('invalid input');
+					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
 				parse(parsedValue.hostname); //better ip parsing, will error if invalid
 			} catch (e) {
-				return res.status(400).send('invalid input');
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			req.body.value = parsedValue.host; //host includes port
 		}
@@ -196,7 +196,7 @@ exports.patchMapForm = async (req, res, next) => {
 				value = res.locals.user.username;
 				break;
 			default:
-				return res.status(400).send('invalid map');
+				return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 		}
 
 		try {
@@ -215,7 +215,7 @@ exports.patchMapForm = async (req, res, next) => {
 					.backend(process.env.BACKEND_NAME);
 				let server;
 				if (backendMapEntry) {
-					return res.status(400).send(`this domain is active already and has a backend server mapping: "${backendMapEntry}"`);
+					return dynamicResponse(req, res, 400, { error: `this domain is active already and has a backend server mapping: "${backendMapEntry}"` });
 				} else {
 					//no existing backend map entry (i.e. didnt exist at startup to get constructed in the lua script)
 					let backendCounter = 0;
@@ -240,7 +240,7 @@ exports.patchMapForm = async (req, res, next) => {
 						backendCounter++;
 					}
 					if (!server) {
-						return res.status(400).send('no server slots available');
+						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 					}
 					const backendsMapId = await getMapId(res.locals.haproxy, process.env.BACKENDS_MAP_NAME);
 					await res.locals.haproxy
@@ -254,10 +254,10 @@ exports.patchMapForm = async (req, res, next) => {
 			const mapId = await getMapId(res.locals.haproxy, req.params.name);
 			await res.locals.haproxy
 				.addMap(mapId.index, req.body.key, value);
-			return res.redirect(`/map/${req.params.name}`);
+			return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);
 		}
 	}
-	res.status(400).send('invalid value');
+	return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 };

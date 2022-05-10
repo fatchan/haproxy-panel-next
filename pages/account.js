@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
+import ErrorAlert from '../components/ErrorAlert.js';
 import ApiCall from '../api.js';
 import { useRouter } from 'next/router';
 
@@ -11,15 +12,21 @@ const Account = (props) => {
 	const router = useRouter();
 
 	const [accountData, setAccountData] = useState(props);
+	const [error, setError] = useState();
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/account.json', 'GET', null, setAccountData, null, router);
+	    	ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
 	    }
     }, [accountData.user, router]);
 
 	if (!accountData.user) {
-		return (<>Loading...</>);
+		return (
+			<>
+				Loading...
+				{error && <ErrorAlert error={error} />}
+			</>
+		);
 	}
 
 	const { user, maps, acls, globalAcl, csrf } = accountData;
@@ -35,14 +42,14 @@ const Account = (props) => {
 
 	async function switchCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5, router);
-		await ApiCall('/account.json', 'GET', null, setAccountData, null, router);
+		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, setError, 0.5, router);
+		await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
-		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5, router);
-		await ApiCall('/account.json', 'GET', null, setAccountData, null, router);
+		await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, setError, 0.5, router);
+		await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	return (
@@ -51,6 +58,8 @@ const Account = (props) => {
 			<Head>
 				<title>Account</title>
 			</Head>
+
+			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Controls:

@@ -1,18 +1,21 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import ApiCall from '../api.js';
+import ErrorAlert from '../components/ErrorAlert.js';
+import { useState } from 'react';
 
 const Login = () => {
 
 	const router = useRouter();
+
+	const [error, setError] = useState();
 
 	async function login(e) {
 		e.preventDefault();
 		await ApiCall('/forms/login', 'POST', JSON.stringify({ 
 			username: e.target.username.value,
 			password: e.target.password.value,
-		}), null, 0.5, router);
-		router.push('/account');
+		}), null, setError, null, router);
 	}
 	
 	return (
@@ -20,6 +23,8 @@ const Login = () => {
 			<Head>
 				<title>Login</title>
 			</Head>
+
+			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">Login</h5>
 			<form onSubmit={login} action="/forms/login" method="POST">

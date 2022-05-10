@@ -1,35 +1,62 @@
 import NProgress from 'nprogress';
 
-export default async function ApiCall(route, method, body, stateCallback, finishProgress, router) {
-	try {
-		const options = {
-//			redirect: "manual",
-			method,
-		};
-		if (body != null) {
-			options.body = body;
-			options.headers = { 'Content-Type': 'application/json' };
+function buildOptions(route, method, body) {
+
+	// Convert method uppercase
+	method = method.toUpperCase();
+	const options = {
+		redirect: "manual",
+		method,
+		headers: {
+			'Content-Type': 'application/json',
 		}
-		NProgress.start();
-		let response = await fetch(route, options);
-//		if (response && response.ok) {
-			response = await response.json();
-			console.log(response);
-			stateCallback && stateCallback(response);
-//		} else {
-//			//TODO: handle bad form submissions by including "error" prop into callback
-//			router.push('/login');
-//		}
+	};
+	if (body != null) {
+		options.body = body;
+	}
+	return options;
+}
+
+export default async function ApiCall(route, method='get', body, stateCallback, errorCallback, finishProgress, router) {
+
+	// Start progress bar
+	NProgress.start();	
+
+	// Build request options for fetch
+	const requestOptions = buildOptions(route, method, body);
+
+	// Make request, catch errors, and finally{} to always end progress bar
+	let response;
+	try {
+		response = await fetch(route, requestOptions);
 	} catch(e) {
 		console.error(e);
-		//TODO: handle bad form submissions by including "error" prop into callback
-//		router.push('/login');
 	} finally {
 		if (finishProgress != null) {
 			NProgress.set(finishProgress);
 		} else {
 			NProgress.done(true);
 		}
-		return null;
 	}
+
+	if (!response) {
+		errorCallback && errorCallback('An error occurred');
+		return;
+	}
+
+	// Process request response
+	const contentType = response.headers.get('Content-type');
+	if (contentType.startsWith('application/json;')) {
+		response = await response.json();
+		if (response.redirect) {
+			return router.push(response.redirect, null, { scroll: false });
+		} else if (response.error) {
+			errorCallback && errorCallback(response.error);
+			return;
+		}
+		stateCallback && stateCallback(response);
+	} else {
+		errorCallback && errorCallback('An error occurred');
+	}
+
 }

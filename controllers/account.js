@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const db = require('../db.js');
-const { validClustersString, makeArrayIfSingle, extractMap } = require('../util.js');
+const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } = require('../util.js');
 
 /**
  * account page data shared between html/json routes
@@ -63,7 +63,7 @@ exports.accountJson = async (req, res, next) => {
  */
 exports.globalToggle = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
-		res.status(403).send('only admin can toggle global');
+		return dynamicResponse(req, res, 403, { error: 'Only admin can toggle global' });
 	}
 	let globalIndex;
 	try {
@@ -87,7 +87,7 @@ exports.globalToggle = async (req, res, next) => {
 	} catch (e) {
 		return next(e);
 	}
-	return res.redirect('/account');
+	return dynamicResponse(req, res, 302, { redirect: '/account' });
 };
 
 /**
@@ -99,14 +99,14 @@ exports.login = async (req, res) => {
 	const password = req.body.password;
 	const account = await db.db.collection('accounts').findOne({_id:username});
 	if (!account) {
-		return res.status(403).send('Incorrect username or password');
+		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 	}
 	const passwordMatch = await bcrypt.compare(password, account.passwordHash);
 	if (passwordMatch === true) {
 		req.session.user = account._id;
-		return res.redirect('/account');
+		return dynamicResponse(req, res, 302, { redirect: '/account' });
 	}
-	return res.status(403).send('Incorrect username or password');
+	return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 };
 
 /**
@@ -122,16 +122,16 @@ exports.register = async (req, res) => {
 		|| !password || typeof password !== "string" || password.length === 0
 		|| !rPassword || typeof rPassword !== "string" || rPassword.length === 0) {
 		//todo: length limits, make jschan input validator LGPL lib and use here
-		return res.status(400).send('Invalid inputs');
+		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
 	}
 
 	if (password !== rPassword) {
-		return res.status(400).send('Passwords did not match');
+		return dynamicResponse(req, res, 400, { error: 'Passwords did not match' });
 	}
 
 	const existingAccount = await db.db.collection('accounts').findOne({ _id: username });
 	if (existingAccount) {
-		return res.status(409).send('Account already exists with that username');
+		return dynamicResponse(req, res, 409, { error: 'Account already exists with this username' });
 	}
 
 	const passwordHash = await bcrypt.hash(req.body.password, 12);
@@ -147,7 +147,7 @@ exports.register = async (req, res) => {
 			balance: 0,
 		});
 
-	return res.redirect('/login');
+	return dynamicResponse(req, res, 302, { redirect: '/login' });
 };
 
 /**
@@ -156,5 +156,5 @@ exports.register = async (req, res) => {
  */
 exports.logout = (req, res) => {
 	req.session.destroy();
-	return res.redirect('/login');
+	return dynamicResponse(req, res, 302, { redirect: '/login' });
 };

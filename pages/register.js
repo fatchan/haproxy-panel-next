@@ -1,10 +1,14 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import ApiCall from '../api.js';
+import ErrorAlert from '../components/ErrorAlert.js';
+import { useState } from 'react';
 
 const Register = () => {
 
 	const router = useRouter();
+
+	const [error, setError] = useState();
 
 	async function register(e) {
 		e.preventDefault();
@@ -12,7 +16,7 @@ const Register = () => {
 			username: e.target.username.value,
 			password: e.target.password.value,
 			rpasword: e.target.repeat_password.value,
-		 }), null, 0.5, router);
+		 }), null, setError, 0.5, router);
 		router.push('/login');
 	}
 	
@@ -21,6 +25,8 @@ const Register = () => {
 			<Head>
 				<title>Register</title>
 			</Head>
+
+			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">Register</h5>
 			<form onSubmit={register} action="/forms/register" method="POST">

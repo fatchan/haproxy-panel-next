@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
+import ErrorAlert from '../../components/ErrorAlert.js';
 import ApiCall from '../../api.js';
 
 const MapPage = (props) => {
@@ -13,30 +14,36 @@ const MapPage = (props) => {
 	const { name: mapName } = router.query;
 
 	const [mapData, setMapData] = useState(props);
+	const [error, setError] = useState();
 
     React.useEffect(() => {
     	if (!mapData.user) {
-    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, null, router);
+    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
 	    }
     }, [mapData.user, mapName, router]);
 
 	if (!mapData.user) {
-	    return <>Loading...</>; //todo: page with animated css placeholder boxes
+		return (
+			<>
+				Loading...
+				{error && <ErrorAlert error={error} />}
+			</>
+		);
 	}
 
 	const { user, mapValueNames, mapId, map, csrf, name, showValues } = mapData;
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, null, router);
+		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, setError, 0.5, router);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, null, router);
+		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, setError, 0.5, router);
+		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
 	}
 
 	const mapRows = map.map((row, i) => {
@@ -111,6 +118,8 @@ const MapPage = (props) => {
 					{mapId.fname}
 				</title>
 			</Head>
+
+			{error && <ErrorAlert error={error} />}
 
 			{/* Map friendly name (same as shown on acc page) */}
 			<h5 className="fw-bold">
