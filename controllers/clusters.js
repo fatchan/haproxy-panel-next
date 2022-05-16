@@ -69,7 +69,7 @@ exports.setCluster = async (req, res, next) => {
 	} catch (e) {
 		return next(e);
 	}
-	return dynamicResponse(req, res, 302, { redirect: '/account' });
+	return dynamicResponse(req, res, 302, { redirect: '/clusters' });
 };
 
 /**

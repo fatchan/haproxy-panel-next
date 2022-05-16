@@ -15,7 +15,7 @@ export default function Clusters(props) {
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/clusters.json', 'GET', null, setAccountData,setError,  null, router);
+	    	ApiCall('/clusters.json', 'GET', null, setAccountData, setError,  null, router);
 	    }
     }, [accountData.user, router]);
 
@@ -32,14 +32,20 @@ export default function Clusters(props) {
 
 	async function addCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5, router);
-		await ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
+		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
+		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	async function deleteCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, 0.5, router);
-		await ApiCall('/clusters.json', 'GET', null, setAccountData, null, router);
+		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
+		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
+	}
+	
+	async function setCluster(e) {
+		e.preventDefault();
+		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
+		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	const domainList = user.clusters.map((c, i) => {
@@ -51,6 +57,13 @@ export default function Clusters(props) {
 						<input type="hidden" name="_csrf" value={csrf} />
 						<input type="hidden" name="cluster" value={c} />
 						<input className="btn btn-danger" type="submit" value="×" />
+					</form>
+				</td>
+				<td className="col-1 text-center">
+					<form onSubmit={setCluster} action="/forms/cluster" method="post">
+						<input type="hidden" name="_csrf" value={csrf} />
+						<input type="hidden" name="cluster" value={i} />
+						<input className="btn btn-primary" type="submit" value="Select" disabled={(i === user.activeCluster ? 'disabled' : null)} />
 					</form>
 				</td>
 				<td>
