@@ -1,36 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
-import ApiCall from '../api.js';
+import { getAccount } from '../api.js';
 import { useRouter } from 'next/router';
+import { GlobalContext } from '../providers/GlobalProvider.js';
 
 const Account = (props) => {
 
 	const router = useRouter();
+	const [state, dispatch] = useContext(GlobalContext);
 
-	const [accountData, setAccountData] = useState(props);
-	const [error, setError] = useState();
-
-    React.useEffect(() => {
-    	if (!accountData.user) {
-	    	ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
-	    }
-    }, [accountData.user, router]);
+	// Set into context from props (From getServerSideProps), else make API call
+	useEffect(() => {
+		if (props.user != null) {
+			dispatch({ type: 'state', payload: props });
+		} else {
+			getAccount(dispatch, null, router);
+		}
+	}, [dispatch, props, router]);
 	
-	const loadingSection = (
-		<div className="list-group-item list-group-item-action d-flex align-items-start">
-			<LoadingPlaceholder />
-		</div>
-	);
+	const loadingSection = useMemo(() => {
+		return (
+			<div className="list-group-item list-group-item-action d-flex align-items-start">
+				<LoadingPlaceholder />
+			</div>
+		);
+	}, []);
 
 	let innerData;
 	
-	if (accountData.user != null) {
+	if (state.user != null) {
 	
-		const { user, maps, acls, globalAcl, csrf } = accountData;
+		const { user, maps, acls, globalAcl, csrf } = state;
 
 		// isAdmin for showing global override option
 		const isAdmin = user.username === 'admin';
@@ -43,14 +47,14 @@ const Account = (props) => {
 
 		async function switchCluster(e) {
 			e.preventDefault();
-			await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, setError, 0.5, router);
-			await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
+			await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5, router);
+			await ApiCall('/account.json', 'GET', null, dispatch, null, router);
 		}
 
 		async function toggleGlobal(e) {
 			e.preventDefault();
-			await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, setError, 0.5, router);
-			await ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
+			await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5, router);
+			await ApiCall('/account.json', 'GET', null, dispatch, null, router);
 		}
 
 		innerData = (
@@ -138,10 +142,9 @@ const Account = (props) => {
 
 	} else {
 
-	
 		innerData = (
 			<>
-				{Array(9).fill(loadingSection)}			
+				{Array(9).map((_, i) => <loadingSection key={i}/>)}			
 			</>			
 		);
 		
@@ -154,7 +157,7 @@ const Account = (props) => {
 				<title>Account</title>
 			</Head>
 
-			{error && <ErrorAlert error={error} />}
+			{state.error && <ErrorAlert error={state.error} />}
 
 			<h5 className="fw-bold">
 				Controls:

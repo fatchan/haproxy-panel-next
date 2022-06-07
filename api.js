@@ -17,7 +17,7 @@ function buildOptions(route, method, body) {
 	return options;
 }
 
-export default async function ApiCall(route, method='get', body, stateCallback, errorCallback, finishProgress, router) {
+export default async function ApiCall(route, method='get', body, dispatch, finishProgress, router) {
 
 	// Start progress bar
 	NProgress.start();	
@@ -40,7 +40,7 @@ export default async function ApiCall(route, method='get', body, stateCallback, 
 	}
 
 	if (!response) {
-		errorCallback && errorCallback('An error occurred');
+		dispatch && dispatch({ type: 'error', payload: 'An error occurred' });
 		return;
 	}
 
@@ -51,12 +51,16 @@ export default async function ApiCall(route, method='get', body, stateCallback, 
 		if (response.redirect) {
 			return router.push(response.redirect, null, { scroll: false });
 		} else if (response.error) {
-			errorCallback && errorCallback(response.error);
+			dispatch && dispatch({ type: 'error', payload: response.error });
 			return;
 		}
-		stateCallback && stateCallback(response);
+		dispatch && dispatch({ type: 'state', payload: response });
 	} else {
-		errorCallback && errorCallback('An error occurred');
+		dispatch && dispatch({ type: 'error', payload: 'An error occurred' });
 	}
 
+}
+
+export async function getAccount(dispatch, finishProgress, router) {
+	return ApiCall('/account.json', 'GET', null, dispatch, finishProgress, router)
 }
