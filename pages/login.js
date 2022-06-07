@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import ApiCall from '../api.js';
+import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
 
@@ -12,10 +12,10 @@ const Login = () => {
 
 	async function login(e) {
 		e.preventDefault();
-		await ApiCall('/forms/login', 'POST', JSON.stringify({ 
+		await API.ApiCall('/forms/login', 'POST', JSON.stringify({ 
 			username: e.target.username.value,
 			password: e.target.password.value,
-		}), null, setError, null, router);
+		}), null, setError, router, null);
 	}
 	
 	return (

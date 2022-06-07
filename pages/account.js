@@ -4,7 +4,7 @@ import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
-import { getAccount } from '../api.js';
+import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import { GlobalContext } from '../providers/GlobalProvider.js';
 
@@ -12,13 +12,14 @@ const Account = (props) => {
 
 	const router = useRouter();
 	const [state, dispatch] = useContext(GlobalContext);
+	const [error, setError] = useState();
 
 	// Set into context from props (From getServerSideProps), else make API call
 	useEffect(() => {
 		if (props.user != null) {
 			dispatch({ type: 'state', payload: props });
 		} else {
-			getAccount(dispatch, null, router);
+			API.getAccount(dispatch, setError, router);
 		}
 	}, [dispatch, props, router]);
 	
@@ -47,14 +48,14 @@ const Account = (props) => {
 
 		async function switchCluster(e) {
 			e.preventDefault();
-			await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: nextCluster }), null, 0.5, router);
-			await ApiCall('/account.json', 'GET', null, dispatch, null, router);
+			await API.changeCluster({ _csrf: csrf, cluster: nextCluster }, dispatch, setError, router);
+			await API.getAccount(dispatch, setError, router);
 		}
 
 		async function toggleGlobal(e) {
 			e.preventDefault();
-			await ApiCall('/forms/global/toggle', 'POST', JSON.stringify({ _csrf: csrf }), null, 0.5, router);
-			await ApiCall('/account.json', 'GET', null, dispatch, null, router);
+			await API.globalToggle({ _csrf: csrf },dispatch, setError, router);
+			await API.getAccount(dispatch, setError, router);
 		}
 
 		innerData = (
@@ -157,7 +158,7 @@ const Account = (props) => {
 				<title>Account</title>
 			</Head>
 
-			{state.error && <ErrorAlert error={state.error} />}
+			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Controls:

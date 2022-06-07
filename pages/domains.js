@@ -4,7 +4,7 @@ import Link from 'next/link';
 import BackButton from '../components/BackButton.js';
 import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
-import ApiCall from '../api.js';
+import * as API from '../api.js'
 import { useRouter } from 'next/router';
 
 export default function Domains(props) {
@@ -16,7 +16,7 @@ export default function Domains(props) {
 
     React.useEffect(() => {
     	if (!accountData.user) {
-	    	ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
+	    	API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
 	    }
     }, [accountData.user, router]);
 
@@ -33,14 +33,14 @@ export default function Domains(props) {
 
 	async function addDomain(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
-		await ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
+		await API.ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
+		await API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	async function deleteDomain(e) {
 		e.preventDefault();
-		await ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
-		await ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
+		await API.ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
+		await API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
 	}
 
 	const domainList = user.domains.map((d, i) => {

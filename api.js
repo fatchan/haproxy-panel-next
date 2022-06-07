@@ -1,5 +1,31 @@
 import NProgress from 'nprogress';
 
+
+
+export async function getAccount(dispatch, errorCallback, router) {
+	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router, null);
+}
+
+export async function getClusters(dispatch, errorCallback, router) {
+	return ApiCall('/clusters.json', 'GET', null, dispatch, errorCallback, router, null);
+}
+
+export async function changeCluster(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cluster', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
+export async function globalToggle(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
+export async function addCluster(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cluster/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
+export async function deleteCluster(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cluster/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
 function buildOptions(route, method, body) {
 
 	// Convert method uppercase
@@ -12,15 +38,16 @@ function buildOptions(route, method, body) {
 		}
 	};
 	if (body != null) {
-		options.body = body;
+		options.body = JSON.stringify(body);
 	}
+	//TODO: for GETs, use "body" with URLSearchParams and append as url query
 	return options;
 }
 
-export default async function ApiCall(route, method='get', body, dispatch, finishProgress, router) {
+export async function ApiCall(route, method='get', body, dispatch, errorCallback, router, finishProgress=1) {
 
 	// Start progress bar
-	NProgress.start();	
+	NProgress.start();
 
 	// Build request options for fetch
 	const requestOptions = buildOptions(route, method, body);
@@ -40,7 +67,7 @@ export default async function ApiCall(route, method='get', body, dispatch, finis
 	}
 
 	if (!response) {
-		dispatch && dispatch({ type: 'error', payload: 'An error occurred' });
+		errorCallback('An error occurred');
 		return;
 	}
 
@@ -51,16 +78,12 @@ export default async function ApiCall(route, method='get', body, dispatch, finis
 		if (response.redirect) {
 			return router.push(response.redirect, null, { scroll: false });
 		} else if (response.error) {
-			dispatch && dispatch({ type: 'error', payload: response.error });
+			errorCallback(response.error);
 			return;
 		}
-		dispatch && dispatch({ type: 'state', payload: response });
+		dispatch({ type: 'state', payload: response });
 	} else {
-		dispatch && dispatch({ type: 'error', payload: 'An error occurred' });
+		errorCallback('An error occurred');
 	}
 
-}
-
-export async function getAccount(dispatch, finishProgress, router) {
-	return ApiCall('/account.json', 'GET', null, dispatch, finishProgress, router)
 }

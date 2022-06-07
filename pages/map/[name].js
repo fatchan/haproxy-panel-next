@@ -5,7 +5,7 @@ import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
-import ApiCall from '../../api.js';
+import * as API from '../../api.js'
 
 const MapPage = (props) => {
 
@@ -18,7 +18,7 @@ const MapPage = (props) => {
 
     React.useEffect(() => {
     	if (!mapData.user) {
-    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
+    		API.ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
 	    }
     }, [mapData.user, mapName, router]);
 
@@ -35,15 +35,15 @@ const MapPage = (props) => {
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, setError, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, setError, 0.5, router);
+		await API.ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, setError, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, setError, 0.5, router);
+		await API.ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
 	}
 
 	const mapRows = map.map((row, i) => {
