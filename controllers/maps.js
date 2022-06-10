@@ -58,7 +58,7 @@ exports.mapData = async (req, res, next) => {
 
 exports.mapPage = async (app, req, res, next) => {
 	const data = await exports.mapData(req, res, next);
-	return app.render(req, res, '/map/[mapname]', data);
+	return app.render(req, res, `/map/${data.name}`, data);
 };
 
 exports.mapJson = async (req, res, next) => {

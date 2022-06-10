@@ -1,7 +1,11 @@
 import Link from 'next/link';
+import { useContext } from 'react';
+import { GlobalContext } from '../providers/GlobalProvider.js';
 
-export default function MapRow({ name, row, csrf, showValues, mapValueNames, onDeleteSubmit }) {
+export default function MapRow({ row, onDeleteSubmit }) {
 
+	const [state] = useContext(GlobalContext);
+	const { user, mapValueNames, mapId, map, csrf, name, showValues } = state;
 	const [id, key, value] = row.split(' ');
 
 	return (

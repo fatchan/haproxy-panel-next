@@ -16,7 +16,7 @@ const Account = (props) => {
 
 	// Set into context from props (From getServerSideProps), else make API call
 	useEffect(() => {
-		if (props.user != null) {
+		if (props.maps != null) {
 			dispatch({ type: 'state', payload: props });
 		} else {
 			API.getAccount(dispatch, setError, router);
@@ -32,8 +32,9 @@ const Account = (props) => {
 	}, []);
 
 	let innerData;
-	
-	if (state.user != null) {
+
+	//TODO: when coming from loaded map after refresh, will already have some data, so we should partially populate page
+	if (state.maps != null) {
 	
 		const { user, maps, acls, globalAcl, csrf } = state;
 
@@ -145,8 +146,8 @@ const Account = (props) => {
 
 		innerData = (
 			<>
-				{Array(9).map((_, i) => <loadingSection key={i}/>)}			
-			</>			
+				{Array(9).fill(loadingSection)}
+			</>
 		);
 		
 	}

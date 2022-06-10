@@ -1,28 +1,31 @@
 import { useRouter } from "next/router";
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
-import * as API from '../../api.js'
+import * as API from '../../api.js';
+import { GlobalContext } from '../../providers/GlobalProvider.js';
 
 const MapPage = (props) => {
 
 	const router = useRouter();
-	
 	const { name: mapName } = router.query;
-
-	const [mapData, setMapData] = useState(props);
+	const [state, dispatch] = useContext(GlobalContext);
 	const [error, setError] = useState();
+	const changedMap = state.mapId?.name != mapName;
 
-    React.useEffect(() => {
-    	if (!mapData.user) {
-    		API.ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
-	    }
-    }, [mapData.user, mapName, router]);
+	useEffect(() => {
+		if (props.map != null) {
+			dispatch({ type: 'state', payload: props });
+		} else {
+			//TODO: eventually, keep all visited maps in the context and refresh on load like e.g. clusters
+			API.getMap(mapName, dispatch, setError, router);
+		}
+	}, [changedMap, mapName, dispatch, props, router]);
 
-	if (!mapData.user) {
+	if (state.map == null || changedMap) {
 		return (
 			<>
 				Loading...
@@ -31,31 +34,26 @@ const MapPage = (props) => {
 		);
 	}
 
-	const { user, mapValueNames, mapId, map, csrf, name, showValues } = mapData;
+	const { user, mapValueNames, mapId, map, csrf, name, showValues } = state;
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await API.ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, setError, 0.5, router);
-		await API.ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.addToMap(mapId.name, { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }, dispatch, setError, router);
+		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await API.ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, setError, 0.5, router);
-		await API.ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.deleteFromMap(mapId.name, { _csrf: csrf, key: e.target.key.value }, dispatch, setError, router);
+		await API.getMap(mapName, dispatch, setError, router);
 	}
 
 	const mapRows = map.map((row, i) => {
-		//TODO: address prop drilling
 		return (
 			<MapRow
 				key={i}
 				row={row}
-				name={mapId.name}
-				csrf={csrf}
-				showValues={showValues}
-				mapValueNames={mapValueNames}
 				onDeleteSubmit={deleteFromMap}
 			/>
 		)

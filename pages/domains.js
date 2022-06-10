@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import BackButton from '../components/BackButton.js';
@@ -6,21 +6,23 @@ import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
+import { GlobalContext } from '../providers/GlobalProvider.js';
 
 export default function Domains(props) {
 
 	const router = useRouter();
-
-	const [accountData, setAccountData] = useState(props);
+	const [state, dispatch] = useContext(GlobalContext);
 	const [error, setError] = useState();
 
-    React.useEffect(() => {
-    	if (!accountData.user) {
-	    	API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
-	    }
-    }, [accountData.user, router]);
+	useEffect(() => {
+		if (props.user != null) {
+			dispatch({ type: 'state', payload: props });
+		} else {
+			API.getDomains(dispatch, setError, router);
+		}
+	}, [dispatch, props, router]);
 
-	if (!accountData.user) {
+	if (!state.user) {
 		return (
 			<>
 				Loading...
@@ -29,18 +31,18 @@ export default function Domains(props) {
 		);
 	}
 
-	const { user, csrf } = accountData;
+	const { user, csrf } = state;
 
 	async function addDomain(e) {
 		e.preventDefault();
-		await API.ApiCall('/forms/domain/add', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
-		await API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
+		await API.addDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
+		await API.getDomains(dispatch, setError, router);
 	}
 
 	async function deleteDomain(e) {
 		e.preventDefault();
-		await API.ApiCall('/forms/domain/delete', 'POST', JSON.stringify({ _csrf: csrf, domain: e.target.domain.value }), null, setError, 0.5, router);
-		await API.ApiCall('/domains.json', 'GET', null, setAccountData, setError, null, router);
+		await API.deleteDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
+		await API.getDomains(dispatch, setError, router);
 	}
 
 	const domainList = user.domains.map((d, i) => {

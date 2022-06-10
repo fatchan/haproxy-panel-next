@@ -2,20 +2,22 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { GlobalContext } from '../providers/GlobalProvider.js';
 
 const Login = () => {
 
-	const router = useRouter();
 
+	const router = useRouter();
+	const [state, dispatch] = useContext(GlobalContext);
 	const [error, setError] = useState();
 
 	async function login(e) {
 		e.preventDefault();
-		await API.ApiCall('/forms/login', 'POST', JSON.stringify({ 
+		await API.login({ 
 			username: e.target.username.value,
 			password: e.target.password.value,
-		}), null, setError, router, null);
+		}, dispatch, setError, router);
 	}
 	
 	return (
