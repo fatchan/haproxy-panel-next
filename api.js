@@ -44,7 +44,7 @@ export async function addToMap(mapName, body, dispatch, errorCallback, router) {
 	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteFromMap(mapName, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/map/${mapName}/delete`, body, dispatch, errorCallback, router, 0.5);
+	return ApiCall(`/forms/map/${mapName}/delete`, 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
 // Global toggle
