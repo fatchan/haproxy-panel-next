@@ -12,7 +12,7 @@ export default function Document() {
 			html, body, #__next {
 				min-height: 100vh;
 				display: flex;
-				flex-direction: column;				
+				flex-direction: column;
 			}
 		`}
 		</style>

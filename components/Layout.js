@@ -7,6 +7,7 @@ export default function Layout({ children }) {
 			<Head>
 				<meta charSet="utf-8"/>
 				<meta name="viewport" content="width=device-width initial-scale=1"/>
+				<link rel="shortcut icon" href="/favicon.ico" />
 			</Head>
 			<div className="container col-lg-6">
 				<header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-2">
