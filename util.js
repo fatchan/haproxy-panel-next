@@ -32,11 +32,11 @@ const fMap = {
 		columnNames: ['Domain', ''],
 	},
 
-	/*[process.env.BACKENDS_MAP_NAME]: {
+	[process.env.BACKENDS_MAP_NAME]: {
 		fname: 'Domain Backend Mappings',
 		description: 'Which internal server haproxy uses for domains',
 		columnNames: ['Domain', 'Server Name'],
-	},*/
+	},
 
 };
 

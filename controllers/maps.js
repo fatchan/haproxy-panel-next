@@ -23,6 +23,7 @@ exports.mapData = async (req, res, next) => {
 	switch (req.params.name) {
 		case process.env.DDOS_MAP_NAME:
 			showValues = true;
+		case process.env.BACKENDS_MAP_NAME:
 		case process.env.HOSTS_MAP_NAME:
 			if (process.env.CUSTOM_BACKENDS_ENABLED) {
 				showValues = true;

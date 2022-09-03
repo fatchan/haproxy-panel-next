@@ -10,7 +10,7 @@ import ApiCall from '../../api.js';
 const MapPage = (props) => {
 
 	const router = useRouter();
-	
+
 	const { name: mapName } = router.query;
 
 	const [mapData, setMapData] = useState(props);
@@ -94,6 +94,16 @@ const MapPage = (props) => {
 						<option selected />
 						{domainSelectOptions}
 					</select>
+					{
+						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapId.name === "hosts") &&
+						<input
+							className="form-control ml-2"
+							type="text"
+							name="value"
+							placeholder="backend ip:port"
+							required
+						/>
+					}
 				</>
 			);
 			break;

@@ -17,16 +17,16 @@ const testRouter = (server, app) => {
 			rolling: true,
 			cookie: {
 				httpOnly: true,
-				secure: false, //!dev, //TODO: check https
+				secure: true, //!dev, //TODO: check https
 				sameSite: 'strict',
-				maxAge: 1000 * 60 * 60 * 24 * 7, //week
+				maxAge: 1000 * 60 * 60 * 24 * 30, //month
 			}
 		});
-		
+
 		const useSession = (req, res, next) => {
 			sessionStore(req, res, next);
 		};
-		
+
 		const fetchSession = async (req, res, next) => {
 			if (req.session.user) {
 				const account = await db.db.collection('accounts').findOne({_id:req.session.user});
@@ -43,14 +43,14 @@ const testRouter = (server, app) => {
 			}
 			next();
 		};
-		
+
 		const checkSession = (req, res, next) => {
 			if (!res.locals.user) {
 				return dynamicResponse(req, res, 302, { redirect: '/login' });
 			}
 			next();
 		};
-		
+
 		const csrfMiddleware = csrf();
 
 		//HAProxy-sdk middleware
@@ -70,7 +70,8 @@ const testRouter = (server, app) => {
 		};
 
 		const hasCluster = (req, res, next) => {
-			if (res.locals.user.clusters.length > 0) {
+			console.log(req.path)
+			if (res.locals.user.clusters.length > 0 || (req.baseUrl+req.path) === '/forms/cluster/add') {
 				return next();
 			}
 			return dynamicResponse(req, res, 302, { redirect: '/clusters' });
@@ -93,7 +94,7 @@ const testRouter = (server, app) => {
 		server.post('/forms/register', useSession, accountController.register);
 
 		const mapNames = [process.env.BLOCKED_MAP_NAME, process.env.MAINTENANCE_MAP_NAME, process.env.WHITELIST_MAP_NAME,
-				process.env.BLOCKED_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.HOSTS_MAP_NAME]
+				process.env.BACKENDS_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.HOSTS_MAP_NAME]
 			, mapNamesOrString = mapNames.join('|');
 
 		//authed pages that dont require a cluster
@@ -102,7 +103,7 @@ const testRouter = (server, app) => {
 
 		server.get(`/map/:name(${mapNamesOrString})`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapPage.bind(null, app));
 		server.get(`/map/:name(${mapNamesOrString}).json`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapJson);
-		
+
 		server.get('/clusters', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersPage.bind(null, app));
 		server.get('/clusters.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersJson);
 

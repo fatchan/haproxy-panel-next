@@ -92,10 +92,10 @@ const Account = (props) => {
 					<div className="d-flex w-100 justify-content-between mt-2">
 						<div className="ms-2">
 							<div className="fw-bold">
-								Servers ({user.clusters[user.activeCluster].split(',').length})
-								<span className="fw-normal">
+								Servers ({user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length})
+								{user.clusters.length > 0 && (<span className="fw-normal">
 									: {user.clusters[user.activeCluster].split(',').map(x => x.substring(0, x.length/2)+'...').join(', ')}
-								</span>
+								</span>)}
 							</div>
 						</div>
 						<span className="ml-auto d-flex flex-row">
