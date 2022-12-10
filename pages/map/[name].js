@@ -16,11 +16,11 @@ const MapPage = (props) => {
 	const [mapData, setMapData] = useState(props);
 	const [error, setError] = useState();
 
-    React.useEffect(() => {
-    	if (!mapData.user) {
-    		ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
-	    }
-    }, [mapData.user, mapName, router]);
+	React.useEffect(() => {
+		if (!mapData.user) {
+			ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
+		}
+	}, [mapData.user, mapName, router]);
 
 	if (!mapData.user) {
 		return (
@@ -154,6 +154,8 @@ const MapPage = (props) => {
 									</th>
 								)}
 							</tr>
+						)}
+
 						{mapRows}
 
 						{/* Add new row form */}
