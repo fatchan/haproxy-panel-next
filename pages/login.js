@@ -12,12 +12,12 @@ const Login = () => {
 
 	async function login(e) {
 		e.preventDefault();
-		await ApiCall('/forms/login', 'POST', JSON.stringify({ 
+		await ApiCall('/forms/login', 'POST', JSON.stringify({
 			username: e.target.username.value,
 			password: e.target.password.value,
 		}), null, setError, null, router);
 	}
-	
+
 	return (
 		<>
 			<Head>
@@ -43,7 +43,7 @@ const Login = () => {
 
 		</>
 	);
-	
+
 };
 
 export default Login;

@@ -19,7 +19,7 @@ const Register = () => {
 		 }), null, setError, 0.5, router);
 		router.push('/login');
 	}
-	
+
 	return (
 		<>
 			<Head>

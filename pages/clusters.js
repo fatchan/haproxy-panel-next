@@ -41,7 +41,7 @@ export default function Clusters(props) {
 		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
 		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
 	}
-	
+
 	async function setCluster(e) {
 		e.preventDefault();
 		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
@@ -99,11 +99,10 @@ export default function Clusters(props) {
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
 									<input className="form-control mx-3" type="text" name="cluster" placeholder="tcp://host1:port,tcp://host2:port,..." required />
-													
 								</form>
 							</td>
 						</tr>
-						
+
 					</tbody>
 				</table>
 			</div>

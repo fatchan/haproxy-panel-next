@@ -87,11 +87,10 @@ export default function Domains(props) {
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
 									<input className="form-control mx-3" type="text" name="domain" placeholder="domain" required />
-													
 								</form>
 							</td>
 						</tr>
-						
+
 					</tbody>
 				</table>
 			</div>

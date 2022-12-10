@@ -154,8 +154,6 @@ const MapPage = (props) => {
 									</th>
 								)}
 							</tr>
-						)}
-						
 						{mapRows}
 
 						{/* Add new row form */}
@@ -166,14 +164,14 @@ const MapPage = (props) => {
 								</form>
 							</td>
 						</tr>
-						
+
 					</tbody>
 				</table>
 			</div>
 
 			{/* back to account */}
 			<BackButton to="/account" />
-			
+
 		</>
 	);
 

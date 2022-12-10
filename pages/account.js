@@ -19,7 +19,7 @@ const Account = (props) => {
 	    	ApiCall('/account.json', 'GET', null, setAccountData, setError, null, router);
 	    }
     }, [accountData.user, router]);
-	
+
 	const loadingSection = (
 		<div className="list-group-item list-group-item-action d-flex align-items-start">
 			<LoadingPlaceholder />
@@ -27,9 +27,9 @@ const Account = (props) => {
 	);
 
 	let innerData;
-	
+
 	if (accountData.user != null) {
-	
+
 		const { user, maps, acls, globalAcl, csrf } = accountData;
 
 		// isAdmin for showing global override option
@@ -55,7 +55,7 @@ const Account = (props) => {
 
 		innerData = (
 			<>
-			
+
 				{/* Global overide */}
 				{isAdmin === true && (
 					<div className="list-group-item d-flex align-items-center">
@@ -73,7 +73,7 @@ const Account = (props) => {
 						</div>
 					</div>
 				)}
-				
+
 				{/* Manage Clusters */}
 				<div className="list-group-item list-group-item-action d-flex align-items-start flex-column">
 					<div className="flex-row d-flex w-100">
@@ -112,7 +112,7 @@ const Account = (props) => {
 						</span>
 					</div>
 				</div>
-				
+
 				{/* Available domains */}
 				<Link href="/domains">
 					<a className="list-group-item list-group-item-action d-flex align-items-start">
@@ -129,27 +129,26 @@ const Account = (props) => {
 						</div>
 					</a>
 				</Link>
-				
+
 				{/* Map links */}
 				{mapLinks}
-				
+
 			</>
 		);
 
 	} else {
 
-	
 		innerData = (
 			<>
-				{Array(9).fill(loadingSection)}			
-			</>			
+				{Array(9).fill(loadingSection)}
+			</>
 		);
-		
+
 	}
 
 	return (
 		<>
-			
+
 			<Head>
 				<title>Account</title>
 			</Head>
@@ -159,13 +158,13 @@ const Account = (props) => {
 			<h5 className="fw-bold">
 				Controls:
 			</h5>
-			
+
 			<div className="list-group">
 
 			{innerData}
-				
+
 			</div>
-			
+
 		</>
 	)
 };
