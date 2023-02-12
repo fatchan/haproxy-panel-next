@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import BackButton from '../components/BackButton.js'
 import ErrorAlert from '../components/ErrorAlert.js';
-import ApiCall from '../api.js'
+import ClusterRow from '../components/ClusterRow.js';
+import * as API from '../api.js'
 import { useRouter } from 'next/router';
 
 export default function Clusters(props) {
 
 	const router = useRouter();
-
-	const [accountData, setAccountData] = useState(props);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-    React.useEffect(() => {
-    	if (!accountData.user) {
-	    	ApiCall('/clusters.json', 'GET', null, setAccountData, setError,  null, router);
-	    }
-    }, [accountData.user, router]);
+	useEffect(() => {
+		if (!state.user) {
+			API.getClusters(dispatch, setError, router);
+		}
+	}, [state.user, router]);
 
-	if (!accountData.user) {
+	if (!state.user) {
 		return (
 			<>
 				Loading...
@@ -28,50 +27,35 @@ export default function Clusters(props) {
 		);
 	}
 
-	const { user, csrf } = accountData;
+	const { user, csrf } = state;
 
 	async function addCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/add', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
-		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
+		await API.addCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
+		await API.getClusters(dispatch, setError, router);
 	}
 
 	async function deleteCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster/delete', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
-		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
+		await API.deleteCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
+		await API.getClusters(dispatch, setError, router);
 	}
 
 	async function setCluster(e) {
 		e.preventDefault();
-		await ApiCall('/forms/cluster', 'POST', JSON.stringify({ _csrf: csrf, cluster: e.target.cluster.value }), null, setError, 0.5, router);
-		await ApiCall('/clusters.json', 'GET', null, setAccountData, setError, null, router);
+		await API.changeCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
+		await API.getClusters(dispatch, setError, router);
 	}
 
-	const domainList = user.clusters.map((c, i) => {
-		//TODO: refactor, to component
-		return (
-			<tr key={c} className="align-middle">
-				<td className="col-1 text-center">
-					<form onSubmit={deleteCluster} action="/forms/cluster/delete" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="cluster" value={c} />
-						<input className="btn btn-danger" type="submit" value="×" />
-					</form>
-				</td>
-				<td className="col-1 text-center">
-					<form onSubmit={setCluster} action="/forms/cluster" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="cluster" value={i} />
-						<input className="btn btn-primary" type="submit" value="Select" disabled={(i === user.activeCluster ? 'disabled' : null)} />
-					</form>
-				</td>
-				<td>
-					{c}
-				</td>
-			</tr>
-		);
-	})
+	const clusterList = user.clusters.map((cluster, i) => (<ClusterRow
+		i={i}
+		key={cluster}
+		cluster={cluster}
+		csrf={csrf}
+		user={user}
+		setCluster={setCluster}
+		deleteCluster={deleteCluster}
+	/>));
 
 	return (
 		<>
@@ -90,9 +74,9 @@ export default function Clusters(props) {
 				<table className="table table-bordered text-nowrap">
 					<tbody>
 
-						{domainList}
+						{clusterList}
 
-						{/* Add new domain form */}
+						{/* Add new cluster form */}
 						<tr className="align-middle">
 							<td className="col-1 text-center" colSpan="3">
 								<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">

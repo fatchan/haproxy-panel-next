@@ -7,7 +7,7 @@ export default function Document() {
       <body>
         <Main />
         <NextScript className="d-flex flex-column" />
-		<style global="true">
+		<style>
 		{`
 			html, body, #__next {
 				min-height: 100vh;

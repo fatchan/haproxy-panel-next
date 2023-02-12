@@ -1,8 +1,6 @@
-import Link from 'next/link';
+export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames }) {
 
-export default function MapRow({ name, row, csrf, showValues, mapValueNames, onDeleteSubmit }) {
-
-	const [id, key, value] = row.split(' ');
+	const [_id, key, value] = row.split(' ');
 
 	return (
 		<tr className="align-middle">

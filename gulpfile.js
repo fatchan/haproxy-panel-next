@@ -15,8 +15,8 @@ async function reset() {
 			.insertOne({
 				_id: 'admin',
 				passwordHash: passwordHash,
-				domains: ['fatchan.net'],
-				clusters: ['tcp://23.95.43.254:2000,tcp://142.202.188.239:2000'],
+				domains: ['localhost'],
+				clusters: ['tcp://127.0.0.1:2000'],
 				activeCluster: 0,
 				balance: 0,
 			});
@@ -27,8 +27,8 @@ async function reset() {
 			}, {
 				$set: {
 					passwordHash,
-					domains: ['fatchan.net'],
-					clusters: ['tcp://23.95.43.254:2000,tcp://142.202.188.239:2000'],
+					domains: ['localhost'],
+					clusters: ['tcp://127.0.0.1:2000'],
 					activeCluster: 0,
 				}
 			});

@@ -19,8 +19,8 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
 
 ##### Todo:
+- Update to use haproxy data plane api instead of haproxy-sdk
 - Better Multi-user support (problems w/ ip whitelist and blacklist)
 - Some kind of payment system
 - SSL cert management, or letsencrypt integration
 - More advanced rules and ability to allow/block/bot mode based on those rules.
-- Something better than haproxy-sdk

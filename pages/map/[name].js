@@ -1,28 +1,26 @@
 import { useRouter } from "next/router";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
-import ApiCall from '../../api.js';
+import * as API from '../../api.js';
 
 const MapPage = (props) => {
 
 	const router = useRouter();
-
 	const { name: mapName } = router.query;
-
-	const [mapData, setMapData] = useState(props);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const changedMap = state.mapId?.name != mapName;
 
-	React.useEffect(() => {
-		if (!mapData.user) {
-			ApiCall(`/map/${mapName}.json`, 'GET', null, setMapData, setError, null, router);
+	useEffect(() => {
+		if (!state.map) {
+			API.getMap(mapName, dispatch, setError, router);
 		}
-	}, [mapData.user, mapName, router]);
+	}, [state.map, mapName, router]);
 
-	if (!mapData.user) {
+	if (state.map == null || changedMap) {
 		return (
 			<>
 				Loading...
@@ -31,23 +29,22 @@ const MapPage = (props) => {
 		);
 	}
 
-	const { user, mapValueNames, mapId, map, csrf, name, showValues } = mapData;
+	const { user, mapValueNames, mapId, map, csrf, showValues } = state;
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/add`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }), null, setError, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.addToMap(mapId.name, { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }, dispatch, setError, router);
+		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await ApiCall(`/forms/map/${mapId.name}/delete`, 'POST', JSON.stringify({ _csrf: csrf, key: e.target.key.value }), null, setError, 0.5, router);
-		await ApiCall(`/map/${mapId.name}.json`, 'GET', null, setMapData, setError, null, router);
+		await API.deleteFromMap(mapId.name, { _csrf: csrf, key: e.target.key.value }, dispatch, setError, router);
+		await API.getMap(mapName, dispatch, setError, router);
 	}
 
 	const mapRows = map.map((row, i) => {
-		//TODO: address prop drilling
 		return (
 			<MapRow
 				key={i}
