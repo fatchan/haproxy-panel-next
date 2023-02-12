@@ -17,7 +17,7 @@ const testRouter = (server, app) => {
 			rolling: true,
 			cookie: {
 				httpOnly: true,
-				secure: false, //!dev, //TODO: check https
+				secure: !dev, //TODO: check https
 				sameSite: 'strict',
 				maxAge: 1000 * 60 * 60 * 24 * 7, //week
 			}

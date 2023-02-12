@@ -1,12 +1,6 @@
-import Link from 'next/link';
-import { useContext } from 'react';
-import { GlobalContext } from '../providers/GlobalProvider.js';
+export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames }) {
 
-export default function MapRow({ row, onDeleteSubmit }) {
-
-	const [state] = useContext(GlobalContext);
-	const { user, mapValueNames, mapId, map, csrf, name, showValues } = state;
-	const [id, key, value] = row.split(' ');
+	const [_id, key, value] = row.split(' ');
 
 	return (
 		<tr className="align-middle">

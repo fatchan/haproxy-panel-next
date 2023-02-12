@@ -2,13 +2,11 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
-import { useState, useContext } from 'react';
-import { GlobalContext } from '../providers/GlobalProvider.js';
+import { useState } from 'react';
 
 const Register = () => {
 
 	const router = useRouter();
-	const [state, dispatch] = useContext(GlobalContext);
 	const [error, setError] = useState();
 
 	async function register(e) {
@@ -17,7 +15,7 @@ const Register = () => {
 			username: e.target.username.value,
 			password: e.target.password.value,
 			rpasword: e.target.repeat_password.value,
-		 }, dispatch, setError, router);
+		}, null, setError, router);
 		router.push('/login');
 	}
 	

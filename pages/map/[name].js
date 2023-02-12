@@ -1,29 +1,24 @@
 import { useRouter } from "next/router";
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
 import * as API from '../../api.js';
-import { GlobalContext } from '../../providers/GlobalProvider.js';
 
 const MapPage = (props) => {
 
 	const router = useRouter();
 	const { name: mapName } = router.query;
-	const [state, dispatch] = useContext(GlobalContext);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 	const changedMap = state.mapId?.name != mapName;
 
 	useEffect(() => {
-		if (props.map != null) {
-			dispatch({ type: 'state', payload: props });
-		} else {
-			//TODO: eventually, keep all visited maps in the context and refresh on load like e.g. clusters
+		if (!state.map) {
 			API.getMap(mapName, dispatch, setError, router);
 		}
-	}, [changedMap, mapName, dispatch, props, router]);
+	}, [state.map, mapName, router]);
 
 	if (state.map == null || changedMap) {
 		return (
@@ -34,7 +29,7 @@ const MapPage = (props) => {
 		);
 	}
 
-	const { user, mapValueNames, mapId, map, csrf, name, showValues } = state;
+	const { user, mapValueNames, mapId, map, csrf, showValues } = state;
 
 	async function addToMap(e) {
 		e.preventDefault();
@@ -54,6 +49,10 @@ const MapPage = (props) => {
 			<MapRow
 				key={i}
 				row={row}
+				name={mapId.name}
+				csrf={csrf}
+				showValues={showValues}
+				mapValueNames={mapValueNames}
 				onDeleteSubmit={deleteFromMap}
 			/>
 		)

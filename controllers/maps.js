@@ -53,7 +53,6 @@ exports.mapData = async (req, res, next) => {
 		name: req.params.name,
 		showValues,
 	};
-
 };
 
 exports.mapPage = async (app, req, res, next) => {

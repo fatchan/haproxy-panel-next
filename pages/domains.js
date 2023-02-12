@@ -1,26 +1,21 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import BackButton from '../components/BackButton.js';
-import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
-import { GlobalContext } from '../providers/GlobalProvider.js';
 
 export default function Domains(props) {
 
 	const router = useRouter();
-	const [state, dispatch] = useContext(GlobalContext);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
 	useEffect(() => {
-		if (props.user != null) {
-			dispatch({ type: 'state', payload: props });
-		} else {
+		if (!state.user) {
 			API.getDomains(dispatch, setError, router);
 		}
-	}, [dispatch, props, router]);
+	}, [state.user, router]);
 
 	if (!state.user) {
 		return (
@@ -65,6 +60,7 @@ export default function Domains(props) {
 
 	return (
 		<>
+
 			<Head>
 				<title>Domains</title>
 			</Head>

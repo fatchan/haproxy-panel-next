@@ -1,27 +1,22 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import BackButton from '../components/BackButton.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import ClusterRow from '../components/ClusterRow.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
-import { GlobalContext } from '../providers/GlobalProvider.js';
 
 export default function Clusters(props) {
 
 	const router = useRouter();
-	const [state, dispatch] = useContext(GlobalContext);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-	// Set into context from props (From getServerSideProps), else make API call
 	useEffect(() => {
-		if (props.user != null) {
-			dispatch({ type: 'state', payload: props });
-		} else {
+		if (!state.user) {
 			API.getClusters(dispatch, setError, router);
 		}
-	}, [dispatch, props, router]);
+	}, [state.user, router]);
 
 	if (!state.user) {
 		return (
@@ -56,6 +51,8 @@ export default function Clusters(props) {
 		i={i}
 		key={cluster}
 		cluster={cluster}
+		csrf={csrf}
+		user={user}
 		setCluster={setCluster}
 		deleteCluster={deleteCluster}
 	/>));

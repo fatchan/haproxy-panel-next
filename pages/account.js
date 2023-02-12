@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
@@ -6,22 +6,19 @@ import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
-import { GlobalContext } from '../providers/GlobalProvider.js';
 
 const Account = (props) => {
 
 	const router = useRouter();
-	const [state, dispatch] = useContext(GlobalContext);
+	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
 	// Set into context from props (From getServerSideProps), else make API call
 	useEffect(() => {
-		if (props.maps != null) {
-			dispatch({ type: 'state', payload: props });
-		} else {
+		if (!state.user) {
 			API.getAccount(dispatch, setError, router);
 		}
-	}, [dispatch, props, router]);
+	}, [state.user, router]);
 	
 	const loadingSection = useMemo(() => {
 		return (
@@ -33,10 +30,9 @@ const Account = (props) => {
 
 	let innerData;
 
-	//TODO: when coming from loaded map after refresh, will already have some data, so we should partially populate page
 	if (state.maps != null) {
 	
-		const { user, maps, acls, globalAcl, csrf } = state;
+		const { user, maps, globalAcl, csrf } = state;
 
 		// isAdmin for showing global override option
 		const isAdmin = user.username === 'admin';

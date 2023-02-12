@@ -108,7 +108,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 			errorCallback(response.error);
 			return;
 		}
-		dispatch({ type: 'state', payload: response });
+		dispatch(response);
 	} else {
 		errorCallback('An error occurred');
 	}

@@ -32,11 +32,11 @@ const fMap = {
 		columnNames: ['Domain', ''],
 	},
 
-	/*[process.env.BACKENDS_MAP_NAME]: {
+	[process.env.BACKENDS_MAP_NAME]: {
 		fname: 'Domain Backend Mappings',
 		description: 'Which internal server haproxy uses for domains',
 		columnNames: ['Domain', 'Server Name'],
-	},*/
+	},
 
 };
 
@@ -54,7 +54,7 @@ module.exports = {
 	},
 
 	extractMap: (item) => {
-		const match = item.match(/(?<index>\d+) \(\/etc\/haproxy\/(?<name>.+).map\)(?:.+entry_cnt=(?<count>\d+)$)?/);
+		const match = item.match(/(?<index>\d+) \(\/etc\/haproxy\/map\/(?<name>.+).map\)(?:.+entry_cnt=(?<count>\d+)$)?/);
 		if (match && match.groups) {
 			return {
 				...match.groups,
@@ -63,7 +63,7 @@ module.exports = {
 		}
 	},
 
-	getMapId: async (haproxy, name) => {
+	getMapId: (haproxy, name) => {
 		return haproxy.showMap()
 			.then(list => {
 				return list
@@ -81,7 +81,7 @@ module.exports = {
 		return haproxy.delMap(mapId.index, value);
 	},
 
-	dynamicResponse: async(req, res, code, data) => {
+	dynamicResponse: (req, res, code, data) => {
 		const isRedirect = code === 302;
 		if (req.headers && req.headers['content-type'] === 'application/json') {
 			return res

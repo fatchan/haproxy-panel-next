@@ -1,10 +1,4 @@
-import { useContext } from 'react';
-import { GlobalContext } from '../providers/GlobalProvider.js';
-
-export default function ClusterRow({ i, cluster, setCluster, deleteCluster }) {
-
-	const [state] = useContext(GlobalContext);
-	const { user, csrf } = state;
+export default function ClusterRow({ i, cluster, setCluster, deleteCluster, csrf, user }) {
 
 	return (
 		<tr className="align-middle">
