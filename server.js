@@ -39,6 +39,11 @@ app.prepare()
 			return handle(req, res);
 		});
 
+		server.use((err, req, res, next) => {
+			console.error(err)
+			return res.end();
+		});
+
 		server.listen(3000, (err) => {
 			if (err) {
 				throw err;

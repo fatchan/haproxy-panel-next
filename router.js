@@ -5,6 +5,7 @@ const HAProxy = require('@fatchan/haproxy-sdk')
 	, MongoStore = require('connect-mongo')
 	, db = require('./db.js')
 	, csrf = require('csurf')
+	, OpenAPIClientAxios = require('openapi-client-axios').default
 	, { dynamicResponse } = require('./util.js');
 
 const testRouter = (server, app) => {
@@ -54,7 +55,7 @@ const testRouter = (server, app) => {
 		const csrfMiddleware = csrf();
 
 		//HAProxy-sdk middleware
-		const useHaproxy = (req, res, next) => {
+		const useHaproxy = async (req, res, next) => {
 			if (res.locals.user.clusters.length === 0) {
 				return next();
 			}
@@ -63,6 +64,16 @@ const testRouter = (server, app) => {
 				res.locals.haproxy = new HAProxy(res.locals.user.clusters[res.locals.user.activeCluster]);
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
+				const api = new OpenAPIClientAxios({
+					definition: 'http://127.0.0.1:2001/v2/specification_openapiv3',
+					axiosConfigDefaults: {
+						headers: {
+							'authorization': 'Basic YWRtaW46YWRtaW4=', // admin:admin for testing,
+						}
+					}
+				});
+				res.locals.dataPlane = await api.init();
+				res.locals.dataPlane.defaults.baseURL = 'http://127.0.0.1:2001/v2';
 				next();
 			} catch (e) {
 				return dynamicResponse(req, res, 500, { error: e });

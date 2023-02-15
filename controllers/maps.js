@@ -1,4 +1,4 @@
-const { deleteFromMap, getMapId, dynamicResponse } = require('../util.js');
+const { extractMap, dynamicResponse } = require('../util.js');
 const { createCIDR, parse } = require('ip6addr');
 const url = require('url');
 /**
@@ -7,15 +7,21 @@ const url = require('url');
  */
 exports.mapData = async (req, res, next) => {
 	let map,
-		mapId,
+		mapInfo,
 		showValues = false;
 	try {
-		mapId = await getMapId(res.locals.haproxy, req.params.name);
-		if (!mapId) {
+		mapInfo = await res.locals
+			.dataPlane.getOneRuntimeMap(req.params.name)
+			.then(res => res.data)
+			.then(extractMap);
+		if (!mapInfo) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 		}
-		map = await res.locals.haproxy
-			.showMap(mapId.index);
+		map = await res.locals
+			.dataPlane.showRuntimeMap({
+				map: req.params.name
+			})
+			.then(res => res.data);
 	} catch (e) {
 		return next(e);
 	}
@@ -30,16 +36,14 @@ exports.mapData = async (req, res, next) => {
 			}
 		case process.env.MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
-				const [id, key, value] = a.split(' ');
-				const { hostname, pathname } = url.parse(`https://${key}`);
+				const { hostname, pathname } = url.parse(`https://${a.key}`);
 				return res.locals.user.domains.includes(hostname);
 			});
 			break;
 		case process.env.BLOCKED_MAP_NAME:
 		case process.env.WHITELIST_MAP_NAME:
 			map = map.filter(a => {
-				const [id, key, value] = a.split(' ');
-				return res.locals.user.username === value;
+				return res.locals.user.username === a.value;
 			});
 			break;
 		default:
@@ -48,7 +52,7 @@ exports.mapData = async (req, res, next) => {
 
 	return {
 		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'hCaptcha' },
-		mapId,
+		mapInfo,
 		map,
 		csrf: req.csrfToken(),
 		name: req.params.name,
@@ -91,29 +95,35 @@ exports.deleteMapForm = async (req, res, next) => {
 	try {
 
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
-			//refactor -> getServer(hostname)
-			const backendMapId = await getMapId(res.locals.haproxy, process.env.BACKENDS_MAP_NAME);
-			const backendMapEntry = await res.locals.haproxy
-				.showMap(backendMapId.index)
-				.then(map => map.find(m => m.split(' ')[1] === req.body.key));
+			const backendMapEntry = await res.locals
+				.dataPlane.getRuntimeMapEntry({
+					map: process.env.BACKENDS_MAP_NAME,
+					id: req.body.key,
+				})
+				.then(res => res.data)
+				.catch(() => {});
 			if (backendMapEntry) {
-				const serverName = backendMapEntry.split(' ')[2];
-				const server = await res.locals.haproxy
-					.backend(process.env.BACKEND_NAME)
-					.then(backend => backend.server(serverName));
-				await Promise.all([
-					server.setState('disable'),
-					//server.setAddress(),
-					//server.setPort(),
-					deleteFromMap(res.locals.haproxy, process.env.BACKENDS_MAP_NAME, req.body.key),
-				]);
+				await res.locals
+					.dataPlane.deleteRuntimeServer({
+						backend: 'servers',
+						name: backendMapEntry.value,
+					});
+				await res.locals
+					.dataPlane.deleteRuntimeMapEntry({
+						map: process.env.BACKENDS_MAP_NAME, //'backends'
+						id: req.body.key, //'example.com'
+					});
 			} else {
 				console.warn('no backend found to remove');
 				//dont return because otherwise they will have a domain stuck in the hosts map
 			}
 		}
 
-		await deleteFromMap(res.locals.haproxy, req.params.name, req.body.key);
+		await res.locals
+			.dataPlane.deleteRuntimeMapEntry({
+				map: req.params.name, //'ddos'
+				id: req.body.key, //'example.com'
+			});
 		return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 	} catch (e) {
 		return next(e);
@@ -202,58 +212,65 @@ exports.patchMapForm = async (req, res, next) => {
 		try {
 
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
-				//refactor -> getServer(hostname)
-				const backendMapId = await getMapId(res.locals.haproxy, process.env.BACKENDS_MAP_NAME);
 				let backendMapSize;
-				const backendMapEntry = await res.locals.haproxy
-					.showMap(backendMapId.index)
-					.then(map => {
-						backendMapSize = map.length;
-						return map.find(m => m.split(' ')[1] === req.body.key)
-					});
-				const backend = await res.locals.haproxy
-					.backend(process.env.BACKEND_NAME);
+				const backendMapEntry = await res.locals
+					.dataPlane.getRuntimeMapEntry({
+						map: process.env.BACKENDS_MAP_NAME,
+						id: req.body.key,
+					})
+					.then(res => res.data)
+					.catch(() => {});
 				let server;
 				if (backendMapEntry) {
-					return dynamicResponse(req, res, 400, { error: `this domain is active already and has a backend server mapping: "${backendMapEntry}"` });
+					//TODO: allow multiple backends (but requires reworking haproxy.cfg)
+					return dynamicResponse(req, res, 400, { error: 'Domain already has a backend server mapping' });
 				} else {
-					//no existing backend map entry (i.e. didnt exist at startup to get constructed in the lua script)
-					let backendCounter = 0;
-					let backendMapCheckId = 1;
-					const maxServers = (await backend.servers()).length;
-					if (backendMapSize > 0 && backendMapSize < maxServers) {
-						//try and skip to an empty index for speed improvement.
-						//will depend if any early servers are removed, but probably will be faster overall.
-						backendMapCheckId = backendMapSize;
-					}
-					while (backendCounter < maxServers) {
-						try {
-							server = await backend.server(`${process.env.SERVER_PREFIX}${backendMapCheckId}`);
-							const status = await server.status();
-							if (status === 'MAINT') { //would atively used servers ever enter this state?
-								break;
-							}
-						} catch (e) {
-							server = null; //probably out of servers
-						}
-						backendMapCheckId = (backendMapCheckId+1) % maxServers;
-						backendCounter++;
-					}
-					if (!server) {
+					const freeSlotId = await res.locals.dataPlane
+						.getRuntimeServers({
+							backend: 'servers'
+						})
+						.then(res => res.data)
+						.then(servers => {
+							const server = servers.find(s => s.admin_state === 'maint' && s.operational_state === 'down');
+							return server ? parseInt(server.id) : servers.length+1;
+						});
+					if (!freeSlotId) {
 						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 					}
-					const backendsMapId = await getMapId(res.locals.haproxy, process.env.BACKENDS_MAP_NAME);
-					await res.locals.haproxy
-						.addMap(backendsMapId.index, req.body.key, server.name);
+					const [address, port] = value.split(':');
+					//delete, add because apparently "replace" cant update the fucking ADDRESS???
+					// await res.locals
+						// .dataPlane.deleteRuntimeServer({
+							// backend: 'servers',
+							// name: `websrv${freeSlotId}`,
+						// })
+						// .catch(e => console.error(e));
+					await res.locals
+						.dataPlane.addRuntimeServer({
+							backend: 'servers',
+						}, {
+							address,
+							port: parseInt(port),
+							name: `websrv${freeSlotId}`,
+							id: `${freeSlotId}`,
+						});
+					await res.locals.dataPlane
+						.addPayloadRuntimeMap({
+							name: process.env.BACKENDS_MAP_NAME,
+						}, [{
+							key: req.body.key,
+							value: `websrv${freeSlotId}`,
+						}]);
 				}
-				await server.setState('enable');
-				await server.setAddress(value.split(':')[0]);
-				await server.setPort(value.split(':')[1]);
 			}
 
-			const mapId = await getMapId(res.locals.haproxy, req.params.name);
-			await res.locals.haproxy
-				.addMap(mapId.index, req.body.key, value);
+			await res.locals.dataPlane
+				.addPayloadRuntimeMap({
+					name: req.params.name
+				}, [{
+					key: req.body.key,
+					value: value,
+				}]);
 			return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);

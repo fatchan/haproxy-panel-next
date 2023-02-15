@@ -12,7 +12,7 @@ const MapPage = (props) => {
 	const { name: mapName } = router.query;
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
-	const changedMap = state.mapId?.name != mapName;
+	const changedMap = state.mapInfo?.name != mapName;
 
 	useEffect(() => {
 		if (!state.map) {
@@ -29,18 +29,18 @@ const MapPage = (props) => {
 		);
 	}
 
-	const { user, mapValueNames, mapId, map, csrf, showValues } = state;
+	const { user, mapValueNames, mapInfo, map, csrf, showValues } = state;
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await API.addToMap(mapId.name, { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }, dispatch, setError, router);
+		await API.addToMap(mapInfo.name, { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
 	}
 
 	async function deleteFromMap(e) {
 		e.preventDefault();
-		await API.deleteFromMap(mapId.name, { _csrf: csrf, key: e.target.key.value }, dispatch, setError, router);
+		await API.deleteFromMap(mapInfo.name, { _csrf: csrf, key: e.target.key.value }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 	}
 
@@ -49,7 +49,7 @@ const MapPage = (props) => {
 			<MapRow
 				key={i}
 				row={row}
-				name={mapId.name}
+				name={mapInfo.name}
 				csrf={csrf}
 				showValues={showValues}
 				mapValueNames={mapValueNames}
@@ -61,7 +61,7 @@ const MapPage = (props) => {
 
 	let formElements;
 	//TODO: env var case map names
-	switch (mapId.name) {
+	switch (mapInfo.name) {
 		case "ddos": {
 			const mapValueOptions = Object.entries(mapValueNames)
 				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>))
@@ -71,7 +71,6 @@ const MapPage = (props) => {
 					<input className="btn btn-success" type="submit" value="+" />
 					<input className="form-control mx-3" type="text" name="key" placeholder="domain/path" required />
 					<select className="form-select mx-3" name="value" required>
-						<option selected />
 						{mapValueOptions}
 					</select>
 				</>
@@ -80,7 +79,7 @@ const MapPage = (props) => {
 		}
 		case "hosts":
 		case "maintenance": {
-			const activeDomains = map.map(e => e.split(' ')[1]);
+			const activeDomains = map.map(e => e.key);
 			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
@@ -92,7 +91,7 @@ const MapPage = (props) => {
 						{domainSelectOptions}
 					</select>
 					{
-						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapId.name === "hosts") &&
+						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapInfo.name === "hosts") &&
 						<input
 							className="form-control ml-2"
 							type="text"
@@ -122,7 +121,7 @@ const MapPage = (props) => {
 
 			<Head>
 				<title>
-					{mapId.fname}
+					{mapInfo.fname}
 				</title>
 			</Head>
 
@@ -130,7 +129,7 @@ const MapPage = (props) => {
 
 			{/* Map friendly name (same as shown on acc page) */}
 			<h5 className="fw-bold">
-				{mapId.fname}:
+				{mapInfo.fname}:
 			</h5>
 
 			{/* Map table */}
@@ -143,11 +142,11 @@ const MapPage = (props) => {
 							<tr>
 								<th />
 								<th>
-									{mapId.columnNames[0]}
+									{mapInfo.columnNames[0]}
 								</th>
 								{showValues === true && (
 									<th>
-										{mapId.columnNames[1]}
+										{mapInfo.columnNames[1]}
 									</th>
 								)}
 							</tr>
@@ -158,7 +157,7 @@ const MapPage = (props) => {
 						{/* Add new row form */}
 						<tr className="align-middle">
 							<td className="col-1 text-center" colSpan="3">
-								<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapId.name}/add`} method="post">
+								<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapInfo.name}/add`} method="post">
 									{formElements}
 								</form>
 							</td>

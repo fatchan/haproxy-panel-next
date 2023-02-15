@@ -1,6 +1,6 @@
 export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames }) {
 
-	const [_id, key, value] = row.split(' ');
+	const { _id, key, value } = row;
 
 	return (
 		<tr className="align-middle">

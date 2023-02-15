@@ -1,6 +1,6 @@
 const db = require('../db.js');
 const url = require('url');
-const { deleteFromMap, dynamicResponse } = require('../util.js');
+const { dynamicResponse } = require('../util.js');
 
 /**
  * GET /domains

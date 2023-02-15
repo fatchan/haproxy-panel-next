@@ -1,41 +1,35 @@
 const bcrypt = require('bcrypt');
 const db = require('../db.js');
-const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } = require('../util.js');
+const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse, getMaps } = require('../util.js');
 
 /**
  * account page data shared between html/json routes
  */
 exports.accountData = async (req, res, next) => {
 	let maps = []
-		, acls = []
 		, globalAcl;
 	if (res.locals.user.clusters.length > 0) {
-		maps = await res.locals.haproxy
-			.showMap()
-			.then(list => {
-				return list.map(extractMap)
-					.filter(i => i && i.fname)
-					.sort((a, b) => a.fname.localeCompare(b.fname));
-			});
-		let globalIndex;
-		acls = await res.locals.haproxy
-			.showAcl()
-			.then(list => {
-				const hdrCntAcl = list.find(x => x.includes("acl 'hdr_cnt'"));
-				if (hdrCntAcl != null) {
-					globalIndex = hdrCntAcl.split(' ')[0];
-				}
-				return list.map(extractMap)
-					.filter(i => i);
-			});
-		globalAcl = await res.locals.haproxy
-			.showAcl(globalIndex);
+		maps = await res.locals.dataPlane.getAllRuntimeMapFiles()
+			.then(res => res.data)
+			.then(data => data.map(extractMap))
+			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
+		const globalIndex = await res.locals.dataPlane.getAcls({
+				parent_name: 'http-in',
+				parent_type:'frontend'
+			})
+			.then(res => res.data.data)
+			.then(acls => acls.find(a => a.acl_name === 'ddos_mode_enabled_override').index)
+		globalAcl = await res.locals.dataPlane.getAcl({
+				index: globalIndex,
+				parent_name: 'http-in',
+				parent_type:'frontend'
+			})
+			.then(res => res.data.data)
 	}
 	return {
 		csrf: req.csrfToken(),
 		maps,
-		acls,
-		globalAcl: globalAcl && globalAcl.length === 1 && globalAcl[0].endsWith(0),
+		globalAcl: globalAcl && globalAcl.value.endsWith(0),
 	}
 };
 

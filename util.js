@@ -54,31 +54,14 @@ module.exports = {
 	},
 
 	extractMap: (item) => {
-		const match = item.match(/(?<index>\d+) \(\/etc\/haproxy\/map\/(?<name>.+).map\)(?:.+entry_cnt=(?<count>\d+)$)?/);
-		if (match && match.groups) {
-			return {
-				...match.groups,
-				...fMap[match.groups.name],
-			}
-		}
-	},
-
-	getMapId: (haproxy, name) => {
-		return haproxy.showMap()
-			.then(list => {
-				return list
-					.map(module.exports.extractMap)
-					.find(l => l && l.name == name);
-			});
-	},
-
-	deleteFromMap: async (haproxy, name, value) => {
-		//maybe in future, we should cache the map # or ID because they dont(afaik) change during runtime
-		const mapId = await module.exports.getMapId(haproxy, name);
-		if (!mapId) {
-			throw 'Invalid map';
-		}
-		return haproxy.delMap(mapId.index, value);
+		const name = item.file && item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
+		const count = item.description && item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
+		return {
+			name,
+			count,
+			id: item.id,
+			...fMap[name],
+		};
 	},
 
 	dynamicResponse: (req, res, code, data) => {
