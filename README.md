@@ -1,11 +1,11 @@
-# HAProxy Panel
+# BasedFlare Control Panel
 
 Work in progress. Not recommended for production deployment. No instructions or help provided whatsoever.
 
-Internally uses [haproxy-sdk](https://github.com/jackpinetech/haproxy-sdk).
+Internally uses [haproxy dataplaneapi](https://github.com/haproxytech/dataplaneapi/).
 Intended for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-protection).
 
-Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Communicates with the HAProxy socket to update maps, acls, etc.
+Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Uses haproxy runtime apis to update maps, acls, etc.
 
 ##### Features:
 - List/add/remove clusters (server groups).
@@ -19,7 +19,6 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
 
 ##### Todo:
-- Update to use haproxy data plane api instead of haproxy-sdk
 - Better Multi-user support (problems w/ ip whitelist and blacklist)
 - Some kind of payment system
 - SSL cert management, or letsencrypt integration

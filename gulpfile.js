@@ -16,7 +16,7 @@ async function reset() {
 				_id: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],
-				clusters: ['tcp://127.0.0.1:2000'],
+				clusters: ['http://127.0.0.1:2001'],
 				activeCluster: 0,
 				balance: 0,
 			});
@@ -28,7 +28,7 @@ async function reset() {
 				$set: {
 					passwordHash,
 					domains: ['localhost'],
-					clusters: ['tcp://127.0.0.1:2000'],
+					clusters: ['http://127.0.0.1:2001'],
 					activeCluster: 0,
 				}
 			});

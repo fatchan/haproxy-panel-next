@@ -55,6 +55,7 @@ module.exports = {
 
 	extractMap: (item) => {
 		const name = item.file && item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
+		if (!fMap[name]) { return null; }
 		const count = item.description && item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
 		return {
 			name,

@@ -60,20 +60,22 @@ const testRouter = (server, app) => {
 				return next();
 			}
 			try {
-				//uses cluster from account
-				res.locals.haproxy = new HAProxy(res.locals.user.clusters[res.locals.user.activeCluster]);
+				//TODO: handle cluster
+				//const cluster = res.locals.user.clusters[res.locals.user.activeCluster]
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
+				const base64Auth = new Buffer(`${process.env.DATA_PLANE_USERNAME}:${process.env.DATA_PLANE_PASSWORD}`).toString("base64");
+				const firstCluster = res.locals.user.clusters[res.locals.user.activeCluster].split(',')[0];
 				const api = new OpenAPIClientAxios({
-					definition: 'http://127.0.0.1:2001/v2/specification_openapiv3',
+					definition: `${firstCluster}/v2/specification_openapiv3`,
 					axiosConfigDefaults: {
 						headers: {
-							'authorization': 'Basic YWRtaW46YWRtaW4=', // admin:admin for testing,
+							'authorization': `Basic ${base64Auth}`,
 						}
 					}
 				});
 				res.locals.dataPlane = await api.init();
-				res.locals.dataPlane.defaults.baseURL = 'http://127.0.0.1:2001/v2';
+				res.locals.dataPlane.defaults.baseURL = `${firstCluster}/v2`;
 				next();
 			} catch (e) {
 				return dynamicResponse(req, res, 500, { error: e });
@@ -81,7 +83,6 @@ const testRouter = (server, app) => {
 		};
 
 		const hasCluster = (req, res, next) => {
-			console.log(req.path)
 			if (res.locals.user.clusters.length > 0 || (req.baseUrl+req.path) === '/forms/cluster/add') {
 				return next();
 			}

@@ -9,27 +9,20 @@ exports.accountData = async (req, res, next) => {
 	let maps = []
 		, globalAcl;
 	if (res.locals.user.clusters.length > 0) {
-		maps = await res.locals.dataPlane.getAllRuntimeMapFiles()
+		maps = await res.locals.dataPlane
+			.getAllRuntimeMapFiles()
 			.then(res => res.data)
 			.then(data => data.map(extractMap))
+			.then(maps => maps.filter(n => n))
 			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
-		const globalIndex = await res.locals.dataPlane.getAcls({
-				parent_name: 'http-in',
-				parent_type:'frontend'
-			})
-			.then(res => res.data.data)
-			.then(acls => acls.find(a => a.acl_name === 'ddos_mode_enabled_override').index)
-		globalAcl = await res.locals.dataPlane.getAcl({
-				index: globalIndex,
-				parent_name: 'http-in',
-				parent_type:'frontend'
-			})
-			.then(res => res.data.data)
+		globalAcl = await res.locals.dataPlane
+			.getOneRuntimeMap('ddos_global')
+			.then(res => res.data.description.split('').reverse()[0])
 	}
 	return {
 		csrf: req.csrfToken(),
 		maps,
-		globalAcl: globalAcl && globalAcl.value.endsWith(0),
+		globalAcl: globalAcl === '1',
 	}
 };
 
@@ -59,24 +52,26 @@ exports.globalToggle = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
 		return dynamicResponse(req, res, 403, { error: 'Only admin can toggle global' });
 	}
-	let globalIndex;
 	try {
-		await res.locals.haproxy
-			.showAcl()
-			.then(list => {
-				const hdrCntAcl = list.find(x => x.includes("acl 'hdr_cnt'"));
-				if (hdrCntAcl != null) {
-					globalIndex = hdrCntAcl.split(' ')[0];
-				}
-			});
-		const globalAcl = await res.locals.haproxy
-			.showAcl(globalIndex);
-		if (globalAcl.length === 1 && globalAcl[0].endsWith(0)) {
-			await res.locals.haproxy
-				.clearAcl(globalIndex);
+		const globalAcl = await res.locals.dataPlane
+			.getOneRuntimeMap('ddos_global')
+			.then(res => res.data.description.split('').reverse()[0])
+		if (globalAcl === '1') {
+			await res.locals.dataPlane
+				.deleteRuntimeMapEntry({
+					map: 'ddos_global',
+					id: 'true'
+				});
 		} else {
-			await res.locals.haproxy
-				.addAcl(globalIndex, '0');
+			await res.locals.dataPlane
+				.addPayloadRuntimeMap({
+					name: 'ddos_global'
+				}, [
+					{
+						key: 'true',
+						value: 'true'
+					}
+				]);
 		}
 	} catch (e) {
 		return next(e);

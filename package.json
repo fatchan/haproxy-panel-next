@@ -14,7 +14,6 @@
   "author": "Thomas Lynch (fatchan) <tom@69420.me>",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@fatchan/haproxy-sdk": "^1.0.6",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.0",
     "bootstrap": "^5.2.3",

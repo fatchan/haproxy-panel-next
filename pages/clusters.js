@@ -82,7 +82,7 @@ export default function Clusters(props) {
 								<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="cluster" placeholder="tcp://host1:port,tcp://host2:port,..." required />
+									<input className="form-control mx-3" type="text" name="cluster" placeholder="http://host1:port,http://host2:port,..." required />
 								</form>
 							</td>
 						</tr>

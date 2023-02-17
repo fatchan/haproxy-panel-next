@@ -15,39 +15,6 @@ exports.clustersJson = async (req, res, next) => {
 }
 
 /**
- * POST /global/toggle
- * toggle global ACL
- */
-exports.globalToggle = async (req, res, next) => {
-	if (res.locals.user.username !== "admin") {
-		res.status(403).send('only admin can toggle global');
-	}
-	let globalIndex;
-	try {
-		await res.locals.haproxy
-			.showAcl()
-			.then(list => {
-				const hdrCntAcl = list.find(x => x.includes("acl 'hdr_cnt'"));
-				if (hdrCntAcl != null) {
-					globalIndex = hdrCntAcl.split(' ')[0];
-				}
-			});
-		const globalAcl = await res.locals.haproxy
-			.showAcl(globalIndex);
-		if (globalAcl.length === 1 && globalAcl[0].endsWith(0)) {
-			await res.locals.haproxy
-				.clearAcl(globalIndex);
-		} else {
-			await res.locals.haproxy
-				.addAcl(globalIndex, '0');
-		}
-	} catch (e) {
-		return next(e);
-	}
-	return dynamicResponse(req, res, 302, { redirect: '/account' });
-};
-
-/**
  * POST /cluster
  * set active cluster
  */
