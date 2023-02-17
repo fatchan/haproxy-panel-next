@@ -1,5 +1,4 @@
-const HAProxy = require('@fatchan/haproxy-sdk')
-	, express = require('express')
+const express = require('express')
     , dev = process.env.NODE_ENV !== 'production'
 	, session = require('express-session')
 	, MongoStore = require('connect-mongo')
