@@ -70,7 +70,8 @@ const MapPage = (props) => {
 					<input type="hidden" name="_csrf" value={csrf} />
 					<input className="btn btn-success" type="submit" value="+" />
 					<input className="form-control mx-3" type="text" name="key" placeholder="domain/path" required />
-					<select className="form-select mx-3" name="value" required>
+					<select className="form-select mx-3" name="value" defaultValue="" required>
+						<option value="" />
 						{mapValueOptions}
 					</select>
 				</>
@@ -86,8 +87,8 @@ const MapPage = (props) => {
 				<>
 					<input type="hidden" name="_csrf" value={csrf} />
 					<input className="btn btn-success" type="submit" value="+" />
-					<select className="form-select mx-3" name="key" required>
-						<option selected />
+					<select className="form-select mx-3" name="key" defaultValue="" required>
+						<option value="" />
 						{domainSelectOptions}
 					</select>
 					{
