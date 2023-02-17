@@ -63,10 +63,10 @@ const testRouter = (server, app) => {
 				//const cluster = res.locals.user.clusters[res.locals.user.activeCluster]
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
-				const base64Auth = new Buffer(`${process.env.DATA_PLANE_USERNAME}:${process.env.DATA_PLANE_PASSWORD}`).toString("base64");
-				const firstCluster = res.locals.user.clusters[res.locals.user.activeCluster].split(',')[0];
+				const firstClusterURL = new URL(res.locals.user.clusters[res.locals.user.activeCluster].split(',')[0]);
+				const base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString("base64");
 				const api = new OpenAPIClientAxios({
-					definition: `${firstCluster}/v2/specification_openapiv3`,
+					definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
 					axiosConfigDefaults: {
 						headers: {
 							'authorization': `Basic ${base64Auth}`,
@@ -74,7 +74,7 @@ const testRouter = (server, app) => {
 					}
 				});
 				res.locals.dataPlane = await api.init();
-				res.locals.dataPlane.defaults.baseURL = `${firstCluster}/v2`;
+				res.locals.dataPlane.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				next();
 			} catch (e) {
 				return dynamicResponse(req, res, 500, { error: e });
