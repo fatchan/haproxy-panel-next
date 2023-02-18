@@ -40,8 +40,29 @@ exports.addDomain = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	//const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.domain);
-	//TODO: save (replace) in db with domain as key and username.
+	const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.domain);
+	const fd = new FormData();
+	fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.domain}.pem`);
+	await fetch(`${res.locals.dataPlane.defaults.baseURL}/services/haproxy/storage/ssl_certificates`, {
+			method: 'POST',
+			headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
+			body: fd,
+		})
+		.then(res => res.text())
+		.then(res => console.log(res))
+	const account = await db.db.collection('certs')
+		.replaceOne({
+			_id: req.body.domain,
+		}, {
+			_id: req.body.domain,
+			username: res.locals.user.username,
+			csr, key, cert, haproxyCert,
+			date,
+		}, {
+			upsert: true,
+		});
+	//TODO: mongodb encryption
+	//TODO: make upload to all user clusters/servers
 	//TODO: add scheduled task to aggregate domains and upload certs to clusters of that username through dataplane
 	//TODO: make scheduled task also run this again for certs close to expiry and repeat ^
 

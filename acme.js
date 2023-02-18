@@ -2,6 +2,7 @@
 
 const fs = require('fs').promises;
 const acme = require('acme-client');
+const dev = process.env.NODE_ENV !== 'production';
 
 /**
  * Function used to satisfy an ACME challenge
@@ -74,7 +75,7 @@ module.exports = {
 	init: async function() {
 		/* Init client */
 		module.exports.client = new acme.Client({
-			directoryUrl: acme.directory.letsencrypt.staging,
+			directoryUrl: dev ? acme.directory.letsencrypt.staging : acme.directory.letsencrypt.production,
 			accountKey: await acme.crypto.createPrivateKey()
 		});
 	},
@@ -94,7 +95,7 @@ module.exports = {
 		});
 		/* Done */
 		const haproxyCert = `${cert.toString()}\n${key.toString()}`;
-		return { key, csr, cet, haproxyCert, date: new Date() };
+		return { key, csr, cert, haproxyCert, date: new Date() };
 	},
 
 };

@@ -54,6 +54,9 @@ export default function Domains(props) {
 				<td>
 					{d}
 				</td>
+				<td title={user.certsMap[d] || null}>
+					{user.certsMap[d] ? '🔐' : '-'}
+				</td>
 			</tr>
 		);
 	})
@@ -75,6 +78,16 @@ export default function Domains(props) {
 			<div className="table-responsive">
 				<table className="table table-bordered text-nowrap">
 					<tbody>
+
+						<tr className="align-middle">
+							<th className="col-1" />
+							<th>
+								Domain
+							</th>
+							<th>
+								HTTPS?
+							</th>
+						</tr>
 
 						{domainList}
 

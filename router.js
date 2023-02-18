@@ -29,13 +29,16 @@ const testRouter = (server, app) => {
 
 		const fetchSession = async (req, res, next) => {
 			if (req.session.user) {
-				const account = await db.db.collection('accounts').findOne({_id:req.session.user});
+				const account = await db.db.collection('accounts').findOne({ _id: req.session.user });
 				if (account) {
+					const certs = await db.db.collection('certs').find({ username: account._id }, { projection: { _id: 1, username: 1, date: 1 }}).toArray();
+					const certsMap = (certs || []).reduce((acc, cert) => { acc[cert._id] = cert.date; return acc; }, {});
 					res.locals.user = {
 						username: account._id,
 						domains: account.domains,
 						clusters: account.clusters,
 						activeCluster: account.activeCluster,
+						certsMap,
 					};
 					return next();
 				}
@@ -128,7 +131,7 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/cluster', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.setCluster);
 		clusterRouter.post('/cluster/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.addCluster);
 		clusterRouter.post('/cluster/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.deleteClusters);
-		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.addDomain);
+		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, domainsController.addDomain);
 		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.deleteDomain);
 		server.use('/forms', clusterRouter);
 
