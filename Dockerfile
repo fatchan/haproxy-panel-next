@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:latest
 
 WORKDIR /opt
 ENV NODE_ENV production

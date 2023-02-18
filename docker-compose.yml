@@ -8,6 +8,10 @@ services:
       - "127.0.0.1:3000:3000"
     environment:
       - NODE_ENV=production
+    volumes:
+      - type: bind
+        source: /tmp/acme-tests/.well-known/acme-challenge/
+        target: /tmp/acme-tests/.well-known/acme-challenge/
   haproxy_panel_mongo:
     restart: always
     image: mongo:latest
