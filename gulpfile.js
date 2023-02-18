@@ -27,9 +27,6 @@ async function reset() {
 			}, {
 				$set: {
 					passwordHash,
-					domains: ['localhost'],
-					clusters: ['http://admin:admin@127.0.0.1:2001'],
-					activeCluster: 0,
 				}
 			});
 	}

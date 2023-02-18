@@ -3,18 +3,17 @@ services:
   haproxy_panel_next:
     restart: always
     build: .
+    network_mode: host
     ports:
-      - "10.0.0.44:3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - NODE_ENV=production
-    volumes:
-      - .:/opt
   haproxy_panel_mongo:
     restart: always
     image: mongo:latest
-#    volumes:
-#      - mongodb_data_container:/data/db
-
+    network_mode: host
+    ports:
+      - "127.0.0.1:27017:27017"
 networks:
   default:
     name: haproxy_panel_next

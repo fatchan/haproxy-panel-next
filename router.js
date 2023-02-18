@@ -53,14 +53,13 @@ const testRouter = (server, app) => {
 
 		const csrfMiddleware = csrf();
 
-		//HAProxy-sdk middleware
+		//dataplaneapi middleware
 		const useHaproxy = async (req, res, next) => {
 			if (res.locals.user.clusters.length === 0) {
 				return next();
 			}
 			try {
 				//TODO: handle cluster
-				//const cluster = res.locals.user.clusters[res.locals.user.activeCluster]
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
 				const firstClusterURL = new URL(res.locals.user.clusters[res.locals.user.activeCluster].split(',')[0]);
@@ -115,23 +114,23 @@ const testRouter = (server, app) => {
 		server.get(`/map/:name(${mapNamesOrString})`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapPage.bind(null, app));
 		server.get(`/map/:name(${mapNamesOrString}).json`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapJson);
 
-		server.get('/clusters', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersPage.bind(null, app));
-		server.get('/clusters.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, clustersController.clustersJson);
+		server.get('/clusters', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersPage.bind(null, app));
+		server.get('/clusters.json', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersJson);
 
-		server.get('/domains', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsPage.bind(null, app));
-		server.get('/domains.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, domainsController.domainsJson);
+		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
+		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
 
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
-		clusterRouter.post('/global/toggle', accountController.globalToggle);
-		clusterRouter.post('/cluster', clustersController.setCluster);
-		clusterRouter.post('/cluster/add', clustersController.addCluster);
-		clusterRouter.post('/cluster/delete', clustersController.deleteClusters);
-		clusterRouter.post('/domain/add', domainsController.addDomain);
-		clusterRouter.post('/domain/delete', domainsController.deleteDomain);
-		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, mapsController.patchMapForm); //add to MAP
-		clusterRouter.post(`/map/:name(${mapNamesOrString})/delete`, mapsController.deleteMapForm); //delete from MAP
-		server.use('/forms', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, clusterRouter);
+		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
+		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.patchMapForm); //add to MAP
+		clusterRouter.post(`/map/:name(${mapNamesOrString})/delete`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.deleteMapForm); //delete from MAP
+		clusterRouter.post('/cluster', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.setCluster);
+		clusterRouter.post('/cluster/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.addCluster);
+		clusterRouter.post('/cluster/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.deleteClusters);
+		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.addDomain);
+		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.deleteDomain);
+		server.use('/forms', clusterRouter);
 
 };
 

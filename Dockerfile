@@ -5,7 +5,7 @@ ENV NODE_ENV production
 
 COPY package.json /opt/package.json
 
-RUN npm install --production
+RUN npm install --omit=dev
 
 COPY .env /opt/.env
 COPY . /opt

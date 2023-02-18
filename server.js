@@ -9,16 +9,16 @@ dotenv.config({ path: '.env' });
 
 const server = require('express')
 	, nextjs = require('next')
-    , dev = process.env.NODE_ENV !== 'production'
-    , hostname = 'localhost'
-    , port = 3000
+	, dev = process.env.NODE_ENV !== 'production'
+	, hostname = 'localhost'
+	, port = 3000
 	, app = nextjs({ dev, hostname, port })
 	, handle = app.getRequestHandler()
 	, express = require('express')
 	, bodyParser = require('body-parser')
 	, cookieParser = require('cookie-parser')
 	, db = require('./db.js');
-	
+
 app.prepare()
 	.then(async () => {
 
@@ -50,7 +50,7 @@ app.prepare()
 			}
 			console.log('> Ready on http://localhost:3000');
 		});
-		
+
 	})
 	.catch(err => {
 		console.error(err.stack);

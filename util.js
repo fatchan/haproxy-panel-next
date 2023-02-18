@@ -49,7 +49,7 @@ module.exports = {
 	validClustersString: (string) => {
 		return !string.split(',').some(c => {
 			const cUrl = url.parse(c);
-			return (cUrl.protocol !== 'tcp:' || !cUrl.hostname)
+			return (cUrl.protocol !== 'http:' || !cUrl.hostname)
 		});
 	},
 
