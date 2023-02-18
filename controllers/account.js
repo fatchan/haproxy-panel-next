@@ -9,16 +9,17 @@ exports.accountData = async (req, res, next) => {
 	let maps = []
 		, globalAcl;
 	if (res.locals.user.clusters.length > 0) {
-		maps = await res.locals.dataPlane
+		maps = res.locals.dataPlane
 			.getAllRuntimeMapFiles()
 			.then(res => res.data)
 			.then(data => data.map(extractMap))
 			.then(maps => maps.filter(n => n))
 			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
-		globalAcl = await res.locals.dataPlane
+		globalAcl = res.locals.dataPlane
 			.getOneRuntimeMap('ddos_global')
 			.then(res => res.data.description.split('').reverse()[0])
 	}
+	([maps, globalAcl] = await Promise.all([maps, globalAcl]));
 	return {
 		csrf: req.csrfToken(),
 		maps,
@@ -86,7 +87,7 @@ exports.globalToggle = async (req, res, next) => {
 exports.login = async (req, res) => {
 	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
-	const account = await db.db.collection('accounts').findOne({_id:username});
+	const account = await db.db.collection('accounts').findOne({ _id: username });
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 	}

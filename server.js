@@ -17,12 +17,14 @@ const server = require('express')
 	, express = require('express')
 	, bodyParser = require('body-parser')
 	, cookieParser = require('cookie-parser')
+	, acme = require('./acme.js')
 	, db = require('./db.js');
 
 app.prepare()
 	.then(async () => {
 
 		await db.connect();
+		await acme.init();
 
 		const server = express();
 		server.set('query parser', 'simple');

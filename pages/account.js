@@ -19,7 +19,7 @@ const Account = (props) => {
 			API.getAccount(dispatch, setError, router);
 		}
 	}, [state.user, router]);
-	
+
 	const loadingSection = useMemo(() => {
 		return (
 			<div className="list-group-item list-group-item-action d-flex align-items-start">
@@ -31,7 +31,7 @@ const Account = (props) => {
 	let innerData;
 
 	if (state.maps != null) {
-	
+
 		const { user, maps, globalAcl, csrf } = state;
 
 		// isAdmin for showing global override option
@@ -81,22 +81,26 @@ const Account = (props) => {
 					<div className="flex-row d-flex w-100">
 						<div className="ms-2 me-auto">
 							<div className="fw-bold">
-								Manage Clusters
+								Manage Servers
 								<span className="fw-normal">
-									{' '}- Add/Delete/Select a cluster
+									{' '}- Add/Delete/Select server
 								</span>
 							</div>
 						</div>
 						<span className="ml-auto badge bg-info rounded-pill" style={{ maxHeight: "1.6em" }}>
-							Cluster: 1
+							Managing: 1
 						</span>
 					</div>
 					<div className="d-flex w-100 justify-content-between mt-2">
-						<div className="ms-2">
-							<div className="fw-bold">
+						<div className="ms-2 overflow-hidden">
+							<div className="fw-bold overflow-hidden text-truncate">
 								Servers ({user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length})
 								{user.clusters.length > 0 && (<span className="fw-normal">
-									: {user.clusters[user.activeCluster].split(',').map(x => x.substring(0, x.length/2)+'...').join(', ')}
+									: {user.clusters[user.activeCluster].split(',').map(x => {
+										const cUrl = new URL(x);
+										cUrl.password = ''; //visual only
+										return new URL(cUrl).toString();
+									}).join(', ')}
 								</span>)}
 							</div>
 						</div>

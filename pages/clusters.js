@@ -60,13 +60,13 @@ export default function Clusters(props) {
 	return (
 		<>
 			<Head>
-				<title>Clusters</title>
+				<title>Servers</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				Clusters ({user.clusters.length}):
+				Servers ({user.clusters.length}):
 			</h5>
 
 			{/* Clusters table */}
@@ -82,7 +82,7 @@ export default function Clusters(props) {
 								<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="cluster" placeholder="http://host1:port,http://host2:port,..." required />
+									<input className="form-control mx-3" type="text" name="cluster" placeholder="http://username:password@host:port" required />
 								</form>
 							</td>
 						</tr>

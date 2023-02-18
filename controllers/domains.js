@@ -1,4 +1,5 @@
 const db = require('../db.js');
+const acme = require('../acme.js');
 const url = require('url');
 const { dynamicResponse } = require('../util.js');
 
@@ -39,7 +40,10 @@ exports.addDomain = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	//todo: somehow enforce payment? or probably not for now, lol
+	//const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.domain);
+	//TODO: save (replace) in db with domain as key and username.
+	//TODO: add scheduled task to aggregate domains and upload certs to clusters of that username through dataplane
+	//TODO: make scheduled task also run this again for certs close to expiry and repeat ^
 
 	await db.db.collection('accounts')
 		.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: req.body.domain }});

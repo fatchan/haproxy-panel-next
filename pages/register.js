@@ -14,7 +14,7 @@ const Register = () => {
 		await API.register({
 			username: e.target.username.value,
 			password: e.target.password.value,
-			rpasword: e.target.repeat_password.value,
+			repeat_password: e.target.repeat_password.value,
 		}, null, setError, router);
 		router.push('/login');
 	}
