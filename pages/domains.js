@@ -54,8 +54,8 @@ export default function Domains(props) {
 				<td>
 					{d}
 				</td>
-				<td title={user.certsMap[d] || null}>
-					{user.certsMap[d] ? '🔐' : '-'}
+				<td title={user.certsMap[d] ? user.certsMap[d].date : null}>
+					{user.certsMap[d] ? '🔐'+user.certsMap[d].storageName : '-'}
 				</td>
 			</tr>
 		);

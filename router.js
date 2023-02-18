@@ -29,10 +29,29 @@ const testRouter = (server, app) => {
 
 		const fetchSession = async (req, res, next) => {
 			if (req.session.user) {
-				const account = await db.db.collection('accounts').findOne({ _id: req.session.user });
+				const account = await db.db.collection('accounts')
+					.findOne({ _id: req.session.user });
 				if (account) {
-					const certs = await db.db.collection('certs').find({ username: account._id }, { projection: { _id: 1, username: 1, date: 1 }}).toArray();
-					const certsMap = (certs || []).reduce((acc, cert) => { acc[cert._id] = cert.date; return acc; }, {});
+					const certs = await db.db.collection('certs')
+						.find({
+								username: account._id
+						}, {
+							projection: {
+								_id: 1,
+								username: 1,
+								date: 1,
+								storageName: 1
+							}
+						})
+						.toArray();
+					const certsMap = (certs || [])
+						.reduce((acc, cert) => {
+							acc[cert._id] = {
+								date: cert.date.toISOString(),
+								storageName: cert.storageName,
+							}
+							return acc;
+						}, {});
 					res.locals.user = {
 						username: account._id,
 						domains: account.domains,
