@@ -17,9 +17,20 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - IP or subnet whitelist. Supports ipv4 and ipv6.
 - Protection rules, choose bot protection mode "none" (whitelist), proof-of-work or hCaptcha. Can be domain-wide or a domain+path. Path overrides domain-wide.
 - Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
+- Get https certificate for domains automatically from letsencrypt and upload to haproxy cluster.
 
 ##### Todo:
-- Better Multi-user support (problems w/ ip whitelist and blacklist)
+- Improved cert management
+- Better Multi-user support
+  - allow domain/cluster editing (with user dupe check) for non-admins
+  - problems w/ ip whitelist and blacklist
 - Some kind of payment system
-- SSL cert management, or letsencrypt integration
-- More advanced rules and ability to allow/block/bot mode based on those rules.
+- More advanced rules and ability to allow/block/bot mode based on those rules
+
+## For generous people
+
+Bitcoin (BTC): [`bc1q4elrlz5puak4m9xy3hfvmpempnpqpu95v8s9m6`](bitcoin:bc1q4elrlz5puak4m9xy3hfvmpempnpqpu95v8s9m6)
+
+Monero (XMR): [`89J9DXPLUBr5HjNDNZTEo4WYMFTouSsGjUjBnUCCUxJGUirthnii4naZ8JafdnmhPe4NP1nkWsgcK82Uga7X515nNR1isuh`](monero:89J9DXPLUBr5HjNDNZTEo4WYMFTouSsGjUjBnUCCUxJGUirthnii4naZ8JafdnmhPe4NP1nkWsgcK82Uga7X515nNR1isuh)
+
+Oxen (OXEN): `LBjExqjDKCFT6Tj198CfK8auAzBERJX1ogtcsjuKZ6AYWTFxwEADLgf2zZ8NHvWCa1UW7vrtY8DJmPYFpj3MEE69CryCvN6`
