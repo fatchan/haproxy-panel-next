@@ -28,7 +28,7 @@ exports.domainsJson = async (req, res) => {
  * POST /domain/add
  * add domain
  */
-exports.addDomain = async (req, res) => {
+exports.addDomain = async (req, res, next) => {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -40,35 +40,44 @@ exports.addDomain = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.domain);
-	const fd = new FormData();
-	fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.domain}.pem`);
-	const { description, file, storage_name: storageName } = await fetch(`${res.locals.dataPlane.defaults.baseURL}/services/haproxy/storage/ssl_certificates`, {
-			method: 'POST',
-			headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
-			body: fd,
-		})
-		.then(certRes => certRes.json());
-	const account = await db.db.collection('certs')
-		.replaceOne({
-			_id: req.body.domain,
-		}, {
+	try {
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.domain);
+		const fd = new FormData();
+		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.domain}.pem`);
+		const { description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
+				method: 'POST',
+				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
+				body: fd,
+			});
+		let update = {
 			_id: req.body.domain,
 			username: res.locals.user.username,
 			csr, key, cert, haproxyCert, // cert creation data
-			description, file, storageName, // dataplane api response
 			date,
-		}, {
-			upsert: true,
-		});
-	//TODO: make upload to all user clusters/servers
-	//TODO: add scheduled task to aggregate domains and upload certs to clusters of that username through dataplane
-	//TODO: make scheduled task also run this again for certs close to expiry and repeat ^
-	//TODO: 90 day expiry on cert documents with index on date
-	//TODO: on domain removal, keep cert to use for re-adding if we still have the cert in DB
+		}
+		if (description) {
+			//may be null due to "already exists", so we keep existing props
+			update = { ...update, description, file, storageName };
+        }
+		await db.db.collection('certs')
+			.updateOne({
+				_id: req.body.domain,
+			}, {
+				$set: update,
+			}, {
+				upsert: true,
+			});
 
-	await db.db.collection('accounts')
-		.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: req.body.domain }});
+		//TODO: add scheduled task to aggregate domains and upload certs to clusters of that username through dataplane
+		//TODO: make scheduled task also run this again for certs close to expiry and repeat ^
+		//TODO: 90 day expiry on cert documents with index on date
+		//TODO: on domain removal, keep cert to use for re-adding if we still have the cert in DB
+
+		await db.db.collection('accounts')
+			.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: req.body.domain }});
+	} catch (e) {
+		return next(e);
+	}
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
 };

@@ -58,21 +58,19 @@ exports.globalToggle = async (req, res, next) => {
 			.getOneRuntimeMap('ddos_global')
 			.then(res => res.data.description.split('').reverse()[0])
 		if (globalAcl === '1') {
-			await res.locals.dataPlane
-				.deleteRuntimeMapEntry({
+			await res.locals
+				.dataPlaneAll('deleteRuntimeMapEntry', {
 					map: 'ddos_global',
 					id: 'true'
 				});
 		} else {
-			await res.locals.dataPlane
-				.addPayloadRuntimeMap({
+			await res.locals
+				.dataPlaneAll('addPayloadRuntimeMap', {
 					name: 'ddos_global'
-				}, [
-					{
-						key: 'true',
-						value: 'true'
-					}
-				]);
+				}, [{
+					key: 'true',
+					value: 'true'
+				}]);
 		}
 	} catch (e) {
 		return next(e);

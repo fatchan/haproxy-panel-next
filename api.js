@@ -82,6 +82,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	// Make request, catch errors, and finally{} to always end progress bar
 	let response;
 	try {
+		errorCallback(null);
 		response = await fetch(route, requestOptions);
 	} catch(e) {
 		console.error(e);
@@ -95,11 +96,17 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 
 	if (!response) {
 		errorCallback('An error occurred');
+		NProgress.done(true);
 		return;
 	}
 
 	// Process request response
 	const contentType = response.headers.get('Content-type');
+	if (!contentType) {
+		errorCallback('An error occurred');
+		NProgress.done(true);
+		return;
+	}
 	if (contentType.startsWith('application/json;')) {
 		response = await response.json();
 		if (response.redirect) {

@@ -104,12 +104,12 @@ exports.deleteMapForm = async (req, res, next) => {
 				.catch(() => {});
 			if (backendMapEntry) {
 				await res.locals
-					.dataPlane.deleteRuntimeServer({
+					.dataPlaneAll('deleteRuntimeServer', {
 						backend: 'servers',
 						name: backendMapEntry.value,
 					});
 				await res.locals
-					.dataPlane.deleteRuntimeMapEntry({
+					.dataPlaneAll('deleteRuntimeMapEntry', {
 						map: process.env.BACKENDS_MAP_NAME, //'backends'
 						id: req.body.key, //'example.com'
 					});
@@ -120,7 +120,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 
 		await res.locals
-			.dataPlane.deleteRuntimeMapEntry({
+			.dataPlaneAll('deleteRuntimeMapEntry', {
 				map: req.params.name, //'ddos'
 				id: req.body.key, //'example.com'
 			});
@@ -238,15 +238,8 @@ exports.patchMapForm = async (req, res, next) => {
 						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 					}
 					const [address, port] = value.split(':');
-					//delete, add because apparently "replace" cant update the fucking ADDRESS???
-					// await res.locals
-						// .dataPlane.deleteRuntimeServer({
-							// backend: 'servers',
-							// name: `websrv${freeSlotId}`,
-						// })
-						// .catch(e => console.error(e));
 					await res.locals
-						.dataPlane.addRuntimeServer({
+						.dataPlaneAll('addRuntimeServer', {
 							backend: 'servers',
 						}, {
 							address,
@@ -254,8 +247,8 @@ exports.patchMapForm = async (req, res, next) => {
 							name: `websrv${freeSlotId}`,
 							id: `${freeSlotId}`,
 						});
-					await res.locals.dataPlane
-						.addPayloadRuntimeMap({
+					await res.locals
+						.dataPlaneAll('addPayloadRuntimeMap', {
 							name: process.env.BACKENDS_MAP_NAME,
 						}, [{
 							key: req.body.key,
@@ -264,8 +257,8 @@ exports.patchMapForm = async (req, res, next) => {
 				}
 			}
 
-			await res.locals.dataPlane
-				.addPayloadRuntimeMap({
+			await res.locals
+				.dataPlaneAll('addPayloadRuntimeMap', {
 					name: req.params.name
 				}, [{
 					key: req.body.key,

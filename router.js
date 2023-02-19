@@ -84,7 +84,11 @@ const testRouter = (server, app) => {
 				//TODO: handle cluster
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
-				const firstClusterURL = new URL(res.locals.user.clusters[res.locals.user.activeCluster].split(',')[0]);
+				const clusterUrls = res.locals.user.clusters[res.locals.user.activeCluster]
+					.split(',')
+					.map(u => new URL(u));
+				const firstClusterURL = clusterUrls[0];
+				//NOTE: all servers in cluster must have same credentials for now
 				const base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString("base64");
 				const api = new OpenAPIClientAxios({
 					definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
@@ -94,8 +98,22 @@ const testRouter = (server, app) => {
 						}
 					}
 				});
-				res.locals.dataPlane = await api.init();
-				res.locals.dataPlane.defaults.baseURL = `${firstClusterURL.origin}/v2`;
+				const apiInstance = await api.init();
+				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
+				res.locals.dataPlane = apiInstance;
+				res.locals.dataPlaneAll = async (operationId, parameters, data, config) => {
+					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
+						return apiInstance[operationId](parameters, data, { ...config, baseUrl: `${clusterUrl.origin}/v2` })
+					}));
+					return promiseResults[0]; //TODO: better desync handling
+				}
+				res.locals.fetchAll = async (path, options) => {
+					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
+					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
+						return fetch(`${clusterUrl.origin}${path}`, options).then(resp => resp.json());
+					}));
+					return promiseResults[0]; //TODO: better desync handling
+				}
 				next();
 			} catch (e) {
 				return dynamicResponse(req, res, 500, { error: e });
