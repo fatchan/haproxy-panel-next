@@ -27,6 +27,10 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - Some kind of payment system
 - More advanced rules and ability to allow/block/bot mode based on those rules
 
+#### Screenshots
+
+![screenshot](img/screenshot.png "account page")
+
 ## For generous people
 
 Bitcoin (BTC): [`bc1q4elrlz5puak4m9xy3hfvmpempnpqpu95v8s9m6`](bitcoin:bc1q4elrlz5puak4m9xy3hfvmpempnpqpu95v8s9m6)
