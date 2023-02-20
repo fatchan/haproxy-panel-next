@@ -1,7 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import NProgress from 'nprogress';
 import Layout from '../components/Layout.js';
-import "nprogress/nprogress.css";
+import 'nprogress/nprogress.css';
 
 export default function App({ Component, pageProps }) {
 	return (
@@ -13,6 +14,14 @@ export default function App({ Component, pageProps }) {
 				.red { color: red; }
 				footer { margin-top: auto; }
 				.btn { font-weight: bold; }
+				.nav-item:not(:first-child) { margin-top: 10px; }
+				.nav-link { color: white; }
+				.nav-link:hover { color: #6aa6fd; }
+				.mobile-btn { display: none; }
+				@media (max-width: 800px) {
+					.sidebar { display: none; }
+					.mobile-btn { display: unset; }
+				}
 				@media (prefers-color-scheme: dark) {
 					:root { --bs-body-color: #fff; --bs-body-bg: #000000; }
 					.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }

@@ -165,7 +165,7 @@ const Account = (props) => {
 				Controls:
 			</h5>
 
-			<div className="list-group">
+			<div className="list-group col-sm-12 col-xl-8 mx-auto">
 
 			{innerData}
 

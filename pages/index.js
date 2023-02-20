@@ -7,7 +7,7 @@ const Index = () => (
 			<title>Homepage</title>
 		</Head>
 
-		<Link href="/account">Account Page</Link>
+		Welcome to BasedFlare.
 	</>
 );
 
