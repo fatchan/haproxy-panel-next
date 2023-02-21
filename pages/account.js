@@ -65,11 +65,11 @@ const Account = (props) => {
 							<span className="fw-bold">
 								Global Override
 							</span>
-							<form onSubmit={toggleGlobal} action="/forms/global/toggle" method="post">
-								<input type="hidden" name="_csrf" value={csrf} />
-								<input className="btn btn-sm btn-primary" type="submit" value="Toggle" />
-							</form>
 						</div>
+						<form onSubmit={toggleGlobal} action="/forms/global/toggle" method="post" className="me-2">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input className="btn btn-sm btn-primary" type="submit" value="Toggle" />
+						</form>
 						<div className={`badge rounded-pill bg-${globalAcl?'success':'dark'}`}>
 							{globalAcl?'ON':'OFF'}
 						</div>
@@ -81,20 +81,20 @@ const Account = (props) => {
 					<div className="flex-row d-flex w-100">
 						<div className="ms-2 me-auto">
 							<div className="fw-bold">
-								Manage Servers
+								Manage Clusters
 								<span className="fw-normal">
-									{' '}- Add/Delete/Select server
+									{' '}- Add/Delete/Select cluster
 								</span>
 							</div>
 						</div>
 						<span className="ml-auto badge bg-info rounded-pill" style={{ maxHeight: "1.6em" }}>
-							Managing: 1
+							Cluster: {user.activeCluster}
 						</span>
 					</div>
 					<div className="d-flex w-100 justify-content-between mt-2">
 						<div className="ms-2 overflow-hidden">
 							<div className="fw-bold overflow-hidden text-truncate">
-								Servers ({user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length})
+								Servers (n:{user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length})
 								{user.clusters.length > 0 && (<span className="fw-normal">
 									: {user.clusters[user.activeCluster].split(',').map(x => {
 										const cUrl = new URL(x);
@@ -119,12 +119,12 @@ const Account = (props) => {
 					</div>
 				</div>
 
-				{/* Available domains */}
+				{/* Domains */}
 				<Link href="/domains">
 					<a className="list-group-item list-group-item-action d-flex align-items-start">
 						<div className="ms-2 me-auto">
 							<div className="fw-bold">
-								Available Domains
+								Domains
 								<span className="fw-normal">
 									{' '}- Domains you have permission over
 								</span>
@@ -132,6 +132,23 @@ const Account = (props) => {
 						</div>
 						<div className="badge bg-primary rounded-pill">
 							{user.domains.length}
+						</div>
+					</a>
+				</Link>
+
+				{/* HTTPS certificates */}
+				<Link href="/certs">
+					<a className="list-group-item list-group-item-action d-flex align-items-start">
+						<div className="ms-2 me-auto">
+							<div className="fw-bold">
+								HTTPS Certificates
+								<span className="fw-normal">
+									{' '}- Generated certs for your domains
+								</span>
+							</div>
+						</div>
+						<div className="badge bg-primary rounded-pill">
+							{user.numCerts}
 						</div>
 					</a>
 				</Link>
@@ -146,7 +163,7 @@ const Account = (props) => {
 
 		innerData = (
 			<>
-				{Array(9).fill(loadingSection)}
+				{Array(10).fill(loadingSection)}
 			</>
 		);
 

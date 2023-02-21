@@ -37,18 +37,34 @@ export default withRouter(function MenuLinks({ router }) {
 				</Link>
 			</li>
 			<li className="nav-item">
+				<Link href="/clusters">
+					<a className={router.pathname === "/clusters" ? "nav-link active" : "nav-link"} aria-current="page">
+						<i className="bi-hdd-rack pe-none me-2" width="16" height="16" />
+						Clusters
+					</a>
+				</Link>
+			</li>
+			{/*process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && <li className="nav-item">
+				<Link href="/map/backends">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "backends" ? "nav-link active" : "nav-link"} aria-current="page">
+						<i className="bi-hdd-network pe-none me-2" width="16" height="16" />
+						Internal Backends
+					</a>
+				</Link>
+			</li>*/}
+			<li className="nav-item">
 				<Link href="/map/hosts">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "hosts" ? "nav-link active" : "nav-link"} aria-current="page">
-						<i className="bi-card-checklist pe-none me-2" width="16" height="16" />
-						Active Domains
+						<i className="bi-hdd-network pe-none me-2" width="16" height="16" />
+						Backends
 					</a>
 				</Link>
 			</li>
 			<li className="nav-item">
-				<Link href="/map/backends">
-					<a className={router.pathname === "/map/[name]" && router.query.name === "backends" ? "nav-link active" : "nav-link"} aria-current="page">
-						<i className="bi-hdd-network pe-none me-2" width="16" height="16" />
-						Backends
+				<Link href="/certs">
+					<a className={router.pathname === "/certs" ? "nav-link active" : "nav-link"} aria-current="page">
+						<i className="bi-file-earmark-lock pe-none me-2" width="16" height="16" />
+						HTTPS Certificates
 					</a>
 				</Link>
 			</li>
@@ -79,7 +95,7 @@ export default withRouter(function MenuLinks({ router }) {
 			<li className="nav-item">
 				<Link href="/map/maintenance">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "maintenance" ? "nav-link active" : "nav-link"} aria-current="page">
-						<i className="bi-info-circle pe-none me-2" width="16" height="16" />
+						<i className="bi-info-square pe-none me-2" width="16" height="16" />
 						Maintenance Mode
 					</a>
 				</Link>
@@ -87,6 +103,14 @@ export default withRouter(function MenuLinks({ router }) {
 		</ul>
 		<hr className="mt-auto" />
 		<ul className="nav nav-pills flex-column">
+			<li className="nav-item user-select-none">
+				<Link href="">
+					<a className={router.pathname === "/setup" ? "nav-link active" : "nav-link"} aria-current="page">
+						<i className="bi-rocket-takeoff pe-none me-2" width="16" height="16" />
+						Setup <small>(coming soon)</small>
+					</a>
+				</Link>
+			</li>
 			<li className="nav-item">
 				<Link href="/login">
 					<a className={router.pathname === "/login" ? "nav-link active" : "nav-link"} aria-current="page">

@@ -36,6 +36,17 @@ export async function deleteDomain(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/domain/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Certs
+export async function getCerts(dispatch, errorCallback, router) {
+	return ApiCall('/certs.json', 'GET', null, dispatch, errorCallback, router);
+}
+export async function addCert(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cert/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+export async function deleteCert(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cert/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
 // Maps
 export async function getMap(mapName, dispatch, errorCallback, router) {
 	return ApiCall(`/map/${mapName}.json`, 'GET', null, dispatch, errorCallback, router);
@@ -82,7 +93,6 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	// Make request, catch errors, and finally{} to always end progress bar
 	let response;
 	try {
-		errorCallback(null);
 		response = await fetch(route, requestOptions);
 	} catch(e) {
 		console.error(e);

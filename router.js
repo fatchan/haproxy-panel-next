@@ -32,32 +32,14 @@ const testRouter = (server, app) => {
 				const account = await db.db.collection('accounts')
 					.findOne({ _id: req.session.user });
 				if (account) {
-					const certs = await db.db.collection('certs')
-						.find({
-								username: account._id
-						}, {
-							projection: {
-								_id: 1,
-								username: 1,
-								date: 1,
-								storageName: 1
-							}
-						})
-						.toArray();
-					const certsMap = (certs || [])
-						.reduce((acc, cert) => {
-							acc[cert._id] = {
-								date: cert.date.toISOString(),
-								storageName: cert.storageName,
-							}
-							return acc;
-						}, {});
+					const numCerts = await db.db.collection('certs')
+						.countDocuments({ username: account._id });
 					res.locals.user = {
 						username: account._id,
 						domains: account.domains,
 						clusters: account.clusters,
 						activeCluster: account.activeCluster,
-						certsMap,
+						numCerts,
 					};
 					return next();
 				}
@@ -131,6 +113,7 @@ const testRouter = (server, app) => {
 		const accountController = require('./controllers/account')
 			, mapsController = require('./controllers/maps')
 			, clustersController = require('./controllers/clusters')
+			, certsController = require('./controllers/certs')
 			, domainsController = require('./controllers/domains');
 
 		//unauthed pages
@@ -160,6 +143,9 @@ const testRouter = (server, app) => {
 		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
 
+		server.get('/certs', useSession, fetchSession, checkSession, csrfMiddleware, certsController.certsPage.bind(null, app));
+		server.get('/certs.json', useSession, fetchSession, checkSession, csrfMiddleware, certsController.certsJson);
+
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
 		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
@@ -170,6 +156,8 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/cluster/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.deleteClusters);
 		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, domainsController.addDomain);
 		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.deleteDomain);
+		clusterRouter.post('/cert/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.addCert);
+		clusterRouter.post('/cert/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, certsController.deleteCert);
 		server.use('/forms', clusterRouter);
 
 };

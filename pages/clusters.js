@@ -60,13 +60,13 @@ export default function Clusters(props) {
 	return (
 		<>
 			<Head>
-				<title>Servers</title>
+				<title>Clusters</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				Servers ({user.clusters.length}):
+				Clusters ({user.clusters.length}):
 			</h5>
 
 			{/* Clusters table */}

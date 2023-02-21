@@ -3,8 +3,8 @@ const url = require('url');
 const fMap = {
 
 	[process.env.HOSTS_MAP_NAME]: {
-		fname: 'Active Domains',
-		description: 'Domains that will be processed by the selected cluster',
+		fname: 'Backends',
+		description: 'Backend IP mappings for domains',
 		columnNames: ['Domain', 'Backend'],
 	},
 
@@ -15,13 +15,13 @@ const fMap = {
 	},
 
 	[process.env.BLOCKED_MAP_NAME]: {
-		fname: 'Blocked IPs/Subnets',
+		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',
 		columnNames: ['IP/Subnet', ''],
 	},
 
 	[process.env.WHITELIST_MAP_NAME]: {
-		fname: 'Whitelisted IPs/Subnets',
+		fname: 'IP Whitelist',
 		description: 'IPs/subnets that bypass protection rules',
 		columnNames: ['IP/Subnet', ''],
 	},
@@ -32,11 +32,11 @@ const fMap = {
 		columnNames: ['Domain', ''],
 	},
 
-	[process.env.BACKENDS_MAP_NAME]: {
-		fname: 'Domain Backend Mappings',
-		description: 'Which internal server haproxy uses for domains',
-		columnNames: ['Domain', 'Server Name'],
-	},
+//	[process.env.BACKENDS_MAP_NAME]: {
+//		fname: 'Domain Backend Mappings',
+//		description: 'Which internal server haproxy uses for domains',
+//		columnNames: ['Domain', 'Server Name'],
+//	},
 
 };
 

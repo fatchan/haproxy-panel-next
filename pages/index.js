@@ -4,7 +4,7 @@ import Link from 'next/link';
 const Index = () => (
 	<>
 		<Head>
-			<title>Homepage</title>
+			<title>BasedFlare</title>
 		</Head>
 
 		Welcome to BasedFlare.

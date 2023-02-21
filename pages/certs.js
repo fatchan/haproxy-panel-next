@@ -5,7 +5,7 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
 
-export default function Domains(props) {
+export default function Certs(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -13,7 +13,7 @@ export default function Domains(props) {
 
 	useEffect(() => {
 		if (!state.user) {
-			API.getDomains(dispatch, setError, router);
+			API.getCerts(dispatch, setError, router);
 		}
 	}, [state.user, router]);
 
@@ -26,33 +26,46 @@ export default function Domains(props) {
 		);
 	}
 
-	const { user, csrf } = state;
+	const { user, csrf, certs } = state;
 
-	async function addDomain(e) {
+	async function addCert(e) {
 		e.preventDefault();
-		await API.addDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
-		await API.getDomains(dispatch, setError, router);
+		await API.addCert({
+			_csrf: csrf,
+			subject: e.target.subject.value,
+			altnames: e.target.altnames.value.split(',').map(x => x.trim())
+		}, dispatch, setError, router);
+		await API.getCerts(dispatch, setError, router);
 	}
 
-	async function deleteDomain(e) {
+	async function deleteCert(e) {
 		e.preventDefault();
-		await API.deleteDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
-		await API.getDomains(dispatch, setError, router);
+		await API.deleteCert({ _csrf: csrf, subject: e.target.subject.value }, dispatch, setError, router);
+		await API.getCerts(dispatch, setError, router);
 	}
 
-	const domainList = user.domains.map((d, i) => {
+	const certList = certs.map((d, i) => {
 		//TODO: refactor, to component
 		return (
 			<tr key={i} className="align-middle">
 				<td className="col-1 text-center">
-					<form onSubmit={deleteDomain} action="/forms/domain/delete" method="post">
+					<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="domain" value={d} />
+						<input type="hidden" name="subject" value={d.subject || d._id} />
 						<input className="btn btn-danger" type="submit" value="×" />
 					</form>
 				</td>
 				<td>
-					{d}
+					{d.subject || '-'}
+				</td>
+				<td>
+					{d.altnames && d.altnames.join(', ') || '-'}
+				</td>
+				<td>
+					{d.date || '-'}
+				</td>
+				<td>
+					{d.storageName || '-'}
 				</td>
 			</tr>
 		);
@@ -62,16 +75,16 @@ export default function Domains(props) {
 		<>
 
 			<Head>
-				<title>Domains</title>
+				<title>Certificates</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				Your Domains:
+				HTTPS Certificates:
 			</h5>
 
-			{/* Domains table */}
+			{/* Certs table */}
 			<div className="table-responsive">
 				<table className="table table-bordered text-nowrap">
 					<tbody>
@@ -79,19 +92,29 @@ export default function Domains(props) {
 						<tr className="align-middle">
 							<th className="col-1" />
 							<th>
-								Domain
+								Subject
+							</th>
+							<th>
+								Altname(s)
+							</th>
+							<th>
+								Creation Date
+							</th>
+							<th>
+								Storage Name
 							</th>
 						</tr>
 
-						{domainList}
+						{certList}
 
-						{/* Add new domain form */}
+						{/* Add new cert form */}
 						<tr className="align-middle">
 							<td className="col-1 text-center" colSpan="3">
-								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
+								<form className="d-flex" onSubmit={addCert} action="/forms/cert/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="domain" placeholder="domain" required />
+									<input className="form-control mx-3" type="text" name="subject" placeholder="domain.com" required />
+									<input className="form-control me-3" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
 								</form>
 							</td>
 						</tr>

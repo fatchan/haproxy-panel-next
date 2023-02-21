@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const db = require('../db.js');
-const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse, getMaps } = require('../util.js');
+const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } = require('../util.js');
 
 /**
  * account page data shared between html/json routes

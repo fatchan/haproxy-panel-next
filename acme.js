@@ -80,10 +80,11 @@ module.exports = {
 		});
 	},
 
-	generate: async function(domain, email='tom@69420.me') {
+	generate: async function(domain, altnames, email='tom@69420.me') {
 		/* Create CSR */
 		const [key, csr] = await acme.crypto.createCsr({
-	 	   commonName: domain
+			commonName: domain,
+			altNames: altnames,
 		});
 		/* Certificate */
 		const cert = await module.exports.client.auto({
