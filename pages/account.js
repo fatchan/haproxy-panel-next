@@ -88,18 +88,17 @@ const Account = (props) => {
 							</div>
 						</div>
 						<span className="ml-auto badge bg-info rounded-pill" style={{ maxHeight: "1.6em" }}>
-							Cluster: {user.activeCluster}
+							Cluster: {user.activeCluster+1}/{user.clusters.length}
 						</span>
 					</div>
 					<div className="d-flex w-100 justify-content-between mt-2">
 						<div className="ms-2 overflow-hidden">
 							<div className="fw-bold overflow-hidden text-truncate">
-								Servers (n:{user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length})
+								Cluster ({user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length} servers)
 								{user.clusters.length > 0 && (<span className="fw-normal">
 									: {user.clusters[user.activeCluster].split(',').map(x => {
 										const cUrl = new URL(x);
-										cUrl.password = ''; //visual only
-										return new URL(cUrl).toString();
+										return cUrl.hostname;
 									}).join(', ')}
 								</span>)}
 							</div>

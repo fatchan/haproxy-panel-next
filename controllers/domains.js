@@ -48,6 +48,7 @@ exports.addDomain = async (req, res, next) => {
 	}
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
+
 };
 
 /**

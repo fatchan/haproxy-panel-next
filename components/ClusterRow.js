@@ -1,5 +1,7 @@
 export default function ClusterRow({ i, cluster, setCluster, deleteCluster, csrf, user }) {
 
+	const splitCluster = cluster.split(',');
+
 	return (
 		<tr className="align-middle">
 			<td className="col-1 text-center">
@@ -17,7 +19,7 @@ export default function ClusterRow({ i, cluster, setCluster, deleteCluster, csrf
 				</form>
 			</td>
 			<td>
-				{cluster}
+				({splitCluster.length}): {splitCluster.map(c => new URL(c).hostname).join(', ')}
 			</td>
 		</tr>
 	);
