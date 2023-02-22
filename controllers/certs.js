@@ -85,15 +85,18 @@ exports.addCert = async (req, res, next) => {
 	}
 
 	try {
-		console.log('Add cert request', req.body.subject, req.body.altnames);
+		console.log('Add cert request:', req.body.subject, req.body.altnames);
 		const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.subject, req.body.altnames);
 		const fd = new FormData();
 		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.subject}.pem`);
-		const { description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
+		const { message, description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
 				body: fd,
 			});
+		if (message) {
+			return dynamicResponse(req, res, 400, { error: message });
+		}
 		let update = {
 			_id: req.body.subject,
 			subject: req.body.subject,
