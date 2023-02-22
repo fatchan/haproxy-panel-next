@@ -91,6 +91,7 @@ module.exports = {
 			csr,
 			email,
 			termsOfServiceAgreed: true,
+			skipChallengeVerification: true,
 			challengeCreateFn,
 			challengeRemoveFn
 		});
