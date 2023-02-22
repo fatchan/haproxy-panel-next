@@ -15,7 +15,7 @@ const MapPage = (props) => {
 	const changedMap = state.mapInfo?.name != mapName;
 
 	useEffect(() => {
-		if (!state.map) {
+		if (!state.map || changedMap) {
 			API.getMap(mapName, dispatch, setError, router);
 		}
 	}, [state.map, mapName, router]);
