@@ -98,7 +98,6 @@ const testRouter = (server, app) => {
 				res.locals.fetchAll = async (path, options) => {
 					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
-						console.log(`${clusterUrl.origin}${path}`)
 						return fetch(`${clusterUrl.origin}${path}`, options).then(resp => resp.json());
 					}));
 					return promiseResults[0]; //TODO: better desync handling

@@ -85,7 +85,7 @@ exports.addCert = async (req, res, next) => {
 	}
 
 	try {
-		console.log(req.body.subject, req.body.altnames);
+		console.log('Add cert request', req.body.subject, req.body.altnames);
 		const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.subject, req.body.altnames);
 		const fd = new FormData();
 		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.subject}.pem`);
@@ -108,7 +108,7 @@ exports.addCert = async (req, res, next) => {
         }
 		await db.db.collection('certs')
 			.updateOne({
-				_id: req.body.domain,
+				_id: req.body.subject,
 			}, {
 				$set: update,
 			}, {
@@ -135,8 +135,6 @@ exports.deleteCert = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	await db.db.collection('accounts')
-		.updateOne({ _id: res.locals.user.username }, { $pull: { domains: req.body.subject } });
 	await db.db.collection('certs')
 		.deleteOne({ _id: req.body.subject, username: res.locals.user.username });
 
