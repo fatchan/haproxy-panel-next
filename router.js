@@ -5,7 +5,8 @@ const express = require('express')
 	, db = require('./db.js')
 	, csrf = require('csurf')
 	, OpenAPIClientAxios = require('openapi-client-axios').default
-	, { dynamicResponse } = require('./util.js');
+	, { dynamicResponse } = require('./util.js')
+	, definition = require('./openapi-definition.js');
 
 const testRouter = (server, app) => {
 
@@ -63,41 +64,48 @@ const testRouter = (server, app) => {
 				return next();
 			}
 			try {
-				//TODO: handle cluster
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
 				const clusterUrls = res.locals.user.clusters[res.locals.user.activeCluster]
 					.split(',')
 					.map(u => new URL(u));
 				const firstClusterURL = clusterUrls[0];
+
 				//NOTE: all servers in cluster must have same credentials for now
 				const base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString("base64");
 				const api = new OpenAPIClientAxios({
-					definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
+					//definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
+					definition,
 					axiosConfigDefaults: {
 						headers: {
 							'authorization': `Basic ${base64Auth}`,
 						}
 					}
 				});
-				const apiInstance = await api.init();
+				const apiInstance = api.initSync();
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
+
 				res.locals.dataPlaneAll = async (operationId, parameters, data, config) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
-						return apiInstance[operationId](parameters, data, { ...config, baseUrl: `${clusterUrl.origin}/v2` })
+						const singleApi = new OpenAPIClientAxios({ definition, axiosConfigDefaults: { headers: { 'authorization': `Basic ${base64Auth}` } } });
+						const singleApiInstance = singleApi.initSync();
+						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;
+						return singleApiInstance[operationId](parameters, data, { ...config, baseUrl: `${clusterUrl.origin}/v2` });
 					}));
 					return promiseResults[0]; //TODO: better desync handling
 				}
 				res.locals.fetchAll = async (path, options) => {
 					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
+						console.log(`${clusterUrl.origin}${path}`)
 						return fetch(`${clusterUrl.origin}${path}`, options).then(resp => resp.json());
 					}));
 					return promiseResults[0]; //TODO: better desync handling
 				}
 				next();
 			} catch (e) {
+				console.error(e)
 				return dynamicResponse(req, res, 500, { error: e });
 			}
 		};
