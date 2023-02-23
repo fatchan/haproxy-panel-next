@@ -4,7 +4,7 @@ import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
 
-const Login = () => {
+export default function Login() {
 
 	const router = useRouter();
 	const [error, setError] = useState();
@@ -43,6 +43,4 @@ const Login = () => {
 		</>
 	);
 
-};
-
-export default Login;
+}

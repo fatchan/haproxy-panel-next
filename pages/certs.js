@@ -19,10 +19,12 @@ export default function Certs(props) {
 
 	if (!state.user) {
 		return (
-			<>
-				Loading...
+			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
-			</>
+				<div className="spinner-border text-primary m-auto mb-4" role="status">
+				  <span className="visually-hidden">Loading...</span>
+				</div>
+			</div>
 		);
 	}
 
@@ -133,4 +135,4 @@ export default function Certs(props) {
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
 	return { props: { user: res.locals.user || null, ...query } }
-}
+};

@@ -104,10 +104,10 @@ export default withRouter(function MenuLinks({ router }) {
 		<hr className="mt-auto" />
 		<ul className="nav nav-pills flex-column">
 			<li className="nav-item user-select-none">
-				<Link href="">
+				<Link href="/setup">
 					<a className={router.pathname === "/setup" ? "nav-link active" : "nav-link"} aria-current="page">
 						<i className="bi-rocket-takeoff pe-none me-2" width="16" height="16" />
-						Setup <small>(coming soon)</small>
+						Setup Instructions
 					</a>
 				</Link>
 			</li>

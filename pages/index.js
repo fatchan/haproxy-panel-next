@@ -1,14 +1,11 @@
 import Head from 'next/head';
-import Link from 'next/link';
 
-const Index = () => (
-	<>
+export default function Index() {
+	return (<>
 		<Head>
 			<title>BasedFlare</title>
 		</Head>
 
-		Welcome to BasedFlare.
-	</>
-);
-
-export default Index;
+		<h5 className="fw-bold">Welcome to BasedFlare.</h5>
+	</>);
+}

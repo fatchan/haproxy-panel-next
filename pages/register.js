@@ -4,7 +4,7 @@ import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
 
-const Register = () => {
+export default function Register() {
 
 	const router = useRouter();
 	const [error, setError] = useState();
@@ -50,6 +50,4 @@ const Register = () => {
 		</>
 	);
 
-};
-
-export default Register;
+}

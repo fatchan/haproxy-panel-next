@@ -7,7 +7,7 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 
-const Account = (props) => {
+export default function Account(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -178,7 +178,7 @@ const Account = (props) => {
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				Controls:
+				Account:
 			</h5>
 
 			<div className="list-group col-sm-12 col-xl-8 mx-auto">
@@ -193,6 +193,4 @@ const Account = (props) => {
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
 	return { props: { user: res.locals.user || null, ...query } }
-}
-
-export default Account;
+};

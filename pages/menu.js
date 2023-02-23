@@ -7,8 +7,8 @@ export default function Menu() {
 			<title>Menu</title>
 		</Head>
 
-		<div className="bg-dark p-4">
+		<div className="p-4">
 			<MenuLinks />
 		</div>
 	</>);
-};
+}

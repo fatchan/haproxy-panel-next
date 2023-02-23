@@ -212,7 +212,6 @@ exports.patchMapForm = async (req, res, next) => {
 		try {
 
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
-				let backendMapSize;
 				const backendMapEntry = await res.locals
 					.dataPlane.getRuntimeMapEntry({
 						map: process.env.BACKENDS_MAP_NAME,
@@ -220,7 +219,6 @@ exports.patchMapForm = async (req, res, next) => {
 					})
 					.then(res => res.data)
 					.catch(() => {});
-				let server;
 				if (backendMapEntry) {
 					//TODO: allow multiple backends (but requires reworking haproxy.cfg)
 					return dynamicResponse(req, res, 400, { error: 'Domain already has a backend server mapping' });
@@ -245,7 +243,11 @@ exports.patchMapForm = async (req, res, next) => {
 							address,
 							port: parseInt(port),
 							name: `websrv${freeSlotId}`,
-							id: `${freeSlotId}`,
+//							id: `${freeSlotId}`,
+							ssl: 'enabled',
+							verify: 'none',
+							apln: 'h2',
+							
 						});
 					await res.locals
 						.dataPlaneAll('addPayloadRuntimeMap', {
