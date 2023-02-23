@@ -8,8 +8,23 @@ const { dynamicResponse } = require('../util.js');
  * domains page
  */
 exports.domainsPage = async (app, req, res) => {
+	const certs = await db.db.collection('certs')
+		.find({
+			username: res.locals.user.username,
+		}, {
+			projection: {
+				_id: 1,
+				subject: 1,
+				altnames: 1,
+				date: 1,
+				storageName: 1,
+			}
+		})
+		.toArray();
+	certs.forEach(c => c.date = c.date.toISOString())
 	return app.render(req, res, '/domains', {
 		csrf: req.csrfToken(),
+		certs,
 	});
 };
 
@@ -18,9 +33,24 @@ exports.domainsPage = async (app, req, res) => {
  * domains json data
  */
 exports.domainsJson = async (req, res) => {
+	const certs = await db.db.collection('certs')
+		.find({
+			username: res.locals.user.username,
+		}, {
+			projection: {
+				_id: 1,
+				subject: 1,
+				altnames: 1,
+				date: 1,
+				storageName: 1,
+			}
+		})
+		.toArray();
+	certs.forEach(c => c.date = c.date.toISOString())
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
+		certs,
 	});
 };
 

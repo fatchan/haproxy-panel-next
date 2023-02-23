@@ -26,7 +26,7 @@ export default function Domains(props) {
 		);
 	}
 
-	const { user, csrf } = state;
+	const { user, csrf, certs } = state;
 
 	async function addDomain(e) {
 		e.preventDefault();
@@ -42,6 +42,7 @@ export default function Domains(props) {
 
 	const domainList = user.domains.map((d, i) => {
 		//TODO: refactor, to component
+		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
 		return (
 			<tr key={i} className="align-middle">
 				<td className="col-1 text-center">
@@ -53,6 +54,9 @@ export default function Domains(props) {
 				</td>
 				<td>
 					{d}
+				</td>
+				<td>
+					{domainCert ? '🔒 '+domainCert.storageName : '-'}
 				</td>
 			</tr>
 		);
@@ -80,6 +84,9 @@ export default function Domains(props) {
 							<th className="col-1" />
 							<th>
 								Domain
+							</th>
+							<th>
+								HTTPS?
 							</th>
 						</tr>
 

@@ -62,10 +62,10 @@ export default function Certs(props) {
 					{d.altnames && d.altnames.join(', ') || '-'}
 				</td>
 				<td>
-					{d.date || '-'}
+					{d.storageName || '-'}
 				</td>
 				<td>
-					{d.storageName || '-'}
+					{d.date || '-'}
 				</td>
 			</tr>
 		);
@@ -98,10 +98,10 @@ export default function Certs(props) {
 								Altname(s)
 							</th>
 							<th>
-								Creation Date
+								Storage Name
 							</th>
 							<th>
-								Storage Name
+								Creation Date
 							</th>
 						</tr>
 
