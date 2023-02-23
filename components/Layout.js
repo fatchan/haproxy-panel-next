@@ -33,9 +33,9 @@ export default function Layout({ children }) {
 							{children}
 						</main>
 
-						<footer className="mt-auto pt-3 text-center text-muted small">
+						<footer className="mt-auto text-center text-muted small">
 							<hr />
-							<a href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
+							<a className="pb-4" href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
 						</footer>
 
 					</div>

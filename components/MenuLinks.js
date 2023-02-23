@@ -101,7 +101,7 @@ export default withRouter(function MenuLinks({ router }) {
 				</Link>
 			</li>
 		</ul>
-		<hr className="mt-auto" />
+		<hr />
 		<ul className="nav nav-pills flex-column">
 			<li className="nav-item user-select-none">
 				<Link href="/setup">

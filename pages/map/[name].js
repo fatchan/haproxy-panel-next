@@ -24,8 +24,8 @@ const MapPage = (props) => {
 		return (
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
-				<div className="spinner-border text-primary m-auto mb-4" role="status">
-				  <span className="visually-hidden">Loading...</span>
+				<div className="text-center mb-4">
+					Loading...
 				</div>
 			</div>
 		);
