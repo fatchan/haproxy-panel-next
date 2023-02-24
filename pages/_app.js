@@ -16,6 +16,7 @@ export default function App({ Component, pageProps }) {
 				.nav-item:not(:first-child) { margin-top: 10px; }
 				.nav-link { color: white; }
 				.nav-link:hover { color: #6aa6fd; }
+				.mobile-menu { margin: 0 -24px; }
 				@media (min-width: 800px) {
 					.mobile-btn { display: none!important; }
 				}
