@@ -161,8 +161,8 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/cluster', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.setCluster);
 		clusterRouter.post('/cluster/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.addCluster);
 		clusterRouter.post('/cluster/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.deleteClusters);
-		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, domainsController.addDomain);
-		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.deleteDomain);
+		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.addDomain);
+		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, domainsController.deleteDomain);
 		clusterRouter.post('/cert/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.addCert);
 		clusterRouter.post('/cert/upload', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.uploadCert);
 		clusterRouter.post('/cert/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, certsController.deleteCert);

@@ -100,7 +100,24 @@ exports.deleteDomain = async (req, res) => {
 	}
 
 	const domain = req.body.domain.toLowerCase();
-	//TODO: check all clusters for domain in any map, dont allow delete
+
+	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
+	const [existingHost, existingMaintenance, existingDdos] = await Promise.all([
+		res.locals.dataPlane.showRuntimeMap({ map: process.env.HOSTS_MAP_NAME })
+			.then(res => res.data).then(map => map.some(e => e.key === domain)),
+		res.locals.dataPlane.showRuntimeMap({ map: process.env.MAINTENANCE_MAP_NAME })
+			.then(res => res.data).then(map => map.some(e => e.key === domain)),
+		res.locals.dataPlane.showRuntimeMap({ map: process.env.DDOS_MAP_NAME })
+			.then(res => res.data).then(map => map.some(e => {
+				const { hostname, pathname } = url.parse(`https://${e.key}`);
+				return res.locals.user.domains.includes(hostname);
+			}))
+	]);
+
+	if (existingHost || existingMaintenance || existingDdos) {
+		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/protection first." });
+	}
+
 
 	await db.db.collection('accounts')
 		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
