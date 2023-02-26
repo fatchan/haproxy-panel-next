@@ -18,7 +18,7 @@ const MapPage = (props) => {
 		if (!state.map || changedMap) {
 			API.getMap(mapName, dispatch, setError, router);
 		}
-	}, [state.map, mapName, router]);
+	}, [state.map, mapName, router, changedMap]);
 
 	if (state.map == null || changedMap) {
 		return (

@@ -64,15 +64,22 @@ exports.addDomain = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+	const domain = req.body.domain.toLowerCase();
+
 	try {
-		const { hostname } = url.parse(`https://${req.body.domain}`);
+		const { hostname } = url.parse(`https://${domain}`);
 	} catch (e) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	try {
+		const existing = await db.db.collection('accounts')
+			.findOne({ domains: domain });
+		if (existing) {
+			return dynamicResponse(req, res, 400, { error: 'This domain is already in use' });
+		}
 		await db.db.collection('accounts')
-			.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: req.body.domain }});
+			.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: domain }});
 	} catch (e) {
 		return next(e);
 	}
@@ -92,11 +99,11 @@ exports.deleteDomain = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	//will fail if domain is only in the hosts map for a different cluster, so we wont do it (for now)
-	//but will cause permission problems "invalid input" when trying to delete it from the other cluster later... hmmm...
+	const domain = req.body.domain.toLowerCase();
+	//TODO: check all clusters for domain in any map, dont allow delete
 
 	await db.db.collection('accounts')
-		.updateOne({_id: res.locals.user.username}, {$pull: {domains: req.body.domain }});
+		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
 

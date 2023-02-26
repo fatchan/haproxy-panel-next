@@ -51,7 +51,7 @@ exports.accountJson = async (req, res, next) => {
  */
 exports.globalToggle = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
-		return dynamicResponse(req, res, 403, { error: 'Only admin can toggle global' });
+		return dynamicResponse(req, res, 403, { error: 'Global ACL can only be toggled by an administrator' });
 	}
 	try {
 		const globalAcl = await res.locals.dataPlane

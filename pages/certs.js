@@ -48,6 +48,9 @@ export default function Certs(props) {
 
 	const certList = certs.map((d, i) => {
 		//TODO: refactor, to component
+		let creation = new Date(d.date);
+		const expiry = creation.setDate(creation.getDate()+90);
+		const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1)
 		return (
 			<tr key={i} className="align-middle">
 				<td className="col-1 text-center">
@@ -61,13 +64,19 @@ export default function Certs(props) {
 					{d.subject || '-'}
 				</td>
 				<td>
-					{d.altnames && d.altnames.join(', ') || '-'}
+					<textarea
+						className="w-100"
+						readOnly
+						cols={20}
+						rows={Math.min(3, d.altnames.length)}
+						defaultValue={d.altnames && d.altnames.join('\n') || '-'}
+					/>
+				</td>
+				<td>
+					{expiry ? `${daysRemaining} days` : '-'}
 				</td>
 				<td>
 					{d.storageName || '-'}
-				</td>
-				<td>
-					{d.date || '-'}
 				</td>
 			</tr>
 		);
@@ -100,10 +109,10 @@ export default function Certs(props) {
 								Altname(s)
 							</th>
 							<th>
-								Storage Name
+								Expires
 							</th>
 							<th>
-								Creation Date
+								Storage Name
 							</th>
 						</tr>
 

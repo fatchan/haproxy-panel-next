@@ -85,6 +85,7 @@ const testRouter = (server, app) => {
 				const apiInstance = api.initSync();
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
+				//console.log((await apiInstance.getAllStorageSSLCertificates().then(res => res.data)))
 
 				res.locals.dataPlaneAll = async (operationId, parameters, data, config) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {

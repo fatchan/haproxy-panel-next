@@ -11,7 +11,7 @@ export default function Login() {
 
 	async function login(e) {
 		e.preventDefault();
-		await API.login({ 
+		await API.login({
 			username: e.target.username.value,
 			password: e.target.password.value,
 		}, null, setError, router);

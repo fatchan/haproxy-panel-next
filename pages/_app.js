@@ -27,9 +27,9 @@ export default function App({ Component, pageProps }) {
 					:root { --bs-body-color: #fff; --bs-body-bg: #161616; }
 					.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }
 					.list-group-item { color: #fff; background-color: #111111; }
-					input:not(.btn), option, select.form-select { color: #fff!important; background-color: #111111!important; border: 1px solid black!important; }
+					input:not(.btn), option, select.form-select, textarea { color: #fff!important; background-color: #111111!important; border: 1px solid black!important; }
 					.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #1F1F1F; }
-					.table { color: #fff; border-color: transparent !important; }
+					.table { color: #fff; border-color: var(--bs-gray-900)!important; }
 				}
 			`}
 			</style>

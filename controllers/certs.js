@@ -70,14 +70,17 @@ exports.addCert = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid altname(s)' });
 	}
 
-	const existingCert = await db.db.collection('certs').findOne({ _id: req.body.subject });
+	const subject = req.body.subject.toLowerCase();
+	const altnames = req.body.altnames.map(a => a.toLowerCase());
+
+	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
 		return dynamicResponse(req, res, 400, { error: 'Cert with this subject already exists' });
 	}
 
 	try {
-		url.parse(`https://${req.body.subject}`);
-		req.body.altnames.forEach(d => {
+		url.parse(`https://${subject}`);
+		altnames.forEach(d => {
 			url.parse(`https://${d}`);
 		});
 	} catch (e) {
@@ -85,10 +88,10 @@ exports.addCert = async (req, res, next) => {
 	}
 
 	try {
-		console.log('Add cert request:', req.body.subject, req.body.altnames);
-		const { csr, key, cert, haproxyCert, date } = await acme.generate(req.body.subject, req.body.altnames);
+		console.log('Add cert request:', subject, altnames);
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames);
 		const fd = new FormData();
-		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${req.body.subject}.pem`);
+		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${subject}.pem`);
 		const { message, description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
@@ -98,9 +101,9 @@ exports.addCert = async (req, res, next) => {
 			return dynamicResponse(req, res, 400, { error: message });
 		}
 		let update = {
-			_id: req.body.subject,
-			subject: req.body.subject,
-			altnames: req.body.altnames,
+			_id: subject,
+			subject: subject,
+			altnames: altnames,
 			username: res.locals.user.username,
 			csr, key, cert, haproxyCert, // cert creation data
 			date,
@@ -111,7 +114,7 @@ exports.addCert = async (req, res, next) => {
         }
 		await db.db.collection('certs')
 			.updateOne({
-				_id: req.body.subject,
+				_id: subject,
 			}, {
 				$set: update,
 			}, {
@@ -138,8 +141,10 @@ exports.deleteCert = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+	const subject = req.body.subject.toLowerCase();
+
 	await db.db.collection('certs')
-		.deleteOne({ _id: req.body.subject, username: res.locals.user.username });
+		.deleteOne({ _id: subject, username: res.locals.user.username });
 
 	return dynamicResponse(req, res, 302, { redirect: '/certs' });
 

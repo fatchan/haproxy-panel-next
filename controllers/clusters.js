@@ -20,7 +20,7 @@ exports.clustersJson = async (req, res, next) => {
  */
 exports.setCluster = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
-		return dynamicResponse(req, res, 403, { error: 'Only admin can change cluster' });
+		return dynamicResponse(req, res, 403, { error: 'Changing cluster is only supported on enterprise plans' });
 	}
 	if (req.body == null || req.body.cluster == null) {
 		return dynamicResponse(req, res, 404, { error: 'Invalid cluster' });
@@ -45,7 +45,7 @@ exports.setCluster = async (req, res, next) => {
  */
 exports.addCluster = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
-		return dynamicResponse(req, res, 404, { error: 'Only admin can add cluster' });
+		return dynamicResponse(req, res, 403, { error: 'Adding clusters is only supported on enterprise plans' });
 	}
 	if (!req.body || !req.body.cluster
 		|| typeof req.body.cluster !== 'string'
@@ -67,8 +67,9 @@ exports.addCluster = async (req, res, next) => {
  */
 exports.deleteClusters = async (req, res, next) => {
 	if (res.locals.user.username !== "admin") {
-		return dynamicResponse(req, res, 404, { error: 'Only admin can delete cluster' });
+		return dynamicResponse(req, res, 403, { error: 'Removing clusters is only supported on enterprise plans' });
 	}
+	//TODO: warning modal and extra "confirm" param before deleting cluster
 	const existingClusters = new Set(res.locals.user.clusters);
 	req.body.cluster = makeArrayIfSingle(req.body.cluster);
 	if (!req.body || !req.body.cluster
