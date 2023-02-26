@@ -28,7 +28,7 @@ export default function Certs(props) {
 		);
 	}
 
-	const { user, csrf, certs } = state;
+	const { user, csrf, dbCerts, clusterCerts } = state;
 
 	async function addCert(e) {
 		e.preventDefault();
@@ -45,20 +45,66 @@ export default function Certs(props) {
 		await API.deleteCert({ _csrf: csrf, subject: e.target.subject.value }, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
+	
+	async function uploadCert(e) {
+		e.preventDefault();
+		await API.uploadCert({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
+		await API.getCerts(dispatch, setError, router);
+	}
 
-	const certList = certs.map((d, i) => {
-		//TODO: refactor, to component
-		let creation = new Date(d.date);
-		const expiry = creation.setDate(creation.getDate()+90);
-		const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1)
+	const clusterOnlyCerts = clusterCerts
+		.filter(c => !dbCerts.some(dc => dc.storageName === c.storage_name))
+		.filter(c => !c.storage_name === 'selfsigned.pem'); //no point showing this
+	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
+		const approxSubject = c.storage_name
+			.replace('_', '.')
+			.substr(0, c.storage_name.length-4);
 		return (
-			<tr key={i} className="align-middle">
+			<tr key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">
-					<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
+					{/*TODO: delete non-db cert <form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
 						<input type="hidden" name="subject" value={d.subject || d._id} />
 						<input className="btn btn-danger" type="submit" value="×" />
-					</form>
+					</form>*/}
+				</td>
+				<td>
+					{approxSubject || '-'}
+				</td>
+				<td>
+					-
+				</td>
+				<td>
+					-
+				</td>
+				<td>
+					{c.storage_name || '-'}
+				</td>
+			</tr>
+		);
+	});
+
+	const certList = dbCerts.map((d, i) => {
+		//TODO: refactor, to component
+		let creation = new Date(d.date);
+		const expiry = creation.setDate(creation.getDate()+90);
+		const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
+		const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);
+		return (
+			<tr key={'certList'+i} className="align-middle">
+				<td className="col-1 text-center">
+					{inCluster
+						? (<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input type="hidden" name="subject" value={d.subject || d._id} />
+							<input className="btn btn-danger" type="submit" value="×" />
+						</form>)
+						: (<form onSubmit={uploadCert} action="/forms/cert/upload" method="post">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input type="hidden" name="domain" value={d.subject || d._id} />
+							<input className="btn btn-warning" type="submit" value="↑" />
+						</form>)
+					}
 				</td>
 				<td>
 					{d.subject || '-'}
@@ -80,7 +126,7 @@ export default function Certs(props) {
 				</td>
 			</tr>
 		);
-	})
+	});
 
 	return (
 		<>
@@ -117,6 +163,15 @@ export default function Certs(props) {
 						</tr>
 
 						{certList}
+
+						{clusterOnlyCerts && clusterOnlyCerts.length > 0 && (<>
+							<tr className="align-middle">
+								<th colSpan="5">
+									Not in local DB:
+								</th>
+							</tr>
+							{clusterOnlyCertList}
+						</>)}
 
 						{/* Add new cert form */}
 						<tr className="align-middle">

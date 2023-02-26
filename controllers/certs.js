@@ -8,7 +8,7 @@ const { dynamicResponse } = require('../util.js');
  * certs page
  */
 exports.certsPage = async (app, req, res) => {
-	const certs = await db.db.collection('certs')
+	const dbCerts = await db.db.collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -20,11 +20,15 @@ exports.certsPage = async (app, req, res) => {
 				storageName: 1,
 			}
 		})
-		.toArray();
-	certs.forEach(c => c.date = c.date.toISOString())
+		.toArray()
+	dbCerts.forEach(c => c.date = c.date.toISOString());
+	const clusterCerts = await res.locals.dataPlane
+		.getAllStorageSSLCertificates()
+		.then(res => res.data);
 	return app.render(req, res, '/certs', {
 		csrf: req.csrfToken(),
-		certs,
+		dbCerts,
+		clusterCerts,
 	});
 };
 
@@ -33,7 +37,7 @@ exports.certsPage = async (app, req, res) => {
  * certs json data
  */
 exports.certsJson = async (req, res) => {
-	const certs = await db.db.collection('certs')
+	const dbCerts = await db.db.collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -45,12 +49,16 @@ exports.certsJson = async (req, res) => {
 				storageName: 1,
 			}
 		})
-		.toArray();
-	certs.forEach(c => c.date = c.date.toISOString())
+		.toArray()
+	dbCerts.forEach(c => c.date = c.date.toISOString());
+	const clusterCerts = await res.locals.dataPlane
+		.getAllStorageSSLCertificates()
+		.then(res => res.data);
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
-		certs,
+		dbCerts,
+		clusterCerts,
 	});
 };
 
@@ -125,9 +133,46 @@ exports.addCert = async (req, res, next) => {
 	}
 
 	return dynamicResponse(req, res, 302, { redirect: '/certs' });
+
 };
 
-//TODO: new route to sync ssl certs throughout cluster
+/**
+ * POST /cert/upload
+ * push existing db cert to cluster
+ */
+exports.uploadCert = async (req, res, next) => {
+
+	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0
+		|| !res.locals.user.domains.includes(req.body.domain)) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const domain = req.body.domain.toLowerCase();
+
+	const existingCert = await db.db.collection('certs').findOne({ _id: domain, username: res.locals.user.username });
+	if (!existingCert || !existingCert.haproxyCert) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	try {
+		console.log('Upload cert:', existingCert.subject, existingCert.altnames);
+		const fd = new FormData();
+		fd.append('file_upload', new Blob([existingCert.haproxyCert], { type: 'text/plain' }), `${existingCert.subject}.pem`);
+		const { message, description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
+				method: 'POST',
+				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
+				body: fd,
+			});
+		if (message) {
+			return dynamicResponse(req, res, 400, { error: message });
+		}
+	} catch (e) {
+		return next(e);
+	}
+
+	return dynamicResponse(req, res, 302, { redirect: '/certs' });
+
+};
 
 /**
  * POST /cert/delete

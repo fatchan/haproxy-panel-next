@@ -85,7 +85,6 @@ const testRouter = (server, app) => {
 				const apiInstance = api.initSync();
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
-				//console.log((await apiInstance.getAllStorageSSLCertificates().then(res => res.data)))
 
 				res.locals.dataPlaneAll = async (operationId, parameters, data, config) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
@@ -151,8 +150,8 @@ const testRouter = (server, app) => {
 		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
 
-		server.get('/certs', useSession, fetchSession, checkSession, csrfMiddleware, certsController.certsPage.bind(null, app));
-		server.get('/certs.json', useSession, fetchSession, checkSession, csrfMiddleware, certsController.certsJson);
+		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
+		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);
 
 		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
@@ -165,6 +164,7 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/domain/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, domainsController.addDomain);
 		clusterRouter.post('/domain/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, domainsController.deleteDomain);
 		clusterRouter.post('/cert/add', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.addCert);
+		clusterRouter.post('/cert/upload', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.uploadCert);
 		clusterRouter.post('/cert/delete', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, certsController.deleteCert);
 		server.use('/forms', clusterRouter);
 

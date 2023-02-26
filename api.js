@@ -46,6 +46,9 @@ export async function addCert(body, dispatch, errorCallback, router) {
 export async function deleteCert(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/cert/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
+export async function uploadCert(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cert/upload', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 
 // Maps
 export async function getMap(mapName, dispatch, errorCallback, router) {
