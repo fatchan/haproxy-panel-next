@@ -104,17 +104,20 @@ export default withRouter(function MenuLinks({ router }) {
 		<hr />
 		<ul className="nav nav-pills flex-column">
 			<li className="nav-item user-select-none">
-				<Link href="/setup">
-					<a className={router.pathname === "/setup" ? "nav-link active" : "nav-link"} aria-current="page">
+				<Link href="/onboarding">
+					<a className={router.pathname === "/onboarding" ? "nav-link active" : "nav-link"} aria-current="page">
 						<i className="bi-rocket-takeoff pe-none me-2" width="16" height="16" />
-						Setup Instructions
+						Onboarding
 					</a>
 				</Link>
 			</li>
+		</ul>
+		<hr />
+		<ul className="nav nav-pills flex-column">
 			<li className="nav-item">
 				<Link href="/login">
 					<a className={router.pathname === "/login" ? "nav-link active" : "nav-link"} aria-current="page">
-						<i className="bi-door-open pe-none me-2" width="16" height="16" />
+						<i className="bi-door-closed pe-none me-2" width="16" height="16" />
 						Login
 					</a>
 				</Link>
@@ -126,6 +129,17 @@ export default withRouter(function MenuLinks({ router }) {
 						Register
 					</a>
 				</Link>
+			</li>
+		</ul>
+		<hr />
+		<ul className="nav nav-pills flex-column">
+			<li className="nav-item">
+				<form action="/forms/logout" method="POST">
+					<button className="nav-link" type="submit">
+						<i className="bi-door-open pe-none me-2" width="16" height="16" />
+						Logout
+					</button>
+				</form>
 			</li>
 		</ul>
 	</>);
