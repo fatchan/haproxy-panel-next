@@ -236,19 +236,18 @@ exports.patchMapForm = async (req, res, next) => {
 						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 					}
 					const [address, port] = value.split(':');
-					await res.locals
+					const runtimeServerResp = await res.locals
 						.dataPlaneAll('addRuntimeServer', {
 							backend: 'servers',
 						}, {
 							address,
 							port: parseInt(port),
 							name: `websrv${freeSlotId}`,
-//							id: `${freeSlotId}`,
+							id: `${freeSlotId}`,
 							ssl: 'enabled',
 							verify: 'none',
-							apln: 'h2',
-							
 						});
+					console.log('added runtime server', req.body.key, runtimeServerResp.data);
 					await res.locals
 						.dataPlaneAll('addPayloadRuntimeMap', {
 							name: process.env.BACKENDS_MAP_NAME,
