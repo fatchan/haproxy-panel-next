@@ -35,10 +35,22 @@ const testRouter = (server, app) => {
 				if (account) {
 					const numCerts = await db.db.collection('certs')
 						.countDocuments({ username: account._id });
+					const strippedClusters = account.clusters
+						.map(c => {
+							return c.split(',')
+								.map(clusterString => {
+									const clusterUrl = new URL(clusterString);
+									clusterUrl.username = '';
+									clusterUrl.password = '';
+									return clusterUrl.toString();
+								})
+								.join(',');
+						});
+					res.locals.clusters = account.clusters;
 					res.locals.user = {
 						username: account._id,
 						domains: account.domains,
-						clusters: account.clusters,
+						clusters: strippedClusters,
 						activeCluster: account.activeCluster,
 						numCerts,
 					};
@@ -60,13 +72,13 @@ const testRouter = (server, app) => {
 
 		//dataplaneapi middleware
 		const useHaproxy = async (req, res, next) => {
-			if (res.locals.user.clusters.length === 0) {
+			if (res.locals.clusters.length === 0) {
 				return next();
 			}
 			try {
 				res.locals.fMap = server.locals.fMap;
 				res.locals.mapValueNames = server.locals.mapValueNames;
-				const clusterUrls = res.locals.user.clusters[res.locals.user.activeCluster]
+				const clusterUrls = res.locals.clusters[res.locals.user.activeCluster]
 					.split(',')
 					.map(u => new URL(u));
 				const firstClusterURL = clusterUrls[0];
