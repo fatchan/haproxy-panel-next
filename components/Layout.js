@@ -35,6 +35,7 @@ export default function Layout({ children }) {
 
 						<footer className="mt-auto text-center text-muted small">
 							<hr />
+							<small className="d-block">(Under Construction... 🏗️)</small>
 							<a className="pb-4" href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
 						</footer>
 

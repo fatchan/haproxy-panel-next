@@ -69,7 +69,6 @@ export default function Onboarding(props) {
 		{error && <ErrorAlert error={error} />}
 
 		<h5 className="fw-bold">Onboarding</h5>
-		<h6>(Under Construction... 🏗️)</h6>
 
 		<div className="list-group">
 			<div className="list-group-item d-flex gap-3">
