@@ -6,14 +6,15 @@ import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
 
-export default function Register() {
+export default function ChangePassword() {
 
 	const router = useRouter();
 	const [error, setError] = useState();
 
-	async function register(e) {
+	async function changepassword(e) {
 		e.preventDefault();
-		await API.register({
+		return setError('notImplemented');
+		await API.changepassword({
 			username: e.target.username.value,
 			password: e.target.password.value,
 			repeat_password: e.target.repeat_password.value,
@@ -24,7 +25,7 @@ export default function Register() {
 	return (
 		<>
 			<Head>
-				<title>Register</title>
+				<title>Change Password</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
@@ -36,25 +37,15 @@ export default function Register() {
 						<span className="mx-2 fs-4">BasedFlare</span>
 					</a>
 				</Link>
-				<form className="mb-3" onSubmit={register} action="/forms/register" method="POST">
+				<form className="mb-3" onSubmit={changepassword} action="/forms/changepassword" method="POST">
 					<div className="mb-2">
-						<label className="form-label">Username
+						<label className="form-label">Email
 							<input className="form-control" type="text" name="username" maxLength="50" required="required"/>
 						</label>
 					</div>
-					<div className="mb-2">
-						<label className="form-label">Password
-							<input className="form-control" type="password" name="password" maxLength="100" required="required"/>
-						</label>
-					</div>
-					<div className="mb-2">
-						<label className="form-label">Repeat Password
-							<input className="form-control" type="password" name="repeat_password" maxLength="100" required="required"/>
-						</label>
-					</div>
-					<input className="btn btn-primary w-100" type="submit" value="Register"/>
+					<input className="btn btn-primary w-100" type="submit" value="Request Reset"/>
 				</form>
-				<span className="fs-xs">Already have an account? <Link href="/login">Login here</Link>.</span>
+				<span className="fs-xs">Found your password? <Link href="/login">Back to Login</Link>.</span>
 			</span>
 
 		</>

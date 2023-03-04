@@ -1,8 +1,10 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import MenuLinks from './MenuLinks';
+import { withRouter } from 'next/router';
 
-export default function Layout({ children }) {
+export default withRouter(function Layout({ children, router }) {
+	const showMenu = !['/login', '/register', '/changepassword', '/'].includes(router.pathname);
 	return (
 		<>
 
@@ -14,29 +16,29 @@ export default function Layout({ children }) {
 
 			<div className="row h-100 p-0 m-0">
 
-				<div className="col-auto sidebar h-100 m-0 px-0">
-					<div className="d-flex flex-column flex-shrink-0 p-3 text-bg-dark h-100 overflow-auto" style={{ width: '280px' }}>
+				{showMenu && <div className="col-auto sidebar h-100 m-0 px-0">
+					<div className="d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto" style={{ width: '280px' }}>
 						<MenuLinks />
 					</div>
-				</div>
+				</div>}
 
 				<div className="col-1 flex-fill m-0 px-0 h-100 overflow-auto">
-					<div className="p-4 h-100 d-flex flex-column">
+					<div className="p-3 h-100 d-flex flex-column">
 
 						<main>
-							<Link href="/menu">
+							{showMenu && <Link href="/menu">
 								<a className="btn btn-primary mobile-btn mb-4 d-inline-block">
 									<i className="bi-list pe-none me-2" width="16" height="16" />
 									Menu
 								</a>
-							</Link>
+							</Link>}
 							{children}
 						</main>
 
 						<footer className="mt-auto text-center text-muted small">
 							<hr />
-							<small className="d-block">(Under Construction... 🏗️)</small>
-							<a className="pb-4" href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
+							<span className="d-block fs-xs">(Under Construction... 🏗️)</span>
+							<a className="pb-4 fs-xs" href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
 						</footer>
 
 					</div>
@@ -45,4 +47,4 @@ export default function Layout({ children }) {
 			</div>
 		</>
 	)
-}
+})

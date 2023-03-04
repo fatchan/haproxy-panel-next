@@ -2,6 +2,15 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Layout from '../components/Layout.js';
 import 'nprogress/nprogress.css';
+import NProgress from "nprogress";
+import Router from "next/router";
+
+
+const loadRoutes = ['/login', '/register', '/changepassword', '/']
+NProgress.configure({ showSpinner: true });
+Router.events.on("routeChangeStart", (url) => loadRoutes.includes(url) && NProgress.start());
+Router.events.on("routeChangeComplete", (url) => loadRoutes.includes(url) && NProgress.done());
+Router.events.on("routeChangeError", (url) => NProgress.done());
 
 export default function App({ Component, pageProps }) {
 	return (
@@ -16,7 +25,7 @@ export default function App({ Component, pageProps }) {
 				.nav-item:not(:first-child) { margin-top: 10px; }
 				.nav-link { color: white; }
 				.nav-link:hover { color: #6aa6fd; }
-				.mobile-menu { margin: 0 -24px; }
+				.mobile-menu { margin: 0 -16px; }
 				.fs-xs { font-size: small; }
 				@media (min-width: 800px) {
 					.mobile-btn { display: none!important; }

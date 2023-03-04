@@ -28,10 +28,12 @@ export default function Login() {
 			{error && <ErrorAlert error={error} />}
 
 			<span className="d-flex flex-column align-items-center mt-5 pt-5">
-				<span className="d-flex mb-3">
-					<Image src="/favicon.ico" layout="fixed" width="24" height="24" alt=" " />
-					<span className="mx-2 fs-4">BasedFlare</span>
-				</span>
+				<Link href="/">
+					<a className="d-flex mb-3 text-decoration-none text-body">
+						<Image src="/favicon.ico" layout="fixed" width="24" height="24" alt=" " />
+						<span className="mx-2 fs-4">BasedFlare</span>
+					</a>
+				</Link>
 				<form className="mb-3" onSubmit={login} action="/forms/login" method="POST">
 					<div className="mb-2">
 						<label className="form-label">Username
