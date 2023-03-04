@@ -102,10 +102,12 @@ exports.deleteDomain = async (req, res) => {
 	const domain = req.body.domain.toLowerCase();
 
 	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
-	const [existingHost, existingMaintenance, existingDdos] = await Promise.all([
+	const [existingHost, existingMaintenance, existingRewrite, existingDdos] = await Promise.all([
 		res.locals.dataPlane.showRuntimeMap({ map: process.env.HOSTS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
 		res.locals.dataPlane.showRuntimeMap({ map: process.env.MAINTENANCE_MAP_NAME })
+			.then(res => res.data).then(map => map.some(e => e.key === domain)),
+		res.locals.dataPlane.showRuntimeMap({ map: process.env.REWRITE_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
 		res.locals.dataPlane.showRuntimeMap({ map: process.env.DDOS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => {
@@ -114,8 +116,8 @@ exports.deleteDomain = async (req, res) => {
 			}))
 	]);
 
-	if (existingHost || existingMaintenance || existingDdos) {
-		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/protection first." });
+	if (existingHost || existingMaintenance || existingRewrite || existingDdos) {
+		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first." });
 	}
 
 

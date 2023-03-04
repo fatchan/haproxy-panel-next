@@ -28,6 +28,7 @@ exports.mapData = async (req, res, next) => {
 	}
 
 	switch (req.params.name) {
+		case process.env.REWRITE_MAP_NAME:
 		case process.env.DDOS_MAP_NAME:
 			showValues = true;
 		case process.env.BACKENDS_MAP_NAME:
@@ -82,7 +83,8 @@ exports.deleteMapForm = async (req, res, next) => {
 
 	if (req.params.name === process.env.HOSTS_MAP_NAME
 		|| req.params.name === process.env.DDOS_MAP_NAME
-		|| req.params.name === process.env.MAINTENANCE_MAP_NAME) {
+		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
+		|| req.params.name === process.env.REWRITE_MAP_NAME) {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
@@ -90,7 +92,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 	} else if (req.params.name === process.env.BLOCKED_MAP_NAME
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
-		//permission check, see https://gitgud.io/fatchan/haproxy-panel/-/issues/10
+		//TODO: 8permission check, see https://gitgud.io/fatchan/haproxy-panel/-/issues/10
 	}
 
 	try {
@@ -146,10 +148,11 @@ exports.patchMapForm = async (req, res, next) => {
 			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 		}
 
-		//ddos and hosts must have valid hostname
+		//validate key is domain
 		if (req.params.name === process.env.DDOS_MAP_NAME
 			|| req.params.name === process.env.HOSTS_MAP_NAME
-			|| req.params.name === process.env.MAINTENANCE_MAP_NAME) {
+			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
+			|| req.params.name === process.env.REWRITE_MAP_NAME) {
 			const { hostname, pathname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
@@ -174,6 +177,15 @@ exports.patchMapForm = async (req, res, next) => {
 			req.body.key = parsedIpOrSubnet.toString({zeroElide: false, zeroPad:false});
 		}
 
+		//validate value is url (roughly)
+		if (req.params.name === process.env.REWRITE_MAP_NAME) {
+			try {
+				new URL(`http://${req.body.value}`);
+			} catch (e) {
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+			}
+		}
+
 		//validate value is IP:port
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 			let parsedValue;
@@ -191,6 +203,7 @@ exports.patchMapForm = async (req, res, next) => {
 
 		let value;
 		switch (req.params.name) {
+			case process.env.REWRITE_MAP_NAME:
 			case process.env.DDOS_MAP_NAME:
 				value = req.body.value;
 				break;

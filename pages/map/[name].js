@@ -117,6 +117,16 @@ const MapPage = (props) => {
 				</>
 			);
 			break;
+		case "rewrite":
+			formElements = (
+				<>
+					<input type="hidden" name="_csrf" value={csrf} />
+					<input className="btn btn-success" type="submit" value="+" />
+					<input className="form-control mx-3" type="text" name="key" placeholder="domain" required />
+					<input className="form-control mx-3" type="text" name="value" placeholder="domain or domain/path" required />
+				</>
+			);
+			break;
 	}
 
 	return (

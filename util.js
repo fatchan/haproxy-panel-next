@@ -32,6 +32,12 @@ const fMap = {
 		columnNames: ['Domain', ''],
 	},
 
+	[process.env.REWRITE_MAP_NAME]: {
+		fname: 'Redirects',
+		description: 'Easily redirect domains to an updated domain and/or path',
+		columnNames: ['Domain', 'Replacement'],
+	},
+
 //	[process.env.BACKENDS_MAP_NAME]: {
 //		fname: 'Domain Backend Mappings',
 //		description: 'Which internal server haproxy uses for domains',
