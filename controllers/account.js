@@ -139,9 +139,8 @@ exports.register = async (req, res) => {
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
-			clusters: [],
+			clusters: process.env.DEFAULT_CLUSTER ? [process.env.DEFAULT_CLUSTER] : [],
 			activeCluster: 0,
-			balance: 0,
 		});
 
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
