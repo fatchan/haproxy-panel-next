@@ -265,7 +265,7 @@ exports.patchMapForm = async (req, res, next) => {
 					key: req.body.key,
 					value: value,
 				}]);
-			return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
+			return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);
 		}

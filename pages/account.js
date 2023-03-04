@@ -13,7 +13,6 @@ export default function Account(props) {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-	// Set into context from props (From getServerSideProps), else make API call
 	useEffect(() => {
 		if (!state.user) {
 			API.getAccount(dispatch, setError, router);

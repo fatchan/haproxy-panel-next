@@ -37,6 +37,15 @@ exports.accountPage = async (app, req, res, next) => {
 }
 
 /**
+ * GET /onboarding
+ * account page html
+ */
+exports.onboardingPage = async (app, req, res, next) => {
+	const data = await exports.accountData(req, res, next);
+	return app.render(req, res, '/onboarding', { ...data, user: res.locals.user });
+}
+
+/**
  * GET /account.json
  * account page json data
  */

@@ -84,7 +84,7 @@ exports.addDomain = async (req, res, next) => {
 		return next(e);
 	}
 
-	return dynamicResponse(req, res, 302, { redirect: '/domains' });
+	return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : '/domains' });
 
 };
 

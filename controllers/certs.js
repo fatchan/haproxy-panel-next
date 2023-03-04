@@ -132,7 +132,7 @@ exports.addCert = async (req, res, next) => {
 		return next(e);
 	}
 
-	return dynamicResponse(req, res, 302, { redirect: '/certs' });
+	return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : '/certs' });
 
 };
 

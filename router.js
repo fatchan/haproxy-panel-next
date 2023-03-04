@@ -149,23 +149,18 @@ const testRouter = (server, app) => {
 				process.env.BACKENDS_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.HOSTS_MAP_NAME]
 			, mapNamesOrString = mapNames.join('|');
 
-		//authed pages that dont require a cluster
+		//authed pages
 		server.get('/account', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.accountPage.bind(null, app));
+		server.get('/onboarding', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.onboardingPage.bind(null, app));
 		server.get('/account.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.accountJson);
-
 		server.get(`/map/:name(${mapNamesOrString})`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapPage.bind(null, app));
 		server.get(`/map/:name(${mapNamesOrString}).json`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapJson);
-
 		server.get('/clusters', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersPage.bind(null, app));
 		server.get('/clusters.json', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersJson);
-
 		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
-
 		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
 		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);
-
-		//authed pages that useHaproxy
 		const clusterRouter = express.Router({ caseSensitive: true });
 		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
 		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.patchMapForm); //add to MAP
