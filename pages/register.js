@@ -1,5 +1,7 @@
 import Head from 'next/head';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import * as API from '../api.js'
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
@@ -27,25 +29,31 @@ export default function Register() {
 
 			{error && <ErrorAlert error={error} />}
 
-			<h5 className="fw-bold">Register</h5>
-			<form onSubmit={register} action="/forms/register" method="POST">
-				<div className="mb-2">
-					<label className="form-label">Username
-						<input className="form-control" type="text" name="username" maxLength="50" required="required"/>
-					</label>
-				</div>
-				<div className="mb-2">
-					<label className="form-label">Password
-						<input className="form-control" type="password" name="password" maxLength="100" required="required"/>
-					</label>
-				</div>
-				<div className="mb-2">
-					<label className="form-label">Repeat Password
-						<input className="form-control" type="password" name="repeat_password" maxLength="100" required="required"/>
-					</label>
-				</div>
-				<input className="btn btn-primary" type="submit" value="Submit"/>
-			</form>
+			<span className="d-flex flex-column align-items-center mt-5 pt-5">
+				<span className="d-flex mb-3">
+					<Image src="/favicon.ico" layout="fixed" width="24" height="24" alt=" " />
+					<span className="mx-2 fs-4">BasedFlare</span>
+				</span>
+				<form className="mb-3" onSubmit={register} action="/forms/register" method="POST">
+					<div className="mb-2">
+						<label className="form-label">Username
+							<input className="form-control" type="text" name="username" maxLength="50" required="required"/>
+						</label>
+					</div>
+					<div className="mb-2">
+						<label className="form-label">Password
+							<input className="form-control" type="password" name="password" maxLength="100" required="required"/>
+						</label>
+					</div>
+					<div className="mb-2">
+						<label className="form-label">Repeat Password
+							<input className="form-control" type="password" name="repeat_password" maxLength="100" required="required"/>
+						</label>
+					</div>
+					<input className="btn btn-primary w-100" type="submit" value="Register"/>
+				</form>
+				<span className="fs-xs">Already have an account? <Link href="/register">Login here</Link>.</span>
+			</span>
 
 		</>
 	);

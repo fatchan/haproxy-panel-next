@@ -17,6 +17,7 @@ export default function App({ Component, pageProps }) {
 				.nav-link { color: white; }
 				.nav-link:hover { color: #6aa6fd; }
 				.mobile-menu { margin: 0 -24px; }
+				.fs-xs { font-size: small; }
 				@media (min-width: 800px) {
 					.mobile-btn { display: none!important; }
 				}
