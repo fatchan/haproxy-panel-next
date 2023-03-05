@@ -54,7 +54,7 @@ export default function Certs(props) {
 
 	const clusterOnlyCerts = clusterCerts
 		.filter(c => !dbCerts.some(dc => dc.storageName === c.storage_name))
-		.filter(c => !c.storage_name === 'selfsigned.pem'); //no point showing this
+		.filter(c => c.storage_name !== 'selfsigned.pem'); //no point showing this
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
 		const approxSubject = c.storage_name
 			.replace('_', '.')
@@ -183,6 +183,7 @@ export default function Certs(props) {
 									<input className="form-control me-3" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
 								</form>
 							</td>
+							<td colSpan="2"></td>
 						</tr>
 
 					</tbody>

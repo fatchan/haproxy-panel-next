@@ -76,10 +76,10 @@ exports.deleteClusters = async (req, res, next) => {
 		|| !req.body.cluster.some(c => existingClusters.has(c))) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid cluster' });
 	}
-	const filteredClusters = res.locals.user.clusters.filter(c => !req.body.cluster.includes(c));
-	if (filteredClusters.length === 0) {
-		return dynamicResponse(req, res, 400, { error: 'Cannot delete last cluster' });
-	}
+	const filteredClusters = res.locals.clusters.filter(c => !req.body.cluster.includes(c));
+	// if (filteredClusters.length === 0) {
+		// return dynamicResponse(req, res, 400, { error: 'Cannot delete last cluster' });
+	// }
 	let newActiveCluster = res.locals.user.activeCluster;
 	if (res.locals.user.activeCluster > filteredClusters.length-1) {
 		newActiveCluster = 0;

@@ -27,8 +27,10 @@ export default function App({ Component, pageProps }) {
 				.nav-link:hover { color: #6aa6fd; }
 				.mobile-menu { margin: 0 -16px; }
 				.fs-xs { font-size: small; }
-				.text-decoration-none {
-					color: var(--bs-body-color);
+				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: max-content; min-width: 600px; }
+				.text-decoration-none { color: var(--bs-body-color); }
+				@media (max-width: 650px) {
+					.table, .list-group { min-width: unset; }
 				}
 				@media (min-width: 800px) {
 					.mobile-btn { display: none!important; }

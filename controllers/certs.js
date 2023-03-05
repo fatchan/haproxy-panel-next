@@ -86,12 +86,12 @@ exports.addCert = async (req, res, next) => {
 			map: process.env.HOSTS_MAP_NAME
 		})
 		.then(res => res.data);
-	const backendDomainEntry = backendMap && backendMap.find(e => e.value === req.body.subject);
+	const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
 	if (!backendDomainEntry) {
 		return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
 	}
 
-	const noBackend = await db.db.collection('certs').findOne({ _id: subject });
+	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
 		return dynamicResponse(req, res, 400, { error: 'Cert with this subject already exists' });
 	}

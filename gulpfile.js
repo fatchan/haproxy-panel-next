@@ -16,7 +16,7 @@ async function reset() {
 				_id: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],
-				clusters: ['http://admin:admin@127.0.0.1:2001'],
+				clusters: [process.env.DEFAULT_CLUSTER],
 				activeCluster: 0,
 				balance: 0,
 			});

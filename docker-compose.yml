@@ -3,7 +3,6 @@ services:
   haproxy_panel_next:
     restart: always
     build: .
-    network_mode: host
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -15,7 +14,6 @@ services:
   haproxy_panel_mongo:
     restart: always
     image: mongo:latest
-    network_mode: host
     ports:
       - "127.0.0.1:27017:27017"
 networks:
