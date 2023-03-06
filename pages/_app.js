@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }) {
 			<style>
 			{`
 				html, body { font-family: helvetica,arial,sans-serif; height: 100%; overflow: hidden; }
-				.corner-ribbon {width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: absolute;overflow: hidden;}
+				.corner-ribbon {z-index:-1; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: absolute;overflow: hidden;}
 				.green { color: green; }
 				.red { color: red; }
 				footer { margin-top: auto; }
@@ -28,7 +28,7 @@ export default function App({ Component, pageProps }) {
 				.nav-link:hover { color: #6aa6fd; }
 				.mobile-menu { margin: 0 -16px; }
 				.fs-xs { font-size: small; }
-				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: max-content; min-width: 600px; }
+				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: max-content; min-width: 600px; background-color: var(--bs-body-bg); }
 				.text-decoration-none { color: var(--bs-body-color); }
 				@media (max-width: 650px) {
 					.table, .list-group { min-width: unset; }

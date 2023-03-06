@@ -23,7 +23,7 @@ export default withRouter(function Layout({ children, router }) {
 				</div>}
 
 				<div className="col-1 flex-fill m-0 px-0 h-100 overflow-auto">
-					<div className="p-3 h-100 d-flex flex-column overflow-hidden">
+					<div className="p-3 h-100 d-flex flex-column">
 						<span className="corner-ribbon">Beta</span>
 						<main>
 							{showMenu && <Link href="/menu">
