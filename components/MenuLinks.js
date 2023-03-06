@@ -7,7 +7,7 @@ export default withRouter(function MenuLinks({ router }) {
 		<Link href="/">
 			<a className="d-flex align-items-center mb-3 mb-md-0 text-body text-decoration-none">
 				<Image src="/favicon.ico" width="32" height="32" alt=" " />
-				<span className="mx-2 fs-4">BasedFlare</span>
+				<span className="mx-2 fs-4 text-decoration-none">BasedFlare</span>
 			</a>
 		</Link>
 		<hr />

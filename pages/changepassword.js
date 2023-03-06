@@ -13,7 +13,7 @@ export default function ChangePassword() {
 
 	async function changepassword(e) {
 		e.preventDefault();
-		return setError('notImplemented');
+		return setError('Not implemented');
 		await API.changepassword({
 			username: e.target.username.value,
 			password: e.target.password.value,

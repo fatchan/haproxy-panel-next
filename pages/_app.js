@@ -7,7 +7,7 @@ import Router from "next/router";
 
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/']
-NProgress.configure({ showSpinner: true });
+NProgress.configure({ showSpinner: false });
 Router.events.on("routeChangeStart", (url) => loadRoutes.includes(url) && NProgress.start());
 Router.events.on("routeChangeComplete", (url) => loadRoutes.includes(url) && NProgress.done());
 Router.events.on("routeChangeError", (url) => NProgress.done());
@@ -17,7 +17,8 @@ export default function App({ Component, pageProps }) {
 		<Layout>
 			<style>
 			{`
-				html, body { font-family: helvetica,arial,sans-serif; height: 100%; }
+				html, body { font-family: helvetica,arial,sans-serif; height: 100%; overflow: hidden; }
+				.corner-ribbon {width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: absolute;overflow: hidden;}
 				.green { color: green; }
 				.red { color: red; }
 				footer { margin-top: auto; }

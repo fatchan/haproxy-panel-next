@@ -23,8 +23,8 @@ export default withRouter(function Layout({ children, router }) {
 				</div>}
 
 				<div className="col-1 flex-fill m-0 px-0 h-100 overflow-auto">
-					<div className="p-3 h-100 d-flex flex-column">
-
+					<div className="p-3 h-100 d-flex flex-column overflow-hidden">
+						<span className="corner-ribbon">Beta</span>
 						<main>
 							{showMenu && <Link href="/menu">
 								<a className="btn btn-primary mobile-btn mb-4 d-inline-block">
@@ -37,8 +37,9 @@ export default withRouter(function Layout({ children, router }) {
 
 						<footer className="mt-auto text-center text-muted small">
 							<hr />
-							<span className="d-block fs-xs">(Under Construction... 🏗️)</span>
-							<a className="pb-4 fs-xs" href="https://gitgud.io/fatchan/haproxy-panel-next/">haproxy-panel-next</a>
+							<a className="pb-3 fs-xs" href="https://gitgud.io/fatchan/haproxy-panel-next/">source code</a>
+							{" "}&bull;{" "}
+							<a className="pb-3 fs-xs" target="_blank" rel="noreferrer" href="https://status.basedflare.com">status page</a>
 						</footer>
 
 					</div>
