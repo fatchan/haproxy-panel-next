@@ -28,7 +28,7 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, globalAcl, csrf } = state;
+	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords } = state;
 	const domainAdded = user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
 	const backendAdded = backendMap && backendMap.count > 0;
@@ -105,14 +105,11 @@ export default function Onboarding(props) {
 						<p>Set the following A and AAAA records for your domain with your DNS provider:</p>
 						<code>A</code>:
 						<ul>
-							<li>45.88.201.168</li>
-							<li>185.125.168.21</li>
-							<li>38.60.199.224</li>
+							{aRecords.map((r, i) => <li key={'a'+i}>{r}</li>)}
 						</ul>
-						<code>AAAA</code> (optional, recommended):
+						<code>AAAA</code>:
 						<ul>
-							<li>2a03:94e1:ffff:45:88:201:0:168</li>
-							<li>2a03:94e0:ffff:185:125:168:0:21</li>
+							{aaaaRecords.map((r, i) => <li key={'aaaa'+i}>{r}</li>)}
 						</ul>
 					</span>
 				</span>

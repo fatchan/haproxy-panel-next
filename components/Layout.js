@@ -17,14 +17,14 @@ export default withRouter(function Layout({ children, router }) {
 			<div className="row h-100 p-0 m-0">
 
 				{showMenu && <div className="col-auto sidebar h-100 m-0 px-0">
-					<div className="d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto" style={{ width: '280px' }}>
+					<div className="d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto" style={{ width: '250px' }}>
 						<MenuLinks />
 					</div>
 				</div>}
 
 				<div className="col-1 flex-fill m-0 px-0 h-100 overflow-auto">
 					<div className="p-3 h-100 d-flex flex-column">
-						<span className="corner-ribbon">Beta</span>
+						{/*<span className="corner-ribbon">Beta</span>*/}
 						<main>
 							{showMenu && <Link href="/menu">
 								<a className="btn btn-primary mobile-btn mb-4 d-inline-block">

@@ -30,6 +30,7 @@ export default function App({ Component, pageProps }) {
 				.fs-xs { font-size: small; }
 				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: max-content; min-width: 600px; background-color: var(--bs-body-bg); }
 				.text-decoration-none { color: var(--bs-body-color); }
+				.sidebar { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
 				@media (max-width: 650px) {
 					.table, .list-group { min-width: unset; }
 				}
