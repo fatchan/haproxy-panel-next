@@ -244,7 +244,12 @@ exports.patchMapForm = async (req, res, next) => {
 						.then(res => res.data)
 						.then(servers => {
 							const server = servers.find(s => s.admin_state === 'maint' && s.operational_state === 'down');
-							return server ? parseInt(server.id) : servers.length+1;
+							console.log('Found free slot server:', server)
+							return server
+								? parseInt(server.id) //maintenance slot server id
+								: servers.length > 0
+									? parseInt(servers[servers.length-1].id)+1 //or the next ID from the last server
+									: 1; //or 1 (i.e there were no servers)
 						});
 					if (!freeSlotId) {
 						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
