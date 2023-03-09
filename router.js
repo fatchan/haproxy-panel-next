@@ -98,14 +98,14 @@ const testRouter = (server, app) => {
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
 
-				res.locals.dataPlaneAll = async (operationId, parameters, data, config) => {
+				res.locals.dataPlaneAll = async (operationId, parameters, data, config, all=false) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
 						const singleApi = new OpenAPIClientAxios({ definition, axiosConfigDefaults: { headers: { 'authorization': `Basic ${base64Auth}` } } });
 						const singleApiInstance = singleApi.initSync();
 						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;
 						return singleApiInstance[operationId](parameters, data, { ...config, baseUrl: `${clusterUrl.origin}/v2` });
 					}));
-					return promiseResults[0]; //TODO: better desync handling
+					return all ? promiseResults.map(p => p.data) : promiseResults[0]; //TODO: better desync handling
 				}
 				res.locals.fetchAll = async (path, options) => {
 					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
@@ -161,6 +161,8 @@ const testRouter = (server, app) => {
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
 		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
 		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);
+		server.get('/stats', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsPage.bind(null, app));
+		server.get('/stats.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsJson);
 		const clusterRouter = express.Router({ caseSensitive: true });
 		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
 		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.patchMapForm); //add to MAP

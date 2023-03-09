@@ -61,6 +61,11 @@ export async function deleteFromMap(mapName, body, dispatch, errorCallback, rout
 	return ApiCall(`/forms/map/${mapName}/delete`, 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Stats
+export async function getStats(dispatch, errorCallback, router) {
+	return ApiCall('/stats.json', 'GET', null, dispatch, errorCallback, router);
+}
+
 // Global toggle
 export async function globalToggle(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5);

@@ -33,7 +33,70 @@ exports.accountData = async (req, res, next) => {
 		globalAcl: globalAcl === '1',
 		aRecords,
 		aaaaRecords,
-	}
+	};
+};
+
+/**
+ * stats data
+ */
+exports.statsData = async (req, res, next) => {
+	let serverStats = []
+		, frontendStats = [];
+	([serverStats, frontendStats] = await Promise.all([
+		res.locals.dataPlaneAll('getStats', { type: 'server', parent: 'servers' }, null, null, true),
+		res.locals.dataPlaneAll('getStats', { type: 'frontend' }, null, null, true)
+	]));
+	frontendStats.forEach(s => {
+		s[0].stats = s[0].stats
+			.filter(t => t.name === 'www-http-https')
+			.map(t => ({
+				'name': t.name,
+				'stats': {
+					'Bytes in': t.stats.bin,
+					'Bytes out': t.stats.bout,
+					'Conn rate': t.stats.conn_rate,
+					'Cr (max)': t.stats.conn_rate_max,
+					'Request rate': t.stats.req_rate,
+					'Rr (max)': t.stats.req_rate_max,
+					'1xx': t.stats.hrsp_1xx,
+					'2xx': t.stats.hrsp_2xx,
+					'3xx': t.stats.hrsp_3xx,
+					'4xx': t.stats.hrsp_4xx,
+					'5xx': t.stats.hrsp_5xx,
+					'Total': t.stats.req_tot,
+				}
+			}));
+	});
+	serverStats.forEach(host => {
+		host.forEach(server => {
+			 server.stats = server.stats
+				.filter(t => t.backend_name === 'servers')
+				.map(t => ({
+					'name': t.name,
+					'backend_name': t.backend_name,
+					'stats': {
+						'Address': t.stats.addr,
+						'Bytes in': t.stats.bin,
+						'Bytes out': t.stats.bout,
+						'Sess rate': t.stats.rate,
+						'Sr (max)': t.stats.rate_max,
+						'Queue': t.stats.qcur,
+						'Q (max)': t.stats.qmax,
+						'Q (time)': t.stats.qtime,
+						'1xx': t.stats.hrsp_1xx,
+						'2xx': t.stats.hrsp_2xx,
+						'3xx': t.stats.hrsp_3xx,
+						'4xx': t.stats.hrsp_4xx,
+						'5xx': t.stats.hrsp_5xx,
+						'Total': t.stats.req_tot,
+					}
+				}));
+		});
+	});
+	return {
+		serverStats,
+		frontendStats,
+	};
 };
 
 /**
@@ -60,6 +123,25 @@ exports.onboardingPage = async (app, req, res, next) => {
  */
 exports.accountJson = async (req, res, next) => {
 	const data = await exports.accountData(req, res, next);
+	return res.json({ ...data, user: res.locals.user });
+}
+
+
+/**
+ * GET /stats
+ * stats page html
+ */
+exports.statsPage = async (app, req, res, next) => {
+	const data = await exports.statsData(req, res, next);
+	return app.render(req, res, '/stats', { ...data, user: res.locals.user });
+}
+
+/**
+ * GET /stats.json
+ * stats json
+ */
+exports.statsJson = async (req, res, next) => {
+	const data = await exports.statsData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
 

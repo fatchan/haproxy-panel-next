@@ -19,6 +19,7 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - Protection rules, choose bot protection mode "none" (whitelist), proof-of-work or proof-of-work+captcha. Can be domain-wide or a domain+path. Path overrides domain-wide.
 - Global override for protection mode, to enable for all domains in a cluster.
 - Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
+- Statistics page with server and backend-level breakdowns based on haproxy stats socket data.
 
 ##### Todo:
 - Improved cert management
