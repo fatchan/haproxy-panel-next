@@ -53,7 +53,7 @@ exports.mapData = async (req, res, next) => {
 	}
 
 	return {
-		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'hCaptcha' },
+		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'Proof-of-work+Captcha' },
 		mapInfo,
 		map,
 		csrf: req.csrfToken(),
