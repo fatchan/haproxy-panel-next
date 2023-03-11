@@ -6,7 +6,9 @@ const express = require('express')
 	, csrf = require('csurf')
 	, OpenAPIClientAxios = require('openapi-client-axios').default
 	, { dynamicResponse } = require('./util.js')
-	, definition = require('./openapi-definition.js');
+	, definition = require('./openapi-definition.js')
+	, https = require('https')
+	, agent = new https.Agent({ rejectUnauthorized: !process.env.ALLOW_SELF_SIGNED_SSL });
 
 const testRouter = (server, app) => {
 
@@ -89,6 +91,7 @@ const testRouter = (server, app) => {
 					//definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
 					definition,
 					axiosConfigDefaults: {
+						httpsAgent: agent,
 						headers: {
 							'authorization': `Basic ${base64Auth}`,
 						}
@@ -100,7 +103,7 @@ const testRouter = (server, app) => {
 
 				res.locals.dataPlaneAll = async (operationId, parameters, data, config, all=false) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
-						const singleApi = new OpenAPIClientAxios({ definition, axiosConfigDefaults: { headers: { 'authorization': `Basic ${base64Auth}` } } });
+						const singleApi = new OpenAPIClientAxios({ definition, axiosConfigDefaults: { httpsAgent: agent, headers: { 'authorization': `Basic ${base64Auth}` } } });
 						const singleApiInstance = singleApi.initSync();
 						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;
 						return singleApiInstance[operationId](parameters, data, { ...config, baseUrl: `${clusterUrl.origin}/v2` });
@@ -110,7 +113,7 @@ const testRouter = (server, app) => {
 				res.locals.fetchAll = async (path, options) => {
 					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
-						return fetch(`${clusterUrl.origin}${path}`, options).then(resp => resp.json());
+						return fetch(`${clusterUrl.origin}${path}`, { ...options, agent }).then(resp => resp.json());
 					}));
 					return promiseResults[0]; //TODO: better desync handling
 				}
