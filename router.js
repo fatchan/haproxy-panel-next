@@ -8,7 +8,25 @@ const express = require('express')
 	, { dynamicResponse } = require('./util.js')
 	, definition = require('./openapi-definition.js')
 	, https = require('https')
-	, agent = new https.Agent({ rejectUnauthorized: !process.env.ALLOW_SELF_SIGNED_SSL });
+	, fetch = require('node-fetch')
+	, FormData = require('form-data');
+
+const agentOptions = {
+	rejectUnauthorized: !process.env.ALLOW_SELF_SIGNED_SSL
+};
+if (process.env.PINNED_FP && process.env.CUSTOM_CA_PATH) {
+	// console.log('Pinned fingerprint:', process.env.PINNED_FP);
+	// console.log('Private CA file path:', process.env.CUSTOM_CA_PATH);
+	agentOptions.ca = require('fs').readFileSync(process.env.CUSTOM_CA_PATH);
+	agentOptions.checkServerIdentity = (host, cert) => {
+		//TODO: host verification? e.g. tls.checkServerIdentity(host, cert);
+		// console.log('Checking:', cert.fingerprint256);
+		if (process.env.PINNED_FP !== cert.fingerprint256) {
+			return new Error('Certificate not pinned');
+		}
+	}
+}
+const agent = new https.Agent(agentOptions);
 
 const testRouter = (server, app) => {
 
@@ -110,10 +128,12 @@ const testRouter = (server, app) => {
 					}));
 					return all ? promiseResults.map(p => p.data) : promiseResults[0]; //TODO: better desync handling
 				}
-				res.locals.fetchAll = async (path, options) => {
+				res.locals.postFileAll = async (path, options, file, fdOptions) => {
 					//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
-						return fetch(`${clusterUrl.origin}${path}`, { ...options, agent }).then(resp => resp.json());
+						const fd = new FormData(); //must resonctruct each time, or get a socket hang up
+						fd.append('file_upload', file, fdOptions);
+						return fetch(`${clusterUrl.origin}${path}`, { ...options, body: fd, agent }).then(resp => resp.json());
 					}));
 					return promiseResults[0]; //TODO: better desync handling
 				}

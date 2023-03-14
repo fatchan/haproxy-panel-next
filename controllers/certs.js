@@ -108,13 +108,18 @@ exports.addCert = async (req, res, next) => {
 	try {
 		console.log('Add cert request:', subject, altnames);
 		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames);
-		const fd = new FormData();
-		fd.append('file_upload', new Blob([haproxyCert], { type: 'text/plain' }), `${subject}.pem`);
-		const { message, description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
+		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
+			'/v2/services/haproxy/storage/ssl_certificates?force_reload=true',
+			{
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
-				body: fd,
-			});
+			},
+			haproxyCert,
+			{
+				filename: `${subject}.pem`,
+				contentType: 'text/plain',
+			}
+		);
 		if (message) {
 			return dynamicResponse(req, res, 400, { error: message });
 		}
@@ -166,13 +171,18 @@ exports.uploadCert = async (req, res, next) => {
 
 	try {
 		console.log('Upload cert:', existingCert.subject, existingCert.altnames);
-		const fd = new FormData();
-		fd.append('file_upload', new Blob([existingCert.haproxyCert], { type: 'text/plain' }), `${existingCert.subject}.pem`);
-		const { message, description, file, storage_name: storageName } = await res.locals.fetchAll('/v2/services/haproxy/storage/ssl_certificates?force_reload=true', {
+		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
+			'/v2/services/haproxy/storage/ssl_certificates?force_reload=true',
+				{
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
-				body: fd,
-			});
+			},
+			existingCert.haproxyCert,
+			{
+				filename: `${existingCert.subject}.pem`,
+				contentType: 'text/plain',
+			}
+		);
 		if (message) {
 			return dynamicResponse(req, res, 400, { error: message });
 		}
