@@ -11,6 +11,9 @@ services:
       - type: bind
         source: /tmp/acme-tests/.well-known/acme-challenge/
         target: /tmp/acme-tests/.well-known/acme-challenge/
+      - type: bind
+        source: ./ca/
+        target: /opt/ca/
   haproxy_panel_mongo:
     restart: always
     image: mongo:latest

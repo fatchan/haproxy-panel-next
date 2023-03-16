@@ -31,14 +31,16 @@ exports.mapData = async (req, res, next) => {
 		case process.env.REWRITE_MAP_NAME:
 		case process.env.DDOS_MAP_NAME:
 			showValues = true;
+			/* falls through */
 		case process.env.BACKENDS_MAP_NAME:
 		case process.env.HOSTS_MAP_NAME:
 			if (process.env.CUSTOM_BACKENDS_ENABLED) {
 				showValues = true;
 			}
+			/* falls through */
 		case process.env.MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
-				const { hostname, pathname } = url.parse(`https://${a.key}`);
+				const { hostname } = url.parse(`https://${a.key}`);
 				return res.locals.user.domains.includes(hostname);
 			});
 			break;
@@ -92,7 +94,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 	} else if (req.params.name === process.env.BLOCKED_MAP_NAME
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
-		//TODO: 8permission check, see https://gitgud.io/fatchan/haproxy-panel/-/issues/10
+		//TODO: permission check, see https://gitgud.io/fatchan/haproxy-panel/-/issues/10
 	}
 
 	try {
@@ -153,7 +155,7 @@ exports.patchMapForm = async (req, res, next) => {
 			|| req.params.name === process.env.HOSTS_MAP_NAME
 			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
 			|| req.params.name === process.env.REWRITE_MAP_NAME) {
-			const { hostname, pathname } = url.parse(`https://${req.body.key}`);
+			const { hostname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
 				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
@@ -166,10 +168,10 @@ exports.patchMapForm = async (req, res, next) => {
 			let parsedIp, parsedSubnet;
 			try {
 				parsedIp = parse(req.body.key);
-			} catch (e) { parsedIp = null; /*invalid ip, or a subnet*/ }
+			} catch { parsedIp = null; /*invalid ip, or a subnet*/ }
 			try {
 				parsedSubnet = createCIDR(req.body.key);
-			} catch (e) { parsedSubnet = null; /*invalid subnet or just an ip*/ }
+			} catch { parsedSubnet = null; /*invalid subnet or just an ip*/ }
 			const parsedIpOrSubnet = parsedIp || parsedSubnet;
 			if (!parsedIpOrSubnet) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -181,7 +183,7 @@ exports.patchMapForm = async (req, res, next) => {
 		if (req.params.name === process.env.REWRITE_MAP_NAME) {
 			try {
 				new URL(`http://${req.body.value}`);
-			} catch (e) {
+			} catch {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 		}
@@ -195,7 +197,7 @@ exports.patchMapForm = async (req, res, next) => {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
 				parse(parsedValue.hostname); //better ip parsing, will error if invalid
-			} catch (e) {
+			} catch {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			req.body.value = parsedValue.host; //host includes port

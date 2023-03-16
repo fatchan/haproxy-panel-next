@@ -69,6 +69,14 @@ export default withRouter(function MenuLinks({ router }) {
 				</Link>
 			</li>
 			<li className="nav-item">
+				<Link href="/csr">
+					<a className={router.pathname === "/csr" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-building-fill-lock pe-none me-2" width="16" height="16" />
+						Origin CSR
+					</a>
+				</Link>
+			</li>
+			<li className="nav-item">
 				<Link href="/map/ddos">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "ddos" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-shield-check pe-none me-2" width="16" height="16" />

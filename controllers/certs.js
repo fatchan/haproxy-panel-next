@@ -2,6 +2,7 @@ const db = require('../db.js');
 const acme = require('../acme.js');
 const url = require('url');
 const { dynamicResponse } = require('../util.js');
+const { verifyCSR } = require('../ca.js');
 
 /**
  * GET /certs
@@ -171,7 +172,7 @@ exports.uploadCert = async (req, res, next) => {
 
 	try {
 		console.log('Upload cert:', existingCert.subject, existingCert.altnames);
-		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
+		const { message } = await res.locals.postFileAll(
 			'/v2/services/haproxy/storage/ssl_certificates?force_reload=true',
 				{
 				method: 'POST',
@@ -213,4 +214,23 @@ exports.deleteCert = async (req, res) => {
 
 	return dynamicResponse(req, res, 302, { redirect: '/certs' });
 
+};
+
+/**
+ * POST /csr/verify
+ * Delete the map entries of the body 'domain'
+ */
+exports.verifyUserCSR = (req, res, next) => {
+	if (res.locals.user.username !== "admin") {
+		return dynamicResponse(req, res, 403, { error: 'CA signed origin certs are only supported on enterprise plans' });
+	}
+	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid csr' });
+	}
+	try {
+		const signedCert = verifyCSR(req.body.csr);
+		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
+	} catch (e) {
+		return next(e);
+	}
 };

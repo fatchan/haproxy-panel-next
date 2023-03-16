@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const db = require('../db.js');
-const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } = require('../util.js');
+const { extractMap, dynamicResponse } = require('../util.js');
 const { Resolver } = require('node:dns').promises;
 const resolver = new Resolver();
 resolver.setServers(process.env.NAMESERVERS.split(','));
@@ -8,7 +8,7 @@ resolver.setServers(process.env.NAMESERVERS.split(','));
 /**
  * account page data shared between html/json routes
  */
-exports.accountData = async (req, res, next) => {
+exports.accountData = async (req, res, _next) => {
 	let maps = []
 		, globalAcl
 		, aRecords = []
@@ -39,7 +39,7 @@ exports.accountData = async (req, res, next) => {
 /**
  * stats data
  */
-exports.statsData = async (req, res, next) => {
+exports.statsData = async (_req, res, _next) => {
 	let serverStats = []
 		, frontendStats = [];
 	([serverStats, frontendStats] = await Promise.all([
