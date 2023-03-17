@@ -63,7 +63,21 @@ function generateCertificate(privateKey, publicKey) {
 	cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
 	cert.setSubject(CAAttrs);
 	cert.setIssuer(CAAttrs);
-	cert.sign(prKey);
+	cert.setExtensions([
+		{
+			name: "basicConstraints",
+			cA: true,
+		},
+		{
+			name: "keyUsage",
+			keyCertSign: true,
+			digitalSignature: true,
+			nonRepudiation: true,
+			keyEncipherment: true,
+			dataEncipherment: true,
+		},
+	]);
+	cert.sign(prKey, forge.md.sha256.create());
 	return pki.certificateToPem(cert);
 }
 
@@ -97,7 +111,7 @@ function verifyCSR(csrPem) {
 		},
 	]);
 	cert.publicKey = csr.publicKey;
-	cert.sign(caKey);
+	cert.sign(caKey, forge.md.sha256.create());
 	return pki.certificateToPem(cert);
 }
 
