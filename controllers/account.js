@@ -44,7 +44,7 @@ exports.statsData = async (_req, res, _next) => {
 		, frontendStats = [];
 	([serverStats, frontendStats] = await Promise.all([
 		res.locals.dataPlaneAll('getStats', { type: 'server', parent: 'servers' }, null, null, true),
-		res.locals.dataPlaneAll('getStats', { type: 'frontend' }, null, null, true)
+		res.locals.dataPlaneAll('getStats', { type: 'frontend', name: 'www-http-https' }, null, null, true)
 	]));
 	frontendStats.forEach(s => {
 		s[0].stats = s[0].stats
