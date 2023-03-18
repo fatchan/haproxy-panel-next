@@ -25,7 +25,14 @@ exports.certsPage = async (app, req, res) => {
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals.dataPlane
 		.getAllStorageSSLCertificates()
-		.then(res => res.data);
+		.then(certs => {
+			return certs.data.filter(c => {
+				const approxSubject = c.storage_name
+					.replace('_', '.')
+					.substr(0, c.storage_name.length-4);
+				return res.locals.user.domains.includes(approxSubject);
+			});
+		});
 	return app.render(req, res, '/certs', {
 		csrf: req.csrfToken(),
 		dbCerts,
@@ -54,7 +61,14 @@ exports.certsJson = async (req, res) => {
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals.dataPlane
 		.getAllStorageSSLCertificates()
-		.then(res => res.data);
+		.then(certs => {
+			return certs.data.filter(c => {
+				const approxSubject = c.storage_name
+					.replace('_', '.')
+					.substr(0, c.storage_name.length-4);
+				return res.locals.user.domains.includes(approxSubject);
+			});
+		});
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
