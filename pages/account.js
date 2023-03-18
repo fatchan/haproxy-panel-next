@@ -148,6 +148,34 @@ export default function Account(props) {
 					</a>
 				</Link>
 
+				{/* Origin CSR */}
+				<Link href="/csr">
+					<a className="list-group-item list-group-item-action d-flex align-items-start">
+						<div className="ms-2 me-auto">
+							<div className="fw-bold">
+								Origin CSR
+								<span className="fw-normal">
+									{' '}- Sign CSR to get certs for your origins
+								</span>
+							</div>
+						</div>
+					</a>
+				</Link>
+
+				{/* Statistics */}
+				<Link href="/stats">
+					<a className="list-group-item list-group-item-action d-flex align-items-start">
+						<div className="ms-2 me-auto">
+							<div className="fw-bold">
+								Statistics
+								<span className="fw-normal">
+									{' '}- Statistics from cluster servers
+								</span>
+							</div>
+						</div>
+					</a>
+				</Link>
+
 				{/* Map links */}
 				{mapLinks}
 
