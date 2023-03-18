@@ -66,11 +66,10 @@ function generateCertificate(privateKey, publicKey) {
 	cert.setExtensions([
 		{
 			name: "basicConstraints",
-			cA: true,
+			cA: false,
 		},
 		{
 			name: "keyUsage",
-			keyCertSign: true,
 			digitalSignature: true,
 			nonRepudiation: true,
 			keyEncipherment: true,
