@@ -1,3 +1,4 @@
+
 const { extractMap, dynamicResponse } = require('../util.js');
 const { createCIDR, parse } = require('ip6addr');
 const url = require('url');
@@ -246,10 +247,10 @@ exports.patchMapForm = async (req, res, next) => {
 						.then(res => res.data)
 						.then(servers => {
 							if (servers.length > 0) {
-								const serverIds = server
+								const serverIds = servers
 									.map(s => parseInt(s.id))
-									.sort();
-								return serverIds[serverIds.length]+1
+									.sort((a, b) => a-b);
+								return serverIds[serverIds.length-1]+1;
 							}
 							return 1;
 						});
