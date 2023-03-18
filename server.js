@@ -43,8 +43,9 @@ app.prepare()
 		});
 
 		server.use((err, req, res, next) => {
-			console.error(err)
-			return res.end();
+			const now = Date.now();
+			console.error('An error occurred', now, err);
+			return res.send('An error occurred. Please contact support with code: '+now);
 		});
 
 		server.listen(3000, (err) => {

@@ -235,14 +235,11 @@ exports.deleteCert = async (req, res) => {
  * Delete the map entries of the body 'domain'
  */
 exports.verifyUserCSR = (req, res, next) => {
-	if (res.locals.user.username !== "admin") {
-		return dynamicResponse(req, res, 403, { error: 'CA signed origin certs are only supported on enterprise plans' });
-	}
 	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid csr' });
 	}
 	try {
-		const signedCert = verifyCSR(req.body.csr);
+		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains);
 		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
 	} catch (e) {
 		return next(e);

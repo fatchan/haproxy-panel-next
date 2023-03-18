@@ -81,8 +81,24 @@ function generateCertificate(privateKey, publicKey) {
 	return pki.certificateToPem(cert);
 }
 
-function verifyCSR(csrPem) {
+function verifyCSR(csrPem, allowedDomains) {
 	const csr = pki.certificationRequestFromPem(csrPem);
+	const subject = csr.subject.getField('CN').value;
+	if (!allowedDomains.includes(subject)) {
+		throw new Error('No permission for subject');
+	}
+	const exts = csr.getAttribute({name: 'extensionRequest'});
+	if (exts && exts.extensions) {
+		const altNamesExt = exts.extensions.find(ext => ext.name === 'subjectAltName');
+		if (altNamesExt) {
+			const badAltNames = altNamesExt.altNames.some(altName => {
+				return !allowedDomains.includes(altName.value);
+			});
+			if (badAltNames) {
+				throw new Error('No permission for altnames');
+			}
+		}
+	}
 	const caCert = RootCACertificate;
 	const caKey = RootCAPrivateKey;
 	if (!csr.verify()) {
