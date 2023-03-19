@@ -63,13 +63,14 @@ function generateCertificate(privateKey, publicKey) {
 	cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
 	cert.setSubject(CAAttrs);
 	cert.setIssuer(CAAttrs);
-	cert.setExtensions([
+	cert.setExtensions([	
 		{
 			name: "basicConstraints",
-			cA: false,
+			cA: true,
 		},
 		{
 			name: "keyUsage",
+			keyCertSign: true,
 			digitalSignature: true,
 			nonRepudiation: true,
 			keyEncipherment: true,
@@ -114,11 +115,10 @@ function verifyCSR(csrPem, allowedDomains) {
 	cert.setExtensions([
 		{
 			name: "basicConstraints",
-			cA: true,
+			cA: false,
 		},
 		{
 			name: "keyUsage",
-			keyCertSign: true,
 			digitalSignature: true,
 			nonRepudiation: true,
 			keyEncipherment: true,
