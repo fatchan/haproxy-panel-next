@@ -56,7 +56,7 @@ function generateCertificate(privateKey, publicKey) {
 	const pubKey = pki.publicKeyFromPem(publicKey);
 	const cert = pki.createCertificate();
 	cert.publicKey = pubKey;
-	cert.serialNumber = '01';
+	cert.serialNumber = `00${Math.floor(Math.random()*1000)}`;
     //TODO: shorter/customisable
 	cert.validity.notBefore = new Date();
 	cert.validity.notAfter = new Date();
@@ -81,7 +81,7 @@ function generateCertificate(privateKey, publicKey) {
 	return pki.certificateToPem(cert);
 }
 
-function verifyCSR(csrPem, allowedDomains) {
+function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	const csr = pki.certificationRequestFromPem(csrPem);
 	const subject = csr.subject.getField('CN').value;
 	if (!allowedDomains.includes(subject)) {
@@ -105,7 +105,7 @@ function verifyCSR(csrPem, allowedDomains) {
 		throw new Error('Signature not verified.');
 	}
 	const cert = pki.createCertificate();
-	cert.serialNumber = '01';
+	cert.serialNumber = `00${serialNumber}${Math.floor(Math.random()*100)}`;
 	//TODO: shorter/customisable
 	cert.validity.notBefore = new Date();
 	cert.validity.notAfter = new Date();

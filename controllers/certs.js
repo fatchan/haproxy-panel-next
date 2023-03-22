@@ -234,12 +234,24 @@ exports.deleteCert = async (req, res) => {
  * POST /csr/verify
  * Delete the map entries of the body 'domain'
  */
-exports.verifyUserCSR = (req, res, next) => {
+exports.verifyUserCSR = async (req, res, next) => {
 	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid csr' });
 	}
 	try {
-		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains);
+		const serial = await db.db.collection('certs')
+			.findOneAndUpdate({
+				_id: 'serial',
+			}, {
+				$inc: {
+					number: 1,
+				},
+			}, {
+				upsert: true,
+			});
+		const serialNumber = serial && serial.value && serial.value.number || 1;
+		console.log('Attempting to sign CSR, serial', serialNumber)
+		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains, serialNumber);
 		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
 	} catch (e) {
 		return next(e);
