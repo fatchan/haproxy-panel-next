@@ -28,7 +28,7 @@ exports.certsPage = async (app, req, res) => {
 		.then(certs => {
 			return certs.data.filter(c => {
 				const approxSubject = c.storage_name
-					.replace('_', '.')
+					.replaceAll('_', '.')
 					.substr(0, c.storage_name.length-4);
 				return res.locals.user.domains.includes(approxSubject);
 			});
@@ -64,7 +64,7 @@ exports.certsJson = async (req, res) => {
 		.then(certs => {
 			return certs.data.filter(c => {
 				const approxSubject = c.storage_name
-					.replace('_', '.')
+					.replaceAll('_', '.')
 					.substr(0, c.storage_name.length-4);
 				return res.locals.user.domains.includes(approxSubject);
 			});

@@ -57,7 +57,7 @@ export default function Certs(props) {
 		.filter(c => c.storage_name !== 'server-cert.pem'); //no point showing this
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
 		const approxSubject = c.storage_name
-			.replace('_', '.')
+			.replaceAll('_', '.')
 			.substr(0, c.storage_name.length-4);
 		return (
 			<tr key={'clusterOnlyCertList'+i} className="align-middle">
