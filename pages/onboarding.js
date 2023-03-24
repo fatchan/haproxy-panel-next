@@ -114,7 +114,7 @@ export default function Onboarding(props) {
 					</span>
 				</span>
 			</div>
-			<div className="list-group-item d-flex gap-3">
+			{<div className="list-group-item d-flex gap-3">
 				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={backendAdded} disabled />
 				<span className="pt-1 form-checked-content">
 					<strong>
@@ -128,8 +128,12 @@ export default function Onboarding(props) {
 					<form onSubmit={addToMap} className="d-flex mb-3" action='/forms/map/hosts/add' method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
 						<input type="hidden" name="onboarding" value="1" />
-						<input className="btn btn-success" type="submit" value="+" disabled={backendAdded} />
-						<select className="form-select mx-3" name="key" defaultValue="" disabled={backendAdded} required>
+						<input className="btn btn-success" type="submit" value="+"
+							//disabled={backendAdded}
+						/>
+						<select className="form-select mx-3" name="key" defaultValue=""
+							//disabled={backendAdded}
+						required>
 							<option value="">select domain</option>
 							{user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>))}
 						</select>
@@ -140,7 +144,7 @@ export default function Onboarding(props) {
 								type="text"
 								name="value"
 								placeholder="backend ip:port"
-								disabled={certAdded}
+								//disabled={backendAdded}
 								required
 							/>
 						}
@@ -150,16 +154,17 @@ export default function Onboarding(props) {
 						Backend server successfully added
 					</strong>)}
 				</span>
-			</div>
+			</div>}
 			<div className="list-group-item d-flex gap-3">
 				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={certAdded} disabled />
 				<span className="pt-1 form-checked-content">
 					<strong>
 						<i className="bi-file-earmark-lock-fill pe-none me-2" width="1em" height="1em" />
-						4. Generate a HTTPS certificate
+						4. Generate a HTTPS certificate (frontend)
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
-						<p>BasedFlare will generate and setup a HTTPS certificate for you using <a href="https://letsencrypt.org/" rel="noreferrer" target="_blank">Let&apos;s Encrypt</a>.</p>
+						<p>BasedFlare will generate a HTTPS certificate for you using <a href="https://letsencrypt.org/" rel="noreferrer" target="_blank">Let&apos;s Encrypt</a>.</p>
+						<p>This certificate will be automatically installed on the BasedFlare edge and visitors will be connected securely.</p>
 						<p>Certificates last 90 days and will automatically renew when they have less than 30 days remaining.</p>
 						<p>You can manage certificates later from the &quot;HTTPS Certificates&quot; page.</p>
 					</span>
@@ -176,9 +181,40 @@ export default function Onboarding(props) {
 					</strong>)}
 				</span>
 			</div>
-			{domainAdded && backendAdded && certAdded && (<div className="list-group-item d-flex gap-3 justify-content-center">
-				<strong>All done!</strong>
-			</div>)}
+			<div className="list-group-item d-flex gap-3">
+				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={certAdded} disabled />
+				<span className="pt-1 form-checked-content">
+					<strong>
+						<i className="bi-file-earmark-lock-fill pe-none me-2" width="1em" height="1em" />
+						5. Get your HTTPS CSR signed (backend)
+					</strong>
+					<span className="d-block text-body-secondary mt-3">
+						<p>Finally, generate a certificate signing request for your origin server(s) and have BasedFlare sign it.</p>
+						<p>This allows BasedFlare servers to verify the connection to your backend and prevents trivial MITM attacks and other weaknesses that are possible with e.g self-signed certificates in CloudFlare&apos;s &quot;flexible&quot; or &quot;full&quot; ssl mode.</p>
+						<ol>
+							<li>Generate the private key and certificate signing request for your domains on your origin server:
+								<p>
+									<code>
+										{`openssl req  -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`")) -days 3650`}
+									</code>
+								</p>
+								Make sure to replace yourdomain.com and www.yourdomain.com. It&apos;s also recommended to put the correct organisational unit, locality, state and country.
+							</li>
+							<li>After generating, you will have two files: <code>origin.key</code> (your private key) and <code>origin.csr</code> (the certificate signing request).</li>
+							<li>Copy the contents of <code>origin.csr</code> into the box below. After submitting the form, save the output to <code>origin.crt</code></li>
+							<li>You can then setup <code>origin.key</code> and <code>origin.crt</code>, as the key and certificate respectively, in your origin web server.</li>
+						</ol>
+					</span>
+					<form className="d-flex mb-3" action="/forms/csr/verify" method="post">
+						<input type="hidden" name="_csrf" value={csrf} />
+						<textarea className="form-control mx-3" name="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..." required />
+						<input className="btn btn-success" type="submit" value="Verify" />
+					</form>
+				</span>
+			</div>
+			<div className="list-group-item d-flex gap-3 justify-content-center">
+				<strong>That&apos;s it!</strong>
+			</div>
 		</div>
 
 	</>);
