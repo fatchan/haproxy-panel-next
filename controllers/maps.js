@@ -250,7 +250,10 @@ exports.patchMapForm = async (req, res, next) => {
 								const serverIds = servers
 									.map(s => parseInt(s.id))
 									.sort((a, b) => a-b);
-								return serverIds[serverIds.length-1]+1;
+								const serverNameIds = servers
+									.map(s => parseInt(s.name.substr(6)))
+									.sort((a, b) => a-b);
+								return Math.max(serverIds[serverIds.length-1], serverNameIds[serverNameIds.length-1])+1;
 							}
 							return 1;
 						});
