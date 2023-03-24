@@ -88,8 +88,9 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 		throw new Error('No permission for subject');
 	}
 	const exts = csr.getAttribute({name: 'extensionRequest'});
+	let altNamesExt;
 	if (exts && exts.extensions) {
-		const altNamesExt = exts.extensions.find(ext => ext.name === 'subjectAltName');
+		altNamesExt = exts.extensions.find(ext => ext.name === 'subjectAltName');
 		if (altNamesExt) {
 			const badAltNames = altNamesExt.altNames.some(altName => {
 				return !allowedDomains.includes(altName.value);
@@ -110,9 +111,9 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	cert.validity.notBefore = new Date();
 	cert.validity.notAfter = new Date();
 	cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
-	cert.setSubject(csr.subject.attributes); //CSR subject (user sets IP)
+	cert.setSubject(csr.subject.attributes); //CSR subject (user sets domain)
 	cert.setIssuer(caCert.subject.attributes); //CA issuer
-	cert.setExtensions([
+	const certExtensions = [
 		{
 			name: "basicConstraints",
 			cA: false,
@@ -124,7 +125,17 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 			keyEncipherment: true,
 			dataEncipherment: true,
 		},
-	]);
+	];
+	if (altNamesExt && altNamesExt.altNames) {
+		certExtensions.push({
+			name: 'subjectAltName',
+			altNames: altNamesExt.altNames.map(an => ({
+				type: 2, // DNS
+				value: an.value
+			}))
+		});
+	}
+	cert.setExtensions(certExtensions);
 	cert.publicKey = csr.publicKey;
 	cert.sign(caKey, forge.md.sha256.create());
 	return pki.certificateToPem(cert);
