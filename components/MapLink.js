@@ -12,9 +12,9 @@ export default function MapLink({ map }) {
 						</span>
 					</span>
 				</span>
-				<span className="badge bg-primary rounded-pill">
+				{/*<span className="badge bg-primary rounded-pill">
 					{map.count}
-				</span>
+				</span>*/}
 			</a>
 		</Link>
 	)

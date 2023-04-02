@@ -162,7 +162,7 @@ export default function Account(props) {
 					</a>
 				</Link>
 
-				{/* Statistics */}
+				{/* Statistics 
 				<Link href="/stats">
 					<a className="list-group-item list-group-item-action d-flex align-items-start">
 						<div className="ms-2 me-auto">
@@ -174,7 +174,7 @@ export default function Account(props) {
 							</div>
 						</div>
 					</a>
-				</Link>
+				</Link>*/}
 
 				{/* Map links */}
 				{mapLinks}
@@ -186,7 +186,7 @@ export default function Account(props) {
 
 		innerData = (
 			<>
-				{Array(10).fill(loadingSection)}
+				{Array(12).fill(loadingSection)}
 			</>
 		);
 

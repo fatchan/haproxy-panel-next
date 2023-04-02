@@ -17,7 +17,7 @@ export default function App({ Component, pageProps }) {
 		<Layout>
 			<style>
 			{`
-				html, body { font-family: helvetica,arial,sans-serif; height: 100%; overflow: hidden; }
+				html, body { font-family: arial,Helvetica,sans-serif; height: 100%; overflow: hidden; }
 				.corner-ribbon {z-index:-1; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: absolute;overflow: hidden;}
 				.green { color: green; }
 				.red { color: red; }

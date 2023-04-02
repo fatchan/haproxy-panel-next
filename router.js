@@ -167,8 +167,8 @@ const testRouter = (server, app) => {
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
 		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
 		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);
-		server.get('/stats', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsPage.bind(null, app));
-		server.get('/stats.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsJson);
+		// server.get('/stats', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsPage.bind(null, app));
+		// server.get('/stats.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsJson);
 		const clusterRouter = express.Router({ caseSensitive: true });
 		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
 		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.patchMapForm); //add to MAP

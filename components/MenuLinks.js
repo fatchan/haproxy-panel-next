@@ -116,14 +116,14 @@ export default withRouter(function MenuLinks({ router }) {
 					</a>
 				</Link>
 			</li>
-			<li className="nav-item">
+			{/*<li className="nav-item">
 				<Link href="/stats">
 					<a className={router.pathname === "/stats" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-table pe-none me-2" width="16" height="16" />
 						Statistics
 					</a>
 				</Link>
-			</li>
+			</li>*/}
 		</ul>
 		<hr />
 		<ul className="nav nav-pills flex-column">
