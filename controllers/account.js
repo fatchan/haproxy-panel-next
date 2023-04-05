@@ -202,7 +202,7 @@ exports.login = async (req, res) => {
  * regiser
  */
 exports.register = async (req, res) => {
-	return dynamicResponse(req, res, 400, { error: 'Registration is disabled' });
+	return dynamicResponse(req, res, 400, { error: 'Registration is currently disabled, please try again later.' });
 
 	const username = req.body.username.toLowerCase();
 	const password = req.body.password;

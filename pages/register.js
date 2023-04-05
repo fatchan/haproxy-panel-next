@@ -18,7 +18,6 @@ export default function Register() {
 			password: e.target.password.value,
 			repeat_password: e.target.repeat_password.value,
 		}, null, setError, router);
-		router.push('/login');
 	}
 
 	return (
