@@ -197,7 +197,7 @@ exports.patchMapForm = async (req, res, next) => {
 				if (!parsedValue.host || !parsedValue.port) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
-				parse(parsedValue.hostname); //better ip parsing, will error if invalid
+				// parse(parsedValue.hostname); //better ip parsing, will error if invalid
 			} catch {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
@@ -236,43 +236,49 @@ exports.patchMapForm = async (req, res, next) => {
 					})
 					.then(res => res.data)
 					.catch(() => {});
+				const freeSlotId = await res.locals.dataPlane
+					.getRuntimeServers({
+						backend: 'servers'
+					})
+					.then(res => res.data)
+					.then(servers => {
+						if (servers.length > 0) {
+							const serverIds = servers
+								.map(s => parseInt(s.id))
+								.sort((a, b) => a-b);
+							const serverNameIds = servers
+								.map(s => parseInt(s.name.substr(6)))
+								.sort((a, b) => a-b);
+							return Math.max(serverIds[serverIds.length-1], serverNameIds[serverNameIds.length-1])+1;
+						}
+						return 1;
+					});
+				if (!freeSlotId) {
+					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
+				}
+				const [address, port] = value.split(':');
+				const runtimeServerResp = await res.locals
+					.dataPlaneAll('addRuntimeServer', {
+						backend: 'servers',
+					}, {
+						address,
+						port: parseInt(port),
+						name: `websrv${freeSlotId}`,
+						id: `${freeSlotId}`,
+						ssl: 'enabled',
+						verify: 'none',
+					});
+				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				if (backendMapEntry) {
-					//TODO: allow multiple backends (but requires reworking haproxy.cfg)
-					return dynamicResponse(req, res, 400, { error: 'Domain already has a backend server mapping' });
-				} else {
-					const freeSlotId = await res.locals.dataPlane
-						.getRuntimeServers({
-							backend: 'servers'
-						})
-						.then(res => res.data)
-						.then(servers => {
-							if (servers.length > 0) {
-								const serverIds = servers
-									.map(s => parseInt(s.id))
-									.sort((a, b) => a-b);
-								const serverNameIds = servers
-									.map(s => parseInt(s.name.substr(6)))
-									.sort((a, b) => a-b);
-								return Math.max(serverIds[serverIds.length-1], serverNameIds[serverNameIds.length-1])+1;
-							}
-							return 1;
-						});
-					if (!freeSlotId) {
-						return dynamicResponse(req, res, 400, { error: 'No server slots available' });
-					}
-					const [address, port] = value.split(':');
-					const runtimeServerResp = await res.locals
-						.dataPlaneAll('addRuntimeServer', {
-							backend: 'servers',
+					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry)
+					await res.locals
+						.dataPlaneAll('replaceRuntimeMapEntry', {
+							map: process.env.BACKENDS_MAP_NAME,
+							id: req.body.key,
 						}, {
-							address,
-							port: parseInt(port),
-							name: `websrv${freeSlotId}`,
-							id: `${freeSlotId}`,
-							ssl: 'enabled',
-							verify: 'none',
+							value: `${backendMapEntry.value},websrv${freeSlotId}`,
 						});
-					console.log('added runtime server', req.body.key, runtimeServerResp.data);
+				} else {
 					await res.locals
 						.dataPlaneAll('addPayloadRuntimeMap', {
 							name: process.env.BACKENDS_MAP_NAME,

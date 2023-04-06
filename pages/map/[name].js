@@ -80,11 +80,8 @@ const MapPage = (props) => {
 			);
 			break;
 		}
-		case "hosts":
-		case "maintenance": {
-			const activeDomains = map.map(e => e.key);
-			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
-			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
+		case "hosts": {
+			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
 					<input type="hidden" name="_csrf" value={csrf} />
@@ -103,6 +100,22 @@ const MapPage = (props) => {
 							required
 						/>
 					}
+				</>
+			);
+			break;
+		}
+		case "maintenance": {
+			const activeDomains = map.map(e => e.key);
+			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
+			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
+			formElements = (
+				<>
+					<input type="hidden" name="_csrf" value={csrf} />
+					<input className="btn btn-success" type="submit" value="+" />
+					<select className="form-select mx-3" name="key" defaultValue="" required>
+						<option value="" />
+						{domainSelectOptions}
+					</select>
 				</>
 			);
 			break;
