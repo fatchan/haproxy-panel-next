@@ -25,6 +25,7 @@ const sendStats = async () => {
 	try {
 		const { frontendStats, serverStats } = await statsData(null, { locals: { dataPlaneAll }}, null);
 		let points = [];
+		const now = new Date();
 		frontendStats.forEach((s, i) => {
 			const hostname = clusterUrls[i].hostname;
 			const statPoints = Object.entries(s[0].stats[0].stats)
@@ -32,7 +33,8 @@ const sendStats = async () => {
 					return new Point(e[0])
 						.tag('type', 'frontend')
 						.tag('hostname', hostname)
-						.floatField('value', e[1]);
+						.floatField('value', e[1])
+						.timestamp(now);
 				});
 			points = points.concat(statPoints);
 		});
@@ -47,7 +49,8 @@ const sendStats = async () => {
 								.tag('hostname', hostname)
 								.tag('server_name', ss.name)
 								.tag('server_address', ss.stats["Address"])
-								.floatField('value', e[1]);
+								.floatField('value', e[1])
+								.timestamp(now);
 						});
 					points = points.concat(statPoints);
 				 });
