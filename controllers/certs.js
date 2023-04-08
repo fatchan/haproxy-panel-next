@@ -106,6 +106,16 @@ exports.addCert = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
 	}
 
+	const maintenanceMap = await res.locals
+		.dataPlane.showRuntimeMap({
+			map: process.env.MAINTENANCE_MAP_NAME
+		})
+		.then(res => res.data);
+	const maintenanceDomainEntry = maintenanceMap && maintenanceMap.find(e => e.key === req.body.subject);
+	if (maintenanceDomainEntry) {
+		return dynamicResponse(req, res, 400, { error: 'Cannot generate a certificate while the domain is in maintenance mode' });
+	}
+
 	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
 		return dynamicResponse(req, res, 400, { error: 'Cert with this subject already exists' });
