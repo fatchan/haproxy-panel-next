@@ -231,8 +231,26 @@ exports.deleteCert = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+
+
 	const subject = req.body.subject.toLowerCase();
 
+	//Delete cert from cluster if storage_name sent
+	if (req.body.storage_name && typeof req.body.storage_name === 'string') {
+		const storageName = req.body.storage_name;
+		const certExists = await db.db.collection('certs')
+			.findOne({ storageName, username: res.locals.user.username });
+		if (!certExists) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
+		await res.locals
+			.dataPlaneAll('deleteStorageSSLCertificate', {
+				name: storageName,
+			});
+		return dynamicResponse(req, res, 302, { redirect: '/certs' });
+	}
+
+	//otherwise completely delete from db
 	await db.db.collection('certs')
 		.deleteOne({ _id: subject, username: res.locals.user.username });
 

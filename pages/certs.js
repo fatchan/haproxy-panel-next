@@ -35,14 +35,14 @@ export default function Certs(props) {
 		await API.addCert({
 			_csrf: csrf,
 			subject: e.target.subject.value,
-			altnames: e.target.altnames.value.split(',').map(x => x.trim())
+			altnames: e.target.altnames.value.split(',').map(x => x.trim()),
 		}, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
 
 	async function deleteCert(e) {
 		e.preventDefault();
-		await API.deleteCert({ _csrf: csrf, subject: e.target.subject.value }, dispatch, setError, router);
+		await API.deleteCert({ _csrf: csrf, subject: e.target.subject.value, storage_name: e.target.storage_name.value }, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
 	
@@ -62,11 +62,12 @@ export default function Certs(props) {
 		return (
 			<tr key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">
-					{/*TODO: delete non-db cert <form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
+					{<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="subject" value={d.subject || d._id} />
+						<input type="hidden" name="subject" value={approxSubject} />
+						<input type="hidden" name="storage_name" value={c.storage_name} />
 						<input className="btn btn-danger" type="submit" value="×" />
-					</form>*/}
+					</form>}
 				</td>
 				<td>
 					{approxSubject || '-'}
@@ -97,13 +98,21 @@ export default function Certs(props) {
 						? (<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
 							<input type="hidden" name="_csrf" value={csrf} />
 							<input type="hidden" name="subject" value={d.subject || d._id} />
+							<input type="hidden" name="storage_name" value={d.storageName} />
 							<input className="btn btn-danger" type="submit" value="×" />
 						</form>)
-						: (<form onSubmit={uploadCert} action="/forms/cert/upload" method="post">
-							<input type="hidden" name="_csrf" value={csrf} />
-							<input type="hidden" name="domain" value={d.subject || d._id} />
-							<input className="btn btn-warning" type="submit" value="↑" />
-						</form>)
+						: (<>
+							<form onSubmit={uploadCert} action="/forms/cert/upload" method="post">
+								<input type="hidden" name="_csrf" value={csrf} />
+								<input type="hidden" name="domain" value={d.subject || d._id} />
+								<input className="btn btn-warning mb-2" type="submit" value="↑" />
+							</form>
+							<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
+								<input type="hidden" name="_csrf" value={csrf} />
+								<input type="hidden" name="domain" value={d.subject || d._id} />
+								<input className="btn btn-danger" type="submit" value="×" />
+							</form>
+						</>)
 					}
 				</td>
 				<td>
