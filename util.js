@@ -33,9 +33,15 @@ const fMap = {
 	},
 
 	[process.env.REWRITE_MAP_NAME]: {
+		fname: 'Rewrites',
+		description: 'Rewrite domain to a different domain and/or path',
+		columnNames: ['Domain', 'Rewrite to'],
+	},
+
+	[process.env.REDIRECT_MAP_NAME]: {
 		fname: 'Redirects',
-		description: 'Easily redirect domains to an updated domain and/or path',
-		columnNames: ['Domain', 'Replacement'],
+		description: 'Redirect one domain to another, stripping path',
+		columnNames: ['Domain', 'Redirect to'],
 	},
 
 //	[process.env.BACKENDS_MAP_NAME]: {

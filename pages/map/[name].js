@@ -130,6 +130,7 @@ const MapPage = (props) => {
 				</>
 			);
 			break;
+		case "redirect":
 		case "rewrite":
 			formElements = (
 				<>

@@ -30,6 +30,7 @@ exports.mapData = async (req, res, next) => {
 
 	switch (req.params.name) {
 		case process.env.REWRITE_MAP_NAME:
+		case process.env.REDIRECT_MAP_NAME:
 		case process.env.DDOS_MAP_NAME:
 			showValues = true;
 			/* falls through */
@@ -87,6 +88,7 @@ exports.deleteMapForm = async (req, res, next) => {
 	if (req.params.name === process.env.HOSTS_MAP_NAME
 		|| req.params.name === process.env.DDOS_MAP_NAME
 		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
+		|| req.params.name === process.env.REDIRECT_MAP_NAME
 		|| req.params.name === process.env.REWRITE_MAP_NAME) {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
@@ -155,6 +157,7 @@ exports.patchMapForm = async (req, res, next) => {
 		if (req.params.name === process.env.DDOS_MAP_NAME
 			|| req.params.name === process.env.HOSTS_MAP_NAME
 			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
+			|| req.params.name === process.env.REDIRECT_MAP_NAME
 			|| req.params.name === process.env.REWRITE_MAP_NAME) {
 			const { hostname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
@@ -181,7 +184,8 @@ exports.patchMapForm = async (req, res, next) => {
 		}
 
 		//validate value is url (roughly)
-		if (req.params.name === process.env.REWRITE_MAP_NAME) {
+		if (req.params.name === process.env.REWRITE_MAP_NAME
+			|| req.params.name === process.env.REDIRECT_MAP_NAME) {
 			try {
 				new URL(`http://${req.body.value}`);
 			} catch {
@@ -207,6 +211,7 @@ exports.patchMapForm = async (req, res, next) => {
 		let value;
 		switch (req.params.name) {
 			case process.env.REWRITE_MAP_NAME:
+			case process.env.REDIRECT_MAP_NAME:
 			case process.env.DDOS_MAP_NAME:
 				value = req.body.value;
 				break;

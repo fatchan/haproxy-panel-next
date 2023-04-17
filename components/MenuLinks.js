@@ -88,6 +88,14 @@ export default withRouter(function MenuLinks({ router }) {
 				<Link href="/map/rewrite">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "rewrite" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-signpost pe-none me-2" width="16" height="16" />
+						Rewrites
+					</a>
+				</Link>
+			</li>
+			<li className="nav-item">
+				<Link href="/map/redirect">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "redirect" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-signpost-fill pe-none me-2" width="16" height="16" />
 						Redirects
 					</a>
 				</Link>
