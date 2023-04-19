@@ -47,7 +47,7 @@ export default function Csr(props) {
 				To generate a certificate signing request for your domain and/or subdomain(s):
 				<code>
 					{`openssl req  -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`")) -days 3650`}
-				/code>
+				</code>
 			</p>
 
 			<div className="table-responsive">
