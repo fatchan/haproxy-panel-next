@@ -6,7 +6,8 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+    command: npm run start-dev
     volumes:
       - type: bind
         source: /tmp/acme-tests/.well-known/acme-challenge/

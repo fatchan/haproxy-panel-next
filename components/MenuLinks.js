@@ -31,15 +31,23 @@ export default withRouter(function MenuLinks({ router }) {
 			<li className="nav-item">
 				<Link href="/domains">
 					<a className={router.pathname === "/domains" ? "nav-link active" : "nav-link text-body"} aria-current="page">
-						<i className="bi-card-list pe-none me-2" width="16" height="16" />
+						<i className="bi-layers pe-none me-2" width="16" height="16" />
 						Domains
 					</a>
 				</Link>
 			</li>
+			{/*<li className="nav-item">
+				<Link href="/dns">
+					<a className={router.pathname === "/dns" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-card-list pe-none me-2" width="16" height="16" />
+						DNS
+					</a>
+				</Link>
+			</li>*/}
 			<li className="nav-item">
 				<Link href="/clusters">
 					<a className={router.pathname === "/clusters" ? "nav-link active" : "nav-link text-body"} aria-current="page">
-						<i className="bi-hdd-rack pe-none me-2" width="16" height="16" />
+						<i className="bi-clouds pe-none me-2" width="16" height="16" />
 						Clusters
 					</a>
 				</Link>
@@ -87,7 +95,7 @@ export default withRouter(function MenuLinks({ router }) {
 			<li className="nav-item">
 				<Link href="/map/rewrite">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "rewrite" ? "nav-link active" : "nav-link text-body"} aria-current="page">
-						<i className="bi-signpost pe-none me-2" width="16" height="16" />
+						<i className="bi-pencil pe-none me-2" width="16" height="16" />
 						Rewrites
 					</a>
 				</Link>
@@ -95,7 +103,7 @@ export default withRouter(function MenuLinks({ router }) {
 			<li className="nav-item">
 				<Link href="/map/redirect">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "redirect" ? "nav-link active" : "nav-link text-body"} aria-current="page">
-						<i className="bi-signpost-fill pe-none me-2" width="16" height="16" />
+						<i className="bi-signpost pe-none me-2" width="16" height="16" />
 						Redirects
 					</a>
 				</Link>

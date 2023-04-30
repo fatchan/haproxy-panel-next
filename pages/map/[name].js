@@ -161,7 +161,7 @@ const MapPage = (props) => {
 
 			{/* Map table */}
 			<div className="table-responsive">
-				<table className="table table-bordered text-nowrap">
+				<table className="table text-nowrap m-1">
 					<tbody>
 
 						{/* header row */}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
@@ -42,7 +43,9 @@ export default function Domains(props) {
 		await API.getDomains(dispatch, setError, router);
 	}
 
-	const domainList = user.domains.map((d, i) => {
+	const domainList = user.domains
+		.sort((a, b) => a.localeCompare(b))
+		.map((d, i) => {
 		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
 		return (
@@ -58,7 +61,17 @@ export default function Domains(props) {
 					{d}
 				</td>
 				<td>
-					{domainCert ? '🔒 '+domainCert.storageName : '-'}
+					{domainCert
+						? <span className="text-success"><i className="bi-lock-fill pe-none me-2" width="16" height="16" />{domainCert.storageName}</span>
+						: <span className="text-danger"><i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />No Certificate</span>}
+				</td>
+				<td className="col-1 text-center">
+					{d.split('.').length < 2 && <Link href={`/dns/${d}`}>
+						<a className="btn btn-outline-secondary">
+							<i className="bi-card-list pe-none me-2" width="16" height="16" />
+							DNS
+						</a>
+					</Link>}
 				</td>
 			</tr>
 		);
@@ -79,7 +92,7 @@ export default function Domains(props) {
 
 			{/* Domains table */}
 			<div className="table-responsive">
-				<table className="table table-bordered text-nowrap">
+				<table className="table text-nowrap m-1">
 					<tbody>
 
 						<tr className="align-middle">
@@ -88,7 +101,10 @@ export default function Domains(props) {
 								Domain
 							</th>
 							<th>
-								HTTPS?
+								HTTPS Certificate
+							</th>
+							<th className="col-1">
+								Edit DNS
 							</th>
 						</tr>
 
@@ -96,7 +112,7 @@ export default function Domains(props) {
 
 						{/* Add new domain form */}
 						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan="3">
+							<td className="col-1 text-center" colSpan="4">
 								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />

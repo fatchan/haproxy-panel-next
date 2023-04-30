@@ -201,9 +201,9 @@ exports.login = async (req, res) => {
  * POST /forms/register
  * regiser
  */
-exports.register = async (req, res) => {
+exports.register = (req, res) => {
 	return dynamicResponse(req, res, 400, { error: 'Registration is currently disabled, please try again later.' });
-
+/*
 	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
 	const rPassword = req.body.repeat_password;
@@ -237,6 +237,7 @@ exports.register = async (req, res) => {
 		});
 
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
+*/
 };
 
 /**

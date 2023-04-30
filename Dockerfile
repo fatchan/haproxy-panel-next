@@ -12,5 +12,3 @@ COPY . /opt
 
 RUN npm run build
 RUN npx next telemetry disable
-
-CMD ["npm","start"]

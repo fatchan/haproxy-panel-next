@@ -23,14 +23,8 @@ Provides a control panel interface to conveniently manage clusters (groups of id
 - Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
 - Statistics page with server and backend-level breakdowns based on haproxy stats socket data. Ability to export statistics to influxdb.
 
-##### Todo:
-- Better Multi-user support
-  - allow domain/cluster editing (with user dupe check) for non-admins
-  - problems w/ ip whitelist and blacklist
-- Some kind of payment system
-- More advanced rules and ability to allow/block/bot mode based on those rules.
-- Show statistics from clusters or servers within a cluster.
-  - Intelligent auto toggling of proteciton modes based on these stats
+## License
+GNU AGPLv3, see [LICENSE](LICENSE).
 
 #### Screenshots
 

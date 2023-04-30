@@ -73,7 +73,7 @@ export default function Clusters(props) {
 
 			{/* Clusters table */}
 			<div className="table-responsive">
-				<table className="table table-bordered text-nowrap">
+				<table className="table text-nowrap m-1">
 					<tbody>
 
 						{clusterList}
