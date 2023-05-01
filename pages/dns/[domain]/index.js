@@ -86,14 +86,14 @@ const DnsDomainIndexPage = (props) => {
 
 			<Head>
 				<title>
-					{domain} / Records List
+					{domain} / Records list
 				</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				{domain} / Records List:
+				{domain} / Records list:
 			</h5>
 
 			{/* Record sets table */}
@@ -130,7 +130,7 @@ const DnsDomainIndexPage = (props) => {
 			</div>
 
 			{/* back to account */}
-			<BackButton to="/account" />
+			<BackButton to="/domains" />
 
 		</>
 	);
