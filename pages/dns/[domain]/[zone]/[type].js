@@ -64,7 +64,8 @@ const DnsEditRecordPage = (props) => {
 
 	const { user, recordSets, csrf, editing } = state;
 
-	const recordSet = recordSets.find(x => x[zone] != null)[zone][type];
+	let recordSet = recordSets.find(x => x[zone] != null)[zone][type];
+	recordSet = Array.isArray(recordSet) ? recordSet : [recordSet]
 
 	return (
 		<>
@@ -82,9 +83,12 @@ const DnsEditRecordPage = (props) => {
 			</h5>
 
 			{/* Record editing form */}
-			<div className="col">
+			<form className="card text-bg-dark col p-3 border-0 shadow-sm" onSubmit={e => {
+				e.preventDefault();
+				console.log(e)
+			}}>
 
-				<div className="row">
+				<div className="row mb-3">
 					<div className="col">
 						<label className="w-100">
 							Type (required)
@@ -105,7 +109,7 @@ const DnsEditRecordPage = (props) => {
 					<div className="col">
 						<label className="w-100">
 							Name
-							<input className="form-control" type="text" name="key" value={zone} readonly required />
+							<input className="form-control" type="text" name="key" value={zone} readOnly required />
 						</label>
 					</div>
 					<div className="col">
@@ -120,23 +124,29 @@ const DnsEditRecordPage = (props) => {
 				</div>
 
 				
-				<div className="row">
+				<div className="row mb-3">
 					<div className="col-4">
 						Record selection mode:
 						<div className="form-check">
-							<input className="form-check-input" type="radio" name="selection" id="weight" checked />
-							<label className="form-check-label" htmlFor="weight">
-								Weight
+							<input className="form-check-input" type="radio" name="selection" id="roundrobin" checked={!recordSet[0].geok} />
+							<label className="form-check-label" htmlFor="roundrobin">
+								Round Robin
 							</label>
 						</div>
 						<div className="form-check">
 							<input className="form-check-input" type="radio" name="selection" id="weight" />
 							<label className="form-check-label" htmlFor="weight">
+								Weighted
+							</label>
+						</div>
+						<div className="form-check">
+							<input className="form-check-input" type="radio" name="selection" id="geo" checked={recordSet[0].geok != null} />
+							<label className="form-check-label" htmlFor="geo">
 								Geolocation
 							</label>
 						</div>
 					</div>
-					<div className="col-4">
+					{/*<div className="col-4">
 						Record selection mode:
 						<div className="form-check">
 							<input className="form-check-input" type="radio" name="selection" id="weight" checked />
@@ -149,15 +159,103 @@ const DnsEditRecordPage = (props) => {
 							<label className="form-check-label" htmlFor="weight">
 								Geolocation
 							</label>
+						</div>
+					</div>*/}
+				</div>
+
+
+				<div className="col">
+					<div className="row">
+						<div className="col">
+							Records:
+						</div>
+					</div>
+					{recordSet.map((rec, i) => (<>
+						<div className="row">
+							<div className="col-2">
+								ID: 
+								<input className="form-control" type="text" name={`id${i}`} defaultValue={rec.id} required />
+							</div>
+							<div className="col">
+								<label className="w-100">
+									Value
+									<input className="form-control" type="text" name={`value_${i}`} defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text} required />
+								</label>
+							</div>
+							<div className="col-auto align-self-end mb-2">
+								<div className="form-check form-switch">
+								  <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={rec.h} />
+								  <label className="form-check-label" htmlFor="flexCheckDefault">
+								    Health Check
+								  </label>
+								</div>
+							</div>
+							<div className="col-auto ms-auto">
+								<button className="btn btn-danger mt-4">
+									×
+								</button>
+							</div>
+						</div>
+						<div className="row">
+							<div className="col-2">
+								<label className="w-100">
+									Geo Key
+									<select className="form-select" name={`geok_${i}`} defaultValue={rec.geok} required>
+										<option value="cn">Continent</option>
+										<option value="cc">Country</option>
+									</select>
+								</label>
+							</div>
+							<div className="col">
+								<label className="w-100">
+									Geo Value(s)
+									<input className="form-control" type="text" name={`geov_${i}`} defaultValue={(rec.geov||[]).join(', ')} required />
+								</label>
+							</div>
+							<div className="col-2">
+								<label className="w-100">
+									Selector
+									<select className="form-select" name={`sel_${i}`} defaultValue={rec.sel} required>
+										<option value="0">None</option>
+										<option value="1">First</option>
+										<option value="2">Random</option>
+										<option value="3">All</option>
+									</select>
+								</label>
+							</div>
+							<div className="col-2">
+								<label className="w-100">
+									Backup Selector
+									<select className="form-select" name={`bsel_${i}`} defaultValue={rec.bsel} required>
+										<option value="0">None</option>
+										<option value="1">First</option>
+										<option value="2">Random</option>
+										<option value="3">All</option>
+									</select>
+								</label>
+							</div>
+						</div>
+						{i < recordSet.length && <hr className="mb-2 mt-3" />}
+					</>))}
+					<div className="row mt-4">
+						<div className="col-auto me-auto">
+							<BackButton to={`/dns/${domain}`} />
+						</div>
+						{/*<div className="col-auto ms-auto">
+							<button className="btn btn-secondary">
+								Cancel
+							</button>
+						</div>*/}
+						<div className="col-auto">
+							<button className="btn btn-success">
+								Save
+							</button>
 						</div>
 					</div>
 				</div>
 
 			
-			</div>
-
-			{/* back to account */}
-			<BackButton to={`/dns/${domain}`} />
+			</form>
 
 		</>
 	);
