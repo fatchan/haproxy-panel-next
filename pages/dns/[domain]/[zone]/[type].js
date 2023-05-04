@@ -8,47 +8,56 @@ import * as API from '../../../../api.js';
 const DnsEditRecordPage = (props) => {
 
 	const router = useRouter();
-	const { domain, zone, type } = router.query;
-	const [state, dispatch] = useState({
-		...props,
-	});
+	const [state, dispatch] = useState(props);
+	const { domain, zone: routerZone, type: routerType } = router.query;
+	const newRecord = router.asPath === `/dns/${domain}/new`;
+	const [zone, setZone] = useState(routerZone || "name");
+	const [type, setType] = useState(routerType || "a");
+	const [recordSet, setRecordSet] = useState(state.recordSet)
 	const [error, setError] = useState();
 
 	useEffect(() => {
-		if (!state.recordSets) {
-			API.getDnsRecords(domain, zone, dispatch, setError, router);
+		if (!recordSet) {
+			API.getDnsRecords(domain, zone, type, dispatch, setError, router)
+				.then(res => {
+					if (res && res.recordSet) {
+						setRecordSet([...res.recordSet]);
+					}
+				});
+				
 		}
-	}, [state.recordSets, domain, router]);
+	}, [recordSet, domain, zone, type, router]);
 
-	if (state.recordSets == null) {
+	if (!recordSet && !newRecord) {
 		return (
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
 				<div className="text-center mb-4">
-					Loading...
+					<div className="spinner-border mt-5" role="status">
+						<span className="visually-hidden">Loading...</span>
+					</div>
 				</div>
 			</div>
 		);
 	}
 
-	const { user, recordSets, csrf, editing } = state;
-
-	let recordSet = recordSets.find(x => x[zone] != null)[zone][type];
-	recordSet = Array.isArray(recordSet) ? recordSet : [recordSet]
+	const { csrf } = state;
+	const supportsGeo = ["a", "aaaa"].includes(type);
+	const supportsHealth = ["a", "aaaa"].includes(type);
 
 	return (
 		<>
 
 			<Head>
 				<title>
-					{domain} / Records list / Edit record set
+					{`${domain} / Records list / ${newRecord?'New':'Edit'} record set`}
 				</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				{domain} / Records list / Edit record set:
+				{domain} / Records list / {newRecord?'New':'Edit'} record set:
 			</h5>
 
 			{/* Record editing form */}
@@ -56,12 +65,18 @@ const DnsEditRecordPage = (props) => {
 				e.preventDefault();
 				console.log(e)
 			}}>
-
+				<input type="hidden" name="_csrf" value={csrf} />
 				<div className="row mb-3">
 					<div className="col">
 						<label className="w-100">
 							Type (required)
-							<select className="form-select" name="value" defaultValue={type} required>
+							<select 
+								className="form-select"
+								name="type"
+								defaultValue={type}
+								onChange={e => setType(e.target.value)}
+								required
+								disabled={!newRecord}>
 								<option value="">Type</option>
 								<option value="a">A</option>
 								<option value="aaaa">AAAA</option>
@@ -78,15 +93,27 @@ const DnsEditRecordPage = (props) => {
 					<div className="col">
 						<label className="w-100">
 							Name
-							<input className="form-control" type="text" name="key" value={zone} readOnly required />
+							<input
+								className="form-control"
+								type="text"
+								name="name"
+								defaultValue={zone}
+								required 
+								disabled={!newRecord}
+								onChange={e => setZone(e.target.value)}
+							/>
 						</label>
 					</div>
 					<div className="col">
 						<label className="w-100">
 							TTL
 							<input
-								className="form-control" type="number" name="key" min="30" required
-								value={Array.isArray(recordSet) ? recordSet[0].ttl : recordSet.ttl}
+								className="form-control"
+								type="number"
+								name="ttl"
+								min="30"
+								required
+								defaultValue={recordSet[0].ttl || 300}
 							/>
 						</label>
 					</div>
@@ -97,7 +124,7 @@ const DnsEditRecordPage = (props) => {
 					<div className="col-4">
 						Record selection mode:
 						<div className="form-check">
-							<input className="form-check-input" type="radio" name="selection" id="roundrobin" checked={!recordSet[0].geok} />
+							<input className="form-check-input" type="radio" name="selection" id="roundrobin" defaultChecked />
 							<label className="form-check-label" htmlFor="roundrobin">
 								Round Robin
 							</label>
@@ -109,7 +136,7 @@ const DnsEditRecordPage = (props) => {
 							</label>
 						</div>
 						<div className="form-check">
-							<input className="form-check-input" type="radio" name="selection" id="geo" checked={recordSet[0].geok != null} />
+							<input className="form-check-input" type="radio" name="selection" id="geo" />
 							<label className="form-check-label" htmlFor="geo">
 								Geolocation
 							</label>
@@ -141,31 +168,39 @@ const DnsEditRecordPage = (props) => {
 					</div>
 					{recordSet.map((rec, i) => (<>
 						<div className="row">
-							<div className="col-2">
+							{supportsHealth && <div className="col-2">
 								ID: 
 								<input className="form-control" type="text" name={`id${i}`} defaultValue={rec.id} required />
-							</div>
+							</div>}
 							<div className="col">
 								<label className="w-100">
 									Value
 									<input className="form-control" type="text" name={`value_${i}`} defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text} required />
 								</label>
 							</div>
-							<div className="col-auto align-self-end mb-2">
+							{supportsHealth && <div className="col-auto align-self-end mb-2">
 								<div className="form-check form-switch">
-								  <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={rec.h} />
+								  <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" defaultChecked={rec.h} />
 								  <label className="form-check-label" htmlFor="flexCheckDefault">
 								    Health Check
 								  </label>
 								</div>
-							</div>
+							</div>}
 							<div className="col-auto ms-auto">
-								<button className="btn btn-danger mt-4">
+								<button
+									className="btn btn-danger mt-4"
+										onClick={(e) =>{
+										e.preventDefault();
+										recordSet.splice(i, 1);
+										setRecordSet([...recordSet]);
+									}}
+									disabled={i === 0}
+								>
 									×
 								</button>
 							</div>
 						</div>
-						<div className="row">
+						{supportsGeo && <div className="row">
 							<div className="col-2">
 								<label className="w-100">
 									Geo Key
@@ -181,9 +216,9 @@ const DnsEditRecordPage = (props) => {
 									<input className="form-control" type="text" name={`geov_${i}`} defaultValue={(rec.geov||[]).join(', ')} required />
 								</label>
 							</div>
-							<div className="col-2">
+							<div className="col-3">
 								<label className="w-100">
-									Selector
+									Fallback Selector
 									<select className="form-select" name={`sel_${i}`} defaultValue={rec.sel} required>
 										<option value="0">None</option>
 										<option value="1">First</option>
@@ -192,7 +227,7 @@ const DnsEditRecordPage = (props) => {
 									</select>
 								</label>
 							</div>
-							<div className="col-2">
+							<div className="col-3">
 								<label className="w-100">
 									Backup Selector
 									<select className="form-select" name={`bsel_${i}`} defaultValue={rec.bsel} required>
@@ -203,10 +238,21 @@ const DnsEditRecordPage = (props) => {
 									</select>
 								</label>
 							</div>
-						</div>
-						{i < recordSet.length && <hr className="mb-2 mt-3" />}
+						</div>}
+						{i < recordSet.length-1 && <hr className="mb-2 mt-3" />}
 					</>))}
-					<div className="row mt-4">
+					<div className="row mt-2">
+						<div className="col-auto ms-auto">
+							<button className="ms-auto btn btn-success mt-2" onClick={(e) =>{
+								e.preventDefault();
+								recordSet.push({})
+								setRecordSet([...recordSet]);
+							}}>
+								+
+							</button>
+						</div>
+					</div>
+					<div className="row mt-5">
 						<div className="col-auto me-auto">
 							<BackButton to={`/dns/${domain}`} />
 						</div>

@@ -166,9 +166,10 @@ const testRouter = (server, app) => {
 		server.get('/clusters.json', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersJson);
 		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
+		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/new', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app));
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+).json', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsDomainJson);
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+)', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsDomainPage.bind(null, app));
-		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@]+).json', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordJson);
+		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@]+)/:type([a-z]+).json', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordJson);
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@]+)/:type([a-z]+)', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app));
 		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
 		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);

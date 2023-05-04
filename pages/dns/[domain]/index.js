@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import RecordSetRow from '../../../components/RecordSetRow.js';
@@ -26,7 +27,9 @@ const DnsDomainIndexPage = (props) => {
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
 				<div className="text-center mb-4">
-					Loading...
+					<div className="spinner-border mt-5" role="status">
+						<span className="visually-hidden">Loading...</span>
+					</div>
 				</div>
 			</div>
 		);
@@ -56,7 +59,7 @@ const DnsDomainIndexPage = (props) => {
 
 			<Head>
 				<title>
-					{domain} / Records list
+					{`${domain} / Records list`}
 				</title>
 			</Head>
 
@@ -97,6 +100,15 @@ const DnsDomainIndexPage = (props) => {
 
 					</tbody>
 				</table>
+			</div>
+
+			
+			<div className="my-3">
+				<Link href={`/dns/${domain}/new`}>
+					<a className="btn btn-success">
+						+
+					</a>
+				</Link>
 			</div>
 
 			{/* back to account */}

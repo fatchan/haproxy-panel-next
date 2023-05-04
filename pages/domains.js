@@ -23,7 +23,9 @@ export default function Domains(props) {
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
 				<div className="text-center mb-4">
-					Loading...
+					<div className="spinner-border mt-5" role="status">
+						<span className="visually-hidden">Loading...</span>
+					</div>
 				</div>
 			</div>
 		);
@@ -66,7 +68,7 @@ export default function Domains(props) {
 						: <span className="text-danger"><i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />No Certificate</span>}
 				</td>
 				<td className="col-1 text-center">
-					{d.split('.').length < 2 && <Link href={`/dns/${d}`}>
+					{d.split('.').length <= 2 && <Link href={`/dns/${d}`}>
 						<a className="btn btn-outline-secondary">
 							<i className="bi-card-list pe-none me-2" width="16" height="16" />
 							DNS
