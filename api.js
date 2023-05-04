@@ -36,6 +36,14 @@ export async function deleteDomain(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/domain/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Dns
+export async function getDnsDomain(domain, dispatch, errorCallback, router) {
+	return ApiCall(`/dns/${domain}.json`, 'GET', null, dispatch, errorCallback, router);
+}
+export async function getDnsRecords(domain, zone, dispatch, errorCallback, router) {
+	return ApiCall(`/dns/${domain}/${zone}.json`, 'GET', null, dispatch, errorCallback, router);
+}
+
 // Certs
 export async function getCerts(dispatch, errorCallback, router) {
 	return ApiCall('/certs.json', 'GET', null, dispatch, errorCallback, router);
