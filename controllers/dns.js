@@ -31,11 +31,14 @@ exports.dnsRecordPage = async (app, req, res) => {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
-	let recordSet = [{}];
+	let recordSet = [];
 	if (req.params.zone && req.params.type) {
-		const recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		if (!recordSetRaw) {
+			recordSetRaw = {};
+		}
 		recordSet = recordSetRaw[req.params.type];
-		recordSet = Array.isArray(recordSet) ? recordSet : [recordSet];
+		recordSet = Array.isArray(recordSet) ? recordSet : (recordSet ? [recordSet] : []);
 	}
 	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||"name"}/${req.params.type||"a"}`, {
 		csrf: req.csrfToken(),
@@ -71,11 +74,14 @@ exports.dnsRecordJson = async (req, res) => {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
-	let recordSet = [{}];
+	let recordSet = [];
 	if (req.params.zone && req.params.type) {
-		const recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		if (!recordSetRaw) {
+			recordSetRaw = {};
+		}
 		recordSet = recordSetRaw[req.params.type];
-		recordSet = Array.isArray(recordSet) ? recordSet : [recordSet];
+		recordSet = Array.isArray(recordSet) ? recordSet : (recordSet ? [recordSet] : []);
 	}
 	return res.json({
 		csrf: req.csrfToken(),
@@ -94,7 +100,7 @@ exports.dnsRecordDelete = async (req, res) => {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
 	if (req.params.zone && req.params.type) {
-		const recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
 		if (!recordSetRaw) {
 			recordSetRaw = {};
 		}

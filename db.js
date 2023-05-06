@@ -6,7 +6,7 @@ module.exports = {
 		const client = new MongoClient(process.env.DB_URL);
 		await client.connect();
 		module.exports.client = client;
-		module.exports.db = client.db('test');
+		module.exports.db = client.db();
 	}
 
 }

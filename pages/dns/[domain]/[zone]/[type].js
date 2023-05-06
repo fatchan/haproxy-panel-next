@@ -11,10 +11,10 @@ const DnsEditRecordPage = (props) => {
 	const [state, dispatch] = useState(props);
 	const { domain, zone: routerZone, type: routerType } = router.query;
 	const newRecord = router.asPath === `/dns/${domain}/new`;
-	const [recordSet, setRecordSet] = useState(state.recordSet||[{}])
+	const [recordSet, setRecordSet] = useState();
 	const [zone, setZone] = useState(routerZone || "name");
 	const [type, setType] = useState(routerType || "a");
-	const [recordSelection, setRecordSelection] = useState(recordSet && recordSet.length > 0 ? (recordSet[0].geok ? "geo" : "roundrobin") : "roundrobin");
+	const [recordSelection, setRecordSelection] = useState("roundrobin");
 	const [error, setError] = useState();
 
 	useEffect(() => {
@@ -22,15 +22,14 @@ const DnsEditRecordPage = (props) => {
 			API.getDnsRecords(domain, zone, type, dispatch, setError, router)
 				.then(res => {
 					if (res && res.recordSet) {
-						setRecordSet([...res.recordSet]);
-						setRecordSelection(res.recordSet[0].geok ? "geo" : "roundrobin");
+						setRecordSet(res.recordSet.length > 0 ? [...res.recordSet] : [{}]);
+						setRecordSelection(res.recordSet.length > 0 && res.recordSet[0].geok ? "geo" : "roundrobin");
 					}
 				});
-				
 		}
 	}, [recordSet, domain, zone, type, router]);
 
-	if (!recordSet && !newRecord) {
+	if (!recordSet) {
 		return (
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
@@ -79,7 +78,7 @@ const DnsEditRecordPage = (props) => {
 						<div className="col">
 							<label className="w-100">
 								Type (required)
-								<select 
+								<select
 									className="form-select"
 									name="type"
 									defaultValue={type}
@@ -107,7 +106,7 @@ const DnsEditRecordPage = (props) => {
 									type="text"
 									name="name"
 									defaultValue={zone}
-									required 
+									required
 									disabled={!newRecord}
 									onChange={e => setZone(e.target.value)}
 								/>
@@ -128,7 +127,6 @@ const DnsEditRecordPage = (props) => {
 						</div>
 					</div>
 
-					
 					<div className="row mb-3">
 						<div className="col-4">
 							Record selection mode:
