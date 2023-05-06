@@ -30,6 +30,11 @@ module.exports = {
 		return client.hget(key, hash).then(res => { return JSON.parse(res); });
 	},
 
+	//set a hash value
+	hset: (key, hash, value) => {
+		return client.hset(key, hash, JSON.stringify(value));
+	},
+
 	//set a value on key
 	set: (key, value) => {
 		return client.set(key, JSON.stringify(value));

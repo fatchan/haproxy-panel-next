@@ -14,7 +14,7 @@ const DnsEditRecordPage = (props) => {
 	const [recordSet, setRecordSet] = useState(state.recordSet)
 	const [zone, setZone] = useState(routerZone || "name");
 	const [type, setType] = useState(routerType || "a");
-	const [recordSelection, setRecordSelection] = useState(newRecord ? "geo" : (recordSet[0].h ? "geo" : "roundrobin"));
+	const [recordSelection, setRecordSelection] = useState(recordSet && recordSet.length > 0 ? (recordSet[0].geok ? "geo" : "roundrobin") : "roundrobin");
 	const [error, setError] = useState();
 
 	useEffect(() => {
@@ -23,6 +23,7 @@ const DnsEditRecordPage = (props) => {
 				.then(res => {
 					if (res && res.recordSet) {
 						setRecordSet([...res.recordSet]);
+						setRecordSelection(res.recordSet[0].geok ? "geo" : "roundrobin");
 					}
 				});
 				
@@ -40,6 +41,11 @@ const DnsEditRecordPage = (props) => {
 				</div>
 			</div>
 		);
+	}
+
+	async function addUpdateRecord(e) {
+		e.preventDefault();
+		await API.addUpdateDnsRecord(domain, zone, type, Object.fromEntries(new FormData(e.target)), dispatch, setError, router);
 	}
 
 	const { csrf } = state;
@@ -65,10 +71,7 @@ const DnsEditRecordPage = (props) => {
 			<form
 				method="POST"
 				action={`/forms/dns/${domain}/${zone}/${type}`}
-				onSubmit={e => {
-					// e.preventDefault();
-					// console.log(e)
-				}}
+				onSubmit={addUpdateRecord}
 			>
 				<input type="hidden" name="_csrf" value={csrf} />
 				<div className="card text-bg-dark col p-3 border-0 shadow-sm">
@@ -136,6 +139,7 @@ const DnsEditRecordPage = (props) => {
 									name="selection"
 									id="roundrobin"
 									value="roundrobin"
+									checked={recordSelection === "roundrobin"}
 									onChange={e => setRecordSelection(e.target.value)}
 								/>
 								<label
@@ -167,7 +171,7 @@ const DnsEditRecordPage = (props) => {
 									value="geo"
 									id="geo"
 									onChange={e => setRecordSelection(e.target.value)}
-									defaultChecked
+									checked={recordSelection === "geo"}
 								/>
 								<label
 									className="form-check-label"
@@ -183,119 +187,215 @@ const DnsEditRecordPage = (props) => {
 								Records:
 							</div>
 						</div>
-						{recordSet.map((rec, i) => (<>
-							<div className="row" key={`row1_${i}`}>
-								{supportsHealth && <div className="col-sm-4 col-md-2">
-									ID: 
-									<input className="form-control" type="text" name={`id_${i}`} defaultValue={rec.id} required />
-								</div>}
-								<div className="col">
-									<label className="w-100">
-										Value
-										<input className="form-control" type="text" name={`value_${i}`} defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text} required />
-									</label>
-								</div>
-								<div className="col-auto ms-auto">
-									<button
-										className="btn btn-danger mt-4"
-										onClick={(e) =>{
-											e.preventDefault();
-											recordSet.splice(i, 1);
-											setRecordSet([...recordSet]);
-										}}
-										disabled={i === 0}
-									>
-										×
-									</button>
-								</div>
-							</div>
-							{supportsHealth && <div className="row" key={`row2_${i}`}>
-								<div className="col-sm-12 col-md-2 align-self-end mb-2">
-									<div className="form-check form-switch">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											name={`health_${i}`}
-											value="1"
-											id="flexCheckDefault"
-											checked={rec.h === true}
-											onChange={(e) =>{
-											recordSet[i].h = e.target.checked;
-											setRecordSet([...recordSet]);
-											}}
-										/>
-										<label className="form-check-label" htmlFor="flexCheckDefault">
-											Health Check
+						{recordSet.map((rec, i) => {
+							let typeFields;
+							switch (type) {
+								case "mx":
+									typeFields = <div className="row">
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Preference
+												<input className="form-control" type="number" name={`preference_${i}`} defaultValue={rec.preference} required />
+											</label>
+										</div>
+									</div>;
+									break;
+								case "srv":
+									typeFields = <div className="row">
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Preference
+												<input className="form-control" type="number" name={`preference_${i}`} defaultValue={rec.preference} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Port
+												<input className="form-control" type="number" name={`port_${i}`} defaultValue={rec.port} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Weight
+												<input className="form-control" type="number" name={`weight_${i}`} defaultValue={rec.weight} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Priority
+												<input className="form-control" type="number" name={`priority_${i}`} defaultValue={rec.priority} required />
+											</label>
+										</div>
+									</div>;
+									break;
+								case "caa":
+									typeFields = <div className="row">
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Flag
+												<input className="form-control" type="number" name={`flag_${i}`} defaultValue={rec.flag} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Tag
+												<input className="form-control" type="text" name={`tag_${i}`} defaultValue={rec.tag} required />
+											</label>
+										</div>
+									</div>;
+									break;
+								case "soa":
+									typeFields = <div className="row">
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												MBox
+												<input className="form-control" type="text" name={`mbox_${i}`} defaultValue={rec.MBox} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Refresh
+												<input className="form-control" type="number" name={`refresh_${i}`} defaultValue={rec.refresh} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Retry
+												<input className="form-control" type="number" name={`retry_${i}`} defaultValue={rec.retry} required />
+											</label>
+										</div>
+										<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												Expire
+												<input className="form-control" type="number" name={`expire_${i}`} defaultValue={rec.expire} required />
+											</label>
+										</div>
+										{/*<div className="col-sm-12 col-md-3">
+											<label className="w-100">
+												MinTTL
+												<input className="form-control" type="number" name={`minttl_${i}`} defaultValue={rec.refresh} required />
+											</label>
+										</div>*/}
+									</div>;
+									break;
+								default:
+									break;
+							}
+							return (<>
+								<div className="row" key={`row1_${i}`}>
+									{supportsHealth && <div className="col-sm-4 col-md-2">
+										ID:
+										<input className="form-control" type="text" name={`id_${i}`} defaultValue={rec.id} required />
+									</div>}
+									<div className="col">
+										<label className="w-100">
+											Value
+											<input className="form-control" type="text" name={`value_${i}`} defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text || rec.target} required />
 										</label>
 									</div>
-								</div>
-								<div className="col-sm-12  col-md">
-									<label className="w-100">
-										Fallback IDs
-										<input
-											className="form-control"
-											type="text"
-											name={`fallbacks_${i}`}
-											defaultValue={(rec.fb||[]).join(', ')}
-											disabled={!rec.h}
-											required
-										/>
-									</label>
-								</div>
-								<div className="col-sm-12 col-md-3">
-									<label className="w-100">
-										Backup Selector
-										<select
-											className="form-select"
-											name={`sel_${i}`}
-											defaultValue={rec.sel}
-											disabled={!rec.h}
-											required
+									<div className="col-auto ms-auto">
+										<button
+											className="btn btn-danger mt-4"
+											onClick={(e) =>{
+												e.preventDefault();
+												recordSet.splice(i, 1);
+												setRecordSet([...recordSet]);
+											}}
+											disabled={i === 0}
 										>
-											<option value="0">None</option>
-											<option value="1">First</option>
-											<option value="2">Random</option>
-											<option value="3">All</option>
-										</select>
-									</label>
+											×
+										</button>
+									</div>
 								</div>
-								<div className="col-sm-12 col-md-3">
-									<label className="w-100">
-										Backup Selector
-										<select
-											className="form-select"
-											name={`bsel_${i}`}
-											defaultValue={rec.bsel}
-											disabled={!rec.h}
-											required
-										>
-											<option value="0">None</option>
-											<option value="1">First</option>
-											<option value="2">Random</option>
-											<option value="3">All</option>
-										</select>
-									</label>
-								</div>
-							</div>}
-							{supportsGeo && <div className="row" key={`row3_${i}`}>
-								<div className="col-sm-12 col-md-2">
-									<label className="w-100">
-										Geo Key
-										<select className="form-select" name={`geok_${i}`} defaultValue={rec.geok} required>
-											<option value="cn">Continent</option>
-											<option value="cc">Country</option>
-										</select>
-									</label>
-								</div>
-								<div className="col">
-									<label className="w-100">
-										Geo Value(s)
-										<input className="form-control" type="text" name={`geov_${i}`} defaultValue={(rec.geov||[]).join(', ')} required />
-									</label>
-								</div>
-							</div>}
-							{i < recordSet.length-1 && <hr className="mb-2 mt-3" />}
-						</>))}
+								{typeFields}
+								{supportsHealth && <div className="row" key={`row2_${i}`}>
+									<div className="col-sm-12 col-md-2 align-self-end mb-2">
+										<div className="form-check form-switch">
+											<input
+												className="form-check-input"
+												type="checkbox"
+												name={`health_${i}`}
+												value="1"
+												id="flexCheckDefault"
+												checked={rec.h === true}
+												onChange={(e) =>{
+												recordSet[i].h = e.target.checked;
+												setRecordSet([...recordSet]);
+												}}
+											/>
+											<label className="form-check-label" htmlFor="flexCheckDefault">
+												Health Check
+											</label>
+										</div>
+									</div>
+									<div className="col-sm-12  col-md">
+										<label className="w-100">
+											Fallback IDs
+											<input
+												className="form-control"
+												type="text"
+												name={`fallbacks_${i}`}
+												defaultValue={(rec.fb||[]).join(', ')}
+												disabled={!rec.h}
+												required
+											/>
+										</label>
+									</div>
+									<div className="col-sm-12 col-md-3">
+										<label className="w-100">
+											Backup Selector
+											<select
+												className="form-select"
+												name={`sel_${i}`}
+												defaultValue={rec.sel}
+												disabled={!rec.h}
+												required
+											>
+												<option value="0">None</option>
+												<option value="1">First</option>
+												<option value="2">Random</option>
+												<option value="3">All</option>
+											</select>
+										</label>
+									</div>
+									<div className="col-sm-12 col-md-3">
+										<label className="w-100">
+											Backup Selector
+											<select
+												className="form-select"
+												name={`bsel_${i}`}
+												defaultValue={rec.bsel}
+												disabled={!rec.h}
+												required
+											>
+												<option value="0">None</option>
+												<option value="1">First</option>
+												<option value="2">Random</option>
+												<option value="3">All</option>
+											</select>
+										</label>
+									</div>
+								</div>}
+								{supportsGeo && <div className="row" key={`row3_${i}`}>
+									<div className="col-sm-12 col-md-2">
+										<label className="w-100">
+											Geo Key
+											<select className="form-select" name={`geok_${i}`} defaultValue={rec.geok} required>
+												<option value="cn">Continent</option>
+												<option value="cc">Country</option>
+											</select>
+										</label>
+									</div>
+									<div className="col">
+										<label className="w-100">
+											Geo Value(s)
+											<input className="form-control" type="text" name={`geov_${i}`} defaultValue={(rec.geov||[]).join(', ')} required />
+										</label>
+									</div>
+								</div>}
+								{i < recordSet.length-1 && <hr className="mb-2 mt-3" />}
+							</>);
+						})}
 						<div className="row mt-2">
 							<div className="col-auto ms-auto">
 								<button className="ms-auto btn btn-success mt-2" onClick={(e) =>{

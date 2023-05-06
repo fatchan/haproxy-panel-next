@@ -44,10 +44,14 @@ const DnsDomainIndexPage = (props) => {
 					return Object.entries(e[1])
 						.map((recordSet, i) => (
 							<RecordSetRow
+								csrf={csrf}
 								domain={domain}
 								key={`${e[0]}_${i}`}
 								name={e[0]}
 								recordSet={recordSet}
+								dispatch={dispatch}
+								setError={setError}
+								router={router}
 							/>
 						));
 				});
@@ -91,7 +95,7 @@ const DnsDomainIndexPage = (props) => {
 							<th>
 								Details
 							</th>
-							<th>
+							<th colSpan="2">
 								Actions
 							</th>
 						</tr>

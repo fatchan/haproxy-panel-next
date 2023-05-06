@@ -179,6 +179,7 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/global/toggle', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, accountController.globalToggle);
 		clusterRouter.post(`/map/:name(${mapNamesOrString})/add`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.patchMapForm);
 		clusterRouter.post(`/map/:name(${mapNamesOrString})/delete`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.deleteMapForm);
+		clusterRouter.post('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@]+)/:type([a-z]+)/delete', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordDelete);
 		clusterRouter.post('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@]+)/:type([a-z]+)', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordUpdate);
 		clusterRouter.post('/cluster', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.setCluster);
 		clusterRouter.post('/cluster/add', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, clustersController.addCluster);

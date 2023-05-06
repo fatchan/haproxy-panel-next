@@ -43,6 +43,12 @@ export async function getDnsDomain(domain, dispatch, errorCallback, router) {
 export async function getDnsRecords(domain, zone, type, dispatch, errorCallback, router) {
 	return ApiCall(`/dns/${domain}/${zone}/${type}.json`, 'GET', null, dispatch, errorCallback, router);
 }
+export async function addUpdateDnsRecord(domain, zone, type, body, dispatch, errorCallback, router) {
+	return ApiCall(`/forms/dns/${domain}/${zone}/${type}`, 'POST', body, dispatch, errorCallback, router);
+}
+export async function deleteDnsRecord(domain, zone, type, body, dispatch, errorCallback, router) {
+	return ApiCall(`/forms/dns/${domain}/${zone}/${type}/delete`, 'POST', body, dispatch, errorCallback, router);
+}
 
 // Certs
 export async function getCerts(dispatch, errorCallback, router) {
