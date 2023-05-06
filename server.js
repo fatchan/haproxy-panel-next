@@ -18,8 +18,7 @@ const server = require('express')
 	, bodyParser = require('body-parser')
 	, cookieParser = require('cookie-parser')
 	, acme = require('./acme.js')
-	, db = require('./db.js')
-	, influx = require('./influxdb.js');
+	, db = require('./db.js');
 
 app.prepare()
 	.then(async () => {

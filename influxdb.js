@@ -1,8 +1,18 @@
+'use strict';
+
+process
+        .on('uncaughtException', console.error)
+        .on('unhandledRejection', console.error);
+
+const dotenv = require('dotenv')
+dotenv.config({ path: '.env' });
+
 const { InfluxDB, Point } = require('@influxdata/influxdb-client')
 	, OpenAPIClientAxios = require('openapi-client-axios').default
 	, definition = require('./openapi-definition.js')
 	, { statsData } = require('./controllers/account.js')
 	, agent = require('./agent.js');
+
 
 if (!process.env.INFLUX_HOST) {
 	return console.warn('INFLUX_HOST not set, statistics will not be recorded');
