@@ -33,6 +33,7 @@ app.prepare()
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);
+		server.use('/.well-known/acme-challenge', express.static('/tmp/.well-known/acme-challenge'))
 
 		const testRouter = require('./router.js');
 		testRouter(server, app);
