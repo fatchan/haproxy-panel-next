@@ -11,7 +11,7 @@ const DnsEditRecordPage = (props) => {
 	const [state, dispatch] = useState(props);
 	const { domain, zone: routerZone, type: routerType } = router.query;
 	const newRecord = router.asPath === `/dns/${domain}/new`;
-	const [recordSet, setRecordSet] = useState(state.recordSet)
+	const [recordSet, setRecordSet] = useState(state.recordSet||[{}])
 	const [zone, setZone] = useState(routerZone || "name");
 	const [type, setType] = useState(routerType || "a");
 	const [recordSelection, setRecordSelection] = useState(recordSet && recordSet.length > 0 ? (recordSet[0].geok ? "geo" : "roundrobin") : "roundrobin");
@@ -122,7 +122,7 @@ const DnsEditRecordPage = (props) => {
 									name="ttl"
 									min="30"
 									required
-									defaultValue={recordSet[0].ttl || 300}
+									defaultValue={recordSet && recordSet.length > 0 ? recordSet[0].ttl : 300}
 								/>
 							</label>
 						</div>

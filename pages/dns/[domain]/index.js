@@ -109,9 +109,9 @@ const DnsDomainIndexPage = (props) => {
 			
 			<div className="my-3">
 				<Link href={`/dns/${domain}/new`}>
-					<a className="btn btn-success">
+					<button className="btn btn-success">
 						+
-					</a>
+					</button>
 				</Link>
 			</div>
 
