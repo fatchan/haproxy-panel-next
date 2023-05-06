@@ -183,13 +183,13 @@ exports.dnsRecordUpdate = async (req, res) => {
 				if (!isIPv4(value)) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
-				record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb };
+				record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
 				break;
 			case "aaaa":
 				if (!isIPv6(value)) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
-				record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb };
+				record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
 				break;
 			case "txt":
 				record = { ttl, text: value };
