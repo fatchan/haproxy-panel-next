@@ -134,7 +134,7 @@ exports.dnsRecordUpdate = async (req, res) => {
 			//geo
 			[`geok_${i}`]: geok,
 			[`geov_${i}`]: geov,
-			[`pref_${i}`]: preference,
+			[`preference_${i}`]: preference,
 			[`port_${i}`]: port,
 			//health
 			[`id_${i}`]: id,
