@@ -24,7 +24,7 @@ module.exports = {
 	hgetall: (key) => {
 		return client.hgetall(key).then(res => { return res });
 	},
-	
+
 	//get a hash value
 	hget: (key, hash) => {
 		return client.hget(key, hash).then(res => { return JSON.parse(res); });
@@ -35,11 +35,16 @@ module.exports = {
 		return client.hset(key, hash, JSON.stringify(value));
 	},
 
+	//delete a hash
+	hdel: (key, hash) => {
+		return client.hdel(key, hash);
+	},
+
 	//set a value on key
 	set: (key, value) => {
 		return client.set(key, JSON.stringify(value));
 	},
-	
+
 	//delete value with key
 	del: (keyOrKeys) => {
 		if (Array.isArray(keyOrKeys)) {

@@ -105,7 +105,11 @@ exports.dnsRecordDelete = async (req, res) => {
 			recordSetRaw = {};
 		}
 		delete recordSetRaw[req.params.type];
-		await redis.hset(`${req.params.domain}.`, req.params.zone, recordSetRaw);
+		if (Object.keys(recordSetRaw).length === 0) {
+			await redis.hdel(`${req.params.domain}.`, req.params.zone);
+		} else {
+			await redis.hset(`${req.params.domain}.`, req.params.zone, recordSetRaw);
+		}
 	}
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${req.params.domain}` });
 };
