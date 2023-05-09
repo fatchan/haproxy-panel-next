@@ -482,7 +482,8 @@ const DnsEditRecordPage = (props) => {
 											    getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
 											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
 											    classNamePrefix="select"
-											    name={`geov_${rec.geok}_${i}`}
+											    key={`geov_${rec.geok}_${i}`}
+											    name={`geov_${i}`}
 											    className="basic-multi-select"
 											/> : <Select
 												theme={(theme) => ({
@@ -497,7 +498,8 @@ const DnsEditRecordPage = (props) => {
 											    getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
 											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
 											    classNamePrefix="select"
-											    name={`geov_${rec.geok}_${i}`}
+											    key={`geov_${rec.geok}_${i}`}
+											    name={`geov_${i}`}
 											    className="basic-multi-select"
 											/>}
 										</label>
