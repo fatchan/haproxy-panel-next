@@ -4,7 +4,8 @@ import Head from 'next/head';
 import BackButton from '../../../../components/BackButton.js';
 import ErrorAlert from '../../../../components/ErrorAlert.js';
 import Select from 'react-select';
-// import CreatableSelect from 'react-select/creatable';
+import countries from 'i18n-iso-countries';
+countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
 import * as API from '../../../../api.js';
 
 const continentMap = {
@@ -16,6 +17,9 @@ const continentMap = {
 	'AF': 'Africa',
 	'AN': 'Antarctica',
 }
+
+const countryOptions = Object.entries(countries.getNames('en'))
+	.map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
 const fromEntries = (pairs) => {
 	return pairs
@@ -46,6 +50,11 @@ const DnsEditRecordPage = (props) => {
 	}
 	const handleValueChange = (value, index) => {
 		recordSet[index].ip = value;
+		setRecordSet([...recordSet]);
+	}
+	const handleGeoKeyChange = (value, index) => {
+		recordSet[index].geok = value;
+		recordSet[index].geov = [];
 		setRecordSet([...recordSet]);
 	}
 	const getFallbackValue = (id) => {
@@ -370,8 +379,8 @@ const DnsEditRecordPage = (props) => {
 												id="flexCheckDefault"
 												checked={rec.h === true}
 												onChange={(e) =>{
-												recordSet[i].h = e.target.checked;
-												setRecordSet([...recordSet]);
+													recordSet[i].h = e.target.checked;
+													setRecordSet([...recordSet]);
 												}}
 											/>
 											<label className="form-check-label" htmlFor="flexCheckDefault">
@@ -392,7 +401,6 @@ const DnsEditRecordPage = (props) => {
 											    closeMenuOnSelect={false}
 											    options={recordSet.map(x => ({ label: x.id, value: x.id}) )}
 											    getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
-											    formatCreateLabel={(inputValue) => `Add fallback to record ID "${inputValue}"`}
 											    defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
 											    classNamePrefix="select"
 											    name={`fallbacks_${i}`}
@@ -439,7 +447,12 @@ const DnsEditRecordPage = (props) => {
 									<div className="col-sm-12 col-md-2">
 										<label className="w-100">
 											Geo Key
-											<select className="form-select" name={`geok_${i}`} defaultValue={rec.geok} required>
+											<select
+												className="form-select"
+												onChange={(e) => handleGeoKeyChange(e.target.value, i)}
+												name={`geok_${i}`}
+												defaultValue={rec.geok}
+												required>
 												<option value="cn">Continent</option>
 												<option value="cc">Country</option>
 											</select>
@@ -448,7 +461,7 @@ const DnsEditRecordPage = (props) => {
 									<div className="col">
 										<label className="w-100">
 											Geo Value(s)
-											<Select
+											{rec.geok === "cn" ? <Select
 												theme={(theme) => ({
 													...theme,
 													borderRadius: 5,
@@ -465,11 +478,28 @@ const DnsEditRecordPage = (props) => {
 													{ value: 'AF', label: 'Africa' },
 													{ value: 'AN', label: 'Antarctica' },
 											    ]}
-											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
+											    // value={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
+											    getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
+											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
 											    classNamePrefix="select"
-											    name={`geov_${i}`}
+											    name={`geov_${rec.geok}_${i}`}
 											    className="basic-multi-select"
-											/>
+											/> : <Select
+												theme={(theme) => ({
+													...theme,
+													borderRadius: 5,
+												})}
+											    required
+											    isMulti
+											    closeMenuOnSelect={false}
+											    options={countryOptions}
+											    // value={(rec.geov||[]).map(x => ({ value: x, label: `${countries.getName(x, 'en')} (${x})` }))}
+											    getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
+											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
+											    classNamePrefix="select"
+											    name={`geov_${rec.geok}_${i}`}
+											    className="basic-multi-select"
+											/>}
 										</label>
 									</div>
 								</div>}
