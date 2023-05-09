@@ -122,10 +122,10 @@ exports.dnsRecordUpdate = async (req, res) => {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
-	if (Object.values(req.body).some(v => typeof v !== "string")) {
+	/*if (Object.values(req.body).some(v => typeof v !== "string")) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
-	let { ttl, selection } = req.body;
+	}*/
+	let { ttl } = req.body;
 	const { domain, zone, type } = req.params;
 	const records = [];
 	for (let i = 0; i < (type == "soa" ? 1 : 100); i++) {
@@ -155,20 +155,20 @@ exports.dnsRecordUpdate = async (req, res) => {
 		} = req.body;
 		if (!value) { break; }
 		try {
-			if (geok && !["cn", "cc"].includes(geok)
-				|| sel && !["0", "1", "2", "3"].includes(sel)
-				|| bsel && !["0", "1", "2", "3"].includes(bsel)
-				|| flag && (isNaN(flag) || parseInt(flag) !== +flag)
-				|| ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl)
-				|| preference && (isNaN(preference) || parseInt(preference) !== +preference)
-				|| port && (isNaN(port) || parseInt(port) !== +port)
-				|| weight && (isNaN(weight) || parseInt(weight) !== +weight)
-				|| priority && (isNaN(priority) || parseInt(priority) !== +priority)
-				|| refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh)
-				|| retry && (isNaN(retry) || parseInt(retry) !== +retry)
-				|| expire && (isNaN(expire) || parseInt(expire) !== +expire)
-				|| geov && !Array.isArray(geov)
-				|| fb && !Array.isArray(fb)) {
+			if ((geok && !["cn", "cc"].includes(geok))
+				|| (sel && !["0", "1", "2", "3"].includes(sel))
+				|| (bsel && !["0", "1", "2", "3"].includes(bsel))
+				|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
+				|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
+				|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))
+				|| (port && (isNaN(port) || parseInt(port) !== +port))
+				|| (weight && (isNaN(weight) || parseInt(weight) !== +weight))
+				|| (priority && (isNaN(priority) || parseInt(priority) !== +priority))
+				|| (refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh))
+				|| (retry && (isNaN(retry) || parseInt(retry) !== +retry))
+				|| (expire && (isNaN(expire) || parseInt(expire) !== +expire))
+				|| (geov && !Array.isArray(geov))
+				|| (fb && !Array.isArray(fb))) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			flag && (flag = parseInt(flag));

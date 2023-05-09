@@ -28,7 +28,7 @@ const fromEntries = (pairs) => {
 				...obj,
 				[k]: k in obj
 				? [].concat(obj[k], v)
-				: v
+				: (k.startsWith('geov_') || k.startsWith('fallbacks_') ? [v] : v)
 			}
 		}, {})
 };

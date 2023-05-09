@@ -33,9 +33,9 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 			</td>
 			<td>
 				{recordSetArray.map((r, i) => (
-					<div key={i}>
-						{r.geok ? 'Geo: ' : ''}{(r.geov||[]).join(', ')}
-					</div>
+					<small key={i}>
+						{r.geok ? `${r.geok === 'cn' ? 'Continents' : 'Countries'}: ` : ''}{(r.geov||[]).join(', ')}
+					</small>
 				))}
 			</td>
 			<td>
