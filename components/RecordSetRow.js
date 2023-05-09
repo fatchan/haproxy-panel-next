@@ -18,6 +18,9 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				{type.toUpperCase()}
 			</td>
 			<td>
+				{recordSetArray[0].ttl}
+			</td>
+			<td>
 				{recordSetArray.map((r, i) => {
 					const healthClass = r.h != null
 						? (r.h ? "text-success" : "text-danger")
@@ -29,13 +32,10 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				})}
 			</td>
 			<td>
-				{recordSetArray[0].ttl}
-			</td>
-			<td>
 				{recordSetArray.map((r, i) => (
-					<small key={i}>
+					<div key={i}>
 						{r.geok ? `${r.geok === 'cn' ? 'Continents' : 'Countries'}: ` : ''}{(r.geov||[]).join(', ')}
-					</small>
+					</div>
 				))}
 			</td>
 			<td>
