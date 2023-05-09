@@ -462,47 +462,49 @@ const DnsEditRecordPage = (props) => {
 									<div className="col">
 										<label className="w-100">
 											Geo Value(s)
-											{rec.geok === "cn" ? <Select
-												theme={(theme) => ({
-													...theme,
-													borderRadius: 5,
-												})}
-											    required
-											    isMulti
-											    closeMenuOnSelect={false}
-											    options={[
-													{ value: 'NA', label: 'North America' },
-													{ value: 'SA', label: 'South America' },
-													{ value: 'EU', label: 'Europe' },
-													{ value: 'AS', label: 'Asia' },
-													{ value: 'OC', label: 'Oceania' },
-													{ value: 'AF', label: 'Africa' },
-													{ value: 'AN', label: 'Antarctica' },
-											    ]}
-											    // value={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
-											    getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
-											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
-											    classNamePrefix="select"
-											    key={`geov_${rec.geok}_${i}`}
-											    name={`geov_${i}`}
-											    className="basic-multi-select"
-											/> : <Select
-												theme={(theme) => ({
-													...theme,
-													borderRadius: 5,
-												})}
-											    required
-											    isMulti
-											    closeMenuOnSelect={false}
-											    options={countryOptions}
-											    // value={(rec.geov||[]).map(x => ({ value: x, label: `${countries.getName(x, 'en')} (${x})` }))}
-											    getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
-											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
-											    classNamePrefix="select"
-											    key={`geov_${rec.geok}_${i}`}
-											    name={`geov_${i}`}
-											    className="basic-multi-select"
-											/>}
+											{rec.geok === "cc"
+												? <Select
+													theme={(theme) => ({
+														...theme,
+														borderRadius: 5,
+													})}
+													required
+													isMulti
+													closeMenuOnSelect={false}
+													options={countryOptions}
+													// value={(rec.geov||[]).map(x => ({ value: x, label: `${countries.getName(x, 'en')} (${x})` }))}
+													getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
+													defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
+													classNamePrefix="select"
+													key={`geov_${rec.geok}_${i}`}
+													name={`geov_${i}`}
+													className="basic-multi-select"
+												/>
+												: <Select
+													theme={(theme) => ({
+														...theme,
+														borderRadius: 5,
+													})}
+													required
+													isMulti
+													closeMenuOnSelect={false}
+													options={[
+														{ value: 'NA', label: 'North America' },
+														{ value: 'SA', label: 'South America' },
+														{ value: 'EU', label: 'Europe' },
+														{ value: 'AS', label: 'Asia' },
+														{ value: 'OC', label: 'Oceania' },
+														{ value: 'AF', label: 'Africa' },
+														{ value: 'AN', label: 'Antarctica' },
+													]}
+													// value={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
+													getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
+													defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
+													classNamePrefix="select"
+													key={`geov_${rec.geok}_${i}`}
+													name={`geov_${i}`}
+													className="basic-multi-select"
+												/>}
 										</label>
 									</div>
 								</div>}
