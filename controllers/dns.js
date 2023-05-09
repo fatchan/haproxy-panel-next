@@ -166,7 +166,9 @@ exports.dnsRecordUpdate = async (req, res) => {
 				|| priority && (isNaN(priority) || parseInt(priority) !== +priority)
 				|| refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh)
 				|| retry && (isNaN(retry) || parseInt(retry) !== +retry)
-				|| expire && (isNaN(expire) || parseInt(expire) !== +expire)) {
+				|| expire && (isNaN(expire) || parseInt(expire) !== +expire)
+				|| geov && !Array.isArray(geov)
+				|| fb && !Array.isArray(fb)) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			flag && (flag = parseInt(flag));
@@ -181,8 +183,8 @@ exports.dnsRecordUpdate = async (req, res) => {
 			sel && (sel = parseInt(sel));
 			bsel && (bsel = parseInt(bsel));
 			h && (h = (h != null ? true : false));
-			geov && (geov = geov.split(',').map(x => x.trim()));
-			fb && (fb = fb.split(',').map(x => x.trim()));
+			geov && (geov = geov.map(x => x.trim()).slice(0,300)); //todo: country/continent filter
+			fb && (fb = fb.map(x => x.trim()).slice(0,20));
 		} catch(e) {
 			console.error(e);
 			return dynamicResponse(req, res, 400, { error: 'Invalid input' });

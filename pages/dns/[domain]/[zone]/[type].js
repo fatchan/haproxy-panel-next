@@ -396,7 +396,8 @@ const DnsEditRecordPage = (props) => {
 													...theme,
 													borderRadius: 5,
 												})}
-											    required
+												isDisabled={!rec.h}
+												required
 											    isMulti
 											    closeMenuOnSelect={false}
 											    options={recordSet.map(x => ({ label: x.id, value: x.id}) )}
