@@ -3,7 +3,31 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../../../../components/BackButton.js';
 import ErrorAlert from '../../../../components/ErrorAlert.js';
+import Select from 'react-select';
+// import CreatableSelect from 'react-select/creatable';
 import * as API from '../../../../api.js';
+
+const continentMap = {
+	'NA': 'North America',
+	'SA': 'South America',
+	'EU': 'Europe',
+	'AS': 'Asia',
+	'OC': 'Oceania',
+	'AF': 'Africa',
+	'AN': 'Antarctica',
+}
+
+const fromEntries = (pairs) => {
+	return pairs
+		.reduce((obj, [k, v]) => {
+			return {
+				...obj,
+				[k]: k in obj
+				? [].concat(obj[k], v)
+				: v
+			}
+		}, {})
+};
 
 const DnsEditRecordPage = (props) => {
 
@@ -16,6 +40,21 @@ const DnsEditRecordPage = (props) => {
 	const [type, setType] = useState(routerType || "a");
 	const [recordSelection, setRecordSelection] = useState("roundrobin");
 	const [error, setError] = useState();
+	const handleIdChange = (value, index) => {
+		recordSet[index].id = value;
+		setRecordSet([...recordSet]);
+	}
+	const handleValueChange = (value, index) => {
+		recordSet[index].ip = value;
+		setRecordSet([...recordSet]);
+	}
+	const getFallbackValue = (id) => {
+		const rec = recordSet.find(r => r.id === id);
+		if (rec) {
+			return (rec.ip || rec.host || rec.value || rec.ns || rec.text || rec.target || 'No Value');
+		}
+		return 'No Value'
+	}
 
 	useEffect(() => {
 		if (!recordSet) {
@@ -44,7 +83,8 @@ const DnsEditRecordPage = (props) => {
 
 	async function addUpdateRecord(e) {
 		e.preventDefault();
-		await API.addUpdateDnsRecord(domain, zone, type, Object.fromEntries(new FormData(e.target)), dispatch, setError, router);
+		console.log(fromEntries([...new FormData(e.target).entries()]));
+		await API.addUpdateDnsRecord(domain, zone, type, fromEntries([...new FormData(e.target).entries()]), dispatch, setError, router);
 	}
 
 	const { csrf } = state;
@@ -283,12 +323,25 @@ const DnsEditRecordPage = (props) => {
 								<div className="row" key={`row1_${i}`}>
 									{supportsHealth && <div className="col-sm-4 col-md-2">
 										ID:
-										<input className="form-control" type="text" name={`id_${i}`} defaultValue={rec.id} required />
+										<input
+											className="form-control"
+											type="text"
+											name={`id_${i}`}
+											onChange={(e) => handleIdChange(e.target.value, i)}
+											defaultValue={rec.id} required
+										/>
 									</div>}
 									<div className="col">
 										<label className="w-100">
 											Value
-											<input className="form-control" type="text" name={`value_${i}`} defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text || rec.target} required />
+											<input
+												className="form-control"
+												type="text"
+												name={`value_${i}`}
+												onChange={(e) => handleValueChange(e.target.value, i)}
+												defaultValue={rec.ip || rec.host || rec.value || rec.ns || rec.text || rec.target}
+												required
+											/>
 										</label>
 									</div>
 									<div className="col-auto ms-auto">
@@ -329,13 +382,21 @@ const DnsEditRecordPage = (props) => {
 									<div className="col-sm-12  col-md">
 										<label className="w-100">
 											Fallback IDs
-											<input
-												className="form-control"
-												type="text"
-												name={`fallbacks_${i}`}
-												defaultValue={(rec.fb||[]).join(', ')}
-												disabled={!rec.h}
-												required
+											<Select
+												theme={(theme) => ({
+													...theme,
+													borderRadius: 5,
+												})}
+											    required
+											    isMulti
+											    closeMenuOnSelect={false}
+											    options={recordSet.map(x => ({ label: x.id, value: x.id}) )}
+											    getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
+											    formatCreateLabel={(inputValue) => `Add fallback to record ID "${inputValue}"`}
+											    defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
+											    classNamePrefix="select"
+											    name={`fallbacks_${i}`}
+											    className="basic-multi-select"
 											/>
 										</label>
 									</div>
@@ -387,7 +448,28 @@ const DnsEditRecordPage = (props) => {
 									<div className="col">
 										<label className="w-100">
 											Geo Value(s)
-											<input className="form-control" type="text" name={`geov_${i}`} defaultValue={(rec.geov||[]).join(', ')} required />
+											<Select
+												theme={(theme) => ({
+													...theme,
+													borderRadius: 5,
+												})}
+											    required
+											    isMulti
+											    closeMenuOnSelect={false}
+											    options={[
+													{ value: 'NA', label: 'North America' },
+													{ value: 'SA', label: 'South America' },
+													{ value: 'EU', label: 'Europe' },
+													{ value: 'AS', label: 'Asia' },
+													{ value: 'OC', label: 'Oceania' },
+													{ value: 'AF', label: 'Africa' },
+													{ value: 'AN', label: 'Antarctica' },
+											    ]}
+											    defaultValue={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
+											    classNamePrefix="select"
+											    name={`geov_${i}`}
+											    className="basic-multi-select"
+											/>
 										</label>
 									</div>
 								</div>}
