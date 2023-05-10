@@ -400,7 +400,7 @@ const DnsEditRecordPage = (props) => {
 												required
 											    isMulti
 											    closeMenuOnSelect={false}
-											    options={recordSet.map(x => ({ label: x.id, value: x.id}) )}
+											    options={recordSet.filter(x => x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
 											    getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
 											    defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
 											    classNamePrefix="select"
