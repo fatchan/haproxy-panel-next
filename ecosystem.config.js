@@ -3,7 +3,6 @@ module.exports = {
 		{
 			name: "basedflare",
 			script: "./server.js",
-			watch: true,
 			instances : "max",
 			exec_mode : "cluster",
 			env: {
@@ -16,7 +15,6 @@ module.exports = {
 		{
 			name: "stats-pusher",
 			script: "./influxdb.js",
-			watch: true,
 			instances : "1",
 			exec_mode : "fork",
 			env: {
