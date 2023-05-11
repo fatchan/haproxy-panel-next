@@ -126,7 +126,7 @@ const DnsEditRecordPage = (props) => {
 					<div className="row mb-3">
 						<div className="col">
 							<label className="w-100">
-								Type (required)
+								Type
 								<select
 									className="form-select"
 									name="type"
