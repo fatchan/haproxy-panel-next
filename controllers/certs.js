@@ -113,7 +113,7 @@ exports.addCert = async (req, res, next) => {
 		.then(res => res.data);
 	const maintenanceDomainEntry = maintenanceMap && maintenanceMap.find(e => e.key === req.body.subject);
 	if (maintenanceDomainEntry) {
-		return dynamicResponse(req, res, 400, { error: 'Cannot generate a certificate while the domain is in maintenance mode' });
+//		return dynamicResponse(req, res, 400, { error: 'Cannot generate a certificate while the domain is in maintenance mode' });
 	}
 
 	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
@@ -230,8 +230,6 @@ exports.deleteCert = async (req, res) => {
 		) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
-
-
 
 	const subject = req.body.subject.toLowerCase();
 

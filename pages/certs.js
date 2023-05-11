@@ -44,13 +44,20 @@ export default function Certs(props) {
 
 	async function deleteCert(e) {
 		e.preventDefault();
-		await API.deleteCert({ _csrf: csrf, subject: e.target.subject.value, storage_name: e.target.storage_name.value }, dispatch, setError, router);
+		await API.deleteCert({
+			_csrf: csrf,
+			subject: e.target.subject.value,
+			storage_name: e.target.storage_name ? e.target.storage_name.value : null,
+		}, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
-	
+
 	async function uploadCert(e) {
 		e.preventDefault();
-		await API.uploadCert({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
+		await API.uploadCert({
+			_csrf: csrf,
+			domain: e.target.domain.value
+		}, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
 
@@ -111,7 +118,7 @@ export default function Certs(props) {
 							</form>
 							<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
 								<input type="hidden" name="_csrf" value={csrf} />
-								<input type="hidden" name="domain" value={d.subject || d._id} />
+								<input type="hidden" name="subject" value={d.subject || d._id} />
 								<input className="btn btn-danger" type="submit" value="×" />
 							</form>
 						</>)
