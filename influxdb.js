@@ -66,15 +66,13 @@ const sendStats = async () => {
 				 });
 			});
 		});
-		writeApi.writePoints(points)
-		writeApi.flush()
-			.then(() => console.log('flushed stats to influxdb'))
-			.catch((e) => console.error(e));
-		
+		writeApi.writePoints(points);
+		writeApi.flush().catch((e) => console.error(e));
 	} catch (e) {
 		console.error('Error writing stats:', e);
 	}
-}
-sendStats()
-setInterval(sendStats, 30000);
+};
+
+sendStats();
+setInterval(sendStats, 10000);
 
