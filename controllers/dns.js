@@ -12,7 +12,7 @@ exports.dnsDomainPage = async (app, req, res) => {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
-	const recordSetsRaw = await redis.hgetall(`${req.params.domain}.`);
+	const recordSetsRaw = await redis.hgetall(`dns:${req.params.domain}.`);
 	const recordSets = recordSetsRaw && Object.keys(recordSetsRaw)
 		.map(k => {
 			return { [k]: JSON.parse(recordSetsRaw[k]) };
@@ -33,7 +33,7 @@ exports.dnsRecordPage = async (app, req, res) => {
 	}
 	let recordSet = [];
 	if (req.params.zone && req.params.type) {
-		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
 		if (!recordSetRaw) {
 			recordSetRaw = {};
 		}
@@ -54,7 +54,7 @@ exports.dnsDomainJson = async (req, res) => {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
-	const recordSetsRaw = await redis.hgetall(`${req.params.domain}.`);
+	const recordSetsRaw = await redis.hgetall(`dns:${req.params.domain}.`);
 	const recordSets = recordSetsRaw && Object.keys(recordSetsRaw)
 		.map(k => {
 			return { [k]: JSON.parse(recordSetsRaw[k]) };
@@ -76,7 +76,7 @@ exports.dnsRecordJson = async (req, res) => {
 	}
 	let recordSet = [];
 	if (req.params.zone && req.params.type) {
-		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
 		if (!recordSetRaw) {
 			recordSetRaw = {};
 		}
@@ -100,15 +100,15 @@ exports.dnsRecordDelete = async (req, res) => {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
 	if (req.params.zone && req.params.type) {
-		let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+		let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
 		if (!recordSetRaw) {
 			recordSetRaw = {};
 		}
 		delete recordSetRaw[req.params.type];
 		if (Object.keys(recordSetRaw).length === 0) {
-			await redis.hdel(`${req.params.domain}.`, req.params.zone);
+			await redis.hdel(`dns:${req.params.domain}.`, req.params.zone);
 		} else {
-			await redis.hset(`${req.params.domain}.`, req.params.zone, recordSetRaw);
+			await redis.hset(`dns:${req.params.domain}.`, req.params.zone, recordSetRaw);
 		}
 	}
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${req.params.domain}` });
@@ -230,7 +230,7 @@ exports.dnsRecordUpdate = async (req, res) => {
 	if (records.lencth === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
-	let recordSetRaw = await redis.hget(`${req.params.domain}.`, req.params.zone);
+	let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
 	if (!recordSetRaw) {
 		recordSetRaw = {};
 	}
@@ -239,6 +239,6 @@ exports.dnsRecordUpdate = async (req, res) => {
 	} else {
 		recordSetRaw[type] = records;
 	}
-	await redis.hset(`${domain}.`, zone, recordSetRaw);
+	await redis.hset(`dns:${domain}.`, zone, recordSetRaw);
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${domain}` });
 };

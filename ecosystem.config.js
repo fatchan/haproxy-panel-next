@@ -23,6 +23,30 @@ module.exports = {
 			env_production: {
 				"NODE_ENV": "production",
 			}
+		},
+		{
+			name: "healthcheck-main",
+			script: "./healthcheck/main.js",
+			instances : "1",
+			exec_mode : "fork",
+			env: {
+				"NODE_ENV": "development"
+			},
+			env_production: {
+				"NODE_ENV": "production",
+			}
+		},
+		{
+			name: "healthcheck-worker",
+			script: "./healthcheck/worker.js",
+			instances : "1",
+			exec_mode : "fork",
+			env: {
+				"NODE_ENV": "development"
+			},
+			env_production: {
+				"NODE_ENV": "production",
+			}
 		}
 	]
 }
