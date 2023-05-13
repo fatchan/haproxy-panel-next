@@ -30,7 +30,7 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords } = state;
+	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords } = state;
 	const domainAdded = user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
 	const backendAdded = backendMap && backendMap.count > 0;
@@ -82,7 +82,7 @@ export default function Onboarding(props) {
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
 						<p>Add your first domain (i.e. <code>example.com</code>) that you want to protect with BasedFlare.</p>
-						<p>You can add more domains later from the &quot;domains&quot; page.</p>
+						<p>You can add other domains and/or subdomains later from the &quot;domains&quot; page.</p>
 					</span>
 					<form className="d-flex mb-3" onSubmit={addDomain} action="/forms/domain/add" method="post">
 						<input type="hidden" name="_csrf" value={csrf} />
@@ -101,15 +101,34 @@ export default function Onboarding(props) {
 				<span className="pt-1 form-checked-content">
 					<strong>
 						<i className="bi-globe2 pe-none me-2" width="1em" height="1em" />
-						2. Update DNS records
+						2. Update the nameservers for your domain to the following:
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
-						<p>Set the following A and AAAA records for your domain with your DNS provider:</p>
+						<ul>
+							{txtRecords
+								.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
+								.map((r, i) => <li key={'a'+i}>{r}</li>)}
+						</ul>
+					</span>
+					<span className="d-block text-body-secondary mt-3">
+						<p>This is usually done through your domain registrar. Use all the nameservers, or as many as the registrar allows for your domain.</p>
+					</span>
+				</span>
+			</div>
+			<div className="list-group-item d-flex gap-3">
+				<span className="flex-shrink-0 mx-1 mt-2">&bull;</span>
+				<span className="pt-1 form-checked-content">
+					<strong>
+						<i className="bi-globe2 pe-none me-2" width="1em" height="1em" />
+						3. Create DNS Records
+					</strong>
+					<span className="d-block text-body-secondary mt-3">
+						<p>On the <Link href="/domains" passHref><a target="_blank">Domains</a></Link> page, create the following A and AAAA records for your domain(s):</p>
 						<code>A</code>:
 						<ul>
 							{aRecords.map((r, i) => <li key={'a'+i}>{r}</li>)}
 						</ul>
-						<code>AAAA</code>:
+						<code>AAAA</code> (optional):
 						<ul>
 							{aaaaRecords.map((r, i) => <li key={'aaaa'+i}>{r}</li>)}
 						</ul>
@@ -121,7 +140,7 @@ export default function Onboarding(props) {
 				<span className="pt-1 form-checked-content">
 					<strong>
 						<i className="bi-hdd-network-fill pe-none me-2" width="1em" height="1em" />
-						3. Connect to a backend
+						4. Setup a backend
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
 						<p>Enter the backend server IP address and port in ip:port format, e.g. <code>12.34.56.78:443</code>.</p>
@@ -162,7 +181,7 @@ export default function Onboarding(props) {
 				<span className="pt-1 form-checked-content">
 					<strong>
 						<i className="bi-file-earmark-lock-fill pe-none me-2" width="1em" height="1em" />
-						4. Generate a HTTPS certificate (frontend)
+						5. Generate HTTPS certificate
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
 						<p>BasedFlare will generate a HTTPS certificate for you using <a href="https://letsencrypt.org/" rel="noreferrer" target="_blank">Let&apos;s Encrypt</a>.</p>
@@ -188,7 +207,7 @@ export default function Onboarding(props) {
 				<span className="pt-1 form-checked-content">
 					<strong>
 						<i className="bi-file-earmark-lock-fill pe-none me-2" width="1em" height="1em" />
-						5. Get your HTTPS CSR signed (backend)
+						6. Get your HTTPS CSR signed
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
 						<p>Finally, generate a certificate signing request for your origin server(s) and have BasedFlare sign it.</p>
@@ -197,7 +216,7 @@ export default function Onboarding(props) {
 							<li>Generate the private key and certificate signing request for your domains on your origin server:
 								<p>
 									<code>
-										{`openssl reqkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
+										{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
 									</code>
 								</p>
 								Make sure to replace yourdomain.com and www.yourdomain.com. It&apos;s also recommended to put the correct organisational unit, locality, state and country.

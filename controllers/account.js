@@ -12,7 +12,8 @@ exports.accountData = async (req, res, _next) => {
 	let maps = []
 		, globalAcl
 		, aRecords = []
-		, aaaaRecords = [];
+		, aaaaRecords = []
+		, txtRecords = [];
 	if (res.locals.user.clusters.length > 0) {
 		maps = res.locals.dataPlane
 			.getAllRuntimeMapFiles()
@@ -25,14 +26,16 @@ exports.accountData = async (req, res, _next) => {
 			.then(res => res.data.description.split('').reverse()[0]);
 		aRecords = resolver.resolve(process.env.ALL_IP_DOMAIN, 'A');
 		aaaaRecords = resolver.resolve(process.env.ALL_IP_DOMAIN, 'AAAA');
+		txtRecords = resolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	}
-	([maps, globalAcl, aRecords, aaaaRecords] = await Promise.all([maps, globalAcl, aRecords, aaaaRecords]));
+	([maps, globalAcl, aRecords, aaaaRecords, txtRecords] = await Promise.all([maps, globalAcl, aRecords, aaaaRecords, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
 		maps,
 		globalAcl: globalAcl === '1',
 		aRecords,
 		aaaaRecords,
+		txtRecords,
 	};
 };
 
