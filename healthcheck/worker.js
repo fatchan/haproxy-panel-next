@@ -2,35 +2,41 @@
 
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
+const { isIPv4 } = require('net');
 const redis = require('../redis.js');
 const redlock = require('../redlock.js');
 const Queue = require('bull');
-const healthCheckQueue = new Queue('healthchecks', {
+const healthCheckQueue = new Queue('healthchecks', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
 	port: process.env.REDIS_PORT || 6379,
 	password: process.env.REDIS_PASS || '',
-});
+}});
 const https = require('https');
 const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
 async function doCheck(domainKey, hkey, record) {
-	// console.log(domainKey, hkey)
-	await new Promise(res => setTimeout(res, Math.floor(Math.random()*1000)));
+	if (!record || record.h !== true) {
+		record.u = true;
+		return record;
+	}
+	//await new Promise(res => setTimeout(res, Math.floor(Math.random()*1000)));
+	const lock = await redlock.acquire([`lock:${record.ip}`], 30000);
 	try {
 		let recordHealth = await redis.get(`health:${record.ip}`);
 		if (recordHealth === null) {
 			try {
-				// console.log('healthchecking', record.ip);
 				const controller = new AbortController();
 				const signal = controller.signal;
 				setTimeout(() => {
 					controller.abort();
 				}, 3000);
-				await fetch(`https://${record.ip}/`, {
+				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
+				const hostHeader = domainKey.substring(4, domainKey.length-1);
+				await fetch(`https://${host}/`, {
 					method: 'HEAD',
-					headers: { 'Host': 'basedflare.com' },
+					headers: { 'Host': hostHeader },
 					agent: httpsAgent,
 					signal,
 				});
@@ -40,8 +46,10 @@ async function doCheck(domainKey, hkey, record) {
 				recordHealth = '0';
 			}
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 5, 'NX');
+			//console.log(domainKey, hkey, record.ip, 'fetch()ed health:', recordHealth);
+		} else {
+			//console.log(domainKey, hkey, record.ip, 'cached health:', recordHealth);
 		}
-		// console.log(record.ip, 'health:', recordHealth);
 		if (recordHealth === '1' && record.u === false) {
 			record.u = true;
 		 	return record;
@@ -53,27 +61,36 @@ async function doCheck(domainKey, hkey, record) {
 	} catch(e) {
 		console.error(e);
 		return record;
+	} finally {
+		await lock.release();
 	}
 }
 
 async function processKey(domainKey) {
 	try {
 		const domainHashKeys = await redis.client.hkeys(domainKey);
-		await Promise.allSettled(domainHashKeys.map(async (hkey) => {
-			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 5000);
+		domainHashKeys.forEach(async (hkey) => {
+			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 30000);
 			try {
 				const records = await redis.hget(domainKey, hkey);
-				const updatedA = await Promise.all((records['a']||[]).map(async r => doCheck(domainKey, hkey, r)));
-				const updatedAAAA = await Promise.all((records['aaaa']||[]).map(async r => doCheck(domainKey, hkey, r)));
-				records['a'] = updatedA;
-				records['aaaa'] = updatedAAAA;
-				await redis.hset(domainKey, hkey, records);
+				const allIps = (records['a']||[]).concat((records['a']||[]));
+				if (allIps.length > 0) {
+					const updatedA = await Promise.all((records['a']||[]).map(async r => doCheck(domainKey, hkey, r)));
+					const updatedAAAA = await Promise.all((records['aaaa']||[]).map(async r => doCheck(domainKey, hkey, r)));
+					if (updatedA && updatedA.length > 0) {
+						records['a'] = updatedA;
+					}
+					if (updatedAAAA && updatedAAAA.length > 0) {
+						records['aaaa'] = updatedAAAA;
+					}
+					await redis.hset(domainKey, hkey, records);
+				}
 			} catch(e) {
 				console.error(e);
 			} finally {
 				await lock.release();
 			}
-		}));
+		});
 	} catch(e) {
 		console.error(e);
 	}

@@ -112,12 +112,12 @@ exports.deleteDomain = async (req, res) => {
 		res.locals.dataPlane.showRuntimeMap({ map: process.env.DDOS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => {
 				const { hostname, pathname } = url.parse(`https://${e.key}`);
-				return res.locals.user.domains.includes(hostname);
+				return hostname === domain;
 			}))
 	]);
 
 	if (existingHost || existingMaintenance || existingRewrite || existingDdos) {
-		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first." });
+		return dynamicResponse(req, res, 400, { error: "Cannot remove domain lwhile still in use. Remove it from backends/maintenance/rewrites/protection first." });
 	}
 
 
@@ -127,3 +127,4 @@ exports.deleteDomain = async (req, res) => {
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
 
 };
+

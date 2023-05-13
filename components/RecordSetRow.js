@@ -18,7 +18,7 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				{type.toUpperCase()}
 			</td>
 			<td>
-				{recordSetArray[0].ttl}
+				{recordSetArray && recordSetArray.length > 0 ? recordSetArray[0].ttl : '-'}
 			</td>
 			<td>
 				{recordSetArray.map((r, i) => {
