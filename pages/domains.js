@@ -45,12 +45,15 @@ export default function Domains(props) {
 		await API.getDomains(dispatch, setError, router);
 	}
 
-	const domainList = user.domains
+	const domainList = [];
+	const subdomainList = [];
+	user.domains
 		.sort((a, b) => a.localeCompare(b))
-		.map((d, i) => {
+		.forEach((d, i) => {
 		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
-		return (
+		const isSubdomain = d.split('.').length > 2;
+		const tableRow = (
 			<tr key={i} className="align-middle">
 				<td className="col-1 text-center">
 					<form onSubmit={deleteDomain} action="/forms/domain/delete" method="post">
@@ -68,7 +71,7 @@ export default function Domains(props) {
 						: <span className="text-danger"><i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />No Certificate</span>}
 				</td>
 				<td className="col-1 text-center">
-					{d.split('.').length <= 2 && <Link href={`/dns/${d}`}>
+					{!isSubdomain && <Link href={`/dns/${d}`}>
 						<a className="btn btn-outline-secondary">
 							<i className="bi-card-list pe-none me-2" width="16" height="16" />
 							DNS
@@ -77,7 +80,8 @@ export default function Domains(props) {
 				</td>
 			</tr>
 		);
-	})
+		isSubdomain ? subdomainList.push(tableRow) : domainList.push(tableRow)
+	});
 
 	return (
 		<>
@@ -89,7 +93,7 @@ export default function Domains(props) {
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
-				Your Domains:
+				Domains:
 			</h5>
 
 			{/* Domains table */}
@@ -111,6 +115,12 @@ export default function Domains(props) {
 						</tr>
 
 						{domainList}
+						{subdomainList.length > 0 && <tr className="align-middle">
+							<th colSpan="4">
+								Subdomains:
+							</th>
+						</tr>}
+						{subdomainList}
 
 						{/* Add new domain form */}
 						<tr className="align-middle">

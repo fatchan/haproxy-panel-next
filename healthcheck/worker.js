@@ -46,9 +46,9 @@ async function doCheck(domainKey, hkey, record) {
 				recordHealth = '0';
 			}
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 5, 'NX');
-			//console.log(domainKey, hkey, record.ip, 'fetch()ed health:', recordHealth);
+			console.log(domainKey, hkey, record.ip, 'fetch()ed health:', recordHealth);
 		} else {
-			//console.log(domainKey, hkey, record.ip, 'cached health:', recordHealth);
+			console.log(domainKey, hkey, record.ip, 'cached health:', recordHealth);
 		}
 		if (recordHealth === '1' && record.u === false) {
 			record.u = true;
