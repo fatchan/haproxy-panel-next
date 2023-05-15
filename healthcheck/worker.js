@@ -34,21 +34,23 @@ async function doCheck(domainKey, hkey, record) {
 				}, 3000);
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
 				const hostHeader = domainKey.substring(4, domainKey.length-1);
+				//await fetch(`https://${host}/.basedflare/cgi/trace`, {
 				await fetch(`https://${host}/`, {
 					method: 'HEAD',
+					redirect: 'manual',
 					headers: { 'Host': hostHeader },
 					agent: httpsAgent,
 					signal,
 				});
 				recordHealth = '1'; //no error = we consider successful
 			} catch(e) {
-				console.warn('health check down for', record.ip);
+				console.warn('health check down for', domainKey, hkey, record.ip);
 				recordHealth = '0';
 			}
-			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 5, 'NX');
-			console.log(domainKey, hkey, record.ip, 'fetch()ed health:', recordHealth);
+			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 30, 'NX');
+			console.info('fetch()ed health:', domainKey, hkey, record.ip, recordHealth);
 		} else {
-			console.log(domainKey, hkey, record.ip, 'cached health:', recordHealth);
+			console.log('cached health:', domainKey, hkey, record.ip, recordHealth);
 		}
 		if (recordHealth === '1' && record.u === false) {
 			record.u = true;
@@ -63,6 +65,7 @@ async function doCheck(domainKey, hkey, record) {
 		return record;
 	} finally {
 		await lock.release();
+		return record;
 	}
 }
 
