@@ -10,13 +10,13 @@ const fMap = {
 
 	[process.env.DDOS_MAP_NAME]: {
 		fname: 'Protection Rules',
-		description: 'Rules for protection mode on domains and/or paths',
+		description: 'Set protection modes on domains and/or paths',
 		columnNames: ['Domain/Path', 'Mode'],
 	},
 
 	[process.env.DDOS_CONFIG_MAP_NAME]: {
-		fname: 'Protection Config',
-		description: 'Per-domain protection settings',
+		fname: 'Protection Settings',
+		description: 'Customise protection settings on a per-domain basis',
 		columnNames: ['Domain/Path', 'Difficulty', 'POW Type', 'Expiry', 'Lock cookie to IP'],
 		columnKeys: ['pd', 'pt', 'cex', 'cip'],
 	},

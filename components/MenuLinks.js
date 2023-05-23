@@ -85,6 +85,14 @@ export default withRouter(function MenuLinks({ router }) {
 				</Link>
 			</li>
 			<li className="nav-item">
+				<Link href="/map/ddos_config">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "ddos" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-sliders2 pe-none me-2" width="16" height="16" />
+						Protection Settings
+					</a>
+				</Link>
+			</li>
+			<li className="nav-item">
 				<Link href="/map/ddos">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "ddos" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-shield-check pe-none me-2" width="16" height="16" />
