@@ -14,6 +14,13 @@ const fMap = {
 		columnNames: ['Domain/Path', 'Mode'],
 	},
 
+	[process.env.DDOS_CONFIG_MAP_NAME]: {
+		fname: 'Protection Config',
+		description: 'Per-domain protection settings',
+		columnNames: ['Domain/Path', 'Difficulty', 'POW Type', 'Expiry', 'Lock cookie to IP'],
+		columnKeys: ['pd', 'pt', 'cex', 'cip'],
+	},
+
 	[process.env.BLOCKED_MAP_NAME]: {
 		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',

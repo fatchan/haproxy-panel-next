@@ -1,4 +1,4 @@
-export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames }) {
+export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys }) {
 
 	const { _id, key, value } = row;
 
@@ -14,11 +14,16 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 			<td>
 				{key}
 			</td>
-			{showValues === true && (
+			{typeof value === 'string' && showValues === true && (
 				<td>
 					{mapValueNames[value] || value}
 				</td>				
 			)}
+			{typeof value === 'object' && columnKeys.map((ck, mvi) => (
+				<td key={`mvi_${mvi}`}>
+					{value[ck].toString()}
+				</td>
+			))}
 		</tr>
 	);
 	

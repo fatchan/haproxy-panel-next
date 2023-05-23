@@ -37,7 +37,15 @@ const MapPage = (props) => {
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await API.addToMap(mapInfo.name, { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value }, dispatch, setError, router);
+		await API.addToMap(mapInfo.name, {
+			_csrf: csrf,
+			key: e.target.key.value,
+			value: e.target.value?.value,
+			pd: e.target.pd?.value,
+			pt: e.target.pt?.value,
+			cex: e.target.cex?.value,
+			cip: e.target.cip?.value,
+		 }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
 	}
@@ -58,6 +66,7 @@ const MapPage = (props) => {
 				showValues={showValues}
 				mapValueNames={mapValueNames}
 				onDeleteSubmit={deleteFromMap}
+				columnKeys={mapInfo.columnKeys}
 			/>
 		)
 	});
@@ -78,6 +87,31 @@ const MapPage = (props) => {
 						<option value="" />
 						{mapValueOptions}
 					</select>
+				</>
+			);
+			break;
+		}
+		case "ddos_config": {
+			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
+			formElements = (
+				<>
+					<input type="hidden" name="_csrf" value={csrf} />
+					<input className="btn btn-success" type="submit" value="+" />
+					<select className="form-select mx-3" name="key" defaultValue="" required>
+						<option value="" />
+						{domainSelectOptions}
+					</select>
+					<input className="form-control mx-3" type="number" name="pd" placeholder="difficulty" required />
+					<select className="form-select mx-3" name="pt" required>
+						<option disabled value="">pow type</option>
+						<option value="sha256">sha256</option>
+						<option value="argon2">argon2</option>
+					</select>
+					<input className="form-control mx-3" type="number" name="cex" placeholder="cookie expiry (seconds)" required />
+					<div className="form-check">
+						<input className="form-check-input" type="checkbox" name="cip" value="cip" id="cip" />
+						<label className="form-check-label" htmlFor="cip">Lock cookie to IP</label>
+					</div>
 				</>
 			);
 			break;
@@ -173,11 +207,11 @@ const MapPage = (props) => {
 								<th>
 									{mapInfo.columnNames[0]}
 								</th>
-								{showValues === true && (
-									<th>
-										{mapInfo.columnNames[1]}
+								{showValues === true && mapInfo.columnNames.slice(1).map((x, mci) => (
+									<th key={`mci_${mci}`}>
+										{x}
 									</th>
-								)}
+								))}
 							</tr>
 						)}
 
@@ -185,7 +219,7 @@ const MapPage = (props) => {
 
 						{/* Add new row form */}
 						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan="3">
+							<td className="col-1 text-center" colSpan={mapInfo.columnNames.length+(showValues?1:0)}>
 								<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapInfo.name}/add`} method="post">
 									{formElements}
 								</form>

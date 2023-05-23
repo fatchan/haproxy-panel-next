@@ -29,6 +29,12 @@ exports.mapData = async (req, res, next) => {
 	}
 
 	switch (req.params.name) {
+		case process.env.DDOS_CONFIG_MAP_NAME:
+			map = map.map(a => {
+				a.value = JSON.parse(a.value);
+				return a;
+			});
+			/* falls through */
 		case process.env.REWRITE_MAP_NAME:
 		case process.env.REDIRECT_MAP_NAME:
 		case process.env.DDOS_MAP_NAME:
@@ -87,6 +93,7 @@ exports.deleteMapForm = async (req, res, next) => {
 
 	if (req.params.name === process.env.HOSTS_MAP_NAME
 		|| req.params.name === process.env.DDOS_MAP_NAME
+		|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
 		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
 		|| req.params.name === process.env.REDIRECT_MAP_NAME
 		|| req.params.name === process.env.REWRITE_MAP_NAME) {
@@ -155,6 +162,7 @@ exports.patchMapForm = async (req, res, next) => {
 
 		//validate key is domain
 		if (req.params.name === process.env.DDOS_MAP_NAME
+			|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
 			|| req.params.name === process.env.HOSTS_MAP_NAME
 			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
 			|| req.params.name === process.env.REDIRECT_MAP_NAME
@@ -193,6 +201,15 @@ exports.patchMapForm = async (req, res, next) => {
 			}
 		}
 
+		//validate ddos_config
+		if (req.params.name === process.env.DDOS_CONFIG_MAP_NAME) {
+			const { pd, cex } = req.body;
+			if ((pd && (isNaN(pd) || parseInt(pd) !== +pd || pd < 8))
+				|| (cex && (isNaN(cex) || parseInt(cex) !== +cex))) {
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+			}
+		}
+
 		//validate value is IP:port
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 			let parsedValue;
@@ -226,6 +243,14 @@ exports.patchMapForm = async (req, res, next) => {
 			case process.env.WHITELIST_MAP_NAME:
 			case process.env.MAINTENANCE_MAP_NAME:
 				value = res.locals.user.username;
+				break;
+			case process.env.DDOS_CONFIG_MAP_NAME:
+				value = JSON.stringify({
+					pd: parseInt(req.body.pd || 24),
+					pt: req.body.pt === "argon2" ? "argon2" : "sha256",
+					cex: parseInt(req.body.cex || 21600),
+					cip: req.body.cip ? true : false,
+				});
 				break;
 			default:
 				return dynamicResponse(req, res, 400, { error: 'Invalid map' });
