@@ -319,13 +319,32 @@ exports.patchMapForm = async (req, res, next) => {
 				}
 			}
 
-			await res.locals
-				.dataPlaneAll('addPayloadRuntimeMap', {
-					name: req.params.name
-				}, [{
-					key: req.body.key,
-					value: value,
-				}]);
+			const existingEntry = req.params.name === process.env.HOSTS_MAP_NAME
+				? null
+				: (await res.locals
+				.dataPlane.getRuntimeMapEntry({
+					map: req.params.name,
+					id: req.body.key,
+				})
+				.then(res => res.data)
+				.catch(() => {}));
+			if (existingEntry) {
+				await res.locals
+					.dataPlaneAll('replaceRuntimeMapEntry', {
+						map: req.params.name,
+						id: req.body.key,
+					}, {
+						value: value,
+					});
+			} else {
+				await res.locals
+					.dataPlaneAll('addPayloadRuntimeMap', {
+						name: req.params.name
+					}, [{
+						key: req.body.key,
+						value: value,
+					}]);
+			}
 			return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);
