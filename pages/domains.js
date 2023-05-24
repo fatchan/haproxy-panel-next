@@ -39,9 +39,8 @@ export default function Domains(props) {
 		await API.getDomains(dispatch, setError, router);
 	}
 
-	async function deleteDomain(e) {
-		e.preventDefault();
-		await API.deleteDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
+	async function deleteDomain(csrf, domain) {
+		await API.deleteDomain({ _csrf: csrf, domain }, dispatch, setError, router);
 		await API.getDomains(dispatch, setError, router);
 	}
 
@@ -55,12 +54,8 @@ export default function Domains(props) {
 		const isSubdomain = d.split('.').length > 2;
 		const tableRow = (
 			<tr key={i} className="align-middle">
-				<td className="col-1 text-center">
-					<form onSubmit={deleteDomain} action="/forms/domain/delete" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="domain" value={d} />
-						<input className="btn btn-danger" type="submit" value="×" />
-					</form>
+				<td className="text-left" style={{width:0}}>
+					<input onClick={() => deleteDomain(csrf, d)} className="btn btn-danger" type="button" value="×" />
 				</td>
 				<td>
 					{d}
@@ -98,18 +93,18 @@ export default function Domains(props) {
 
 			{/* Domains table */}
 			<div className="table-responsive">
-				<table className="table text-nowrap m-1">
+				<table className="table text-nowrap">
 					<tbody>
 
 						<tr className="align-middle">
-							<th className="col-1" />
+							<th/>
 							<th>
 								Domain
 							</th>
 							<th>
 								HTTPS Certificate
 							</th>
-							<th className="col-1">
+							<th>
 								Edit DNS
 							</th>
 						</tr>
@@ -128,7 +123,7 @@ export default function Domains(props) {
 								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="domain" placeholder="domain" required />
+									<input className="form-control ms-3" type="text" name="domain" placeholder="domain" required />
 								</form>
 							</td>
 						</tr>

@@ -28,7 +28,7 @@ export default function App({ Component, pageProps }) {
 				.nav-link:hover { color: #6aa6fd; }
 				.mobile-menu { margin: 0 -16px; }
 				.fs-xs { font-size: small; }
-				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: max-content; min-width: 600px; background-color: var(--bs-body-bg); }
+				.table, .list-group { box-shadow: 0 0px 3px rgba(0,0,0,.1); max-width: 100%; min-width: 600px; background-color: var(--bs-body-bg); }
 				.text-decoration-none { color: var(--bs-body-color); }
 				.sidebar { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
 				.card { background: var(--bs-body-bg) !important; color: var(--bs-body-color) !important; }

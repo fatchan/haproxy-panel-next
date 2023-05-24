@@ -8,7 +8,6 @@ Intended for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-pro
 Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Uses haproxy runtime apis to update maps, acls, etc.
 
 ##### Features:
-- Works with javascript disabled on the client (next.js server side rendering).
 - List/add/remove clusters (server groups).
 - List/add/remove domains for your account.
 - Control allowed hosts for a cluster.

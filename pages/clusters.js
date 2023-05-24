@@ -39,15 +39,13 @@ export default function Clusters(props) {
 		await API.getClusters(dispatch, setError, router);
 	}
 
-	async function deleteCluster(e) {
-		e.preventDefault();
-		await API.deleteCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
+	async function deleteCluster(csrf, cluster) {
+		await API.deleteCluster({ _csrf: csrf, cluster }, dispatch, setError, router);
 		await API.getClusters(dispatch, setError, router);
 	}
 
-	async function setCluster(e) {
-		e.preventDefault();
-		await API.changeCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
+	async function setCluster(csrf, cluster) {
+		await API.changeCluster({ _csrf: csrf, cluster }, dispatch, setError, router);
 		await API.getClusters(dispatch, setError, router);
 	}
 
@@ -75,24 +73,27 @@ export default function Clusters(props) {
 
 			{/* Clusters table */}
 			<div className="table-responsive">
-				<table className="table text-nowrap m-1">
-					<tbody>
+				<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
+					<input type="hidden" name="_csrf" value={csrf} />
+					<table className="table text-nowrap">
+						<tbody>
 
-						{clusterList}
+							{clusterList}
 
-						{/* Add new cluster form */}
-						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan="3">
-								<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
-									<input type="hidden" name="_csrf" value={csrf} />
+							{/* Add new cluster form */}
+							<tr className="align-middle">
+								<td>
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="cluster" placeholder="http://username:password@host:port, comma separated for multiple" required />
-								</form>
-							</td>
-						</tr>
+								</td>
+								<td colSpan="2">
 
-					</tbody>
-				</table>
+									<input className="form-control" type="text" name="cluster" placeholder="http://username:password@host:port, comma separated for multiple" required />
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+				</form>
 			</div>
 
 			{/* back to account */}

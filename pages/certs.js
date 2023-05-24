@@ -42,12 +42,11 @@ export default function Certs(props) {
 		await API.getCerts(dispatch, setError, router);
 	}
 
-	async function deleteCert(e) {
-		e.preventDefault();
+	async function deleteCert(csrf, subject, storageName) {
 		await API.deleteCert({
 			_csrf: csrf,
-			subject: e.target.subject.value,
-			storage_name: e.target.storage_name ? e.target.storage_name.value : null,
+			subject,
+			storage_name: storageName,
 		}, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
@@ -71,12 +70,7 @@ export default function Certs(props) {
 		return (
 			<tr key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">
-					{<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="subject" value={approxSubject} />
-						<input type="hidden" name="storage_name" value={c.storage_name} />
-						<input className="btn btn-danger" type="submit" value="×" />
-					</form>}
+					<input onClick={() => deleteCert(csrf, approxSubject, c.storage_name)} className="btn btn-danger" type="button" value="×" />
 				</td>
 				<td>
 					{approxSubject || '-'}
@@ -102,25 +96,12 @@ export default function Certs(props) {
 		const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);
 		return (
 			<tr key={'certList'+i} className="align-middle">
-				<td className="col-1 text-center">
+				<td className="text-left" style={{width:0}}>
 					{inCluster
-						? (<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
-							<input type="hidden" name="_csrf" value={csrf} />
-							<input type="hidden" name="subject" value={d.subject || d._id} />
-							<input type="hidden" name="storage_name" value={d.storageName} />
-							<input className="btn btn-danger" type="submit" value="×" />
-						</form>)
+						? <input onClick={() => deleteCert(csrf, (d.subject || d._id), d.storageName)} className="btn btn-danger" type="button" value="×" />
 						: (<>
-							<form onSubmit={uploadCert} action="/forms/cert/upload" method="post">
-								<input type="hidden" name="_csrf" value={csrf} />
-								<input type="hidden" name="domain" value={d.subject || d._id} />
-								<input className="btn btn-warning mb-2" type="submit" value="↑" />
-							</form>
-							<form onSubmit={deleteCert} action="/forms/cert/delete" method="post">
-								<input type="hidden" name="_csrf" value={csrf} />
-								<input type="hidden" name="subject" value={d.subject || d._id} />
-								<input className="btn btn-danger" type="submit" value="×" />
-							</form>
+							<input onClick={() => uploadCert(csrf, (d.subject || d._id))} className="btn btn-warning mb-2" type="button" value="↑" />
+							<input onClick={() => deleteCert(csrf, (d.subject || d._id))} className="btn btn-warning mb-2" type="button" value="×" />
 						</>)
 					}
 				</td>
@@ -161,51 +142,55 @@ export default function Certs(props) {
 
 			{/* Certs table */}
 			<div className="table-responsive">
-				<table className="table text-nowrap m-1">
-					<tbody>
+				<form className="d-flex" onSubmit={addCert} action="/forms/cert/add" method="post">
+					<input type="hidden" name="_csrf" value={csrf} />
+					<table className="table text-nowrap">
+						<tbody>
 
-						<tr className="align-middle">
-							<th className="col-1" />
-							<th>
-								Subject
-							</th>
-							<th>
-								Altname(s)
-							</th>
-							<th>
-								Expires
-							</th>
-							<th>
-								Storage Name
-							</th>
-						</tr>
-
-						{certList}
-
-						{clusterOnlyCerts && clusterOnlyCerts.length > 0 && (<>
 							<tr className="align-middle">
-								<th colSpan="5">
-									Not in local DB:
+								<th style={{width:0}} />
+								<th>
+									Subject
+								</th>
+								<th>
+									Altname(s)
+								</th>
+								<th>
+									Expires
+								</th>
+								<th>
+									Storage Name
 								</th>
 							</tr>
-							{clusterOnlyCertList}
-						</>)}
 
-						{/* Add new cert form */}
-						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan="3">
-								<form className="d-flex" onSubmit={addCert} action="/forms/cert/add" method="post">
-									<input type="hidden" name="_csrf" value={csrf} />
+							{certList}
+
+							{clusterOnlyCerts && clusterOnlyCerts.length > 0 && (<>
+								<tr className="align-middle">
+									<th colSpan="5">
+										Not in local DB:
+									</th>
+								</tr>
+								{clusterOnlyCertList}
+							</>)}
+
+							{/* Add new cert form */}
+							<tr className="align-middle">
+								<td>
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control mx-3" type="text" name="subject" placeholder="domain.com" required />
-									<input className="form-control me-3" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
-								</form>
-							</td>
-							<td colSpan="2"></td>
-						</tr>
+								</td>
+								<td>
+									<input className="form-control" type="text" name="subject" placeholder="domain.com" required />
+								</td>
+								<td>
+									<input className="form-control" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
+								</td>
+								<td colSpan="2"></td>
+							</tr>
 
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				</form>
 			</div>
 
 			{/* back to account */}

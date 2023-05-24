@@ -50,9 +50,8 @@ const MapPage = (props) => {
 		e.target.reset();
 	}
 
-	async function deleteFromMap(e) {
-		e.preventDefault();
-		await API.deleteFromMap(mapInfo.name, { _csrf: csrf, key: e.target.key.value }, dispatch, setError, router);
+	async function deleteFromMap(csrf, key) {
+		await API.deleteFromMap(mapInfo.name, { _csrf: csrf, key }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 	}
 
@@ -80,13 +79,18 @@ const MapPage = (props) => {
 				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>))
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<input className="form-control mx-3" type="text" name="key" placeholder="domain/path" required />
-					<select className="form-select mx-3" name="value" defaultValue="" required>
-						<option value="" />
-						{mapValueOptions}
-					</select>
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<input className="form-control" type="text" name="key" placeholder="domain/path" required />
+					</td>
+					<td>
+						<select className="form-select" name="value" defaultValue="" required>
+							<option value="" />
+							{mapValueOptions}
+						</select>
+					</td>
 				</>
 			);
 			break;
@@ -95,23 +99,34 @@ const MapPage = (props) => {
 			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<select className="form-select mx-3" name="key" defaultValue="" required>
-						<option value="" />
-						{domainSelectOptions}
-					</select>
-					<input className="form-control mx-3" type="number" name="pd" placeholder="difficulty" required />
-					<select className="form-select mx-3" name="pt" required>
-						<option disabled value="">pow type</option>
-						<option value="sha256">sha256</option>
-						<option value="argon2">argon2</option>
-					</select>
-					<input className="form-control mx-3" type="number" name="cex" placeholder="cookie expiry (seconds)" required />
-					<div className="form-check">
-						<input className="form-check-input" type="checkbox" name="cip" value="cip" id="cip" />
-						<label className="form-check-label" htmlFor="cip">Lock cookie to IP</label>
-					</div>
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<select className="form-select" name="key" defaultValue="" required>
+							<option value="" />
+							{domainSelectOptions}
+						</select>
+					</td>
+					<td>
+						<input className="form-control" type="number" name="pd" placeholder="difficulty" required />
+					</td>
+					<td>
+						<select className="form-select" name="pt" required>
+							<option disabled value="">pow type</option>
+							<option value="sha256">sha256</option>
+							<option value="argon2">argon2</option>
+						</select>
+					</td>
+					<td>
+						<input className="form-control" type="number" name="cex" placeholder="cookie expiry (seconds)" required />
+					</td>
+					<td>
+						<div className="form-check">
+							<input className="form-check-input" type="checkbox" name="cip" value="cip" id="cip" />
+							<label className="form-check-label" htmlFor="cip">Lock cookie to IP</label>
+						</div>
+					</td>
 				</>
 			);
 			break;
@@ -120,21 +135,26 @@ const MapPage = (props) => {
 			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<select className="form-select mx-3" name="key" defaultValue="" required>
-						<option value="" />
-						{domainSelectOptions}
-					</select>
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<select className="form-select" name="key" defaultValue="" required>
+							<option value="" />
+							{domainSelectOptions}
+						</select>
+					</td>
 					{
 						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapInfo.name === "hosts") &&
-						<input
-							className="form-control ml-2"
-							type="text"
-							name="value"
-							placeholder="backend ip:port"
-							required
-						/>
+						<td>
+							<input
+								className="form-control"
+								type="text"
+								name="value"
+								placeholder="backend ip:port"
+								required
+							/>
+						</td>
 					}
 				</>
 			);
@@ -146,12 +166,15 @@ const MapPage = (props) => {
 			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<select className="form-select mx-3" name="key" defaultValue="" required>
-						<option value="" />
-						{domainSelectOptions}
-					</select>
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<select className="form-select" name="key" defaultValue="" required>
+							<option value="" />
+							{domainSelectOptions}
+						</select>
+					</td>
 				</>
 			);
 			break;
@@ -160,9 +183,12 @@ const MapPage = (props) => {
 		case "whitelist":
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<input className="form-control mx-3" type="text" name="key" placeholder="ip or subnet" required />
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<input className="form-control" type="text" name="key" placeholder="ip or subnet" required />
+					</td>
 				</>
 			);
 			break;
@@ -170,10 +196,15 @@ const MapPage = (props) => {
 		case "rewrite":
 			formElements = (
 				<>
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-success" type="submit" value="+" />
-					<input className="form-control mx-3" type="text" name="key" placeholder="domain" required />
-					<input className="form-control mx-3" type="text" name="value" placeholder="domain or domain/path" required />
+					<td>
+						<input className="btn btn-success" type="submit" value="+" />
+					</td>
+					<td>
+						<input className="form-control" type="text" name="key" placeholder="domain" required />
+					</td>
+					<td>
+						<input className="form-control" type="text" name="value" placeholder="domain or domain/path" required />
+					</td>
 				</>
 			);
 			break;
@@ -196,14 +227,14 @@ const MapPage = (props) => {
 			</h5>
 
 			{/* Map table */}
-			<div className="table-responsive">
-				<table className="table text-nowrap m-1">
-					<tbody>
+			<div className="table-responsive w-100">
+				<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapInfo.name}/add`} method="post">
+					<table className="table text-nowrap mb-0">
+						<tbody>
 
-						{/* header row */}
-						{mapRows.length > 0 && (
+							{/* header row */}
 							<tr>
-								<th />
+								<th style={{width:0}} />
 								<th>
 									{mapInfo.columnNames[0]}
 								</th>
@@ -212,22 +243,19 @@ const MapPage = (props) => {
 										{x}
 									</th>
 								))}
+								
 							</tr>
-						)}
 
-						{mapRows}
+							{mapRows}
 
-						{/* Add new row form */}
-						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan={mapInfo.columnNames.length+(showValues?1:0)}>
-								<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapInfo.name}/add`} method="post">
-									{formElements}
-								</form>
-							</td>
-						</tr>
+							{/* Add new row form */}
+							<tr className="align-middle">
+								{formElements}
+							</tr>
 
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				</form>
 			</div>
 
 			{/* back to account */}

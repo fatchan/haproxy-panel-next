@@ -4,12 +4,8 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 
 	return (
 		<tr className="align-middle">
-			<td className="col-1 text-center">
-				<form onSubmit={onDeleteSubmit} action={`/forms/map/${name}/delete`} method="post">
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input type="hidden" name="key" value={key} />
-					<input className="btn btn-danger" type="submit" value="×" />
-				</form>
+			<td className="text-left">
+				<input onClick={() => onDeleteSubmit(csrf, key)} className="btn btn-danger" type="button" value="×" />
 			</td>
 			<td>
 				{key}
