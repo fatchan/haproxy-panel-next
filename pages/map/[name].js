@@ -44,7 +44,7 @@ const MapPage = (props) => {
 			pd: e.target.pd?.value,
 			pt: e.target.pt?.value,
 			cex: e.target.cex?.value,
-			cip: e.target.cip?.value,
+			cip: e.target.cip?.checked,
 		 }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
