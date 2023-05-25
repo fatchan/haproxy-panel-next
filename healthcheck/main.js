@@ -1,5 +1,9 @@
 'use strict';
 
+process
+        .on('uncaughtException', console.error)
+        .on('unhandledRejection', console.error);
+
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
 const redis = require('../redis.js');

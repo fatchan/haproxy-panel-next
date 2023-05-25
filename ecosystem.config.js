@@ -13,9 +13,21 @@ module.exports = {
 			}
 		},
 		{
-			name: "stats-pusher",
-			script: "./influxdb.js",
+			name: "stats-main",
+			script: "./stats/main.js",
 			instances : "1",
+			exec_mode : "fork",
+			env: {
+				"NODE_ENV": "development"
+			},
+			env_production: {
+				"NODE_ENV": "production",
+			}
+		},
+		{
+			name: "stats-worker",
+			script: "./stats/worker.js",
+			instances : "2",
 			exec_mode : "fork",
 			env: {
 				"NODE_ENV": "development"
@@ -39,7 +51,7 @@ module.exports = {
 		{
 			name: "healthcheck-worker",
 			script: "./healthcheck/worker.js",
-			instances : "1",
+			instances : "2",
 			exec_mode : "fork",
 			env: {
 				"NODE_ENV": "development"
