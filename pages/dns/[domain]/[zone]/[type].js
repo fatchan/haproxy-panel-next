@@ -131,19 +131,26 @@ const DnsEditRecordPage = (props) => {
 									className="form-select"
 									name="type"
 									defaultValue={type}
+									value={type}
 									onChange={e => setType(e.target.value)}
 									required
 									disabled={!newRecord}>
 									<option value="">Type</option>
-									<option value="a">A</option>
-									<option value="aaaa">AAAA</option>
-									<option value="txt">TXT</option>
-									<option value="cname">CNAME</option>
-									<option value="ns">NS</option>
-									<option value="mx">MX</option>
-									<option value="srv">SRV</option>
-									<option value="caa">CAA</option>
-									<option value="soa">SOA</option>
+									<optgroup label="Standard">
+										<option value="a">A</option>
+										<option value="aaaa">AAAA</option>
+										<option value="txt">TXT</option>
+										<option value="cname">CNAME</option>
+										<option value="ns">NS</option>
+										<option value="mx">MX</option>
+										<option value="srv">SRV</option>
+										<option value="caa">CAA</option>
+										<option value="soa">SOA</option>
+									</optgroup>
+									<optgroup label="Templates">
+										<option value="a_template">A (template)</option>
+										<option value="aaaa_template">AAAA (template)</option>
+									</optgroup>
 								</select>
 							</label>
 						</div>
@@ -161,7 +168,7 @@ const DnsEditRecordPage = (props) => {
 								/>
 							</label>
 						</div>
-						<div className="col">
+						{!type.endsWith('_template') && <div className="col">
 							<label className="w-100">
 								TTL
 								<input
@@ -173,10 +180,10 @@ const DnsEditRecordPage = (props) => {
 									defaultValue={recordSet && recordSet.length > 0 ? recordSet[0].ttl : 300}
 								/>
 							</label>
-						</div>
+						</div>}
 					</div>
 
-					<div className="row mb-3">
+					{!type.endsWith('_template') && <div className="row mb-3">
 						<div className="col-4">
 							Record selection mode:
 							<div className="form-check">
@@ -227,8 +234,8 @@ const DnsEditRecordPage = (props) => {
 								</label>
 							</div>
 						</div>
-					</div>
-					<div className="col">
+					</div>}
+					{!type.endsWith('_template') && <div className="col">
 						<div className="row">
 							<div className="col">
 								Records:
@@ -522,7 +529,7 @@ const DnsEditRecordPage = (props) => {
 								</button>
 							</div>
 						</div>
-					</div>
+					</div>}
 				</div>
 				<div className="row mt-4">
 					<div className="col-auto me-auto">
