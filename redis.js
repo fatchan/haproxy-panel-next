@@ -5,14 +5,23 @@ const Redis = require('ioredis')
 		host: process.env.REDIS_HOST || '127.0.0.1',
 		port: process.env.REDIS_PORT || 6379,
 		password: process.env.REDIS_PASS || '',
+		db: 0,
+	})
+	, lockClient = new Redis({
+		host: process.env.REDIS_HOST || '127.0.0.1',
+		port: process.env.REDIS_PORT || 6379,
+		password: process.env.REDIS_PASS || '',
+		db: 1,
 	});
 
 module.exports = {
 
 	client,
+	lockClient,
 
 	close: () => {
 		client.quit();
+		lockClient.quit();
 	},
 
 	//get a value with key

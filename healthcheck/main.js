@@ -12,6 +12,7 @@ const healthCheckQueue = new Queue('healthchecks', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
 	port: process.env.REDIS_PORT || 6379,
 	password: process.env.REDIS_PASS || '',
+	db: 1,
 }});
 
 function scanKeys(pattern) {
