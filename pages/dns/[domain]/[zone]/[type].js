@@ -183,7 +183,7 @@ const DnsEditRecordPage = (props) => {
 						</div>}
 					</div>
 
-					{!type.endsWith('_template') && <div className="row mb-3">
+					{(type === "a" || type === "aaaa") && <div className="row mb-3">
 						<div className="col-4">
 							Record selection mode:
 							<div className="form-check">
