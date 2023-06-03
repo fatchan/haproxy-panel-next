@@ -228,7 +228,7 @@ exports.dnsRecordUpdate = async (req, res) => {
 					record = { ttl, value, flag, tag };
 					break;
 				case "soa":
-					record = { ttl, ns: value, MBox, refresh, retry, expire, minttl: 30 };
+					record = { ttl, ns: value, MBox, refresh, retry, expire, minttl: 180 };
 					break;
 				default:
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
