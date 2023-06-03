@@ -126,7 +126,7 @@ export default function Account(props) {
 							</div>
 						</div>
 						<div className="badge bg-primary rounded-pill">
-							{user.domains.length}
+							{user.domains.filter(x => x.split('.').length <= 2).length}
 						</div>
 					</a>
 				</Link>
