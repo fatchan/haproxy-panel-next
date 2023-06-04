@@ -134,7 +134,7 @@ exports.addCert = async (req, res, next) => {
 		console.log('Add cert request:', subject, altnames);
 		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames);
 		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
-			'/v2/services/haproxy/storage/ssl_certificates?force_reload=true',
+			'/v2/services/haproxy/storage/ssl_certificates', // ?force_reload=true
 			{
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
@@ -197,7 +197,7 @@ exports.uploadCert = async (req, res, next) => {
 	try {
 		console.log('Upload cert:', existingCert.subject, existingCert.altnames);
 		const { message } = await res.locals.postFileAll(
-			'/v2/services/haproxy/storage/ssl_certificates?force_reload=true',
+			'/v2/services/haproxy/storage/ssl_certificates', // ?force_reload=true
 				{
 				method: 'POST',
 				headers: { 'authorization': res.locals.dataPlane.defaults.headers.authorization },
