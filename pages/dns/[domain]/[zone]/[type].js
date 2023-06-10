@@ -147,9 +147,11 @@ const DnsEditRecordPage = (props) => {
 										<option value="caa">CAA</option>
 										<option value="soa">SOA</option>
 									</optgroup>
-									<optgroup label="Templates">
-										<option value="a_template">A (template)</option>
-										<option value="aaaa_template">AAAA (template)</option>
+									<optgroup label="BasedFlare Templates">
+										<option value="a_template">A</option>
+										<option value="aaaa_template">AAAA</option>
+										<option value="soa_template">SOA</option>
+										<option value="ns_template">NS</option>
 									</optgroup>
 								</select>
 							</label>

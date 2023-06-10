@@ -129,111 +129,124 @@ exports.dnsRecordUpdate = async (req, res) => {
 	let { ttl } = req.body;
 	let { domain, zone, type } = req.params;
 	let records = [];
-	if (type === 'a_template') {
-		records = aTemplate;
-		type = 'a';
-	} else if (type === 'aaaa_template') {
-		records = aaaaTemplate;
-		type = 'aaaa';
-	} else {
-		for (let i = 0; i < (type == "soa" ? 1 : 100); i++) {
-			let {
-				[`value_${i}`]: value,
-				//geo
-				[`geok_${i}`]: geok,
-				[`geov_${i}`]: geov,
-				[`preference_${i}`]: preference,
-				[`port_${i}`]: port,
-				//health
-				[`id_${i}`]: id,
-				[`health_${i}`]: h,
-				[`fallbacks_${i}`]: fb,
-				[`sel_${i}`]: sel,
-				[`bsel_${i}`]: bsel,
-				//other (numbers)
-				[`weight_${i}`]: weight,
-				[`priority_${i}`]: priority,
-				[`flag_${i}`]: flag,
-				[`refresh_${i}`]: refresh,
-				[`retry_${i}`]: retry,
-				[`expire_${i}`]: expire,
-				//other
-				[`tag_${i}`]: tag,
-				[`mbox_${i}`]: MBox,
-			} = req.body;
-			if (!value) { break; }
-			try {
-				if ((geok && !["cn", "cc"].includes(geok))
-					|| (sel && !["0", "1", "2", "3"].includes(sel))
-					|| (bsel && !["0", "1", "2", "3"].includes(bsel))
-					|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
-					|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
-					|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))
-					|| (port && (isNaN(port) || parseInt(port) !== +port))
-					|| (weight && (isNaN(weight) || parseInt(weight) !== +weight))
-					|| (priority && (isNaN(priority) || parseInt(priority) !== +priority))
-					|| (refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh))
-					|| (retry && (isNaN(retry) || parseInt(retry) !== +retry))
-					|| (expire && (isNaN(expire) || parseInt(expire) !== +expire))
-					|| (geov && !Array.isArray(geov))
-					|| (fb && !Array.isArray(fb))) {
+	switch (type) {
+		case 'ns_template':
+			records = nsTemplate;
+			type = 'ns';
+			break;
+		case 'soa_template':
+			records = JSON.parse(JSON.stringify(nsTemplate));
+			records[0].MBox = `root.${req.params.domain}.`;
+			type = 'soa';
+			break;
+		case 'a_template':
+			records = aTemplate;
+			type = 'a';
+			break;
+		case 'aaaa_template':
+			records = aaaaTemplate;
+			type = 'aaaa';
+			break;
+		default: {
+			for (let i = 0; i < (type == "soa" ? 1 : 100); i++) {
+				let {
+					[`value_${i}`]: value,
+					//geo
+					[`geok_${i}`]: geok,
+					[`geov_${i}`]: geov,
+					[`preference_${i}`]: preference,
+					[`port_${i}`]: port,
+					//health
+					[`id_${i}`]: id,
+					[`health_${i}`]: h,
+					[`fallbacks_${i}`]: fb,
+					[`sel_${i}`]: sel,
+					[`bsel_${i}`]: bsel,
+					//other (numbers)
+					[`weight_${i}`]: weight,
+					[`priority_${i}`]: priority,
+					[`flag_${i}`]: flag,
+					[`refresh_${i}`]: refresh,
+					[`retry_${i}`]: retry,
+					[`expire_${i}`]: expire,
+					//other
+					[`tag_${i}`]: tag,
+					[`mbox_${i}`]: MBox,
+				} = req.body;
+				if (!value) { break; }
+				try {
+					if ((geok && !["cn", "cc"].includes(geok))
+						|| (sel && !["0", "1", "2", "3"].includes(sel))
+						|| (bsel && !["0", "1", "2", "3"].includes(bsel))
+						|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
+						|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
+						|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))
+						|| (port && (isNaN(port) || parseInt(port) !== +port))
+						|| (weight && (isNaN(weight) || parseInt(weight) !== +weight))
+						|| (priority && (isNaN(priority) || parseInt(priority) !== +priority))
+						|| (refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh))
+						|| (retry && (isNaN(retry) || parseInt(retry) !== +retry))
+						|| (expire && (isNaN(expire) || parseInt(expire) !== +expire))
+						|| (geov && !Array.isArray(geov))
+						|| (fb && !Array.isArray(fb))) {
+						return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+					}
+					flag && (flag = parseInt(flag));
+					ttl && (ttl = parseInt(ttl));
+					preference && (preference = parseInt(preference));
+					port && (port = parseInt(port));
+					weight && (weight = parseInt(weight));
+					priority && (priority = parseInt(priority));
+					refresh && (refresh = parseInt(refresh));
+					retry && (retry = parseInt(retry));
+					expire && (expire = parseInt(expire));
+					sel && (sel = parseInt(sel));
+					bsel && (bsel = parseInt(bsel));
+					h && (h = (h != null ? true : false));
+					geov && (geov = geov.map(x => x.trim()).slice(0,300)); //todo: country/continent filter
+					fb && (fb = fb.map(x => x.trim()).slice(0,20));
+				} catch(e) {
+					console.error(e);
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
-				flag && (flag = parseInt(flag));
-				ttl && (ttl = parseInt(ttl));
-				preference && (preference = parseInt(preference));
-				port && (port = parseInt(port));
-				weight && (weight = parseInt(weight));
-				priority && (priority = parseInt(priority));
-				refresh && (refresh = parseInt(refresh));
-				retry && (retry = parseInt(retry));
-				expire && (expire = parseInt(expire));
-				sel && (sel = parseInt(sel));
-				bsel && (bsel = parseInt(bsel));
-				h && (h = (h != null ? true : false));
-				geov && (geov = geov.map(x => x.trim()).slice(0,300)); //todo: country/continent filter
-				fb && (fb = fb.map(x => x.trim()).slice(0,20));
-			} catch(e) {
-				console.error(e);
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-			let record;
-			switch(type) {
-				case "a":
-					if (!isIPv4(value)) {
+				let record;
+				switch(type) {
+					case "a":
+						if (!isIPv4(value)) {
+							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+						}
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
+						break;
+					case "aaaa":
+						if (!isIPv6(value)) {
+							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+						}
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
+						break;
+					case "txt":
+						record = { ttl, text: value };
+						break;
+					case "cname":
+					case "ns":
+						record = { ttl, host: value };
+						break;
+					case "mx":
+						record = { ttl, host: value, preference };
+						break;
+					case "srv":
+						record = { ttl, target: value, port, weight, priority };
+						break;
+					case "caa":
+						record = { ttl, value, flag, tag };
+						break;
+					case "soa":
+						record = { ttl, ns: value, MBox, refresh, retry, expire, minttl: 180 };
+						break;
+					default:
 						return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-					}
-					record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
-					break;
-				case "aaaa":
-					if (!isIPv6(value)) {
-						return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-					}
-					record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
-					break;
-				case "txt":
-					record = { ttl, text: value };
-					break;
-				case "cname":
-				case "ns":
-					record = { ttl, host: value };
-					break;
-				case "mx":
-					record = { ttl, host: value, preference };
-					break;
-				case "srv":
-					record = { ttl, target: value, port, weight, priority };
-					break;
-				case "caa":
-					record = { ttl, value, flag, tag };
-					break;
-				case "soa":
-					record = { ttl, ns: value, MBox, refresh, retry, expire, minttl: 180 };
-					break;
-				default:
-					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+				}
+				records.push(record);
 			}
-			records.push(record);
 		}
 	}
 	if (records.lencth === 0) {

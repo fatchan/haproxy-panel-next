@@ -1,3 +1,7 @@
 exports.aTemplate = Object.seal(Object.freeze(Object.preventExtensions([])));
 
 exports.aaaaTemplate = Object.seal(Object.freeze(Object.preventExtensions([])));
+
+exports.soaTemplate = Object.seal(Object.freeze(Object.preventExtensions([])));
+
+exports.nsTemplate = Object.seal(Object.freeze(Object.preventExtensions([])));

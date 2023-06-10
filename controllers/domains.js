@@ -2,6 +2,8 @@ const db = require('../db.js');
 const acme = require('../acme.js');
 const url = require('url');
 const { dynamicResponse } = require('../util.js');
+const redis = require('../redis.js');
+const { nsTemplate, soaTemplate } = require('../templates.js');
 
 /**
  * GET /domains
@@ -64,10 +66,11 @@ exports.addDomain = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const domain = req.body.domain.toLowerCase();
+	let domain = req.body.domain.toLowerCase();
 
 	try {
 		const { hostname } = url.parse(`https://${domain}`);
+		domain = hostname;
 	} catch (e) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -80,6 +83,20 @@ exports.addDomain = async (req, res, next) => {
 		}
 		await db.db.collection('accounts')
 			.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: domain }});
+		if (domain.split('.').length < 3 //naive
+			&& (soaTemplate.length > 0 && nsTemplate.length > 0)) {
+			const records = [];
+			const soaRecords = JSON.parse(JSON.stringify(soaTemplate));
+			soaRecords[0].MBox = `root.${domain}.`;
+			const nsRecords = nsTemplate;
+			let recordSetRaw = await redis.hget(`dns:${domain}.`, '@');
+			if (!recordSetRaw) {
+				recordSetRaw = {};
+			}
+			recordSetRaw['soa'] = soaRecords[0];
+			recordSetRaw['ns'] = nsRecords;
+			await redis.hset(`dns:${domain}.`, '@', recordSetRaw);
+		}
 	} catch (e) {
 		return next(e);
 	}
@@ -117,12 +134,12 @@ exports.deleteDomain = async (req, res) => {
 	]);
 
 	if (existingHost || existingMaintenance || existingRewrite || existingDdos) {
-		return dynamicResponse(req, res, 400, { error: "Cannot remove domain lwhile still in use. Remove it from backends/maintenance/rewrites/protection first." });
+		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first." });
 	}
-
 
 	await db.db.collection('accounts')
 		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
+	await redis.del(`dns:${domain}.`);
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
 
