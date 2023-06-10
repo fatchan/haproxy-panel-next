@@ -21,6 +21,8 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
+const downedIps = [];
+
 async function doCheck(domainKey, hkey, record) {
 	if (!record || record.h !== true) {
 		record.u = true;
@@ -29,14 +31,20 @@ async function doCheck(domainKey, hkey, record) {
 	//await new Promise(res => setTimeout(res, Math.floor(Math.random()*1000)));
 	const lock = await redlock.acquire([`lock:${record.ip}`], 30000);
 	try {
-		let recordHealth = await redis.get(`health:${record.ip}`);
+		let recordHealth;
+		if (downedIps.includes(record.ip)) {
+			console.log('FORCED DOWNTIME:', record.ip, 'from', downedIps);
+			recordHealth = '0';
+		} else {
+			recordHealth = await redis.get(`health:${record.ip}`);
+		}
 		if (recordHealth === null) {
 			try {
 				const controller = new AbortController();
 				const signal = controller.signal;
 				setTimeout(() => {
 					controller.abort();
-				}, 3000);
+				}, 5000);
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
 				const hostHeader = domainKey.substring(4, domainKey.length-1);
 				//await fetch(`https://${host}/.basedflare/cgi/trace`, {
@@ -49,20 +57,20 @@ async function doCheck(domainKey, hkey, record) {
 				});
 				recordHealth = '1'; //no error = we consider successful
 			} catch(e) {
+				console.warn(e)
 				console.warn('health check down for', domainKey, hkey, record.ip);
 				recordHealth = '0';
 			}
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 30, 'NX');
 			console.info('fetch()ed health:', domainKey, hkey, record.ip, recordHealth);
 		} else {
+			recordHealth = recordHealth.toString()
 			console.log('cached health:', domainKey, hkey, record.ip, recordHealth);
 		}
-		if (recordHealth === '1' && record.u === false) {
+		if (recordHealth === '1') {
 			record.u = true;
-		 	return record;
-		} else if (recordHealth === '0' && record.u === true) {
+		} else if (recordHealth === '0') {
 			record.u = false;
-			return record;
 		}
 		return record; //no change required, or no cache and failed fetch
 	} catch(e) {
