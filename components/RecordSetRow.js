@@ -23,11 +23,20 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 			<td>
 				{recordSetArray.map((r, i) => {
 					const healthClass = r.h != null
-						? (r.h ? "text-success" : "text-danger")
+						? (r.u === true
+							? "text-success"
+							: (r.fb
+								? "text-warning"
+								: "text-danger"))
 						: "";
+					//todo: make fbrecord correctly calculate multiple fallbacks, 3 mode, etc
+					const fbRecord = healthClass === "text-warning"
+						&& r.sel === 1
+						&& recordSetArray.find(fbr => fbr.id === r.fb[0])
 					return (<div key={i}>
 						<strong>{r.id ? r.id+': ' : ''}</strong>
 						<span className={healthClass}>{r.ip || r.host || r.value || r.ns || r.text || r.target}</span>
+						{fbRecord && <>{' -> '}<span className="text-success">{fbRecord.ip}</span></>}
 					</div>)
 				})}
 			</td>
