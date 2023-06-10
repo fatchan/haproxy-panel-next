@@ -404,15 +404,15 @@ const DnsEditRecordPage = (props) => {
 													borderRadius: 5,
 												})}
 												isDisabled={!rec.h}
-												required
-											    isMulti
-											    closeMenuOnSelect={false}
-											    options={recordSet.filter(x => x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
-											    getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
-											    defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
-											    classNamePrefix="select"
-											    name={`fallbacks_${i}`}
-											    className="basic-multi-select"
+												//required
+												isMulti
+												closeMenuOnSelect={false}
+												options={recordSet.filter(x => x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
+												getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
+												defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
+												classNamePrefix="select"
+												name={`fallbacks_${i}`}
+												className="basic-multi-select"
 											/>
 										</label>
 									</div>
