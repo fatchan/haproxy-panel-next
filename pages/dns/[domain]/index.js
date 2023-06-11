@@ -15,14 +15,38 @@ const DnsDomainIndexPage = (props) => {
 		...props,
 	});
 	const [error, setError] = useState();
+	const [sortType, setSortType] = useState("name");
+	const [sortOrder, setSortOrder] = useState(-1);
+	const { user, recordSets, csrf } = state;
+	const handleSetSorting = (newSortType) => {
+		let sorted;
+		const sameType = newSortType === sortType;
+		const newSortOrder = sortOrder * (sameType ? -1 : 1);
+		if (newSortType === "name") {
+			sorted = recordSets.sort((a, b) => {
+				return (Object.keys(a)[0].localeCompare(Object.keys(b)[0]) * newSortOrder);
+			});
+		} else if (newSortType === "type") {
+			sorted = recordSets.map(recordSet => {
+				const k = Object.keys(recordSet)[0];
+				let rs = Object.entries(recordSet[k]);
+				rs = rs.sort((a, b) => (a[0].localeCompare(b[0]) * newSortOrder));
+				recordSet[k] = Object.fromEntries(rs);
+				return recordSet;
+			});
+		}
+		setSortOrder(newSortOrder);
+		setSortType(newSortType);
+		dispatch({ ...state, recordSets: sorted });
+	}
 
 	useEffect(() => {
 		if (!state.recordSets) {
 			API.getDnsDomain(domain, dispatch, setError, router);
 		}
-	}, [state.recordSets, domain, router]);
+	}, [recordSets, domain, router]);
 
-	if (state.recordSets == null) {
+	if (recordSets == null) {
 		return (
 			<div className="d-flex flex-column">
 				{error && <ErrorAlert error={error} />}
@@ -35,27 +59,26 @@ const DnsDomainIndexPage = (props) => {
 		);
 	}
 
-	const { user, recordSets, csrf } = state;
+	const recordSetRows = recordSets.map(recordSet => {
+		return Object.entries(recordSet)
+			.map(e => {
+				return Object.entries(e[1])
+					.map((recordSet, i) => (
+						<RecordSetRow
+							csrf={csrf}
+							domain={domain}
+							key={`${e[0]}_${i}`}
+							name={e[0]}
+							recordSet={recordSet}
+							dispatch={dispatch}
+							setError={setError}
+							router={router}
+						/>
+					));
+			});
+	});
 
-	const recordSetRows = recordSets
-		.map(recordSet => {
-			return Object.entries(recordSet)
-				.map(e => {
-					return Object.entries(e[1])
-						.map((recordSet, i) => (
-							<RecordSetRow
-								csrf={csrf}
-								domain={domain}
-								key={`${e[0]}_${i}`}
-								name={e[0]}
-								recordSet={recordSet}
-								dispatch={dispatch}
-								setError={setError}
-								router={router}
-							/>
-						));
-				});
-		})
+	const sortArrow = sortOrder === 1 ? <i className="bi-caret-down-fill"></i> : <i className="bi-caret-up-fill"></i>
 
 	return (
 		<>
@@ -74,16 +97,18 @@ const DnsDomainIndexPage = (props) => {
 
 			{/* Record sets table */}
 			<div className="table-responsive">
-				<table className="table text-nowrap m-1">
+				<table className="table text-nowrap">
 					<tbody>
 
 						{/* header row */}
 						<tr>
-							<th>
+							<th role="button" className="user-select-none" onClick={() => handleSetSorting("name")}>
 								Name
+								{sortType === "name" && sortArrow}
 							</th>
-							<th>
+							<th role="button" className="user-select-none" onClick={() => handleSetSorting("type")}>
 								Type
+								{sortType === "type" && sortArrow}
 							</th>
 							<th>
 								Content
