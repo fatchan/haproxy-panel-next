@@ -57,9 +57,14 @@ async function doCheck(domainKey, hkey, record) {
 				});
 				recordHealth = '1'; //no error = we consider successful
 			} catch(e) {
-				console.warn(e)
-				console.warn('health check down for', domainKey, hkey, record.ip);
-				recordHealth = '0';
+				if (e.code && e.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+					//invalid cert doesn't mean the server is dead
+					recordHealth = '1';
+				} else {
+					console.warn(e)
+					console.warn('health check down for', domainKey, hkey, record.ip);
+					recordHealth = '0';
+				}
 			}
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 30, 'NX');
 			console.info('fetch()ed health:', domainKey, hkey, record.ip, recordHealth);
