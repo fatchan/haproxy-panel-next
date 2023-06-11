@@ -122,6 +122,9 @@ const DnsEditRecordPage = (props) => {
 				onSubmit={addUpdateRecord}
 			>
 				<input type="hidden" name="_csrf" value={csrf} />
+				{recordSet && Array.isArray(recordSet) && recordSet[0].t === true && <div className="alert alert-warning" role="alert">
+					This is a template record. Changes may be overwritten with updates to the BasedFlare platform.
+				</div>}
 				<div className="card text-bg-dark col p-3 border-0 shadow-sm">
 					<div className="row mb-3">
 						<div className="col">
