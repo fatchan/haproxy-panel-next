@@ -123,14 +123,24 @@ export default function Onboarding(props) {
 						3. Create DNS Records
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
-						<p>On the <Link href="/domains" passHref><a target="_blank">Domains</a></Link> page, create the following A and AAAA records for your domain(s):</p>
-						<code>A</code>:
+						<p>On the <Link href="/domains" passHref><a target="_blank">Domains</a></Link> page, edit the DNS for your domain and add a &quot;A&quot; type record from the templates, with the name &quot;@&quot;.</p>
+					</span>
+				</span>
+			</div>
+			<div className="list-group-item d-flex gap-3">
+				<span className="flex-shrink-0 mx-1 mt-2">&bull;</span>
+				<span className="pt-1 form-checked-content">
+					<strong>
+						<i className="bi-hourglass-split pe-none me-2" width="1em" height="1em" />
+						Wait for the nameserver and DNS updates to propagate.
+					</strong>
+					<span className="d-block text-body-secondary mt-3">
+						<p>This may take up to 48 hours depending on your domain registrar, but typically starts working within 30 minutes.</p>
+						<p>You can use these external tools to check the propagation of the DNS:</p>
 						<ul>
-							{aRecords.map((r, i) => <li key={'a'+i}>{r}</li>)}
-						</ul>
-						<code>AAAA</code> (optional):
-						<ul>
-							{aaaaRecords.map((r, i) => <li key={'aaaa'+i}>{r}</li>)}
+							<li><a href="https://ping.sx/dig">{'https://ping.sx/dig'}</a></li>
+							<li><a href="https://www.whatsmydns.net/">{'https://www.whatsmydns.net/'}</a></li>
+							<li><a href="https://dnschecker.org/">{'https://dnschecker.org/'}</a></li>
 						</ul>
 					</span>
 				</span>
