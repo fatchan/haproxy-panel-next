@@ -3,7 +3,7 @@ const redis = require('../redis.js');
 const url = require('url');
 const { isIPv4, isIPv6 } = require('net');
 const { dynamicResponse } = require('../util.js');
-const { aTemplate, aaaaTemplate } = require('../templates.js');
+const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('../templates.js');
 
 /**
 * GET /dns/:domain
@@ -131,20 +131,24 @@ exports.dnsRecordUpdate = async (req, res) => {
 	let records = [];
 	switch (type) {
 		case 'ns_template':
-			records = nsTemplate;
+			records = JSON.parse(JSON.stringify(nsTemplate));
+			records.forEach(r => r.t = true);
 			type = 'ns';
 			break;
 		case 'soa_template':
-			records = JSON.parse(JSON.stringify(nsTemplate));
+			records = JSON.parse(JSON.stringify(soaTemplate));
 			records[0].MBox = `root.${req.params.domain}.`;
+			records.forEach(r => r.t = true);
 			type = 'soa';
 			break;
 		case 'a_template':
-			records = aTemplate;
+			records = JSON.parse(JSON.stringify(aTemplate));
+			records.forEach(r => r.t = true);
 			type = 'a';
 			break;
 		case 'aaaa_template':
-			records = aaaaTemplate;
+			records = JSON.parse(JSON.stringify(aaaaTemplate));
+			records.forEach(r => r.t = true);
 			type = 'aaaa';
 			break;
 		default: {
@@ -255,6 +259,9 @@ exports.dnsRecordUpdate = async (req, res) => {
 	let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
 	if (!recordSetRaw) {
 		recordSetRaw = {};
+	} else if (recordSetRaw[type] && recordSetRaw[type].l === true
+		|| (Array.isArray(recordSetRaw[type]) && recordSetRaw[type][0].l === true)) {
+		return dynamicResponse(req, res, 400, { error: "You can't edit or overwrite locked records" });
 	}
 	if (type == "soa") {
 		recordSetRaw[type] = records[0];

@@ -46,13 +46,15 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 						{r.geok ? `${r.geok === 'cn' ? 'Continents' : 'Countries'}: ` : ''}{(r.geov||[]).join(', ')}
 					</div>
 				))}
+				{recordSetArray[0].t && <div className="text-warning">Template</div>}
+				{recordSetArray[0].l && <div className="text-danger">Locked</div>}
 			</td>
 			<td>
-				<Link href={`/dns/${domain}/${name}/${type}`}>
+				{recordSetArray[0].l !== true && <Link href={`/dns/${domain}/${name}/${type}`}>
 					<a className="btn btn-outline-primary">
 						Edit
 					</a>
-				</Link>
+				</Link>}
 			</td>
 			<td>
 				<form onSubmit={deleteDnsRecord} action={`/forms/dns/${domain}/${name}/${type}/delete`} method="post">

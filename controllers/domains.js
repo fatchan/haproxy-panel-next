@@ -88,7 +88,13 @@ exports.addDomain = async (req, res, next) => {
 			const records = [];
 			const soaRecords = JSON.parse(JSON.stringify(soaTemplate));
 			soaRecords[0].MBox = `root.${domain}.`;
-			const nsRecords = nsTemplate;
+			soaRecords[0].l = true;
+			soaRecords[0].t = true;
+			const nsRecords = JSON.parse(JSON.stringify(nsTemplate));
+			nsRecords.forEach(r => {
+				r.l = true;
+				r.t = true;
+			});
 			let recordSetRaw = await redis.hget(`dns:${domain}.`, '@');
 			if (!recordSetRaw) {
 				recordSetRaw = {};

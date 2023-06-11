@@ -123,7 +123,8 @@ export default function Onboarding(props) {
 						3. Create DNS Records
 					</strong>
 					<span className="d-block text-body-secondary mt-3">
-						<p>On the <Link href="/domains" passHref><a target="_blank">Domains</a></Link> page, edit the DNS for your domain and add a &quot;A&quot; type record from the templates, with the name &quot;@&quot;.</p>
+						<p>On the <Link href="/domains" passHref><a target="_blank">Domains</a></Link> page, edit the DNS for your domain and add any &quot;A&quot; type records using the templates.</p>
+						<p>The &quot;name&quot; field for <code>example.com</code> should be &quot;@&quot;, and for subdomains e.g. <code>www.example.com</code> it should be the subdomain &quot;www&quot;.</p>
 					</span>
 				</span>
 			</div>
@@ -138,9 +139,9 @@ export default function Onboarding(props) {
 						<p>This may take up to 48 hours depending on your domain registrar, but typically starts working within 30 minutes.</p>
 						<p>You can use these external tools to check the propagation of the DNS:</p>
 						<ul>
-							<li><a href="https://ping.sx/dig">{'https://ping.sx/dig'}</a></li>
-							<li><a href="https://www.whatsmydns.net/">{'https://www.whatsmydns.net/'}</a></li>
-							<li><a href="https://dnschecker.org/">{'https://dnschecker.org/'}</a></li>
+							<li><a rel="noreferrer" target="_blank" href="https://ping.sx/dig">{'https://ping.sx/dig'}</a></li>
+							<li><a rel="noreferrer" target="_blank" href="https://www.whatsmydns.net/">{'https://www.whatsmydns.net/'}</a></li>
+							<li><a rel="noreferrer" target="_blank" href="https://dnschecker.org/">{'https://dnschecker.org/'}</a></li>
 						</ul>
 					</span>
 				</span>

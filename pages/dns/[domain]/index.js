@@ -56,7 +56,6 @@ const DnsDomainIndexPage = (props) => {
 						));
 				});
 		})
-			
 
 	return (
 		<>
@@ -106,7 +105,6 @@ const DnsDomainIndexPage = (props) => {
 				</table>
 			</div>
 
-			
 			<div className="my-3">
 				<Link href={`/dns/${domain}/new`}>
 					<button className="btn btn-success">
