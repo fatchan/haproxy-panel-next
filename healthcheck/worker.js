@@ -57,8 +57,9 @@ async function doCheck(domainKey, hkey, record) {
 				});
 				recordHealth = '1'; //no error = we consider successful
 			} catch(e) {
-				if (e.code && e.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+				if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
 					//invalid cert doesn't mean the server is dead
+					console.warn('health check ERR_TLS_CERT_ALTNAME_INVALID for', domainKey, hkey, record.ip);
 					recordHealth = '1';
 				} else {
 					console.warn(e)
