@@ -181,7 +181,7 @@ exports.dnsRecordUpdate = async (req, res) => {
 				try {
 					if ((geok && !["cn", "cc"].includes(geok))
 						|| (sel && !["0", "1", "2", "3"].includes(sel))
-						|| (bsel && !["0", "1", "2", "3"].includes(bsel))
+						|| (bsel && !["0", "1", "2", "3", "4", "5", "6"].includes(bsel))
 						|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
 						|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
 						|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))

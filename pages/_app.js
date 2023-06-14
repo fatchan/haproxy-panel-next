@@ -1,4 +1,4 @@
-import 'bootstrap/dist/css/bootstrap.css';
+	import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Layout from '../components/Layout.js';
 import 'nprogress/nprogress.css';
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }) {
 			<style>
 			{`
 				html, body { font-family: arial,Helvetica,sans-serif; height: 100%; overflow: hidden; }
-				.corner-ribbon {z-index:9999; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: absolute;overflow: hidden;}
+				.corner-ribbon {z-index:9999; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: fixed;overflow: hidden;}
 				.green { color: green; }
 				.red { color: red; }
 				footer { margin-top: auto; }

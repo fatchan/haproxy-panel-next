@@ -423,7 +423,7 @@ const DnsEditRecordPage = (props) => {
 									</div>
 									<div className="col-sm-12 col-md-3">
 										<label className="w-100">
-											Backup Selector
+											Fallback Selector
 											<select
 												className="form-select"
 												name={`sel_${i}`}
@@ -432,9 +432,9 @@ const DnsEditRecordPage = (props) => {
 												required
 											>
 												<option value="0">None</option>
-												<option value="1">First</option>
-												<option value="2">Random</option>
-												<option value="3">All</option>
+												<option value="1">First alive fallback</option>
+												<option value="2">Random alive fallback</option>
+												<option value="3">All alive fallbacks</option>
 											</select>
 										</label>
 									</div>
@@ -449,9 +449,12 @@ const DnsEditRecordPage = (props) => {
 												required
 											>
 												<option value="0">None</option>
-												<option value="1">First</option>
-												<option value="2">Random</option>
-												<option value="3">All</option>
+												<option value="1">First healthy record</option>
+												<option value="2">Random healthy record</option>
+												<option value="3">All healthy records</option>
+												<option value="4">First fallback (ignores health)</option>
+												<option value="5">Random fallback (ignores health)</option>
+												<option value="6">All fallbacks (ignores health)</option>
 											</select>
 										</label>
 									</div>
