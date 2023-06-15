@@ -11,7 +11,8 @@ const fMap = {
 	[process.env.DDOS_MAP_NAME]: {
 		fname: 'Protection Rules',
 		description: 'Set protection modes on domains and/or paths',
-		columnNames: ['Domain/Path', 'Mode'],
+		columnNames: ['Domain/Path', 'Mode', 'Tor Exits Only'],
+		columnKeys: ['m', 't'],
 	},
 
 	[process.env.DDOS_CONFIG_MAP_NAME]: {

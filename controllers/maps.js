@@ -210,6 +210,14 @@ exports.patchMapForm = async (req, res, next) => {
 			}
 		}
 
+		//validate ddos
+		if (req.params.name === process.env.DDOS_MAP_NAME) {
+			const { m } = req.body; //t, v, etc
+			if (m && (isNaN(m) || parseInt(m) !== +m || m < 8)) {
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+			}
+		}
+
 		//validate value is IP:port
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 			let parsedValue;
@@ -229,7 +237,6 @@ exports.patchMapForm = async (req, res, next) => {
 		switch (req.params.name) {
 			case process.env.REWRITE_MAP_NAME:
 			case process.env.REDIRECT_MAP_NAME:
-			case process.env.DDOS_MAP_NAME:
 				value = req.body.value;
 				break;
 			case process.env.HOSTS_MAP_NAME:
@@ -243,6 +250,12 @@ exports.patchMapForm = async (req, res, next) => {
 			case process.env.WHITELIST_MAP_NAME:
 			case process.env.MAINTENANCE_MAP_NAME:
 				value = res.locals.user.username;
+				break;
+			case process.env.DDOS_MAP_NAME:
+				value = JSON.stringify({
+					m: parseInt(req.body.m || 1),
+					t: req.body.t != null,
+				});
 				break;
 			case process.env.DDOS_CONFIG_MAP_NAME:
 				value = JSON.stringify({

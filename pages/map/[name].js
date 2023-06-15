@@ -86,10 +86,16 @@ const MapPage = (props) => {
 						<input className="form-control" type="text" name="key" placeholder="domain/path" required />
 					</td>
 					<td>
-						<select className="form-select" name="value" defaultValue="" required>
+						<select className="form-select" name="m" defaultValue="" required>
 							<option value="" />
 							{mapValueOptions}
 						</select>
+					</td>
+					<td>
+						<div className="form-check">
+							<input className="form-check-input" type="checkbox" name="t" value="t" id="t" />
+							<label className="form-check-label" htmlFor="t">Tor exits only</label>
+						</div>
 					</td>
 				</>
 			);
