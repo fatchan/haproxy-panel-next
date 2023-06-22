@@ -44,7 +44,7 @@ const DnsDomainIndexPage = (props) => {
 		if (!state.recordSets) {
 			API.getDnsDomain(domain, dispatch, setError, router);
 		}
-	}, [recordSets, domain, router]);
+	}, [state.recordSets, domain, router]);
 
 	if (recordSets == null) {
 		return (

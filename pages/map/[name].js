@@ -39,12 +39,17 @@ const MapPage = (props) => {
 		e.preventDefault();
 		await API.addToMap(mapInfo.name, {
 			_csrf: csrf,
+			//general maps
 			key: e.target.key.value,
 			value: e.target.value?.value,
+			//ddos_config
 			pd: e.target.pd?.value,
 			pt: e.target.pt?.value,
 			cex: e.target.cex?.value,
 			cip: e.target.cip?.checked,
+			//ddos
+			m: e.target.m?.value,
+			t: e.target.t?.checked,
 		 }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();

@@ -34,11 +34,16 @@ export default function Certs(props) {
 
 	async function addCert(e) {
 		e.preventDefault();
-		await API.addCert({
-			_csrf: csrf,
-			subject: e.target.subject.value,
-			altnames: e.target.altnames.value.split(',').map(x => x.trim()),
-		}, dispatch, setError, router);
+		try {
+			await API.addCert({
+				_csrf: csrf,
+				subject: e.target.subject.value,
+				altnames: e.target.altnames.value.split(',').map(x => x.trim()),
+			}, dispatch, setError, router);
+		} catch(err) {
+			console.warn(err);
+			await new Promise(res => setTimeout(res, 10000));
+		}
 		await API.getCerts(dispatch, setError, router);
 	}
 
@@ -53,10 +58,15 @@ export default function Certs(props) {
 
 	async function uploadCert(e) {
 		e.preventDefault();
-		await API.uploadCert({
-			_csrf: csrf,
-			domain: e.target.domain.value
-		}, dispatch, setError, router);
+		try {
+			await API.uploadCert({
+				_csrf: csrf,
+				domain: e.target.domain.value
+			}, dispatch, setError, router);
+		} catch(err) {
+			console.warn(err);
+			await new Promise(res => setTimeout(res, 10000));
+		}
 		await API.getCerts(dispatch, setError, router);
 	}
 
@@ -117,7 +127,7 @@ export default function Certs(props) {
 						defaultValue={d.altnames && d.altnames.join('\n') || '-'}
 					/>
 				</td>
-				<td>
+				<td suppressHydrationWarning={true}>
 					{expiry ? `${daysRemaining} days` : '-'}
 				</td>
 				<td>

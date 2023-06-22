@@ -131,7 +131,11 @@ async function processHost(host) {
 		await writeApi.flush()
 		console.log('Flushed', points.length, 'points to influx');
 	} catch (e) {
-		console.error('Error writing stats:', e);
+		if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+			console.error('Error writing stats', host, e.cause.code);
+		} else {
+			console.error('Error writing stats:', e);
+		}
 	}
 };
 
@@ -142,3 +146,4 @@ async function handleJob(job, done) {
 }
 
 haproxyStatsQueue.process(handleJob);
+

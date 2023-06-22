@@ -13,7 +13,7 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 			{typeof value === 'string' && showValues === true && (
 				<td>
 					{mapValueNames[value] || value}
-				</td>				
+				</td>
 			)}
 			{typeof value === 'object' && columnKeys.map((ck, mvi) => (
 				<td key={`mvi_${mvi}`}>
@@ -22,5 +22,5 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 			))}
 		</tr>
 	);
-	
+
 }

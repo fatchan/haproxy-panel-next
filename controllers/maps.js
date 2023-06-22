@@ -29,6 +29,7 @@ exports.mapData = async (req, res, next) => {
 	}
 
 	switch (req.params.name) {
+		case process.env.DDOS_MAP_NAME:
 		case process.env.DDOS_CONFIG_MAP_NAME:
 			map = map.map(a => {
 				a.value = JSON.parse(a.value);
@@ -37,7 +38,6 @@ exports.mapData = async (req, res, next) => {
 			/* falls through */
 		case process.env.REWRITE_MAP_NAME:
 		case process.env.REDIRECT_MAP_NAME:
-		case process.env.DDOS_MAP_NAME:
 			showValues = true;
 			/* falls through */
 		case process.env.BACKENDS_MAP_NAME:
@@ -154,12 +154,6 @@ exports.deleteMapForm = async (req, res, next) => {
 exports.patchMapForm = async (req, res, next) => {
 	if(req.body && req.body.key && typeof req.body.key === 'string') {
 
-		//ddos must have valid 0, 1, 2
-		if (req.params.name === process.env.DDOS_MAP_NAME
-			&& (!req.body.value || !['0', '1', '2'].includes(req.body.value))) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
-		}
-
 		//validate key is domain
 		if (req.params.name === process.env.DDOS_MAP_NAME
 			|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
@@ -211,9 +205,13 @@ exports.patchMapForm = async (req, res, next) => {
 		}
 
 		//validate ddos
+		if (req.params.name === process.env.DDOS_MAP_NAME
+			&& (!req.body.m || !['0', '1', '2'].includes(req.body.m))) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
+		}
 		if (req.params.name === process.env.DDOS_MAP_NAME) {
 			const { m } = req.body; //t, v, etc
-			if (m && (isNaN(m) || parseInt(m) !== +m || m < 8)) {
+			if (m && (isNaN(m) || parseInt(m) !== +m || m < 0)) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 		}
