@@ -56,12 +56,11 @@ export default function Certs(props) {
 		await API.getCerts(dispatch, setError, router);
 	}
 
-	async function uploadCert(e) {
-		e.preventDefault();
+	async function uploadCert(csrf, domain) {
 		try {
 			await API.uploadCert({
 				_csrf: csrf,
-				domain: e.target.domain.value
+				domain: domain
 			}, dispatch, setError, router);
 		} catch(err) {
 			console.warn(err);

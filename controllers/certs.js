@@ -196,7 +196,7 @@ exports.uploadCert = async (req, res, next) => {
 	}
 
 	try {
-		console.log('Upload cert:', existingCert.subject, existingCert.altnames);
+		console.log('Upload cert:', existingCert.subject);
 		const { message } = await res.locals.postFileAll(
 			'/v2/services/haproxy/storage/ssl_certificates',
 			{
