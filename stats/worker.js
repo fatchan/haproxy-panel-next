@@ -23,7 +23,7 @@ if (!process.env.INFLUX_HOST) {
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client')
 	, OpenAPIClientAxios = require('openapi-client-axios').default
-	, definition = require('../openapi-definition.js')
+	, definition = require('../specification_openapiv3.js')
 	, agent = require('../agent.js')
 	, writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
