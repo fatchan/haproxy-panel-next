@@ -132,23 +132,19 @@ exports.dnsRecordUpdate = async (req, res) => {
 	switch (type) {
 		case 'ns_template':
 			records = JSON.parse(JSON.stringify(nsTemplate));
-			records.forEach(r => r.t = true);
 			type = 'ns';
 			break;
 		case 'soa_template':
 			records = JSON.parse(JSON.stringify(soaTemplate));
 			records[0].MBox = `root.${req.params.domain}.`;
-			records.forEach(r => r.t = true);
 			type = 'soa';
 			break;
 		case 'a_template':
 			records = JSON.parse(JSON.stringify(aTemplate));
-			records.forEach(r => r.t = true);
 			type = 'a';
 			break;
 		case 'aaaa_template':
 			records = JSON.parse(JSON.stringify(aaaaTemplate));
-			records.forEach(r => r.t = true);
 			type = 'aaaa';
 			break;
 		default: {

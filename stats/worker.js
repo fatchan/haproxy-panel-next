@@ -132,7 +132,7 @@ async function processHost(host) {
 		console.log('Flushed', points.length, 'points to influx');
 	} catch (e) {
 		if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
-			console.error('Error writing stats', host, e.cause.code);
+			console.error('Error writing stats', new URL(host).hostname, e.cause.code);
 		} else {
 			console.error('Error writing stats:', e);
 		}

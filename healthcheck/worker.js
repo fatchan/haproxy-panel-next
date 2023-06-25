@@ -21,7 +21,7 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
-const downedIps = [];
+const downedIps = require('../down.js');
 
 async function doCheck(domainKey, hkey, record) {
 	if (!record || record.h !== true) {
@@ -33,7 +33,7 @@ async function doCheck(domainKey, hkey, record) {
 	try {
 		let recordHealth;
 		if (downedIps.includes(record.ip)) {
-			console.log('FORCED DOWNTIME:', record.ip, 'from', downedIps);
+			console.log('FORCED DOWNTIME:', record.ip);
 			recordHealth = '0';
 		} else {
 			recordHealth = await redis.get(`health:${record.ip}`);
