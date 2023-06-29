@@ -3,7 +3,8 @@ const redis = require('../redis.js');
 const url = require('url');
 const { isIPv4, isIPv6 } = require('net');
 const { dynamicResponse } = require('../util.js');
-const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('../templates.js');
+const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate,
+	altsvcaTemplate, altsvcaaaaTemplate } = require('../templates.js');
 
 /**
 * GET /dns/:domain
@@ -129,22 +130,35 @@ exports.dnsRecordUpdate = async (req, res) => {
 	let { ttl } = req.body;
 	let { domain, zone, type } = req.params;
 	let records = [];
+	let template = false;
 	switch (type) {
 		case 'ns_template':
 			records = JSON.parse(JSON.stringify(nsTemplate));
+			template = true;
 			type = 'ns';
 			break;
 		case 'soa_template':
 			records = JSON.parse(JSON.stringify(soaTemplate));
 			records[0].MBox = `root.${req.params.domain}.`;
+			template = true;
 			type = 'soa';
 			break;
 		case 'a_template':
 			records = JSON.parse(JSON.stringify(aTemplate));
+			template = true;
 			type = 'a';
 			break;
 		case 'aaaa_template':
 			records = JSON.parse(JSON.stringify(aaaaTemplate));
+			template = true;
+			type = 'aaaa';
+			break;
+		case 'altsvca_template':
+			records = JSON.parse(JSON.stringify(altsvcaTemplate));
+			type = 'a';
+			break;
+		case 'altsvcaaaa_template':
+			records = JSON.parse(JSON.stringify(altsvcaaaaTemplate));
 			type = 'aaaa';
 			break;
 		default: {
@@ -260,9 +274,13 @@ exports.dnsRecordUpdate = async (req, res) => {
 		return dynamicResponse(req, res, 400, { error: "You can't edit or overwrite locked records" });
 	}
 	if (type == "soa") {
+		template = template || (recordSetRaw[type] && recordSetRaw[type]['t'] === true);
 		recordSetRaw[type] = records[0];
+		recordSetRaw[type]['t'] = template;
 	} else {
+		template = template || (recordSetRaw[type] && recordSetRaw[type].length > 0 && recordSetRaw[type][0]['t'] === true);
 		recordSetRaw[type] = records;
+		recordSetRaw[type].forEach(rr => rr['t'] = template);
 	}
 	await redis.hset(`dns:${domain}.`, zone, recordSetRaw);
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${domain}` });

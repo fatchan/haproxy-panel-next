@@ -12,9 +12,9 @@ const redis = require('./redis.js')
 async function processKey(domainKey) {
 	const domainHashKeys = await redis.client.hkeys(domainKey);
 	const domain = domainKey.substring(4, domainKey.length-1);
-	console.log('Updating', domain);
 	return Promise.all(domainHashKeys.map(async (hkey) => {
 		try {
+			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
 			if (records['a'] && records['a'][0]["t"] === true) {
 				records['a'] = JSON.parse(JSON.stringify(aTemplate));
