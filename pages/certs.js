@@ -35,11 +35,13 @@ export default function Certs(props) {
 	async function addCert(e) {
 		e.preventDefault();
 		try {
+			setError(null);
 			await API.addCert({
 				_csrf: csrf,
 				subject: e.target.subject.value,
 				altnames: e.target.altnames.value.split(',').map(x => x.trim()),
 			}, dispatch, setError, router);
+			e.target.reset();
 		} catch(err) {
 			console.warn(err);
 			await new Promise(res => setTimeout(res, 10000));
@@ -48,6 +50,7 @@ export default function Certs(props) {
 	}
 
 	async function deleteCert(csrf, subject, storageName) {
+		setError(null);
 		await API.deleteCert({
 			_csrf: csrf,
 			subject,
@@ -58,6 +61,7 @@ export default function Certs(props) {
 
 	async function uploadCert(csrf, domain) {
 		try {
+			setError(null);
 			await API.uploadCert({
 				_csrf: csrf,
 				domain: domain
@@ -143,8 +147,6 @@ export default function Certs(props) {
 				<title>Certificates</title>
 			</Head>
 
-			{error && <ErrorAlert error={error} />}
-
 			<h5 className="fw-bold">
 				HTTPS Certificates:
 			</h5>
@@ -201,6 +203,8 @@ export default function Certs(props) {
 					</table>
 				</form>
 			</div>
+
+			{error && <ErrorAlert error={error} />}
 
 			{/* back to account */}
 			<BackButton to="/account" />

@@ -3,6 +3,7 @@ const acme = require('../acme.js');
 const url = require('url');
 const { dynamicResponse } = require('../util.js');
 const redis = require('../redis.js');
+const psl = require('psl');
 const { nsTemplate, soaTemplate } = require('../templates.js');
 
 /**
@@ -76,13 +77,31 @@ exports.addDomain = async (req, res, next) => {
 	}
 
 	try {
+		const parsed = psl.parse(domain);
+		if (!parsed || !parsed.domain) {
+			dynamicResponse(req, res, 400, { error: 'Invalid input' })
+		}
+		const domains = [domain, parsed.domain];
 		const existing = await db.db.collection('accounts')
-			.findOne({ domains: domain });
+			.findOne({
+				'$or': [
+					{ domains: domain },
+					{ domains: new RegExp(`${parsed.domain}$`), _id: { '$ne': res.locals.user.username } },
+				]
+			});
 		if (existing) {
-			return dynamicResponse(req, res, 400, { error: 'This domain is already in use' });
+			return dynamicResponse(req, res, 400, { error: 'This domain is already in use or belongs to another user' });
 		}
 		await db.db.collection('accounts')
-			.updateOne({_id: res.locals.user.username}, {$addToSet: {domains: domain }});
+			.updateOne({
+				_id: res.locals.user.username
+			}, {
+				$addToSet: {
+					domains: {
+						'$each': domains,
+					}
+				}
+			});
 		if (domain.split('.').length < 3 //naive
 			&& (soaTemplate.length > 0 && nsTemplate.length > 0)) {
 			const records = [];

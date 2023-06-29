@@ -35,11 +35,14 @@ export default function Domains(props) {
 
 	async function addDomain(e) {
 		e.preventDefault();
+		setError(null);
 		await API.addDomain({ _csrf: csrf, domain: e.target.domain.value }, dispatch, setError, router);
 		await API.getDomains(dispatch, setError, router);
+		e.target.reset();
 	}
 
 	async function deleteDomain(csrf, domain) {
+		setError(null);
 		await API.deleteDomain({ _csrf: csrf, domain }, dispatch, setError, router);
 		await API.getDomains(dispatch, setError, router);
 	}
@@ -47,7 +50,7 @@ export default function Domains(props) {
 	const domainList = [];
 	const subdomainList = [];
 	user.domains
-		.sort((a, b) => a.localeCompare(b))
+		//.sort((a, b) => a.localeCompare(b))
 		.forEach((d, i) => {
 		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
@@ -84,8 +87,6 @@ export default function Domains(props) {
 			<Head>
 				<title>Domains</title>
 			</Head>
-
-			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Domains:
@@ -131,6 +132,8 @@ export default function Domains(props) {
 					</tbody>
 				</table>
 			</div>
+
+			{error && <ErrorAlert error={error} />}
 
 			{/* back to account */}
 			<BackButton to="/account" />

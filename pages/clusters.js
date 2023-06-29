@@ -35,16 +35,20 @@ export default function Clusters(props) {
 
 	async function addCluster(e) {
 		e.preventDefault();
+		setError(null);
 		await API.addCluster({ _csrf: csrf, cluster: e.target.cluster.value }, dispatch, setError, router);
 		await API.getClusters(dispatch, setError, router);
+		e.target.reset();
 	}
 
 	async function deleteCluster(csrf, cluster) {
+		setError(null);
 		await API.deleteCluster({ _csrf: csrf, cluster }, dispatch, setError, router);
 		await API.getClusters(dispatch, setError, router);
 	}
 
 	async function setCluster(csrf, cluster) {
+		setError(null);
 		await API.changeCluster({ _csrf: csrf, cluster }, dispatch, setError, router);
 		await API.getClusters(dispatch, setError, router);
 	}
@@ -64,8 +68,6 @@ export default function Clusters(props) {
 			<Head>
 				<title>Clusters</title>
 			</Head>
-
-			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Clusters ({user.clusters.length}):
@@ -95,6 +97,8 @@ export default function Clusters(props) {
 					</table>
 				</form>
 			</div>
+
+			{error && <ErrorAlert error={error} />}
 
 			{/* back to account */}
 			<BackButton to="/account" />
