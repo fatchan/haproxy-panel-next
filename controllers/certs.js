@@ -280,6 +280,9 @@ exports.verifyUserCSR = async (req, res, next) => {
 		const serialNumber = serial && serial.value && serial.value.number || 1;
 		console.log('Attempting to sign CSR, serial', serialNumber)
 		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains, serialNumber);
+		if (req.headers['accept'].toLowerCase() === 'application/json') {
+			return res.send(signedCert);
+		}
 		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
 	} catch (e) {
 		return next(e);

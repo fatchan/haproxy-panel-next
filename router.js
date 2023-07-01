@@ -190,6 +190,9 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/cert/upload', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.uploadCert);
 		clusterRouter.post('/cert/delete', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.deleteCert);
 		clusterRouter.post('/csr/verify', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, certsController.verifyUserCSR);
+		clusterRouter.get('/csrf', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, (req, res, next) => {
+			return res.send(req.csrfToken());
+		});
 		server.use('/forms', clusterRouter);
 
 };
