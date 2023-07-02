@@ -9,6 +9,7 @@ const express = require('express')
 	, definition = require('./specification_openapiv3.js')
 	, fetch = require('node-fetch')
 	, FormData = require('form-data')
+	, update = require('./update.js')
 	, agent = require('./agent.js');
 
 const testRouter = (server, app) => {
@@ -190,6 +191,24 @@ const testRouter = (server, app) => {
 		clusterRouter.post('/cert/upload', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.uploadCert);
 		clusterRouter.post('/cert/delete', useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, certsController.deleteCert);
 		clusterRouter.post('/csr/verify', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, certsController.verifyUserCSR);
+		clusterRouter.post('/template', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, async (req, res, next) => {
+			if (res.locals.user.username !== "admin") {
+				return dynamicResponse(req, res, 403, { error: 'No permission' });
+			}
+			const { id, data } = req.body
+			if (!id || !data) {
+				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
+			}
+			await db.db.collection('templates').updateOne({ _id: id }, { $set: { data } }, { upsert: true });
+			return res.json({ ok: true });
+		});
+		clusterRouter.post('/update', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, async (req, res, next) => {
+			if (res.locals.user.username !== "admin") {
+				return dynamicResponse(req, res, 403, { error: 'No permission' });
+			}
+			await update();
+			return res.json({ ok: true });
+		});
 		clusterRouter.get('/csrf', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, (req, res, next) => {
 			return res.send(req.csrfToken());
 		});
@@ -198,3 +217,4 @@ const testRouter = (server, app) => {
 };
 
 module.exports = testRouter;
+

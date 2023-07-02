@@ -105,11 +105,11 @@ exports.addDomain = async (req, res, next) => {
 		if (domain.split('.').length < 3 //naive
 			&& (soaTemplate.length > 0 && nsTemplate.length > 0)) {
 			const records = [];
-			const soaRecords = JSON.parse(JSON.stringify(soaTemplate));
+			const soaRecords = JSON.parse(JSON.stringify(soaTemplate()));
 			soaRecords[0].MBox = `root.${domain}.`;
 			soaRecords[0].l = true;
 			soaRecords[0].t = true;
-			const nsRecords = JSON.parse(JSON.stringify(nsTemplate));
+			const nsRecords = JSON.parse(JSON.stringify(nsTemplate()));
 			nsRecords.forEach(r => {
 				r.l = true;
 				r.t = true;

@@ -17,19 +17,19 @@ async function processKey(domainKey) {
 			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
 			if (records['a'] && records['a'][0]["t"] === true) {
-				records['a'] = JSON.parse(JSON.stringify(aTemplate));
+				records['a'] = JSON.parse(JSON.stringify((await aTemplate())));
 			}
 			if (records['aaaa'] && records['aaaa'][0]["t"] === true) {
-				records['aaaa'] = JSON.parse(JSON.stringify(aaaaTemplate));
+				records['aaaa'] = JSON.parse(JSON.stringify((await aaaaTemplate())));
 			}
 			if (records['ns'] && records['ns'][0]["t"] === true) {
 				const locked = records['ns']['l'] === true;
-				records['ns'] = JSON.parse(JSON.stringify(nsTemplate));
+				records['ns'] = JSON.parse(JSON.stringify(nsTemplate()));
 				records['ns'].forEach(r => r['l'] = locked);
 			}
 			if (records['soa'] && records['soa']["t"] === true) {
 				const locked = records['soa']['l'] === true;
-				records['soa'] = JSON.parse(JSON.stringify(soaTemplate))[0];
+				records['soa'] = JSON.parse(JSON.stringify(soaTemplate()))[0];
 				records['soa']['l'] = locked;
 				records['soa'].MBox = `root.${domain}.`;
 			}
@@ -40,20 +40,32 @@ async function processKey(domainKey) {
 	}));
 }
 
-let allKeys = [];
-const stream = redis.client.scanStream({
-	match: 'dns:*',
-});
-stream.on('data', (keys) => {
-	if (!keys || keys.length === 0) { return; }
-	allKeys = allKeys.concat(keys);
-});
-stream.on('end', async () => {
-	await Promise.all(allKeys.map(async k => processKey(k)))
-		.catch(e => console.error(e))
-	redis.close();
-});
-stream.on('error', (err) => {
-	console.err(err);
-	redis.close();
-});
+async function update() {
+	let allKeys = [];
+	const stream = redis.client.scanStream({
+		match: 'dns:*',
+	});
+	stream.on('data', (keys) => {
+		if (!keys || keys.length === 0) { return; }
+		allKeys = allKeys.concat(keys);
+	});
+	stream.on('end', async () => {
+		await Promise.all(allKeys.map(async k => processKey(k)))
+			.catch(e => console.error(e))
+		if (require.main === module) {
+			redis.close();
+		}
+	});
+	stream.on('error', (err) => {
+		console.err(err);
+		if (require.main === module) {
+			redis.close();
+		}
+	});
+}
+
+module.exports = update;
+
+if (require.main === module) {
+    update();
+}

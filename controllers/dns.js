@@ -3,8 +3,7 @@ const redis = require('../redis.js');
 const url = require('url');
 const { isIPv4, isIPv6 } = require('net');
 const { dynamicResponse } = require('../util.js');
-const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate,
-	altsvcaTemplate, altsvcaaaaTemplate } = require('../templates.js');
+const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('../templates.js');
 
 /**
 * GET /dns/:domain
@@ -133,32 +132,24 @@ exports.dnsRecordUpdate = async (req, res) => {
 	let template = false;
 	switch (type) {
 		case 'ns_template':
-			records = JSON.parse(JSON.stringify(nsTemplate));
+			records = JSON.parse(JSON.stringify(nsTemplate()));
 			template = true;
 			type = 'ns';
 			break;
 		case 'soa_template':
-			records = JSON.parse(JSON.stringify(soaTemplate));
+			records = JSON.parse(JSON.stringify(soaTemplate()));
 			records[0].MBox = `root.${req.params.domain}.`;
 			template = true;
 			type = 'soa';
 			break;
 		case 'a_template':
-			records = JSON.parse(JSON.stringify(aTemplate));
+			records = JSON.parse(JSON.stringify((await aTemplate())));
 			template = true;
 			type = 'a';
 			break;
 		case 'aaaa_template':
-			records = JSON.parse(JSON.stringify(aaaaTemplate));
+			records = JSON.parse(JSON.stringify((await aaaaTemplate())));
 			template = true;
-			type = 'aaaa';
-			break;
-		case 'altsvca_template':
-			records = JSON.parse(JSON.stringify(altsvcaTemplate));
-			type = 'a';
-			break;
-		case 'altsvcaaaa_template':
-			records = JSON.parse(JSON.stringify(altsvcaaaaTemplate));
 			type = 'aaaa';
 			break;
 		default: {
