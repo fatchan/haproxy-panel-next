@@ -9,6 +9,25 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 		await API.deleteDnsRecord(domain, name, type, Object.fromEntries(new FormData(e.target)), dispatch, setError, router);
 		await API.getDnsDomain(domain, dispatch, setError, router);
 	}
+	const recordSetContent = recordSetArray.map((r, i) => {
+		const healthClass = r.h != null
+			? (r.u === true
+				? "text-success"
+				: (r.fb
+					? "text-warning"
+					: "text-danger"))
+			: "";
+		//todo: make fbrecord correctly calculate multiple fallbacks, 3 mode, etc
+		const fbRecord = healthClass === "text-warning"
+			&& r.sel === 1
+			&& recordSetArray.find(fbr => fbr.id === r.fb[0])
+		return (<div key={i}>
+			<strong>{r.id ? r.id+': ' : ''}</strong>
+			<span className={healthClass}>{r.ip || r.host || r.value || r.ns || r.text || r.target}</span>
+			{fbRecord && <>{' -> '}<span className="text-success">{fbRecord.ip}</span></>}
+			{r.geok ? `${r.geok === 'cn' ? ' Continents' : ' Countries'}: ` : ''}{(r.geov||[]).join(', ')}
+		</div>)
+	});
 	return (
 		<tr className="align-middle">
 			<td>
@@ -18,34 +37,14 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				{type.toUpperCase()}
 			</td>
 			<td>
-				{recordSetArray.map((r, i) => {
-					const healthClass = r.h != null
-						? (r.u === true
-							? "text-success"
-							: (r.fb
-								? "text-warning"
-								: "text-danger"))
-						: "";
-					//todo: make fbrecord correctly calculate multiple fallbacks, 3 mode, etc
-					const fbRecord = healthClass === "text-warning"
-						&& r.sel === 1
-						&& recordSetArray.find(fbr => fbr.id === r.fb[0])
-					return (<div key={i}>
-						<strong>{r.id ? r.id+': ' : ''}</strong>
-						<span className={healthClass}>{r.ip || r.host || r.value || r.ns || r.text || r.target}</span>
-						{fbRecord && <>{' -> '}<span className="text-success">{fbRecord.ip}</span></>}
-					</div>)
-				})}
+				{recordSetArray.length > 5
+					? <details><summary>Expand ({recordSetArray.length})</summary>{recordSetContent}</details>
+					: recordSetContent}
 			</td>
 			<td>
 				{recordSetArray && recordSetArray.length > 0 ? recordSetArray[0].ttl : '-'}
 			</td>
 			<td>
-				{recordSetArray.map((r, i) => (
-					<div key={i}>
-						{r.geok ? `${r.geok === 'cn' ? 'Continents' : 'Countries'}: ` : ''}{(r.geov||[]).join(', ')}
-					</div>
-				))}
 				{recordSetArray[0].t && <div className="text-warning">Template</div>}
 				{recordSetArray[0].l && <div className="text-danger">Locked</div>}
 			</td>
