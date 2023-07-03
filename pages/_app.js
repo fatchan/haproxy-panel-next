@@ -52,7 +52,7 @@ export default function App({ Component, pageProps }) {
 					.sidebar { display: none; }
 				}
 				@media (prefers-color-scheme: dark) {
-					:root { --bs-body-color: #fff; --bs-body-bg: #161616; }
+					:root { --bs-body-color: #fff; --bs-body-bg: #222; }
 					.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }
 					.list-group-item { color: #fff; background-color: unset; }
 					input:not(.btn):not(.select__input), option, select.form-select, textarea { color: #fff!important; background-color: #393939!important; border: 1px solid black!important; }
