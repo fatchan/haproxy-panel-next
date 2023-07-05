@@ -3,6 +3,7 @@ module.exports = {
 		{
 			name: "basedflare",
 			script: "./server.js",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
 			instances : "max",
 			exec_mode : "cluster",
 			env: {
@@ -16,6 +17,7 @@ module.exports = {
 		{
 			name: "stats-main",
 			script: "./stats/main.js",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
 			instances : "1",
 			exec_mode : "fork",
 			env: {
@@ -28,7 +30,8 @@ module.exports = {
 		{
 			name: "stats-worker",
 			script: "./stats/worker.js",
-			instances : "2",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
+			instances : "4",
 			exec_mode : "fork",
 			env: {
 				"NODE_ENV": "development"
@@ -40,6 +43,7 @@ module.exports = {
 		{
 			name: "healthcheck-main",
 			script: "./healthcheck/main.js",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
 			instances : "1",
 			exec_mode : "fork",
 			env: {
@@ -52,7 +56,8 @@ module.exports = {
 		{
 			name: "healthcheck-worker",
 			script: "./healthcheck/worker.js",
-			instances : "2",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
+			instances : "6",
 			exec_mode : "fork",
 			env: {
 				"NODE_ENV": "development"
