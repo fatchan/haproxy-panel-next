@@ -85,36 +85,36 @@ exports.addCert = async (req, res, next) => {
 
 	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0
 		|| !res.locals.user.domains.includes(req.body.subject)) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid subject' });
+		return dynamicResponse(req, res, 400, { error: 'Add the domain in the domains page before generating a certficate' });
 	}
 
 	if (!req.body.altnames || typeof req.body.altnames !== 'object'
 		|| req.body.altnames.some(d => !res.locals.user.domains.includes(d))) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid altname(s)' });
+		return dynamicResponse(req, res, 400, { error: 'Add all the altnames on the domains page before generating a certificate' });
 	}
 
 	const subject = req.body.subject.toLowerCase();
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
 
-	const backendMap = await res.locals
-		.dataPlane.showRuntimeMap({
-			map: process.env.HOSTS_MAP_NAME
-		})
-		.then(res => res.data);
-	const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
-	if (!backendDomainEntry) {
-		return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
-	}
+//	const backendMap = await res.locals
+//		.dataPlane.showRuntimeMap({
+//			map: process.env.HOSTS_MAP_NAME
+//		})
+//		.then(res => res.data);
+//	const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
+//	if (!backendDomainEntry) {
+//		return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
+//	}
 
-	const maintenanceMap = await res.locals
-		.dataPlane.showRuntimeMap({
-			map: process.env.MAINTENANCE_MAP_NAME
-		})
-		.then(res => res.data);
-	const maintenanceDomainEntry = maintenanceMap && maintenanceMap.find(e => e.key === req.body.subject);
-	if (maintenanceDomainEntry) {
+//	const maintenanceMap = await res.locals
+//		.dataPlane.showRuntimeMap({
+//			map: process.env.MAINTENANCE_MAP_NAME
+//		})
+//		.then(res => res.data);
+//	const maintenanceDomainEntry = maintenanceMap && maintenanceMap.find(e => e.key === req.body.subject);
+//	if (maintenanceDomainEntry) {
 //		return dynamicResponse(req, res, 400, { error: 'Cannot generate a certificate while the domain is in maintenance mode' });
-	}
+//	}
 
 	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
