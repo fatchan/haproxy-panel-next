@@ -49,7 +49,7 @@ const MapPage = (props) => {
 			cip: e.target.cip?.checked,
 			//ddos
 			m: e.target.m?.value,
-			t: e.target.t?.checked,
+			t: e.target.t?.checked || null,
 		 }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
