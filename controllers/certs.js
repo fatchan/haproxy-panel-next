@@ -1,7 +1,7 @@
 const db = require('../db.js');
 const acme = require('../acme.js');
 const url = require('url');
-const { dynamicResponse } = require('../util.js');
+const { dynamicResponse, wildcardCheck } = require('../util.js');
 const { verifyCSR } = require('../ca.js');
 
 /**
@@ -27,9 +27,12 @@ exports.certsPage = async (app, req, res) => {
 		.getAllStorageSSLCertificates()
 		.then(certs => {
 			return certs.data.filter(c => {
-				const approxSubject = c.storage_name
+				let approxSubject = c.storage_name
 					.replaceAll('_', '.')
 					.substr(0, c.storage_name.length-4);
+				if (approxSubject.startsWith('.')) {
+					approxSubject = approxSubject.substring(1);
+				}
 				return res.locals.user.domains.includes(approxSubject);
 			});
 		});
@@ -63,9 +66,12 @@ exports.certsJson = async (req, res) => {
 		.getAllStorageSSLCertificates()
 		.then(certs => {
 			return certs.data.filter(c => {
-				const approxSubject = c.storage_name
+				let approxSubject = c.storage_name
 					.replaceAll('_', '.')
-					.substr(0, c.storage_name.length-4);
+					.substr(0, c.storage_name.length-4);	
+				if (approxSubject.startsWith('.')) {
+					approxSubject = approxSubject.substring(1);
+				}
 				return res.locals.user.domains.includes(approxSubject);
 			});
 		});
@@ -83,28 +89,39 @@ exports.certsJson = async (req, res) => {
  */
 exports.addCert = async (req, res, next) => {
 
+	let wildcardOk = true;
+	if (req.body.subject.startsWith('*.')) {
+		wildcardOk = wildcardCheck(req.body.subject, res.locals.user.domains);
+	}
 	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0
-		|| !res.locals.user.domains.includes(req.body.subject)) {
-		return dynamicResponse(req, res, 400, { error: 'Add the domain in the domains page before generating a certficate' });
+		|| (!res.locals.user.domains.includes(req.body.subject) && !wildcardOk)) {
+		return dynamicResponse(req, res, 400, { error: 'Add a matching domain in the domains page before generating a certficate' });
 	}
 
 	if (!req.body.altnames || typeof req.body.altnames !== 'object'
-		|| req.body.altnames.some(d => !res.locals.user.domains.includes(d))) {
+		|| (req.body.altnames.some(d => !res.locals.user.domains.includes(d)) && !wildcardOk)) {
 		return dynamicResponse(req, res, 400, { error: 'Add all the altnames on the domains page before generating a certificate' });
+	}
+
+	if (req.body.email && (typeof req.body.email !== 'string'
+		|| !/^\S+@\S+\.\S+$/.test(req.body.email))) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid email' });
 	}
 
 	const subject = req.body.subject.toLowerCase();
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
 
-//	const backendMap = await res.locals
-//		.dataPlane.showRuntimeMap({
-//			map: process.env.HOSTS_MAP_NAME
-//		})
-//		.then(res => res.data);
-//	const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
-//	if (!backendDomainEntry) {
-//		return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
-//	}
+	if (!req.body.subject.startsWith('*.')) {
+		const backendMap = await res.locals
+			.dataPlane.showRuntimeMap({
+				map: process.env.HOSTS_MAP_NAME
+			})
+			.then(res => res.data);
+		const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
+		if (!backendDomainEntry) {
+			return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
+		}
+	}
 
 //	const maintenanceMap = await res.locals
 //		.dataPlane.showRuntimeMap({
@@ -132,7 +149,7 @@ exports.addCert = async (req, res, next) => {
 
 	try {
 		console.log('Add cert request:', subject, altnames);
-		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames);
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, req.body.email);
 		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
 			'/v2/services/haproxy/storage/ssl_certificates',
 			{

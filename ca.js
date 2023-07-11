@@ -1,6 +1,7 @@
 'use strict';
 
 const { generateKeyPairSync } = require('crypto')
+	, { wildcardCheck } = require('./util.js')
 	, fs = require('fs')
 	, forge = require('node-forge')
 	, pki = forge.pki
@@ -84,7 +85,13 @@ function generateCertificate(privateKey, publicKey) {
 function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	const csr = pki.certificationRequestFromPem(csrPem);
 	const subject = csr.subject.getField('CN').value;
-	if (!allowedDomains.includes(subject)) {
+	const isWildcard = subject.startsWith('*.');
+	if (isWildcard) {
+		const wildcardOk = wildcardCheck(subject, allowedDomains);
+		if (!wildcardOk) {
+			throw new Error('No permission for subject');
+		}
+	} else if (!allowedDomains.includes(subject)) {
 		throw new Error('No permission for subject');
 	}
 	const exts = csr.getAttribute({name: 'extensionRequest'});
@@ -95,7 +102,9 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 			const badAltNames = altNamesExt.altNames.some(altName => {
 				return !allowedDomains.includes(altName.value);
 			});
-			if (badAltNames) {
+			if (isWildcard && !altNamesExt.altNames.every(altName => altName.value === subject)) {
+				throw new Error('No permission for altnames');
+			} else if (!isWildcard && badAltNames) {
 				throw new Error('No permission for altnames');
 			}
 		}

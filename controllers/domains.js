@@ -79,7 +79,7 @@ exports.addDomain = async (req, res, next) => {
 	try {
 		const parsed = psl.parse(domain);
 		if (!parsed || !parsed.domain) {
-			dynamicResponse(req, res, 400, { error: 'Invalid input' })
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' })
 		}
 		const domains = [domain, parsed.domain];
 		const existing = await db.db.collection('accounts')

@@ -3,6 +3,7 @@
 const fs = require('fs').promises;
 const acme = require('acme-client');
 const dev = process.env.NODE_ENV !== 'production';
+const redis = require('./redis.js');
 
 /**
  * Function used to satisfy an ACME challenge
@@ -29,9 +30,14 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 		const dnsRecord = `_acme-challenge.${authz.identifier.value}`;
 		const recordValue = keyAuthorization;
 		console.log(`Creating TXT record for ${authz.identifier.value}: ${dnsRecord}`);
-		/* Replace this */
-		console.log(`Would create TXT record "${dnsRecord}" with value "${recordValue}"`);
-		// await dnsProvider.createRecord(dnsRecord, 'TXT', recordValue);
+		const record = { ttl: 300, text: recordValue, l: true, t: true };
+		let recordSetRaw = await redis.hget(`dns:${authz.identifier.value}.`, '_acme-challenge');
+		if (!recordSetRaw) {
+			recordSetRaw = {};
+		}
+		recordSetRaw['txt'] = [record];
+		await redis.hset(`dns:${authz.identifier.value}.`, '_acme-challenge', recordSetRaw);
+		console.log(`Created TXT record "${dnsRecord}" with value "${recordValue}"`);
 	}
 }
 
@@ -60,9 +66,8 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 		const dnsRecord = `_acme-challenge.${authz.identifier.value}`;
 		const recordValue = keyAuthorization;
 		console.log(`Removing TXT record for ${authz.identifier.value}: ${dnsRecord}`);
-		/* Replace this */
-		console.log(`Would remove TXT record "${dnsRecord}" with value "${recordValue}"`);
-		// await dnsProvider.removeRecord(dnsRecord, 'TXT');
+		await redis.hdel(`dns:${authz.identifier.value}.`, '_acme-challenge');
+		console.log(`Removed TXT record "${dnsRecord}" with value "${recordValue}"`);
 	}
 }
 
@@ -80,7 +85,7 @@ module.exports = {
 		});
 	},
 
-	generate: async function(domain, altnames, email='tom@69420.me') {
+	generate: async function(domain, altnames, email) {
 		/* Create CSR */
 		const [key, csr] = await acme.crypto.createCsr({
 			commonName: domain,
