@@ -75,8 +75,7 @@ export default function Domains(props) {
 							{(domainCert||wildcardCert).storageName}
 							{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
 						</span>
-						: <span className="text-danger">
-							<i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />
+						: <span>
 							No Certificate
 						</span>}
 				</td>
