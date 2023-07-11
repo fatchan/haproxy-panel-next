@@ -1,7 +1,7 @@
 const db = require('../db.js');
 const acme = require('../acme.js');
 const url = require('url');
-const { dynamicResponse, wildcardCheck } = require('../util.js');
+const { dynamicResponse, wildcardCheck, filterCertsByDomain } = require('../util.js');
 const { verifyCSR } = require('../ca.js');
 
 /**
@@ -25,17 +25,7 @@ exports.certsPage = async (app, req, res) => {
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals.dataPlane
 		.getAllStorageSSLCertificates()
-		.then(certs => {
-			return certs.data.filter(c => {
-				let approxSubject = c.storage_name
-					.replaceAll('_', '.')
-					.substr(0, c.storage_name.length-4);
-				if (approxSubject.startsWith('.')) {
-					approxSubject = approxSubject.substring(1);
-				}
-				return res.locals.user.domains.includes(approxSubject);
-			});
-		});
+		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
 	return app.render(req, res, '/certs', {
 		csrf: req.csrfToken(),
 		dbCerts,
@@ -64,17 +54,7 @@ exports.certsJson = async (req, res) => {
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals.dataPlane
 		.getAllStorageSSLCertificates()
-		.then(certs => {
-			return certs.data.filter(c => {
-				let approxSubject = c.storage_name
-					.replaceAll('_', '.')
-					.substr(0, c.storage_name.length-4);	
-				if (approxSubject.startsWith('.')) {
-					approxSubject = approxSubject.substring(1);
-				}
-				return res.locals.user.domains.includes(approxSubject);
-			});
-		});
+		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,

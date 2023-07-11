@@ -3,6 +3,7 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
+import { getApproxSubject } from '../util.js'
 import { useRouter } from 'next/router';
 
 export default function Certs(props) {
@@ -78,12 +79,7 @@ export default function Certs(props) {
 		.filter(c => !dbCerts.some(dc => dc.storageName === c.storage_name))
 		.filter(c => c.storage_name !== 'server-cert.pem'); //no point showing this
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
-		const approxSubject = c.storage_name
-			.replaceAll('_', '.')
-			.substr(0, c.storage_name.length-4);
-		if (approxSubject.startsWith('.')) {
-			approxSubject = approxSubject.substring(1);
-		}
+		const approxSubject = getApproxSubject(c.storage_name);
 		return (
 			<tr key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">

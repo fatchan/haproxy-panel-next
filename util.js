@@ -105,6 +105,23 @@ module.exports = {
 		return allowedDomains.some(d => {
 			return wcRegex.test(d);
 		});
-	}
+	},
+
+	getApproxSubject: (storageName) => {
+		let ret = storageName
+			.replaceAll('_', '.')
+			.substr(0, storageName.length-4);
+		if (ret.startsWith('.')) {
+			ret = ret.substring(1);
+		}
+		return ret;
+	},
+
+	filterCertsByDomain: (certs, allowedDomains) => {
+		return certs.filter(c => {
+			let approxSubject = module.exports.getApproxSubject(c.storage_name);
+			return allowedDomains.includes(approxSubject);
+		});
+	},
 
 };
