@@ -18,6 +18,7 @@ const server = require('express')
 	, bodyParser = require('body-parser')
 	, cookieParser = require('cookie-parser')
 	, acme = require('./acme.js')
+	, redis = require('./redis.js')
 	, db = require('./db.js');
 
 app.prepare()
@@ -52,7 +53,25 @@ app.prepare()
 			if (err) {
 				throw err;
 			}
+			if (typeof process.send === 'function') {
+				console.log('SENT READY SIGNAL TO PM2');
+				process.send('ready');
+			}
 			console.log('> Ready on http://localhost:3000');
+		});
+
+		//graceful stop handling
+		const gracefulStop = () => {
+			console.log('SIGINT SIGNAL RECEIVED');
+			db.client.close();
+			redis.close();
+			process.exit(0);
+		};
+		process.on('SIGINT', gracefulStop);
+		process.on('message', (message) => {
+			if (message === 'shutdown') {
+				gracefulStop();
+			}
 		});
 
 	})
