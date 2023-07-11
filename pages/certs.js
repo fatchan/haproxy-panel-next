@@ -40,6 +40,7 @@ export default function Certs(props) {
 				_csrf: csrf,
 				subject: e.target.subject.value,
 				altnames: e.target.altnames.value.split(',').map(x => x.trim()),
+				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
 		} catch(err) {
@@ -80,6 +81,9 @@ export default function Certs(props) {
 		const approxSubject = c.storage_name
 			.replaceAll('_', '.')
 			.substr(0, c.storage_name.length-4);
+		if (approxSubject.startsWith('.')) {
+			approxSubject = approxSubject.substring(1);
+		}
 		return (
 			<tr key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">
@@ -196,7 +200,9 @@ export default function Certs(props) {
 								<td>
 									<input className="form-control" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
 								</td>
-								<td colSpan="2"></td>
+								<td colSpan="2">
+									<input className="form-control" type="email" name="email" placeholder="optional expiry warning email address"  />
+								</td>
 							</tr>
 
 						</tbody>

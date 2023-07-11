@@ -5,6 +5,7 @@ import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
+import { wildcardCheck } from '../util.js';
 
 export default function Domains(props) {
 
@@ -54,6 +55,10 @@ export default function Domains(props) {
 		.forEach((d, i) => {
 		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
+		const wildcardCert = certs.find(c => {
+			return ((c.subject.startsWith('*') && wildcardCheck(c.subject, [d]))
+				|| c.altnames.some(an => an.startsWith('*') && wildcardCheck(an, [d])));
+		});
 		const isSubdomain = d.split('.').length > 2;
 		const tableRow = (
 			<tr key={i} className="align-middle">
@@ -64,9 +69,16 @@ export default function Domains(props) {
 					{d}
 				</td>
 				<td>
-					{domainCert
-						? <span className="text-success"><i className="bi-lock-fill pe-none me-2" width="16" height="16" />{domainCert.storageName}</span>
-						: <span className="text-danger"><i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />No Certificate</span>}
+					{(domainCert || wildcardCert)
+						? <span className="text-success">
+							<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width="16" height="16" />
+							{(domainCert||wildcardCert).storageName}
+							{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
+						</span>
+						: <span className="text-danger">
+							<i className="bi-exclamation-triangle-fill pe-none me-2" width="16" height="16" />
+							No Certificate
+						</span>}
 				</td>
 				<td className="col-1 text-center">
 					{!isSubdomain && <Link href={`/dns/${d}`}>

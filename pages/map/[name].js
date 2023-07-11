@@ -92,7 +92,7 @@ const MapPage = (props) => {
 					</td>
 					<td>
 						<select className="form-select" name="m" defaultValue="" required>
-							<option value="" />
+							<option disabled value="">protection mode</option>
 							{mapValueOptions}
 						</select>
 					</td>
