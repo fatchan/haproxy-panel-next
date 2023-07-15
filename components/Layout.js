@@ -4,7 +4,7 @@ import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
 export default withRouter(function Layout({ children, router }) {
-	const showMenu = !['/login', '/register', '/changepassword', '/'].includes(router.pathname);
+	const showMenu = !['/tos', '/login', '/register', '/changepassword', '/'].includes(router.pathname);
 	return (
 		<>
 

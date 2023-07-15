@@ -108,7 +108,7 @@ export default function Domains(props) {
 				<table className="table text-nowrap">
 					<tbody>
 
-						<tr className="align-middle">
+						{domainList && domainList.length > 0 && <tr className="align-middle">
 							<th/>
 							<th>
 								Domain
@@ -119,7 +119,7 @@ export default function Domains(props) {
 							<th>
 								Edit DNS
 							</th>
-						</tr>
+						</tr>}
 
 						{domainList}
 						{subdomainList.length > 0 && <tr className="align-middle">
@@ -135,7 +135,7 @@ export default function Domains(props) {
 								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<input className="btn btn-success" type="submit" value="+" />
-									<input className="form-control ms-3" type="text" name="domain" placeholder="domain" required />
+									<input className="form-control ms-3" type="text" name="domain" placeholder="domain e.g. example.com" required />
 								</form>
 							</td>
 						</tr>

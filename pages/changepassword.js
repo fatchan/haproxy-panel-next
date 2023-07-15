@@ -13,7 +13,7 @@ export default function ChangePassword() {
 
 	async function changepassword(e) {
 		e.preventDefault();
-		return setError('Not implemented');
+		return setError('Invalid email');
 		await API.changepassword({
 			username: e.target.username.value,
 			password: e.target.password.value,
@@ -32,7 +32,7 @@ export default function ChangePassword() {
 
 			<span className="d-flex flex-column align-items-center mt-5 pt-5">
 				<Link href="/">
-					<a className="d-flex mb-3 text-decoration-none">
+					<a className="d-flex mb-3 text-decoration-none align-items-center">
 						<Image src="/favicon.ico" layout="fixed" width="24" height="24" alt=" " />
 						<span className="mx-2 fs-4 text-decoration-none">BasedFlare</span>
 					</a>

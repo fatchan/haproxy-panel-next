@@ -8,7 +8,6 @@ export default function Index() {
 			<title>BasedFlare</title>
 		</Head>
 
-
 		<span className="d-flex flex-column align-items-center mt-5 pt-5">
 			<Link href="#!">
 				<a className="d-flex mb-3 text-decoration-none align-items-center">
