@@ -11,8 +11,6 @@ resolver.setServers(process.env.NAMESERVERS.split(','));
 exports.accountData = async (req, res, _next) => {
 	let maps = []
 		, globalAcl
-		, aRecords = []
-		, aaaaRecords = []
 		, txtRecords = [];
 	if (res.locals.user.clusters.length > 0) {
 		maps = res.locals.dataPlane
@@ -24,17 +22,13 @@ exports.accountData = async (req, res, _next) => {
 		globalAcl = res.locals.dataPlane
 			.getOneRuntimeMap('ddos_global')
 			.then(res => res.data.description.split('').reverse()[0]);
-		aRecords = resolver.resolve(process.env.ALL_IP_DOMAIN, 'A');
-		aaaaRecords = resolver.resolve(process.env.ALL_IP_DOMAIN, 'AAAA');
 		txtRecords = resolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	}
-	([maps, globalAcl, aRecords, aaaaRecords, txtRecords] = await Promise.all([maps, globalAcl, aRecords, aaaaRecords, txtRecords]));
+	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
 		maps,
 		globalAcl: globalAcl === '1',
-		aRecords,
-		aaaaRecords,
 		txtRecords,
 	};
 };
@@ -177,6 +171,7 @@ exports.register = async (req, res) => {
 			domains: [],
 			clusters: process.env.DEFAULT_CLUSTER ? [process.env.DEFAULT_CLUSTER] : [],
 			activeCluster: 0,
+			onboarding: false,
 		});
 
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
@@ -190,4 +185,23 @@ exports.register = async (req, res) => {
 exports.logout = (req, res) => {
 	req.session.destroy();
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
+};
+
+/**
+ * POST /forms/onboarding
+ * finish/skip onboarding
+ */
+exports.finishOnboarding = async (req, res) => {
+	if (!res.locals.user) {
+		return dynamicResponse(req, res, 400, { error: 'Bad request' });
+	}
+	await db.db.collection('accounts')
+		.updateOne({
+			_id: res.locals.user.username
+		}, {
+			'$set': {
+				onboarding: true,
+			}
+		});
+	return dynamicResponse(req, res, 302, { redirect: '/account' });
 };

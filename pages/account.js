@@ -33,6 +33,10 @@ export default function Account(props) {
 
 		const { user, maps, globalAcl, csrf } = state;
 
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+
 		const isAdmin = user.username === 'admin';
 
 		// Next cluster number for > browse button

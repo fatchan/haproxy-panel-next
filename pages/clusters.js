@@ -33,6 +33,10 @@ export default function Clusters(props) {
 
 	const { user, csrf } = state;
 
+	if (user && !user.onboarding) {
+		router.push('/onboarding');
+	}
+
 	async function addCluster(e) {
 		e.preventDefault();
 		setError(null);

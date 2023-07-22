@@ -48,7 +48,7 @@ async function doCheck(domainKey, hkey, record) {
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
 				const hostHeader = domainKey.substring(4, domainKey.length-1);
 				//await fetch(`https://${host}/.basedflare/cgi/trace`, {
-				await fetch(`https://${host}/`, {
+				await fetch(`https://${host}/.basedflare/cgi/ping`, {
 					method: 'HEAD',
 					redirect: 'manual',
 					headers: { 'Host': hostHeader },
@@ -59,7 +59,7 @@ async function doCheck(domainKey, hkey, record) {
 			} catch(e) {
 				if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
 					//invalid cert doesn't mean the server is dead
-					console.warn('health check ERR_TLS_CERT_ALTNAME_INVALID for', domainKey, hkey, record.ip);
+					console.info('health check ERR_TLS_CERT_ALTNAME_INVALID for', domainKey, hkey, record.ip);
 					recordHealth = '1';
 				} else {
 					console.warn(e)

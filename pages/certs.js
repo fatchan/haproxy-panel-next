@@ -33,6 +33,10 @@ export default function Certs(props) {
 
 	const { user, csrf, dbCerts, clusterCerts } = state;
 
+	if (user && !user.onboarding) {
+		router.push('/onboarding');
+	}
+
 	async function addCert(e) {
 		e.preventDefault();
 		try {

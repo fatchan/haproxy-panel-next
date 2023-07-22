@@ -38,5 +38,3 @@ exports.nsTemplate = () => Object.seal(Object.freeze(Object.preventExtensions([
 		"t": true
 	}
 ])));
-
-

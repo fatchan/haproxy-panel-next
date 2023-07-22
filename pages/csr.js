@@ -30,7 +30,11 @@ export default function Csr(props) {
 		);
 	}
 
-	const { csrf } = state;
+	const { user, csrf } = state;
+
+	if (user && !user.onboarding) {
+		router.push('/onboarding');
+	}
 
 	return (
 		<>

@@ -56,6 +56,7 @@ const testRouter = (server, app) => {
 						domains: account.domains,
 						clusters: strippedClusters,
 						activeCluster: account.activeCluster,
+						onboarding: account.onboarding,
 						numCerts,
 					};
 					return next();
@@ -68,6 +69,13 @@ const testRouter = (server, app) => {
 		const checkSession = (req, res, next) => {
 			if (!res.locals.user) {
 				return dynamicResponse(req, res, 302, { redirect: '/login' });
+			}
+			next();
+		};
+
+		const checkOnboarding = (req, res, next) => {
+			if (!res.locals.user || res.locals.user.onboarding === false) {
+				return dynamicResponse(req, res, 302, { redirect: '/onboarding' });
 			}
 			next();
 		};
@@ -148,8 +156,9 @@ const testRouter = (server, app) => {
 		server.get('/login', useSession, fetchSession, (req, res, next) => { return app.render(req, res, '/login') });
 		server.get('/register', useSession, fetchSession, (req, res, next) => { return app.render(req, res, '/register') });
 
-		//register/login/logout forms
+		//register/login/logout/onboarding forms
 		server.post('/forms/login', useSession, accountController.login);
+		server.post('/forms/onboarding', useSession, fetchSession, checkSession, accountController.finishOnboarding);
 		server.post('/forms/logout', useSession, accountController.logout);
 		server.post('/forms/register', useSession, fetchSession, accountController.register);
 
@@ -158,12 +167,12 @@ const testRouter = (server, app) => {
 			, mapNamesOrString = mapNames.join('|');
 
 		//authed pages
-		server.get('/account', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.accountPage.bind(null, app));
+		server.get('/account', useSession, fetchSession, checkSession, checkOnboarding, useHaproxy, csrfMiddleware, accountController.accountPage.bind(null, app));
 		server.get('/onboarding', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.onboardingPage.bind(null, app));
 		server.get('/account.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.accountJson);
-		server.get(`/map/:name(${mapNamesOrString})`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapPage.bind(null, app));
+		server.get(`/map/:name(${mapNamesOrString})`, useSession, fetchSession, checkSession, checkOnboarding, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapPage.bind(null, app));
 		server.get(`/map/:name(${mapNamesOrString}).json`, useSession, fetchSession, checkSession, useHaproxy, hasCluster, csrfMiddleware, mapsController.mapJson);
-		server.get('/clusters', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersPage.bind(null, app));
+		server.get('/clusters', useSession, fetchSession, checkSession, checkOnboarding, csrfMiddleware, clustersController.clustersPage.bind(null, app));
 		server.get('/clusters.json', useSession, fetchSession, checkSession, csrfMiddleware, clustersController.clustersJson);
 		server.get('/domains', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsPage.bind(null, app));
 		server.get('/domains.json', useSession, fetchSession, checkSession, csrfMiddleware, domainsController.domainsJson);
@@ -172,7 +181,7 @@ const testRouter = (server, app) => {
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+)', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsDomainPage.bind(null, app));
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+).json', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordJson);
 		server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+)', useSession, fetchSession, checkSession, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app));
-		server.get('/certs', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
+		server.get('/certs', useSession, fetchSession, checkSession, checkOnboarding, useHaproxy, csrfMiddleware, certsController.certsPage.bind(null, app));
 		server.get('/certs.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, certsController.certsJson);
 		// server.get('/stats', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsPage.bind(null, app));
 		// server.get('/stats.json', useSession, fetchSession, checkSession, useHaproxy, csrfMiddleware, accountController.statsJson);

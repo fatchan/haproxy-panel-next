@@ -36,6 +36,11 @@ export default function Onboarding(props) {
 	const backendAdded = backendMap && backendMap.count > 0;
 	const certAdded = user.numCerts > 0;
 
+	async function finishOnboarding(e) {
+		await API.finishOnboarding(dispatch, setError, router);
+		await API.getAccount(dispatch, setError, router);
+	}
+
 	async function addDomain(e) {
 		e.preventDefault();
 		await API.addDomain({ _csrf: csrf, domain: e.target.domain.value, onboarding: e.target.onboarding.value }, dispatch, setError, router);
@@ -71,6 +76,10 @@ export default function Onboarding(props) {
 		{error && <ErrorAlert error={error} />}
 
 		<h5 className="fw-bold">Onboarding</h5>
+
+		{!user.onboarding && <div className="my-2">
+			<input onClick={finishOnboarding} className="btn btn-warning" type="submit" value="Skip Onboarding" />
+		</div>}
 
 		<div className="list-group">
 			<div className="list-group-item d-flex gap-3">

@@ -4,6 +4,9 @@ import NProgress from 'nprogress';
 export async function getAccount(dispatch, errorCallback, router) {
 	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router);
 }
+export async function finishOnboarding(dispatch, errorCallback, router) {
+	return ApiCall('/forms/onboarding', 'POST', null, dispatch, errorCallback, router);
+}
 export async function login(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/login', 'POST', body, dispatch, errorCallback, router);
 }
