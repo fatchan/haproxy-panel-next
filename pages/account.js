@@ -14,7 +14,7 @@ export default function Account(props) {
 	const [error, setError] = useState();
 
 	useEffect(() => {
-		if (!state.user) {
+		if (!state.user || !state.user.clusters) {
 			API.getAccount(dispatch, setError, router);
 		}
 	}, [state.user, router]);
