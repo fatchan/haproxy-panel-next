@@ -274,6 +274,14 @@ exports.verifyUserCSR = async (req, res, next) => {
 			}, {
 				upsert: true,
 			});
+		await db.db.collection('accounts')
+			.updateOne({
+				_id: res.locals.user.username
+			}, {
+				'$set': {
+					onboarding: true, //skip during onboarding
+				}
+			});
 		const serialNumber = serial && serial.value && serial.value.number || 1;
 		console.log('Attempting to sign CSR, serial', serialNumber)
 		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains, serialNumber);
