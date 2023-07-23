@@ -34,7 +34,6 @@ const deleteLokiLabel = (value, label="hh") => fetch(`${process.env.LOKI_HOST}lo
 	});
 
 async function loop() {
-	const start = Date.now();
 	try {
 		const lokiDomains = await getLokiDomains();
 		let userDomains = await db.db.collection('accounts')
@@ -55,7 +54,6 @@ async function loop() {
 		setTimeout(loop, 60000);
 		return;
 	}
-	const elapsed = Date.now() - start;
 	setTimeout(loop, 3600000);
 }
 
