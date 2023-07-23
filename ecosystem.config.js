@@ -31,7 +31,7 @@ module.exports = {
 			name: "stats-worker",
 			script: "./stats/worker.js",
 			log_date_format: "YYYY-MM-DD HH:mm:ss",
-			instances : "4",
+			instances : "2",
 			exec_mode : "fork",
 			env: {
 				"NODE_ENV": "development"
@@ -78,6 +78,19 @@ module.exports = {
 			env_production: {
 				"NODE_ENV": "production",
 			}
-		}
+		},
+		{
+			name: "autorenew",
+			script: "./autorenew/main.js",
+			log_date_format: "YYYY-MM-DD HH:mm:ss",
+			instances : "1",
+			exec_mode : "fork",
+			env: {
+				"NODE_ENV": "development"
+			},
+			env_production: {
+				"NODE_ENV": "production",
+			}
+		},
 	]
 }
