@@ -39,7 +39,7 @@ export default withRouter(function Layout({ children, router }) {
 							<hr />
 							<a className="pb-3 fs-xs" href="https://gitgud.io/fatchan/haproxy-panel-next/">source code</a>
 							{" "}&bull;{" "}
-							<a className="pb-3 fs-xs" target="_blank" rel="noreferrer" href="https://status.basedflare.com">status page</a>
+							<a className="pb-3 fs-xs" target="_blank" rel="noreferrer" href="https://basedstatus.online">status page</a>
 						</footer>
 
 					</div>
