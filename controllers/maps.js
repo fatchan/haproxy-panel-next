@@ -297,7 +297,7 @@ exports.patchMapForm = async (req, res, next) => {
 				if (!freeSlotId) {
 					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 				}
-				const [address, port] = value.split(':');
+				const { hostname: address, port } = new URL(`http://${value}`);
 				const runtimeServerResp = await res.locals
 					.dataPlaneAll('addRuntimeServer', {
 						backend: 'servers',
