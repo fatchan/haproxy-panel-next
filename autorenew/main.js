@@ -7,31 +7,90 @@ process
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
 const db = require('../db.js');
+const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
+const firstClusterURL = clusterUrls[0];
+const base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString("base64");
+const fetch = require('node-fetch')
+const FormData = require('form-data');
+const agent = require('../agent.js');
+const acme = require('../acme.js');
 
 async function main() {
 	await db.connect();
+	await acme.init();
 	loop();
 }
 
-const getCertsOlderThan = (days=60) => db.db.collection('certs')
-	.find({
-		date: {
-			'$lt': new Date(new Date().setDate(new Date().getDate()-days))
+function getCertsOlderThan(days=60) {
+	return db.db.collection('certs')
+		.find({
+			date: {
+				'$lt': new Date(new Date().setDate(new Date().getDate()-days))
+			},
+		}, {
+			date: 1,
+			subject: 1,
+			altnames: 1,
+		})
+		.toArray();
+}
+
+async function postFileAll(path, options, file, fdOptions) {
+	const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
+		const fd = new FormData();
+		fd.append('file_upload', file, fdOptions);
+		return fetch(`${clusterUrl.origin}${path}`, { ...options, body: fd, agent }).then(resp => resp.json());
+	}));
+	return promiseResults[0];
+}
+
+async function updateCert(dbCert) {
+	const { subject, altnames, email } = dbCert;
+	console.log('Renew cert request:', subject, altnames, email);
+	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email);
+	const { message, description, file, storage_name: storageName } = await postFileAll('/v2/services/haproxy/storage/ssl_certificates', {
+		method: 'POST',
+		headers: {
+			'authorization': `Basic ${base64Auth}`,
 		},
-	}, {
-		date: 1,
-		subject: 1,
-		altnames: 1,
-	})
-	.toArray();
+	}, haproxyCert,
+		{
+			filename: `${subject}.pem`,
+			contentType: 'text/plain',
+		}
+	);
+	if (message) {
+		return console.error('Problem renewing', subject, altnames, 'message:', message);
+	}
+	let update = {
+		_id: subject,
+		subject: subject,
+		altnames: altnames,
+		csr, key, cert, haproxyCert, // cert creation data
+		date,
+	}
+	if (description) {
+		//may be null due to "already exists", so we keep existing props
+		update = { ...update, description, file, storageName };
+	}
+	await db.db.collection('certs')
+		.updateOne({
+			_id: subject,
+		}, {
+			$set: update,
+		}, {
+			upsert: true,
+		});
+}
 
 async function loop() {
 	try {
 		const expiringCerts = await getCertsOlderThan(60);
-		expiringCerts.forEach(c => {
+		for (let c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
-			//TODO
-		});
+			await updateCert(c);
+			process.exit(0);
+		};
 	} catch(e) {
 		console.error(e);
 		setTimeout(loop, 60000);

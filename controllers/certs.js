@@ -90,6 +90,7 @@ exports.addCert = async (req, res, next) => {
 
 	const subject = req.body.subject.toLowerCase();
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
+	const email = req.body.email;
 
 	if (!req.body.subject.startsWith('*.')) {
 		const backendMap = await res.locals
@@ -102,16 +103,6 @@ exports.addCert = async (req, res, next) => {
 			return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
 		}
 	}
-
-//	const maintenanceMap = await res.locals
-//		.dataPlane.showRuntimeMap({
-//			map: process.env.MAINTENANCE_MAP_NAME
-//		})
-//		.then(res => res.data);
-//	const maintenanceDomainEntry = maintenanceMap && maintenanceMap.find(e => e.key === req.body.subject);
-//	if (maintenanceDomainEntry) {
-//		return dynamicResponse(req, res, 400, { error: 'Cannot generate a certificate while the domain is in maintenance mode' });
-//	}
 
 	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
@@ -129,7 +120,7 @@ exports.addCert = async (req, res, next) => {
 
 	try {
 		console.log('Add cert request:', subject, altnames);
-		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, req.body.email);
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email);
 		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
 			'/v2/services/haproxy/storage/ssl_certificates',
 			{
@@ -149,6 +140,7 @@ exports.addCert = async (req, res, next) => {
 			_id: subject,
 			subject: subject,
 			altnames: altnames,
+			email: email,
 			username: res.locals.user.username,
 			csr, key, cert, haproxyCert, // cert creation data
 			date,
