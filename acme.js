@@ -4,6 +4,9 @@ const fs = require('fs').promises;
 const acme = require('acme-client');
 const dev = process.env.NODE_ENV !== 'production';
 const redis = require('./redis.js');
+const redlock = require('./redlock.js');
+const psl = require('psl');
+
 
 /**
  * Function used to satisfy an ACME challenge
@@ -27,17 +30,29 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 
 	/* dns-01 */
 	else if (challenge.type === 'dns-01') {
-		const dnsRecord = `_acme-challenge.${authz.identifier.value}`;
-		const recordValue = keyAuthorization;
-		console.log(`Creating TXT record for ${authz.identifier.value}: ${dnsRecord}`);
-		const record = { ttl: 300, text: recordValue, l: true, t: true };
-		let recordSetRaw = await redis.hget(`dns:${authz.identifier.value}.`, '_acme-challenge');
-		if (!recordSetRaw) {
-			recordSetRaw = {};
+		const parsed = psl.parse(authz.identifier.value);
+		const domain = parsed.domain;
+		let subdomain = `_acme-challenge`;
+		if (parsed.subdomain && parsed.subdomain.length > 0) {
+			subdomain += `.${parsed.subdomain}`;
 		}
-		recordSetRaw['txt'] = [record];
-		await redis.hset(`dns:${authz.identifier.value}.`, '_acme-challenge', recordSetRaw);
-		console.log(`Created TXT record "${dnsRecord}" with value "${recordValue}"`);
+		const lock = await redlock.acquire([`lock:${domain}:${subdomain}`], 10000);
+		try {
+			const recordValue = keyAuthorization;
+			console.log(`Creating TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
+			const record = { ttl: 300, text: recordValue, l: true, t: true };
+			let recordSetRaw = await redis.hget(`dns:${domain}.`, subdomain);
+			if (!recordSetRaw) {
+				recordSetRaw = {};
+			}
+			recordSetRaw['txt'] = [record];
+			await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
+			console.log(`Created TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
+		} catch(e) {
+			console.error(e);
+		} finally {
+			await lock.release();
+		}
 	}
 }
 
@@ -63,11 +78,23 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
 	/* dns-01 */
 	else if (challenge.type === 'dns-01') {
-		const dnsRecord = `_acme-challenge.${authz.identifier.value}`;
-		const recordValue = keyAuthorization;
-		console.log(`Removing TXT record for ${authz.identifier.value}: ${dnsRecord}`);
-		await redis.hdel(`dns:${authz.identifier.value}.`, '_acme-challenge');
-		console.log(`Removed TXT record "${dnsRecord}" with value "${recordValue}"`);
+		const parsed = psl.parse(authz.identifier.value);
+		const domain = parsed.domain;
+		let subdomain = `_acme-challenge`;
+		if (parsed.subdomain && parsed.subdomain.length > 0) {
+			subdomain += `.${parsed.subdomain}`;
+		}
+		const lock = await redlock.acquire([`lock:${domain}:${subdomain}`], 10000);
+		try {
+			const recordValue = keyAuthorization;
+			console.log(`Removing TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
+			await redis.hdel(`dns:${domain}.`, subdomain);
+			console.log(`Removed TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
+		} catch(e) {
+			console.error(e);
+		} finally {
+			await lock.release();
+		}
 	}
 }
 
@@ -85,7 +112,7 @@ module.exports = {
 		});
 	},
 
-	generate: async function(domain, altnames, email) {
+	generate: async function(domain, altnames, email, challengePriority=['http-01', 'dns-01']) {
 		/* Create CSR */
 		const [key, csr] = await acme.crypto.createCsr({
 			commonName: domain,
@@ -98,7 +125,8 @@ module.exports = {
 			termsOfServiceAgreed: true,
 			skipChallengeVerification: true,
 			challengeCreateFn,
-			challengeRemoveFn
+			challengeRemoveFn,
+			challengePriority,
 		});
 		/* Done */
 		const haproxyCert = `${cert.toString()}\n${key.toString()}`;

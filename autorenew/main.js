@@ -24,6 +24,7 @@ async function main() {
 function getCertsOlderThan(days=60) {
 	return db.db.collection('certs')
 		.find({
+			_id: 'basedflare.com',
 			date: {
 				'$lt': new Date(new Date().setDate(new Date().getDate()-days))
 			},
@@ -47,7 +48,7 @@ async function postFileAll(path, options, file, fdOptions) {
 async function updateCert(dbCert) {
 	const { subject, altnames, email } = dbCert;
 	console.log('Renew cert request:', subject, altnames, email);
-	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email);
+	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email, ['dns-01', 'http-01']);
 	const { message, description, file, storage_name: storageName } = await postFileAll('/v2/services/haproxy/storage/ssl_certificates', {
 		method: 'POST',
 		headers: {
@@ -75,11 +76,11 @@ async function updateCert(dbCert) {
 	}
 	await db.db.collection('certs')
 		.updateOne({
-			_id: subject,
+			'_id': subject,
 		}, {
-			$set: update,
+			'$set': update,
 		}, {
-			upsert: true,
+			'upsert': true,
 		});
 }
 
@@ -89,13 +90,14 @@ async function loop() {
 		for (let c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
 			await updateCert(c);
-			process.exit(0);
 		};
 	} catch(e) {
 		console.error(e);
+		console.log('Sleeping for', 60000);
 		setTimeout(loop, 60000);
 		return;
 	}
+	console.log('Sleeping for', 3600000);
 	setTimeout(loop, 3600000);
 }
 
