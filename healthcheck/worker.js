@@ -7,6 +7,7 @@ process
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
 const { isIPv4 } = require('net');
+const db = require('../db.js');
 const redis = require('../redis.js');
 const redlock = require('../redlock.js');
 const Queue = require('bull');
@@ -21,7 +22,7 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
-const downedIps = require('../down.js');
+let downedIps = [];
 
 async function doCheck(domainKey, hkey, record) {
 	if (!record || record.h !== true) {
@@ -124,4 +125,24 @@ async function handleJob(job, done) { //job.id, job.data
 	done();
 }
 
-healthCheckQueue.process(handleJob);
+async function updateDowned() {
+	try {
+		downedIps = await db.db.collection('down')
+			.findOne({
+				_id: 'down',
+			})
+			.then(res => res && res.ips ? res.ips : []);
+		console.log(downedIps);
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+async function main() {
+	await db.connect();
+	await updateDowned();
+	setTimeout(() => updateDowned(), 10000);
+	healthCheckQueue.process(handleJob);
+}
+
+main();

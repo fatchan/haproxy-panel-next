@@ -218,6 +218,13 @@ const testRouter = (server, app) => {
 			await update();
 			return res.json({ ok: true });
 		});
+		clusterRouter.post('/down', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, async (req, res, next) => {
+			if (res.locals.user.username !== "admin") {
+				return dynamicResponse(req, res, 403, { error: 'No permission' });
+			}
+			await db.db.collection('down').updateOne({ _id: 'down' }, { $set: { ips: req.body.ips.filter(x => x && x.length > 0) } }, { upsert: true });
+			return res.json({ ok: true });
+		});
 		clusterRouter.get('/csrf', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, (req, res, next) => {
 			return res.send(req.csrfToken());
 		});
@@ -226,4 +233,3 @@ const testRouter = (server, app) => {
 };
 
 module.exports = testRouter;
-
