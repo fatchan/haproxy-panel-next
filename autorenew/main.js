@@ -24,7 +24,7 @@ async function main() {
 function getCertsOlderThan(days=60) {
 	return db.db.collection('certs')
 		.find({
-			_id: 'basedflare.com',
+			// _id: 'basedflare.com',
 			date: {
 				'$lt': new Date(new Date().setDate(new Date().getDate()-days))
 			},
