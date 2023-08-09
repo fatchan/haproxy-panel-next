@@ -81,7 +81,8 @@ export default function Certs(props) {
 
 	const clusterOnlyCerts = clusterCerts
 		.filter(c => !dbCerts.some(dc => dc.storageName === c.storage_name))
-		.filter(c => c.storage_name !== 'server-cert.pem'); //no point showing this
+		.filter(c => c.storage_name !== 'server-cert.pem')
+		.filter(c => c.storage_name !== '_00_server-cert.pem');
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
 		const approxSubject = getApproxSubject(c.storage_name);
 		return (
