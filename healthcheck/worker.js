@@ -141,7 +141,7 @@ async function updateDowned() {
 async function main() {
 	await db.connect();
 	await updateDowned();
-	setTimeout(() => updateDowned(), 10000);
+	setInterval(() => updateDowned(), 10000);
 	healthCheckQueue.process(handleJob);
 }
 
