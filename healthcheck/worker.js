@@ -22,6 +22,11 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
+const ignoredErrorCodes = [
+	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+	'ERR_TLS_CERT_ALTNAME_INVALID',
+];
+
 let downedIps = [];
 
 async function doCheck(domainKey, hkey, record) {
@@ -58,9 +63,9 @@ async function doCheck(domainKey, hkey, record) {
 				});
 				recordHealth = '1'; //no error = we consider successful
 			} catch(e) {
-				if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
-					//invalid cert doesn't mean the server is dead
-					console.info('health check ERR_TLS_CERT_ALTNAME_INVALID for', domainKey, hkey, record.ip);
+				if (e && e.cause && e.cause.code && ignoredErrorCodes.includes(e.cause.code)) {
+					//invalid certs don't mean the server is dead
+					console.info('health check for', domainKey, hkey, record.ip, 'ignoring error', e.cause.code);
 					recordHealth = '1';
 				} else {
 					console.warn(e)
