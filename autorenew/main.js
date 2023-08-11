@@ -24,7 +24,7 @@ async function main() {
 function getCertsOlderThan(days=60) {
 	return db.db.collection('certs')
 		.find({
-			// _id: 'basedflare.com',
+			// _id: '*.zeroddos.net',
 			date: {
 				'$lt': new Date(new Date().setDate(new Date().getDate()-days))
 			},
@@ -87,9 +87,13 @@ async function updateCert(dbCert) {
 async function loop() {
 	try {
 		const expiringCerts = await getCertsOlderThan(60);
+		if (expiringCerts.length === 0) {
+			console.log('No certs close to expiry');
+		}
 		for (let c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
 			await updateCert(c);
+			await new Promise(res => setTimeout(res, 5000));
 		};
 	} catch(e) {
 		console.error(e);
