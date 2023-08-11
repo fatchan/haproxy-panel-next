@@ -222,7 +222,12 @@ const testRouter = (server, app) => {
 			if (res.locals.user.username !== "admin") {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
-			await db.db.collection('down').updateOne({ _id: 'down' }, { $set: { ips: req.body.ips.filter(x => x && x.length > 0) } }, { upsert: true });
+			const ips = req.body.ips.filter(x => x && x.length > 0);
+			if (ips.length === 0) {
+				await db.db.collection('down').updateOne({ _id: 'down' }, { $set: { ips: [] } }, { upsert: true });
+			} else {
+				await db.db.collection('down').updateOne({ _id: 'down' }, { $addToSet: { ips: { '$each': ips } } }, { upsert: true });
+			}
 			return res.json({ ok: true });
 		});
 		clusterRouter.get('/csrf', useSession, fetchSession, checkSession, hasCluster, csrfMiddleware, (req, res, next) => {
