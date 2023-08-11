@@ -67,7 +67,7 @@ exports.addDomain = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	if (res.locals.user.username !== "admin" && res.locals.user.domains && res.locals.user.domains.length >= 10) {
+	if (res.locals.user.username !== "admin" && res.locals.user.domains && res.locals.user.domains.length >= 20) {
 		return dynamicResponse(req, res, 403, { error: 'Domain limit reached' });
 	}
 
