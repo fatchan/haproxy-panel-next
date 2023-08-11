@@ -53,7 +53,7 @@ export default function Csr(props) {
 				To generate a certificate signing request for your domain and/or subdomain(s):
 				<div>
 					<code>
-						{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
+						{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>yourdomain.com</strong>{`,DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
 					</code>
 				</div>
 			</p>

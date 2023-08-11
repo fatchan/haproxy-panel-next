@@ -235,8 +235,8 @@ export default function Onboarding(props) {
 						<ol>
 							<li>Generate the private key and certificate signing request for your domains on your origin server:
 								<p>
-									<code>
-										{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
+									<code>																																																																																																				
+										{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>yourdomain.com</strong>{`,DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
 									</code>
 								</p>
 								Make sure to replace yourdomain.com and www.yourdomain.com. It&apos;s also recommended to put the correct organisational unit, locality, state and country.
