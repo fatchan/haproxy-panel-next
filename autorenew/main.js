@@ -98,7 +98,7 @@ async function loop() {
 	} catch(e) {
 		console.error(e);
 		console.log('Sleeping for', 60000);
-		setTimeout(loop, 60000);
+		process.exit(-1);
 		return;
 	}
 	console.log('Sleeping for', 3600000);
