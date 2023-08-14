@@ -40,7 +40,7 @@ const DnsEditRecordPage = (props) => {
 	const { domain, zone: routerZone, type: routerType } = router.query;
 	const newRecord = router.asPath === `/dns/${domain}/new`;
 	const [recordSet, setRecordSet] = useState();
-	const [zone, setZone] = useState(routerZone || "name");
+	const [zone, setZone] = useState(newRecord ? "@" : (routerZone || "@"));
 	const [type, setType] = useState(routerType || "a");
 	const [recordSelection, setRecordSelection] = useState("roundrobin");
 	const [error, setError] = useState();
@@ -62,10 +62,11 @@ const DnsEditRecordPage = (props) => {
 		if (rec) {
 			return (rec.ip || rec.host || rec.value || rec.ns || rec.text || rec.target || 'No Value');
 		}
-		return 'No Value'
+		return 'No Value';
 	}
 
 	useEffect(() => {
+		if (newRecord) { return; }
 		if (!recordSet) {
 			API.getDnsRecords(domain, zone, type, dispatch, setError, router)
 				.then(res => {
@@ -76,6 +77,24 @@ const DnsEditRecordPage = (props) => {
 				});
 		}
 	}, [recordSet, domain, zone, type, router]);
+
+	useEffect(() => {
+		if (newRecord) {
+			setRecordSet([{
+		        "geok": "cc",
+		        "geov": [],
+		        "id": "",
+		        "ip": "",
+		        "fb": [],
+		        "sel": 0,
+		        "bsel": 0,
+		        "t": false,
+		        "h": false,
+		        "u": true,
+		        "ttl": 86400,
+		    }]);
+		}
+	}, []);
 
 	if (!recordSet) {
 		return (
@@ -124,6 +143,9 @@ const DnsEditRecordPage = (props) => {
 				<input type="hidden" name="_csrf" value={csrf} />
 				{recordSet && Array.isArray(recordSet) && recordSet[0].t === true && <div className="alert alert-warning" role="alert">
 					This is a template record. Changes may be overwritten with updates to the BasedFlare platform.
+				</div>}
+				{newRecord && zone === '@' && <div className="alert alert-info" role="info">
+					The &quot;@&quot; symbol indicates that this is a record for the root domain i.e &quot;{domain}&quot;. You can change the name to create other subdomains e.g. &quot;www&quot;.
 				</div>}
 				<div className="card text-bg-dark col p-3 border-0 shadow-sm">
 					<div className="row mb-3">

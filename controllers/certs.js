@@ -92,18 +92,6 @@ exports.addCert = async (req, res, next) => {
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
 	const email = req.body.email;
 
-	if (!req.body.subject.startsWith('*.')) {
-		const backendMap = await res.locals
-			.dataPlane.showRuntimeMap({
-				map: process.env.HOSTS_MAP_NAME
-			})
-			.then(res => res.data);
-		const backendDomainEntry = backendMap && backendMap.find(e => e.key === req.body.subject);
-		if (!backendDomainEntry) {
-			return dynamicResponse(req, res, 400, { error: 'Add a backend for the domain first before generating a certificate' });
-		}
-	}
-
 	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
 	if (existingCert) {
 		return dynamicResponse(req, res, 400, { error: 'Cert with this subject already exists' });
@@ -120,7 +108,7 @@ exports.addCert = async (req, res, next) => {
 
 	try {
 		console.log('Add cert request:', subject, altnames);
-		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email);
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email, ['dns-01', 'http-01']);
 		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
 			'/v2/services/haproxy/storage/ssl_certificates',
 			{
