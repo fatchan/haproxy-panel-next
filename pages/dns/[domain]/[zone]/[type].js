@@ -66,35 +66,32 @@ const DnsEditRecordPage = (props) => {
 	}
 
 	useEffect(() => {
-		if (newRecord) { return; }
 		if (!recordSet) {
 			API.getDnsRecords(domain, zone, type, dispatch, setError, router)
 				.then(res => {
 					if (res && res.recordSet) {
+						if (newRecord) {
+							setRecordSet([{
+						        "geok": "cc",
+						        "geov": [],
+						        "id": "",
+						        "ip": "",
+						        "fb": [],
+						        "sel": 0,
+						        "bsel": 0,
+						        "t": false,
+						        "h": false,
+						        "u": true,
+						        "ttl": 86400,
+						    }]);
+						    return;
+						}
 						setRecordSet(res.recordSet.length > 0 ? [...res.recordSet] : [{}]);
 						setRecordSelection(res.recordSet.length > 0 && res.recordSet[0].geok ? "geo" : "roundrobin");
 					}
 				});
 		}
 	}, [recordSet, domain, zone, type, router]);
-
-	useEffect(() => {
-		if (newRecord) {
-			setRecordSet([{
-		        "geok": "cc",
-		        "geov": [],
-		        "id": "",
-		        "ip": "",
-		        "fb": [],
-		        "sel": 0,
-		        "bsel": 0,
-		        "t": false,
-		        "h": false,
-		        "u": true,
-		        "ttl": 86400,
-		    }]);
-		}
-	}, []);
 
 	if (!recordSet) {
 		return (
