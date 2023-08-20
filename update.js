@@ -5,9 +5,13 @@ process
         .on('unhandledRejection', console.error);
 
 const dotenv = require('dotenv');
+const db = require('./db.js');
 dotenv.config({ path: '.env' });
-const redis = require('./redis.js')
-	, { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('./templates.js');
+const redis = require('./redis.js');
+let nsTemplate = null;
+let soaTemplate = null;
+let aTemplate = null;
+let aaaaTemplate = null;
 
 async function processKey(domainKey) {
 	const domainHashKeys = await redis.client.hkeys(domainKey);
@@ -67,5 +71,11 @@ async function update() {
 module.exports = update;
 
 if (require.main === module) {
-    update();
+	(async () => {
+		await db.connect();
+		({ nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('./templates.js'));
+	    update();
+	})();
+} else {
+	({ nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('./templates.js'));
 }
