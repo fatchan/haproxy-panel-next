@@ -15,7 +15,6 @@
   "author": "Thomas Lynch (fatchan) <tom@69420.me>",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@fontsource/inter": "^5.0.8",
     "@influxdata/influxdb-client": "^1.33.2",
     "acme-client": "^5.0.0",
     "bcrypt": "^5.1.0",

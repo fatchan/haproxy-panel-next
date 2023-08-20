@@ -174,7 +174,7 @@ export default function Certs(props) {
 			<div className="table-responsive">
 				<form className="d-flex" onSubmit={addCert} action="/forms/cert/add" method="post">
 					<input type="hidden" name="_csrf" value={csrf} />
-					<table className="table text-nowrap">
+					<table className="table text-nowrap notaborder">
 						<tbody>
 
 							<tr className="align-middle">

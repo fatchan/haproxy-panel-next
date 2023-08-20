@@ -4,7 +4,6 @@ import Layout from '../components/Layout.js';
 import 'nprogress/nprogress.css';
 import NProgress from "nprogress";
 import Router from "next/router";
-import "@fontsource/inter";
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/']
 NProgress.configure({ showSpinner: false });
@@ -17,11 +16,7 @@ export default function App({ Component, pageProps }) {
 		<Layout>
 			<style>
 			{`
-				:root { font-family: 'Inter', sans-serif; }
-				@supports (font-variation-settings: normal) {
-				  :root { font-family: 'Inter var', sans-serif; }
-				}
-				html, body { letter-spacing: -0.3px; font-family: 'Inter', arial,Helvetica,sans-serif; height: 100%; overflow: hidden; background: #F4F5F7; }
+				html, body { font-family: arial,Helvetica,sans-serif; height: 100%; overflow: hidden; background: #F4F5F7; }
 				.sidebar { background: var(--bs-body-bg); }
 				.corner-ribbon {z-index:9999; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: fixed;overflow: hidden;}
 				.green { color: green; }
@@ -58,7 +53,7 @@ export default function App({ Component, pageProps }) {
 				tr:target, tr:target textarea {
 					background: var(--bs-highlight-bg);
 				}
-				tr:target textarea {
+				table.notaborder textarea {
 					border: none!important;
 				}
 				@media (max-width: 650px) {
