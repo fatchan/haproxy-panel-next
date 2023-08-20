@@ -66,7 +66,7 @@ export default function Csr(props) {
 								<form className="d-flex" action="/forms/csr/verify" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
 									<textarea className="form-control mx-3" name="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..." required />
-									<input className="btn btn-success" type="submit" value="Verify" />
+									<input className="btn btn-sm btn-success" type="submit" value="Verify" />
 								</form>
 							</td>
 						</tr>

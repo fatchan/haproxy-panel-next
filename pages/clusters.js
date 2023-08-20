@@ -89,7 +89,9 @@ export default function Clusters(props) {
 							{/* Add new cluster form */}
 							<tr className="align-middle">
 								<td>
-									<input className="btn btn-success" type="submit" value="+" />
+									<button className="btn btn-sm btn-success" type="submit">
+										<i className="bi-plus-lg pe-none" width="16" height="16" />
+									</button>
 								</td>
 								<td colSpan="2">
 

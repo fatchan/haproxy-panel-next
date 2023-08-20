@@ -45,7 +45,7 @@ export default function Login() {
 							<input className="form-control" type="password" name="password" maxLength="100" required="required"/>
 						</label>
 					</div>
-					<div className="mb-2">
+					<div className="mb-3">
 						<div className="form-check">
 							<input className="form-check-input" type="checkbox" name="tos" value="true" id="tos" required />
 							<label className="form-check-label" htmlFor="tos">I agree to the <Link href="/tos" passHref><a target="_blank">terms of service</a></Link>.</label>

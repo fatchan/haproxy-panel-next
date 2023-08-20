@@ -102,6 +102,7 @@ const DnsDomainIndexPage = (props) => {
 
 						{/* header row */}
 						<tr>
+							<th />
 							<th role="button" className="user-select-none" onClick={() => handleSetSorting("name")}>
 								Name
 								{sortType === "name" && sortArrow}
@@ -119,9 +120,6 @@ const DnsDomainIndexPage = (props) => {
 							<th>
 								Details
 							</th>
-							<th colSpan="2">
-								Actions
-							</th>
 						</tr>
 
 						{recordSetRows}
@@ -132,7 +130,7 @@ const DnsDomainIndexPage = (props) => {
 
 			<div className="my-3">
 				<Link href={`/dns/${domain}/new`}>
-					<button className="btn btn-success">
+					<button className="btn btn-sm btn-success">
 						+
 					</button>
 				</Link>

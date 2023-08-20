@@ -89,7 +89,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<input className="form-control" type="text" name="key" placeholder="domain/path" required />
@@ -115,7 +117,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<select className="form-select" name="key" defaultValue="" required>
@@ -124,7 +128,7 @@ const MapPage = (props) => {
 						</select>
 					</td>
 					<td>
-						<input className="form-control" type="number" name="pd" placeholder="difficulty" required />
+						<input className="form-control" type="number" min="8" defaultValue="24" name="pd" placeholder="difficulty" required />
 					</td>
 					<td>
 						<select className="form-select" name="pt" required>
@@ -151,7 +155,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<select className="form-select" name="key" defaultValue="" required>
@@ -182,7 +188,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<select className="form-select" name="key" defaultValue="" required>
@@ -199,7 +207,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<input className="form-control" type="text" name="key" placeholder="ip or subnet" required />
@@ -212,7 +222,9 @@ const MapPage = (props) => {
 			formElements = (
 				<>
 					<td>
-						<input className="btn btn-success" type="submit" value="+" />
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
 					</td>
 					<td>
 						<input className="form-control" type="text" name="key" placeholder="domain" required />

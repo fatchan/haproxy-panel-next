@@ -18,7 +18,7 @@ export default function Index() {
 			<span className="d-flex">
 				<div className="me-2">
 					<Link href='/account'>
-						<a className="btn btn-primary">
+						<a className="btn btn-sm btn-primary">
 							<i className="bi-person-square pe-none me-2" width="16" height="16" />
 							Account
 						</a>
@@ -26,7 +26,7 @@ export default function Index() {
 				</div>
 				<div>
 					<Link href='/login'>
-						<a className="btn btn-primary">
+						<a className="btn btn-sm btn-primary">
 							<i className="bi-door-closed pe-none me-2" width="16" height="16" />
 							Login
 						</a>

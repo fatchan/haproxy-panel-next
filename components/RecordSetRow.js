@@ -31,13 +31,28 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 	return (
 		<tr className="align-middle">
 			<td>
+				<span className="d-inline-block">
+					<form onSubmit={deleteDnsRecord} action={`/forms/dns/${domain}/${name}/${type}/delete`} method="post">
+						<input type="hidden" name="_csrf" value={csrf} />
+						<button className="btn btn-sm btn-danger" type="submit">
+							<i className="bi-trash-fill pe-none" width="16" height="16" />
+						</button>
+					</form>
+				</span>
+				{recordSetArray[0].l !== true && <Link href={`/dns/${domain}/${name}/${type}`}>
+					<a className="btn btn-sm btn-primary ms-2">
+						<i className="bi-pencil-fill pe-none" width="16" height="16" />
+					</a>
+				</Link>}
+			</td>
+			<td>
 				{name}
 			</td>
 			<td>
 				{type.toUpperCase()}
 			</td>
 			<td>
-				{recordSetArray.length > 5
+				{recordSetArray.length > 3
 					? <details><summary>Expand ({recordSetArray.length})</summary>{recordSetContent}</details>
 					: recordSetContent}
 			</td>
@@ -47,19 +62,6 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 			<td>
 				{recordSetArray[0].t && <div className="text-warning">Template</div>}
 				{recordSetArray[0].l && <div className="text-danger">Locked</div>}
-			</td>
-			<td>
-				{recordSetArray[0].l !== true && <Link href={`/dns/${domain}/${name}/${type}`}>
-					<a className="btn btn-outline-primary">
-						Edit
-					</a>
-				</Link>}
-			</td>
-			<td>
-				<form onSubmit={deleteDnsRecord} action={`/forms/dns/${domain}/${name}/${type}/delete`} method="post">
-					<input type="hidden" name="_csrf" value={csrf} />
-					<input className="btn btn-danger" type="submit" value="×" />
-				</form>
 			</td>
 		</tr>
 	);

@@ -31,6 +31,9 @@ export default function App({ Component, pageProps }) {
 				.text-decoration-none { color: var(--bs-body-color); }
 				.sidebar { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
 				.card { background: var(--bs-body-bg) !important; color: var(--bs-body-color) !important; }
+				.table { margin-bottom: 0; }
+				.table-responsive { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
+				a.text-success:visited, a.text-success:hover { color: rgba(var(--bs-success-rgb),var(--bs-text-opacity)) !important }
 				.select__control {
 					transition: none;
 				}
@@ -40,6 +43,12 @@ export default function App({ Component, pageProps }) {
 				.select__control--menu-is-open, .select__control--is-focused {
 					box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 					border-color: #86b7fe!important;
+				}
+				tr:target, tr:target textarea {
+					background: var(--bs-highlight-bg);
+				}
+				tr:target textarea {
+					border: none!important;
 				}
 				@media (max-width: 650px) {
 					.table, .list-group { min-width: unset; }
@@ -57,6 +66,12 @@ export default function App({ Component, pageProps }) {
 					input:not(.btn):not(.select__input), option, select.form-select, textarea { color: #fff!important; background-color: #393939!important; border: 1px solid black!important; }
 					.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #1F1F1F; }
 					.table { color: #fff; border-color: var(--bs-gray-900)!important; }
+					tr:target {
+						background: #ffc10720!important;
+					}
+					tr:target textarea {
+						background: transparent!important;
+					}
 					.select__control {
 					    background-color: #393939;
 					    border-color: var(--bs-gray-900);

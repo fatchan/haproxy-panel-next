@@ -12,6 +12,7 @@ export default function Domains(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const [filter, setFilter] = useState('');
 
 	useEffect(() => {
 		if (!state.user) {
@@ -52,6 +53,7 @@ export default function Domains(props) {
 	const subdomainList = [];
 	user.domains
 		//.sort((a, b) => a.localeCompare(b))
+		.filter(d => d.includes(filter))
 		.forEach((d, i) => {
 		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
@@ -60,32 +62,47 @@ export default function Domains(props) {
 				|| c.altnames.some(an => an.startsWith('*') && wildcardCheck(an, [d])));
 		});
 		const isSubdomain = d.split('.').length > 2;
+		let daysRemaining;
+		if (domainCert || wildcardCert) {
+			const certDate = (domainCert || wildcardCert).date;
+			const creation = new Date(certDate);
+			const expiry = creation.setDate(creation.getDate()+90);
+			daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
+		}
 		const tableRow = (
 			<tr key={i} className="align-middle">
 				<td className="text-left" style={{width:0}}>
-					<input onClick={() => deleteDomain(csrf, d)} className="btn btn-danger" type="button" value="×" />
+					<a className="btn btn-sm btn-danger" onClick={() => {
+						if (window.confirm(`Are you sure you want to delete "${d}"?`)) {
+							deleteDomain(csrf, d);
+						}
+					}}>
+						<i className="bi-trash-fill pe-none" width="16" height="16" />
+					</a>
+					{!isSubdomain && <Link href={`/dns/${d}`} passHref>
+						<a className="btn btn-sm btn-primary ms-2">
+							<i className="bi-pencil pe-none" width="16" height="16" />
+						</a>
+					</Link>}
 				</td>
 				<td>
 					{d}
 				</td>
 				<td>
 					{(domainCert || wildcardCert)
-						? <span className="text-success">
-							<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width="16" height="16" />
-							{(domainCert||wildcardCert).storageName}
-							{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
-						</span>
+						? <Link href={`/certs#${(domainCert||wildcardCert).storageName}`}>
+							<a className="text-success">
+								<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width="16" height="16" />
+								{(domainCert||wildcardCert).storageName}
+								{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
+							</a>
+						</Link>
 						: <span>
 							No Certificate
 						</span>}
 				</td>
-				<td className="col-1 text-center">
-					{!isSubdomain && <Link href={`/dns/${d}`}>
-						<a className="btn btn-outline-secondary">
-							<i className="bi-card-list pe-none me-2" width="16" height="16" />
-							DNS
-						</a>
-					</Link>}
+				<td suppressHydrationWarning={true}>
+					{daysRemaining ? `${daysRemaining} days` : '-'}
 				</td>
 			</tr>
 		);
@@ -103,6 +120,15 @@ export default function Domains(props) {
 				Domains:
 			</h5>
 
+			<div className="input-group mb-3">
+			  <div className="input-group-prepend">
+			    <span className="input-group-text" style={{ borderRadius: '5px 0 0 5px' }}>
+					<i className="bi bi-search" />
+			    </span>
+			  </div>
+			  <input onChange={e => setFilter(e.target.value||'')} type="text" className="form-control" placeholder="Search" />
+			</div>
+			
 			{/* Domains table */}
 			<div className="table-responsive">
 				<table className="table text-nowrap">
@@ -117,7 +143,7 @@ export default function Domains(props) {
 								HTTPS Certificate
 							</th>
 							<th>
-								Edit DNS
+								Certificate Expires
 							</th>
 						</tr>}
 
@@ -134,7 +160,9 @@ export default function Domains(props) {
 							<td className="col-1 text-center" colSpan="4">
 								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
 									<input type="hidden" name="_csrf" value={csrf} />
-									<input className="btn btn-success" type="submit" value="+" />
+									<button className="btn btn-sm btn-success" type="submit">
+										<i className="bi-plus-lg pe-none" width="16" height="16" />
+									</button>
 									<input className="form-control ms-3" type="text" name="domain" placeholder="domain e.g. example.com" required />
 								</form>
 							</td>

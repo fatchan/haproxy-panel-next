@@ -91,7 +91,7 @@ const DnsEditRecordPage = (props) => {
 					}
 				});
 		}
-	}, [recordSet, domain, zone, type, router]);
+	}, [newRecord, recordSet, domain, zone, type, router]);
 
 	if (!recordSet) {
 		return (
@@ -386,7 +386,7 @@ const DnsEditRecordPage = (props) => {
 									</div>
 									<div className="col-auto ms-auto">
 										<button
-											className="btn btn-danger mt-4"
+											className="btn btn-sm btn-danger mt-4"
 											onClick={(e) =>{
 												e.preventDefault();
 												recordSet.splice(i, 1);
@@ -547,7 +547,7 @@ const DnsEditRecordPage = (props) => {
 						})}
 						<div className="row mt-2">
 							<div className="col-auto ms-auto">
-								<button className="ms-auto btn btn-success mt-2" onClick={(e) =>{
+								<button className="ms-auto btn btn-sm btn-success mt-2" onClick={(e) =>{
 									e.preventDefault();
 									recordSet.push({})
 									setRecordSet([...recordSet]);
@@ -563,12 +563,12 @@ const DnsEditRecordPage = (props) => {
 						<BackButton to={`/dns/${domain}`} />
 					</div>
 					{/*<div className="col-auto ms-auto">
-						<button className="btn btn-secondary">
+						<button className="btn btn-sm btn-secondary">
 							Cancel
 						</button>
 					</div>*/}
 					<div className="col-auto">
-						<button className="btn btn-success">
+						<button className="btn btn-sm btn-success">
 							Save
 						</button>
 					</div>

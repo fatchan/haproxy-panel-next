@@ -14,7 +14,12 @@ export default function Certs(props) {
 
 	useEffect(() => {
 		if (!state.user) {
-			API.getCerts(dispatch, setError, router);
+			API.getCerts(dispatch, setError, router)
+				.then(() => {
+					setTimeout(() => {
+						location.hash = location.hash;
+					}, 10);
+				});
 		}
 	}, [state.user, router]);
 
@@ -86,9 +91,11 @@ export default function Certs(props) {
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
 		const approxSubject = getApproxSubject(c.storage_name);
 		return (
-			<tr key={'clusterOnlyCertList'+i} className="align-middle">
+			<tr id={c.storage_name} key={'clusterOnlyCertList'+i} className="align-middle">
 				<td className="col-1 text-center">
-					<input onClick={() => deleteCert(csrf, approxSubject, c.storage_name)} className="btn btn-danger" type="button" value="×" />
+					<a className="btn btn-sm btn-danger" onClick={() => deleteCert(csrf, approxSubject, c.storage_name)}>
+						<i className="bi-trash-fill pe-none" width="16" height="16" />
+					</a>
 				</td>
 				<td>
 					{approxSubject || '-'}
@@ -113,13 +120,19 @@ export default function Certs(props) {
 		const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
 		const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);
 		return (
-			<tr key={'certList'+i} className="align-middle">
+			<tr id={d.storageName} key={'certList'+i} className="align-middle">
 				<td className="text-left" style={{width:0}}>
 					{inCluster
-						? <input onClick={() => deleteCert(csrf, (d.subject || d._id), d.storageName)} className="btn btn-danger" type="button" value="×" />
+						? <a className="btn btn-sm btn-danger" onClick={() => deleteCert(csrf, (d.subject || d._id), d.storageName)}>
+							<i className="bi-trash-fill pe-none" width="16" height="16" />
+						</a>
 						: (<>
-							<input onClick={() => uploadCert(csrf, (d.subject || d._id))} className="btn btn-warning mb-2" type="button" value="↑" />
-							<input onClick={() => deleteCert(csrf, (d.subject || d._id))} className="btn btn-warning mb-2" type="button" value="×" />
+							<a className="btn btn-sm btn-warning" onClick={() => uploadCert(csrf, (d.subject || d._id))}>
+								<i className="bi-cloud-upload pe-none" width="16" height="16" />
+							</a>
+							<a className="btn btn-sm btn-warning ms-2" onClick={() => deleteCert(csrf, (d.subject || d._id))}>
+								<i className="bi-trash-fill pe-none" width="16" height="16" />
+							</a>
 						</>)
 					}
 				</td>
@@ -129,6 +142,7 @@ export default function Certs(props) {
 				<td>
 					<textarea
 						className="w-100"
+						style={{border:'none'}}
 						readOnly
 						cols={20}
 						rows={Math.min(3, d.altnames.length)}
@@ -193,7 +207,9 @@ export default function Certs(props) {
 							{/* Add new cert form */}
 							<tr className="align-middle">
 								<td>
-									<input className="btn btn-success" type="submit" value="+" />
+									<button className="btn btn-sm btn-success" type="submit">
+										<i className="bi-plus-lg pe-none" width="16" height="16" />
+									</button>
 								</td>
 								<td>
 									<input className="form-control" type="text" name="subject" placeholder="domain.com" required />
