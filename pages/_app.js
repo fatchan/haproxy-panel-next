@@ -4,6 +4,7 @@ import Layout from '../components/Layout.js';
 import 'nprogress/nprogress.css';
 import NProgress from "nprogress";
 import Router from "next/router";
+import "@fontsource/inter";
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/']
 NProgress.configure({ showSpinner: false });
@@ -16,7 +17,12 @@ export default function App({ Component, pageProps }) {
 		<Layout>
 			<style>
 			{`
-				html, body { font-family: arial,Helvetica,sans-serif; height: 100%; overflow: hidden; }
+				:root { font-family: 'Inter', sans-serif; }
+				@supports (font-variation-settings: normal) {
+				  :root { font-family: 'Inter var', sans-serif; }
+				}
+				html, body { letter-spacing: -0.3px; font-family: 'Inter', arial,Helvetica,sans-serif; height: 100%; overflow: hidden; background: #F4F5F7; }
+				.sidebar { background: var(--bs-body-bg); }
 				.corner-ribbon {z-index:9999; width: 180px;top: 8px;left: auto;text-align: center;line-height: 30px;letter-spacing: 1px;color: white;background: darkorange;box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);right: -70px;transform: rotate(45deg);-webkit-transform: rotate(46deg);position: fixed;overflow: hidden;}
 				.green { color: green; }
 				.red { color: red; }
@@ -36,6 +42,11 @@ export default function App({ Component, pageProps }) {
 				a.text-success:visited, a.text-success:hover { color: rgba(var(--bs-success-rgb),var(--bs-text-opacity)) !important }
 				.select__control {
 					transition: none;
+				}
+				input:autofill, input:-webkit-autofill {
+					background-color: initial!important;
+					background-image: initial!important;
+					color: initial!important;
 				}
 				.select__control:hover:not(.select__control--is-focused) {
 					border-color: #ced4da;
@@ -60,11 +71,34 @@ export default function App({ Component, pageProps }) {
 					.sidebar { display: none; }
 				}
 				@media (prefers-color-scheme: dark) {
-					:root { --bs-body-color: #fff; --bs-body-bg: #222; }
+					:root {
+						--bs-body-color: #fff;
+						--bs-body-bg: #23272a;
+					}
+					html, body { background: var(--bs-body-bg); }
+					.nav-pills {
+						--bs-nav-pills-link-active-bg: #7289da;
+						--bs-btn-hover-bg: #7289da;
+						--bs-btn-hover-border-color: #7289da;
+					}
+					.btn-primary {
+						--bs-btn-bg: #7289da;
+						--bs-btn-border-color: #7289da;
+						--bs-btn-hover-bg: #6481e7;
+						--bs-btn-hover-border-color: #6481e7;
+						--bs-btn-active-bg: #6481e7;
+						--bs-btn-active-border-color: #6481e7;
+						--bs-btn-disabled-bg: #7289da;
+						--bs-btn-disabled-border-color: #7289da;
+					}
+					.badge.bg-primary {
+						background-color: #7289da;
+					}
 					.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }
-					.list-group-item { color: #fff; background-color: unset; }
-					input:not(.btn):not(.select__input), option, select.form-select, textarea { color: #fff!important; background-color: #393939!important; border: 1px solid black!important; }
+					.list-group-item { color: #fff; background-color: #2c2f33; }
+					input:not(.btn):not(.select__input), option, select.form-select, textarea, .input-group-text { color: #fff!important; background-color: #2c2f33!important; border: 1px solid black!important; }
 					.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #1F1F1F; }
+					.sidebar, .table { background-color: #2c2f33; }
 					.table { color: #fff; border-color: var(--bs-gray-900)!important; }
 					tr:target {
 						background: #ffc10720!important;

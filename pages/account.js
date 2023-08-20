@@ -14,10 +14,8 @@ export default function Account(props) {
 	const [error, setError] = useState();
 
 	useEffect(() => {
-		if (!state.user || !state.user.clusters) {
-			API.getAccount(dispatch, setError, router);
-		}
-	}, [state.user, router]);
+		API.getAccount(dispatch, setError, router);
+	}, []);
 
 	const loadingSection = useMemo(() => {
 		return (
@@ -29,7 +27,7 @@ export default function Account(props) {
 
 	let innerData;
 
-	if (state.maps != null) {
+	if (state && state.user && state.maps != null) {
 
 		const { user, maps, globalAcl, csrf } = state;
 
