@@ -13,14 +13,14 @@ exports.mapData = async (req, res, next) => {
 		showValues = false;
 	try {
 		mapInfo = await res.locals
-			.dataPlane.getOneRuntimeMap(req.params.name)
+			.dataPlaneRetry('getOneRuntimeMap', req.params.name)
 			.then(res => res.data)
 			.then(extractMap);
 		if (!mapInfo) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 		}
 		map = await res.locals
-			.dataPlane.showRuntimeMap({
+			.dataPlaneRetry('showRuntimeMap', {
 				map: req.params.name
 			})
 			.then(res => res.data);
@@ -111,7 +111,7 @@ exports.deleteMapForm = async (req, res, next) => {
 
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 			const backendMapEntry = await res.locals
-				.dataPlane.getRuntimeMapEntry({
+				.dataPlaneRetry('getRuntimeMapEntry', {
 					map: process.env.BACKENDS_MAP_NAME,
 					id: req.body.key,
 				})
@@ -271,14 +271,14 @@ exports.patchMapForm = async (req, res, next) => {
 
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 				const backendMapEntry = await res.locals
-					.dataPlane.getRuntimeMapEntry({
+					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: process.env.BACKENDS_MAP_NAME,
 						id: req.body.key,
 					})
 					.then(res => res.data)
 					.catch(() => {});
-				const freeSlotId = await res.locals.dataPlane
-					.getRuntimeServers({
+				const freeSlotId = await res.locals
+					.dataPlaneRetry('getRuntimeServers', {
 						backend: 'servers'
 					})
 					.then(res => res.data)
@@ -333,7 +333,7 @@ exports.patchMapForm = async (req, res, next) => {
 			const existingEntry = req.params.name === process.env.HOSTS_MAP_NAME
 				? null
 				: (await res.locals
-				.dataPlane.getRuntimeMapEntry({
+				.dataPlaneRetry('getRuntimeMapEntry', {
 					map: req.params.name,
 					id: req.body.key,
 				})

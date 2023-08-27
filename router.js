@@ -110,6 +110,28 @@ const testRouter = (server, app) => {
 				const apiInstance = api.initSync();
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
+				function dataPlaneRetry(command, ...args) {
+				    let retryCnt = 0;
+				    function delay(t) {
+				        return new Promise(resolve => {
+				            setTimeout(resolve, t);
+				        });
+				    }
+				    function run() {
+				        return apiInstance[command](...args).catch(function (err) {
+				            ++retryCnt;
+				            apiInstance.defaults.baseURL = `${clusterUrls[retryCnt].origin}/v2`;
+				            if (retryCnt > clusterUrls.length-1) {
+				                console.error('Max retries exceeded in dataPlaneRetry', err.message);
+				                throw err;
+				            }
+				            console.error('dataPlaneRetry retry', retryCnt, ' after error', err.message);
+				            return delay(50).then(run);
+				        });
+				    }
+				    return run();
+				}
+				res.locals.dataPlaneRetry = dataPlaneRetry;
 
 				res.locals.dataPlaneAll = async (operationId, parameters, data, config, all=false) => {
 					const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {

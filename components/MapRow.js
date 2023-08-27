@@ -20,7 +20,6 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 			{typeof value === 'object' && columnKeys.map((ck, mvi) => {
 				let displayValue = mapValueNames[value[ck].toString()] || value[ck].toString();
 				if (typeof value[ck] === 'boolean') {
-					console.log(value[ck])
 					displayValue = value[ck] === true
 						? <span className="text-success">
 							<i className="bi-check-lg pe-none me-2" width="16" height="16" />

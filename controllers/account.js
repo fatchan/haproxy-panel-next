@@ -13,14 +13,14 @@ exports.accountData = async (req, res, _next) => {
 		, globalAcl
 		, txtRecords = [];
 	if (res.locals.user.clusters.length > 0) {
-		maps = res.locals.dataPlane
-			.getAllRuntimeMapFiles()
+		maps = res.locals
+			.dataPlaneRetry('getAllRuntimeMapFiles')
 			.then(res => res.data)
 			.then(data => data.map(extractMap))
 			.then(maps => maps.filter(n => n))
 			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
-		globalAcl = res.locals.dataPlane
-			.getOneRuntimeMap('ddos_global')
+		globalAcl = res.locals
+			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 			.then(res => res.data.description.split('').reverse()[0]);
 		txtRecords = resolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	}
@@ -88,8 +88,8 @@ exports.globalToggle = async (req, res, next) => {
 		return dynamicResponse(req, res, 403, { error: 'Global ACL can only be toggled by an administrator' });
 	}
 	try {
-		const globalAcl = await res.locals.dataPlane
-			.getOneRuntimeMap('ddos_global')
+		const globalAcl = await res.locals
+			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 			.then(res => res.data.description.split('').reverse()[0])
 		if (globalAcl === '1') {
 			await res.locals

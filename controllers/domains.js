@@ -149,13 +149,13 @@ exports.deleteDomain = async (req, res) => {
 
 	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
 	const [existingHost, existingMaintenance, existingRewrite, existingDdos] = await Promise.all([
-		res.locals.dataPlane.showRuntimeMap({ map: process.env.HOSTS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.HOSTS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlane.showRuntimeMap({ map: process.env.MAINTENANCE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.MAINTENANCE_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlane.showRuntimeMap({ map: process.env.REWRITE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.REWRITE_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlane.showRuntimeMap({ map: process.env.DDOS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.DDOS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => {
 				const { hostname, pathname } = url.parse(`https://${e.key}`);
 				return hostname === domain;
