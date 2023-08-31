@@ -1,4 +1,3 @@
-
 const { extractMap, dynamicResponse } = require('../util.js');
 const { createCIDR, parse } = require('ip6addr');
 const url = require('url');

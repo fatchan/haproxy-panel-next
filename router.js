@@ -110,23 +110,23 @@ const testRouter = (server, app) => {
 				const apiInstance = api.initSync();
 				apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
 				res.locals.dataPlane = apiInstance;
-				function dataPlaneRetry(command, ...args) {
+				async function dataPlaneRetry(operationId, ...args) {
 				    let retryCnt = 0;
-				    function delay(t) {
-				        return new Promise(resolve => {
-				            setTimeout(resolve, t);
-				        });
-				    }
 				    function run() {
-				        return apiInstance[command](...args).catch(function (err) {
+				        return apiInstance[operationId](...args).catch(function (err) {
+					        if (operationId === 'getRuntimeMapEntry' && err && err.response
+								&& err.response.data && err.response.data.code === 404) {
+								return null;
+					        }
 				            ++retryCnt;
+				            console.error('dataPlaneRetry retry', retryCnt, ' after error', err);
+				            console.trace();
 				            apiInstance.defaults.baseURL = `${clusterUrls[retryCnt].origin}/v2`;
 				            if (retryCnt > clusterUrls.length-1) {
 				                console.error('Max retries exceeded in dataPlaneRetry', err.message);
 				                throw err;
 				            }
-				            console.error('dataPlaneRetry retry', retryCnt, ' after error', err.message);
-				            return delay(50).then(run);
+				            return run();
 				        });
 				    }
 				    return run();
