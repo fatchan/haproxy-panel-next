@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js'
 import { getApproxSubject } from '../util.js'
 import { useRouter } from 'next/router';
@@ -173,14 +174,7 @@ export default function Certs(props) {
 				HTTPS Certificates:
 			</h5>
 
-			<div className="input-group mb-3">
-			  <div className="input-group-prepend">
-			    <span className="input-group-text" style={{ borderRadius: '5px 0 0 5px' }}>
-					<i className="bi bi-search" />
-			    </span>
-			  </div>
-			  <input onChange={e => setFilter(e.target.value||'')} type="text" className="form-control" placeholder="Search" />
-			</div>
+			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Certs table */}
 			<div className="table-responsive">

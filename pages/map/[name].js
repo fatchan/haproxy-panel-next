@@ -4,6 +4,7 @@ import Head from 'next/head';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
+import SearchFilter from '../../components/SearchFilter.js';
 import * as API from '../../api.js';
 
 const MapPage = (props) => {
@@ -262,14 +263,7 @@ const MapPage = (props) => {
 				{mapInfo.fname}:
 			</h5>
 
-			<div className="input-group mb-3">
-			  <div className="input-group-prepend">
-			    <span className="input-group-text" style={{ borderRadius: '5px 0 0 5px' }}>
-					<i className="bi bi-search" />
-			    </span>
-			  </div>
-			  <input onChange={e => setFilter(e.target.value||'')} type="text" className="form-control" placeholder="Search" />
-			</div>
+			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Map table */}
 			<div className="table-responsive w-100">
