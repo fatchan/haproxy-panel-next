@@ -11,6 +11,7 @@ export default function Certs(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const [filter, setFilter] = useState('');
 
 	useEffect(() => {
 		if (!state.user) {
@@ -113,7 +114,9 @@ export default function Certs(props) {
 		);
 	});
 
-	const certList = dbCerts.map((d, i) => {
+	const certList = dbCerts
+		.filter(d => d.subject.includes(filter) || d.altnames.some(an => an.includes(filter)))
+		.map((d, i) => {
 		//TODO: refactor, to component
 		let creation = new Date(d.date);
 		const expiry = creation.setDate(creation.getDate()+90);
@@ -169,6 +172,15 @@ export default function Certs(props) {
 			<h5 className="fw-bold">
 				HTTPS Certificates:
 			</h5>
+
+			<div className="input-group mb-3">
+			  <div className="input-group-prepend">
+			    <span className="input-group-text" style={{ borderRadius: '5px 0 0 5px' }}>
+					<i className="bi bi-search" />
+			    </span>
+			  </div>
+			  <input onChange={e => setFilter(e.target.value||'')} type="text" className="form-control" placeholder="Search" />
+			</div>
 
 			{/* Certs table */}
 			<div className="table-responsive">

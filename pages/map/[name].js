@@ -12,6 +12,7 @@ const MapPage = (props) => {
 	const { name: mapName } = router.query;
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const [filter, setFilter] = useState('');
 	const changedMap = state.mapInfo?.name != mapName;
 
 	useEffect(() => {
@@ -64,7 +65,15 @@ const MapPage = (props) => {
 		await API.getMap(mapName, dispatch, setError, router);
 	}
 
-	const mapRows = map.map((row, i) => {
+	const mapRows = map
+		.filter(row => {
+			const rowValue = typeof row.value === 'object'
+				? Object.values(row.value)
+				: row.value;
+			return row.key.includes(filter)
+				|| rowValue.includes(filter);
+		})
+		.map((row, i) => {
 		return (
 			<MapRow
 				key={i}
@@ -252,6 +261,15 @@ const MapPage = (props) => {
 			<h5 className="fw-bold">
 				{mapInfo.fname}:
 			</h5>
+
+			<div className="input-group mb-3">
+			  <div className="input-group-prepend">
+			    <span className="input-group-text" style={{ borderRadius: '5px 0 0 5px' }}>
+					<i className="bi bi-search" />
+			    </span>
+			  </div>
+			  <input onChange={e => setFilter(e.target.value||'')} type="text" className="form-control" placeholder="Search" />
+			</div>
 
 			{/* Map table */}
 			<div className="table-responsive w-100">
