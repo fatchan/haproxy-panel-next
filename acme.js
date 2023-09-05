@@ -19,6 +19,9 @@ const psl = require('psl');
 
 async function challengeCreateFn(authz, challenge, keyAuthorization) {
 	console.log('Triggered challengeCreateFn()');
+	// console.log('authz', authz);
+	// console.log('challenge', challenge);
+	// console.log('keyAuthorization', keyAuthorization);
 
 	/* http-01 */
 	if (challenge.type === 'http-01') {
@@ -45,7 +48,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 			if (!recordSetRaw) {
 				recordSetRaw = {};
 			}
-			recordSetRaw['txt'] = [record];
+			recordSetRaw['txt'] = (recordSetRaw['txt']||[]).concat([record]);
 			await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
 			console.log(`Created TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
 		} catch(e) {
@@ -88,7 +91,16 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 		try {
 			const recordValue = keyAuthorization;
 			console.log(`Removing TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
-			await redis.hdel(`dns:${domain}.`, subdomain);
+			let recordSetRaw = await redis.hget(`dns:${domain}.`, subdomain);
+			if (!recordSetRaw) {
+				recordSetRaw = {};
+			}
+			recordSetRaw['txt'] = (recordSetRaw['txt']||[]).filter(r => r.text !== recordValue);
+			if (recordSetRaw['txt'].length === 0) {
+				await redis.hdel(`dns:${domain}.`, subdomain);
+			} else {
+				await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
+			}
 			console.log(`Removed TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
 		} catch(e) {
 			console.error(e);
