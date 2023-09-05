@@ -5,6 +5,7 @@ import Head from 'next/head';
 import RecordSetRow from '../../../components/RecordSetRow.js';
 import BackButton from '../../../components/BackButton.js';
 import ErrorAlert from '../../../components/ErrorAlert.js';
+import SearchFilter from '../../../components/SearchFilter.js';
 import * as API from '../../../api.js';
 
 const DnsDomainIndexPage = (props) => {
@@ -17,6 +18,7 @@ const DnsDomainIndexPage = (props) => {
 	const [error, setError] = useState();
 	const [sortType, setSortType] = useState("name");
 	const [sortOrder, setSortOrder] = useState(-1);
+	const [filter, setFilter] = useState('');
 	const { user, recordSets, csrf } = state;
 	const handleSetSorting = (newSortType) => {
 		let sorted;
@@ -61,6 +63,7 @@ const DnsDomainIndexPage = (props) => {
 
 	const recordSetRows = recordSets.map(recordSet => {
 		return Object.entries(recordSet)
+			.filter(x => x && JSON.stringify(x).includes(filter))
 			.map(e => {
 				return Object.entries(e[1])
 					.map((recordSet, i) => (
@@ -94,6 +97,8 @@ const DnsDomainIndexPage = (props) => {
 			<h5 className="fw-bold">
 				{domain} / Records list:
 			</h5>
+
+			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Record sets table */}
 			<div className="table-responsive">
