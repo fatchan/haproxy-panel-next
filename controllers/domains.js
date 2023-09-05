@@ -73,6 +73,10 @@ exports.addDomain = async (req, res, next) => {
 
 	let domain = req.body.domain.toLowerCase();
 
+	if (res.locals.user.domains.includes(domain)) {
+		return dynamicResponse(req, res, 403, { error: 'Domain already added' });
+	}
+
 	try {
 		const { hostname } = url.parse(`https://${domain}`);
 		domain = hostname;
@@ -84,6 +88,9 @@ exports.addDomain = async (req, res, next) => {
 		const parsed = psl.parse(domain);
 		if (!parsed || !parsed.domain) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid input' })
+		}
+		if (parsed.domain !== domain && !res.locals.user.domains.includes(parsed.domain)) {
+			return dynamicResponse(req, res, 403, { error: 'Add the root domain before adding subdomains' });
 		}
 		const domains = [domain, parsed.domain];
 		const existing = await db.db.collection('accounts')
@@ -106,6 +113,13 @@ exports.addDomain = async (req, res, next) => {
 					}
 				}
 			});
+		await res.locals
+			.dataPlaneAll('addPayloadRuntimeMap', {
+				name: process.env.DOMTOACC_MAP_NAME,
+			}, [{
+				key: domain,
+				value: res.locals.user.username,
+			}]);
 		if (domain.split('.').length < 3 //naive
 			&& (soaTemplate.length > 0 && nsTemplate.length > 0)) {
 			const records = [];
@@ -168,6 +182,11 @@ exports.deleteDomain = async (req, res) => {
 
 	await db.db.collection('accounts')
 		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
+	await res.locals
+		.dataPlaneAll('deleteRuntimeMapEntry', {
+			map: process.env.DOMTOACC_MAP_NAME,
+			id: domain,
+		});
 	await redis.del(`dns:${domain}.`);
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });

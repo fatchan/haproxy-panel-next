@@ -18,7 +18,7 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 				</td>
 			)}
 			{typeof value === 'object' && columnKeys.map((ck, mvi) => {
-				let displayValue = mapValueNames[value[ck].toString()] || value[ck].toString();
+				let displayValue = value[ck] && (mapValueNames[value[ck].toString()] || value[ck].toString());
 				if (typeof value[ck] === 'boolean') {
 					displayValue = value[ck] === true
 						? <span className="text-success">

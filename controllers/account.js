@@ -145,7 +145,7 @@ exports.register = async (req, res) => {
 	const password = req.body.password;
 	const rPassword = req.body.repeat_password;
 
-	if (!username || typeof username !== "string" || username.length === 0
+	if (!username || typeof username !== "string" || username.length === 0 || !/^[a-zA-Z0-9]+$/.test(username)
 		|| !password || typeof password !== "string" || password.length === 0
 		|| !rPassword || typeof rPassword !== "string" || rPassword.length === 0) {
 		//todo: length limits, make jschan input validator LGPL lib and use here

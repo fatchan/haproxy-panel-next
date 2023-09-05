@@ -17,7 +17,8 @@ const redis = require('../redis.js')
 	}});
 
 if (!process.env.INFLUX_HOST) {
-	return console.warn('INFLUX_HOST not set, statistics will not be recorded');
+	console.error('INFLUX_HOST not set, statistics will not be recorded');
+	process.exit(1);
 }
 
 //TODO: a better process for storing and discovering these? i.e collect from all clusters in db

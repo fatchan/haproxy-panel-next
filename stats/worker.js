@@ -18,7 +18,8 @@ const redis = require('../redis.js')
 	}});
 
 if (!process.env.INFLUX_HOST) {
-	return console.warn('INFLUX_HOST not set, statistics will not be recorded');
+	console.error('INFLUX_HOST not set, statistics will not be recorded');
+	process.exit(1);
 }
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client')

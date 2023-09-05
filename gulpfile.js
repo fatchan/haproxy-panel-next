@@ -27,6 +27,7 @@ async function reset() {
 			}, {
 				$set: {
 					passwordHash,
+					clusters: [process.env.DEFAULT_CLUSTER],
 				}
 			});
 	}

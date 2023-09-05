@@ -54,7 +54,7 @@ exports.mapData = async (req, res, next) => {
 		case process.env.BLOCKED_MAP_NAME:
 		case process.env.WHITELIST_MAP_NAME:
 			map = map.filter(a => {
-				return res.locals.user.username === a.value;
+				return a.value && a.value.split(':').includes(res.locals.user.username);
 			});
 			break;
 		default:
@@ -90,7 +90,46 @@ exports.deleteMapForm = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
 
-	if (req.params.name === process.env.HOSTS_MAP_NAME
+	if (req.params.name === process.env.BLOCKED_MAP_NAME
+		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
+		let value;
+		const existingEntry = await res.locals
+			.dataPlaneRetry("getRuntimeMapEntry", {
+				map: req.params.name,
+				id: req.body.key,
+			})
+			.then((res) => res.data)
+			.catch(() => {});
+		if (existingEntry && existingEntry.value) {
+			let existingEntries = existingEntry.value.split(':');
+			if (!existingEntries || !existingEntries.includes(res.locals.user.username)) {
+				return dynamicResponse(req, res, 403, { error: 'No permission to remove that entry' });
+			}
+			existingEntries = existingEntries.filter(e => e !== res.locals.user.username);
+			value = existingEntries.join(':'); //0 length if was only name
+			try {
+				if (value && value.length > 0) {
+					//if value still exists, other user has whitelisted, so replace withg updated value
+					await res.locals
+						.dataPlaneAll('replaceRuntimeMapEntry', {
+							map: req.params.name,
+							id: req.body.key,
+						}, {
+							value: value,
+						});
+				} else {
+					//else we were the last/only one, so remove
+					await res.locals
+						.dataPlaneAll('deleteRuntimeMapEntry', {
+							map: req.params.name,
+							id: req.body.key,
+						});
+				}
+			} catch (e) {
+				return next(e);
+			}
+		}
+	} else if (req.params.name === process.env.HOSTS_MAP_NAME
 		|| req.params.name === process.env.DDOS_MAP_NAME
 		|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
 		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
@@ -101,48 +140,42 @@ exports.deleteMapForm = async (req, res, next) => {
 		if (!allowed) {
 			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 		}
-	} else if (req.params.name === process.env.BLOCKED_MAP_NAME
-		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
-		//TODO: permission check, see https://gitgud.io/fatchan/haproxy-panel/-/issues/10
-	}
-
-	try {
-
-		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
-			const backendMapEntry = await res.locals
-				.dataPlaneRetry('getRuntimeMapEntry', {
-					map: process.env.BACKENDS_MAP_NAME,
-					id: req.body.key,
-				})
-				.then(res => res.data)
-				.catch(() => {});
-			if (backendMapEntry) {
-				await res.locals
-					.dataPlaneAll('deleteRuntimeServer', {
-						backend: 'servers',
-						name: backendMapEntry.value,
-					});
-				await res.locals
-					.dataPlaneAll('deleteRuntimeMapEntry', {
-						map: process.env.BACKENDS_MAP_NAME, //'backends'
-						id: req.body.key, //'example.com'
-					});
-			} else {
-				console.warn('no backend found to remove');
-				//dont return because otherwise they will have a domain stuck in the hosts map
+		try {
+			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
+				//Make sure to also update backends map if editing hosts map and putting duplicate
+				const backendMapEntry = await res.locals
+					.dataPlaneRetry('getRuntimeMapEntry', {
+						map: process.env.BACKENDS_MAP_NAME,
+						id: req.body.key,
+					})
+					.then(res => res.data)
+					.catch(() => {});
+				if (backendMapEntry) {
+					await res.locals
+						.dataPlaneAll('deleteRuntimeServer', {
+							backend: 'servers',
+							name: backendMapEntry.value,
+						});
+					await res.locals
+						.dataPlaneAll('deleteRuntimeMapEntry', {
+							map: process.env.BACKENDS_MAP_NAME, //'backends'
+							id: req.body.key, //'example.com'
+						});
+				} else {
+					console.warn('no backend found to remove');
+					//dont return because otherwise they will have a domain stuck in the hosts map
+				}
 			}
+			await res.locals
+				.dataPlaneAll('deleteRuntimeMapEntry', {
+					map: req.params.name, //'ddos'
+					id: req.body.key, //'example.com'
+				});
+		} catch (e) {
+			return next(e);
 		}
-
-		await res.locals
-			.dataPlaneAll('deleteRuntimeMapEntry', {
-				map: req.params.name, //'ddos'
-				id: req.body.key, //'example.com'
-			});
-		return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
-	} catch (e) {
-		return next(e);
 	}
-
+	return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 };
 
 
@@ -244,7 +277,24 @@ exports.patchMapForm = async (req, res, next) => {
 				}
 				break;
 			case process.env.BLOCKED_MAP_NAME:
-			case process.env.WHITELIST_MAP_NAME:
+			case process.env.WHITELIST_MAP_NAME: {
+				const existingEntry = await res.locals
+					.dataPlaneRetry("getRuntimeMapEntry", {
+						map: req.params.name,
+						id: req.body.key,
+					})
+					.then((res) => res.data)
+					.catch(() => {});
+				if (existingEntry && existingEntry.value) {
+					const existingSplitEntries = existingEntry.value.split(':');
+					existingSplitEntries.push(res.locals.user.username);
+					const dedupedSplitEntries = [...new Set(existingSplitEntries)];
+					value = dedupedSplitEntries.join(':');
+				} else {
+					value = res.locals.user.username;
+				}
+				break;
+			}
 			case process.env.MAINTENANCE_MAP_NAME:
 				value = res.locals.user.username;
 				break;
@@ -310,7 +360,7 @@ exports.patchMapForm = async (req, res, next) => {
 					});
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				if (backendMapEntry) {
-					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry)
+					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
 							map: process.env.BACKENDS_MAP_NAME,

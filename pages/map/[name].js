@@ -256,8 +256,6 @@ const MapPage = (props) => {
 				</title>
 			</Head>
 
-			{error && <ErrorAlert error={error} />}
-
 			{/* Map friendly name (same as shown on acc page) */}
 			<h5 className="fw-bold">
 				{mapInfo.fname}:
@@ -296,6 +294,10 @@ const MapPage = (props) => {
 					</table>
 				</form>
 			</div>
+
+			{error && <span className="mx-1">
+				<ErrorAlert error={error} />
+			</span>}
 
 			{/* back to account */}
 			<BackButton to="/account" />
