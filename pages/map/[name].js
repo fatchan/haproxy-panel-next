@@ -212,7 +212,7 @@ const MapPage = (props) => {
 			);
 			break;
 		}
-		case "blocked":
+		case "blockedip":
 		case "whitelist":
 			formElements = (
 				<>
@@ -223,6 +223,20 @@ const MapPage = (props) => {
 					</td>
 					<td>
 						<input className="form-control" type="text" name="key" placeholder="ip or subnet" required />
+					</td>
+				</>
+			);
+			break;
+		case "blockedasn":
+			formElements = (
+				<>
+					<td>
+						<button className="btn btn-sm btn-success" type="submit">
+							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						</button>
+					</td>
+					<td>
+						<input className="form-control" type="text" name="key" placeholder="ASN" required />
 					</td>
 				</>
 			);

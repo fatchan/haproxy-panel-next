@@ -117,18 +117,26 @@ export default withRouter(function MenuLinks({ router }) {
 				</Link>
 			</li>
 			<li className="nav-item">
-				<Link href="/map/blocked">
-					<a className={router.pathname === "/map/[name]" && router.query.name === "blocked" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+				<Link href="/map/whitelist">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "whitelist" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-person-check pe-none me-2" width="16" height="16" />
+						IP Whitelist
+					</a>
+				</Link>
+			</li>
+			<li className="nav-item">
+				<Link href="/map/blockedip">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "blockedip" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-person-slash pe-none me-2" width="16" height="16" />
 						IP Blacklist
 					</a>
 				</Link>
 			</li>
 			<li className="nav-item">
-				<Link href="/map/whitelist">
-					<a className={router.pathname === "/map/[name]" && router.query.name === "whitelist" ? "nav-link active" : "nav-link text-body"} aria-current="page">
-						<i className="bi-person-check pe-none me-2" width="16" height="16" />
-						IP Whitelist
+				<Link href="/map/blockedasn">
+					<a className={router.pathname === "/map/[name]" && router.query.name === "blockedasn" ? "nav-link active" : "nav-link text-body"} aria-current="page">
+						<i className="bi-building-slash pe-none me-2" width="16" height="16" />
+						ASN Blacklist
 					</a>
 				</Link>
 			</li>

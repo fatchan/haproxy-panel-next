@@ -184,7 +184,7 @@ const testRouter = (server, app) => {
 		server.post('/forms/logout', useSession, accountController.logout);
 		server.post('/forms/register', useSession, fetchSession, accountController.register);
 
-		const mapNames = [process.env.BLOCKED_MAP_NAME, process.env.MAINTENANCE_MAP_NAME, process.env.WHITELIST_MAP_NAME, process.env.REDIRECT_MAP_NAME,
+		const mapNames = [process.env.BLOCKED_IP_MAP_NAME, process.env.BLOCKED_ASN_MAP_NAME, process.env.MAINTENANCE_MAP_NAME, process.env.WHITELIST_MAP_NAME, process.env.REDIRECT_MAP_NAME,
 				process.env.BACKENDS_MAP_NAME, process.env.DDOS_MAP_NAME, process.env.DDOS_CONFIG_MAP_NAME, process.env.HOSTS_MAP_NAME, process.env.REWRITE_MAP_NAME]
 			, mapNamesOrString = mapNames.join('|');
 

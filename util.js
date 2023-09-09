@@ -22,10 +22,16 @@ const fMap = {
 		columnKeys: ['pd', 'pt', 'cex', 'cip'],
 	},
 
-	[process.env.BLOCKED_MAP_NAME]: {
+	[process.env.BLOCKED_IP_MAP_NAME]: {
 		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',
 		columnNames: ['IP/Subnet', ''],
+	},
+
+	[process.env.BLOCKED_ASN_MAP_NAME]: {
+		fname: 'ASN Blacklist',
+		description: 'ASNs that are outright blocked',
+		columnNames: ['AS Number', ''],
 	},
 
 	[process.env.WHITELIST_MAP_NAME]: {
