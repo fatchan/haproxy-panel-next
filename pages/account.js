@@ -75,7 +75,7 @@ export default function Account(props) {
 				</div>
 
 				{/* Manage Clusters */}
-				<div className="list-group-item list-group-item-action d-flex align-items-start flex-column">
+				{/*<div className="list-group-item list-group-item-action d-flex align-items-start flex-column">
 					<div className="flex-row d-flex w-100">
 						<div className="ms-2 me-auto">
 							<div className="fw-bold">
@@ -114,7 +114,7 @@ export default function Account(props) {
 							</Link>
 						</span>
 					</div>
-				</div>
+				</div>*/}
 
 				{/* Domains */}
 				<Link href="/domains">

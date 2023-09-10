@@ -44,14 +44,14 @@ export default withRouter(function MenuLinks({ router }) {
 					</a>
 				</Link>
 			</li>*/}
-			<li className="nav-item">
+			{/*<li className="nav-item">
 				<Link href="/clusters">
 					<a className={router.pathname === "/clusters" ? "nav-link active" : "nav-link text-body"} aria-current="page">
 						<i className="bi-clouds pe-none me-2" width="16" height="16" />
 						Clusters
 					</a>
 				</Link>
-			</li>
+			</li>*/}
 			{/*process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && <li className="nav-item">
 				<Link href="/map/backends">
 					<a className={router.pathname === "/map/[name]" && router.query.name === "backends" ? "nav-link active" : "nav-link"} aria-current="page">

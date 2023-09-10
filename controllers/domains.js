@@ -121,7 +121,7 @@ exports.addDomain = async (req, res, next) => {
 				value: res.locals.user.username,
 			}]);
 		if (domain.split('.').length < 3 //naive
-			&& (soaTemplate.length > 0 && nsTemplate.length > 0)) {
+			&& soaTemplate && nsTemplate) {
 			const records = [];
 			const soaRecords = JSON.parse(JSON.stringify(soaTemplate()));
 			soaRecords[0].MBox = `root.${domain}.`;
