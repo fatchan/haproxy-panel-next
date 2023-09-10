@@ -88,6 +88,9 @@ export default function Domains(props) {
 				</td>
 				<td>
 					{d}
+					{(domainCert || wildcardCert) && <a target="_blank" rel="noreferrer" href={`https://${d}`}>
+						<i className="bi-box-arrow-up-right pe-none ms-1" width="12" height="12" style={{fontSize: '0.8rem'}} />
+					</a>}
 				</td>
 				<td>
 					{(domainCert || wildcardCert)
