@@ -68,7 +68,6 @@ exports.certsJson = async (req, res) => {
  * add cert
  */
 exports.addCert = async (req, res, next) => {
-
 	let wildcardOk = true;
 	if (req.body.subject.startsWith('*.')) {
 		wildcardOk = wildcardCheck(req.body.subject, res.locals.user.domains);
@@ -211,12 +210,17 @@ exports.deleteCert = async (req, res) => {
 
 	const subject = req.body.subject.toLowerCase();
 
+	const clusterCerts = await res.locals
+		.dataPlaneRetry('getAllStorageSSLCertificates')
+		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
+
 	//Delete cert from cluster if storage_name sent
 	if (req.body.storage_name && typeof req.body.storage_name === 'string') {
 		const storageName = req.body.storage_name;
-		const certExists = await db.db.collection('certs')
-			.findOne({ storageName, username: res.locals.user.username });
-		if (!certExists) {
+		const clusterCerts = await res.locals
+			.dataPlaneRetry('getAllStorageSSLCertificates')
+			.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
+		if (!clusterCerts.find(c => c.storage_name === req.body.storage_name)) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 		}
 		await res.locals

@@ -107,7 +107,7 @@ module.exports = {
 
 	wildcardCheck: (subject, allowedDomains) => {
 		if (subject.includes('\\')) { throw new Error('Illegal wildcardCheck'); }
-		const wcRegex = new RegExp(subject.replace(/\*/g, "[^ ]*\\")+'$');
+		const wcRegex = new RegExp(`${subject.replace(/\*\./g, "([^ ]*\\.|^)")}$`);
 		return allowedDomains.some(d => {
 			return wcRegex.test(d);
 		});

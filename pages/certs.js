@@ -51,7 +51,7 @@ export default function Certs(props) {
 			await API.addCert({
 				_csrf: csrf,
 				subject: e.target.subject.value,
-				altnames: e.target.altnames.value.split(',').map(x => x.trim()),
+				altnames: e.target.altnames.value.split(/\r?\n/).map(x => x.trim()),
 				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
@@ -210,30 +210,43 @@ export default function Certs(props) {
 								{clusterOnlyCertList}
 							</>)}
 
-							{/* Add new cert form */}
-							<tr className="align-middle">
-								<td>
-									<button className="btn btn-sm btn-success" type="submit">
-										<i className="bi-plus-lg pe-none" width="16" height="16" />
-									</button>
-								</td>
-								<td>
-									<input className="form-control" type="text" name="subject" placeholder="domain.com" required />
-								</td>
-								<td>
-									<input className="form-control" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." required />
-								</td>
-								<td colSpan="2">
-									<input className="form-control" type="email" name="email" placeholder="optional expiry warning email address"  />
-								</td>
-							</tr>
-
 						</tbody>
 					</table>
 				</form>
 			</div>
 
-			{error && <ErrorAlert error={error} />}
+			{/* Add new cert form */}
+			<div className="list-group-item list-group my-2 pb-4">
+				<form onSubmit={addCert} action="/forms/cert/add" method="post">
+					<input type="hidden" name="_csrf" value={csrf} />
+					<div className="mb-2">
+						<label className="form-label w-100">Subject
+							<input className="form-control" type="text" name="subject" placeholder="domain.com" required />
+						</label>
+					</div>
+					<div className="mb-2">
+						<label className="form-label w-100">Altname(s)
+							<textarea
+								className="form-control"
+								name="altnames"
+								placeholder={`www.domain.com\r\ntest.example.com\r\netc...`}
+								rows={4}
+								required />
+						</label>
+					</div>
+					<div className="mb-3">
+						<label className="form-label w-100">Email (Optional, for expiry notices)
+							<input className="form-control" type="email" name="email" placeholder="email@example.com"  />
+						</label>
+					</div>
+					<button className="btn btn-sm btn-success" type="submit">
+						<i className="bi-plus-lg pe-1" width="16" height="16" />
+						New Certificate
+					</button>
+				</form>
+			</div>
+
+			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
 			<BackButton to="/account" />

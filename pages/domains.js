@@ -169,9 +169,7 @@ export default function Domains(props) {
 				</table>
 			</div>
 
-			{error && <span className="mx-1">
-				<ErrorAlert error={error} />
-			</span>}
+			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
 			<BackButton to="/account" />
