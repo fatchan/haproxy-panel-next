@@ -85,24 +85,26 @@ export default function Onboarding(props) {
 			<div className="list-group-item d-flex gap-3">
 				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={domainAdded} disabled />
 				<span className="pt-1 form-checked-content">
-					<strong>
+					<strong style={{ textDecoration: domainAdded ? 'line-through' : '' }}>
 						<i className="bi-card-list pe-none me-2" width="1em" height="1em" />
 						1. Add a domain
 					</strong>
-					<span className="d-block text-body-secondary mt-3">
-						<p>Add your first domain (i.e. <code>example.com</code>) that you want to protect with BasedFlare.</p>
-						<p>You can add other domains and/or subdomains later from the &quot;domains&quot; page.</p>
-					</span>
-					<form className="d-flex mb-3" onSubmit={addDomain} action="/forms/domain/add" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="onboarding" value="1" />
-						<input className="btn btn-success" type="submit" value="+" disabled={domainAdded} />
-						<input className="form-control mx-3" type="text" name="domain" placeholder="domain" disabled={domainAdded} required />
-					</form>
-					{domainAdded && (<strong>
+					{!domainAdded && <>
+						<span className="d-block text-body-secondary mt-3">
+							<p>Add your first domain (i.e. <code>example.com</code>) that you want to protect with BasedFlare.</p>
+							<p>You can add other domains and/or subdomains later from the &quot;domains&quot; page.</p>
+						</span>
+						<form className="d-flex mb-3" onSubmit={addDomain} action="/forms/domain/add" method="post">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input type="hidden" name="onboarding" value="1" />
+							<input className="btn btn-success" type="submit" value="+" disabled={domainAdded} />
+							<input className="form-control mx-3" type="text" name="domain" placeholder="domain" disabled={domainAdded} required />
+						</form>
+					</>}
+					{domainAdded && (<div><strong>
 						<i className="bi-check-circle-fill me-2" style={{ color: 'green' }}  width="1em" height="1em" />
 						Domain added successfully
-					</strong>)}
+					</strong></div>)}
 				</span>
 			</div>
 			<div className="list-group-item d-flex gap-3">
@@ -158,68 +160,72 @@ export default function Onboarding(props) {
 			{<div className="list-group-item d-flex gap-3">
 				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={backendAdded} disabled />
 				<span className="pt-1 form-checked-content">
-					<strong>
+					<strong style={{ textDecoration: backendAdded ? 'line-through' : '' }}>
 						<i className="bi-hdd-network-fill pe-none me-2" width="1em" height="1em" />
 						4. Setup a backend
 					</strong>
-					<span className="d-block text-body-secondary mt-3">
-						<p>Enter the backend server IP address and port in ip:port format, e.g. <code>12.34.56.78:443</code>.</p>
-						<p>This is the &quot;origin&quot; that you want BasedFlare to proxy traffic to.</p>
-					</span>
-					<form onSubmit={addToMap} className="d-flex mb-3" action='/forms/map/hosts/add' method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="onboarding" value="1" />
-						<input className="btn btn-success" type="submit" value="+"
-							//disabled={backendAdded}
-						/>
-						<select className="form-select mx-3" name="key" defaultValue=""
-							//disabled={backendAdded}
-						required>
-							<option value="">select domain</option>
-							{user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>))}
-						</select>
-						{
-							(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED) &&
-							<input
-								className="form-control ml-2"
-								type="text"
-								name="value"
-								placeholder="backend ip:port"
+					{!backendAdded && <>
+						<span className="d-block text-body-secondary mt-3">
+							<p>Enter the backend server IP address and port in ip:port format, e.g. <code>12.34.56.78:443</code>.</p>
+							<p>This is the &quot;origin&quot; that you want BasedFlare to proxy traffic to.</p>
+						</span>
+						<form onSubmit={addToMap} className="d-flex mb-3" action='/forms/map/hosts/add' method="post">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input type="hidden" name="onboarding" value="1" />
+							<input className="btn btn-success" type="submit" value="+"
 								//disabled={backendAdded}
-								required
 							/>
-						}
-					</form>
-					{backendAdded && (<strong>
+							<select className="form-select mx-3" name="key" defaultValue=""
+								//disabled={backendAdded}
+							required>
+								<option value="">select domain</option>
+								{user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>))}
+							</select>
+							{
+								(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED) &&
+								<input
+									className="form-control ml-2"
+									type="text"
+									name="value"
+									placeholder="backend ip:port"
+									//disabled={backendAdded}
+									required
+								/>
+							}
+						</form>
+					</>}
+					{backendAdded && (<div><strong>
 						<i className="bi-check-circle-fill me-2" style={{ color: 'green' }}  width="1em" height="1em" />
 						Backend server successfully added
-					</strong>)}
+					</strong></div>)}
 				</span>
 			</div>}
 			<div className="list-group-item d-flex gap-3">
 				<input className="form-check-input flex-shrink-0" type="checkbox" value="" checked={certAdded} disabled />
 				<span className="pt-1 form-checked-content">
-					<strong>
+					<strong style={{ textDecoration: certAdded ? 'line-through' : '' }}>
 						<i className="bi-file-earmark-lock-fill pe-none me-2" width="1em" height="1em" />
 						5. Generate HTTPS certificate
 					</strong>
-					<span className="d-block text-body-secondary mt-3">
-						<p>BasedFlare will generate a HTTPS certificate for you using <a href="https://letsencrypt.org/" rel="noreferrer" target="_blank">Let&apos;s Encrypt</a>.</p>
-						<p>This certificate will be automatically installed on the BasedFlare edge and visitors will be connected securely.</p>
-						<p>Certificates last 90 days and will automatically renew when they have less than 30 days remaining.</p>
-						<p>You can manage certificates later from the &quot;HTTPS Certificates&quot; page.</p>
-					</span>
-					<form className="d-flex mb-3" onSubmit={addCert} action="/forms/cert/add" method="post">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input type="hidden" name="onboarding" value="1" />
-						<input className="btn btn-success" type="submit" value="+" disabled={certAdded} />
-						<input className="form-control mx-3" type="text" name="subject" placeholder="domain.com" disabled={certAdded} required />
-						<input className="form-control me-3" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." disabled={certAdded} required />
-					</form>
-					{certAdded && (<strong>
+					{!certAdded && <>
+						<span className="d-block text-body-secondary mt-3">
+							<p>BasedFlare will generate a HTTPS certificate for you using <a href="https://letsencrypt.org/" rel="noreferrer" target="_blank">Let&apos;s Encrypt</a>.</p>
+							<p>This certificate will be automatically installed on the BasedFlare edge and visitors will be connected securely.</p>
+							<p>Certificates last 90 days and will automatically renew when they have less than 30 days remaining.</p>
+							<p>You can manage certificates later from the &quot;HTTPS Certificates&quot; page.</p>
+						</span>
+						<form className="d-flex mb-3" onSubmit={addCert} action="/forms/cert/add" method="post">
+							<input type="hidden" name="_csrf" value={csrf} />
+							<input type="hidden" name="onboarding" value="1" />
+							<input className="btn btn-success" type="submit" value="+" disabled={certAdded} />
+							<input className="form-control mx-3" type="text" name="subject" placeholder="domain.com" disabled={certAdded} required />
+							<input className="form-control me-3" type="text" name="altnames" placeholder="www.domain.com,staging.domain.com,etc..." disabled={certAdded} required />
+						</form>
+					</>}
+					{certAdded && (<div><strong>
 						<i className="bi-check-circle-fill me-2" style={{ color: 'green' }}  width="1em" height="1em" />
 						HTTPS Certificate successfully generated
-					</strong>)}
+					</strong></div>)}
 				</span>
 			</div>
 			<div className="list-group-item d-flex gap-3">
