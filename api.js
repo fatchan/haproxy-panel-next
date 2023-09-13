@@ -66,6 +66,9 @@ export async function deleteCert(body, dispatch, errorCallback, router) {
 export async function uploadCert(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/cert/upload', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
+export async function verifyCSR(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/csr/verify', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 
 // Maps
 export async function getMap(mapName, dispatch, errorCallback, router) {
@@ -154,6 +157,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 		return response;
 	} else {
 		errorCallback('An error occurred');
+		NProgress.done(true);
 	}
 
 }

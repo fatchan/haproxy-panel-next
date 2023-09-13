@@ -245,7 +245,7 @@ exports.deleteCert = async (req, res) => {
  */
 exports.verifyUserCSR = async (req, res, next) => {
 	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid csr' });
+		return dynamicResponse(req, res, 400, { error: 'Invalid CSR' });
 	}
 	try {
 		const serial = await db.db.collection('certs')
@@ -269,11 +269,20 @@ exports.verifyUserCSR = async (req, res, next) => {
 		const serialNumber = serial && serial.value && serial.value.number || 1;
 		console.log('Attempting to sign CSR, serial', serialNumber)
 		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains, serialNumber);
-		if (req.headers['accept'].toLowerCase() === 'application/json') {
-			return res.send(signedCert);
+		if (req.body.json) {
+			return res.json({
+				csrf: req.csrfToken(),
+				user: res.locals.user,
+				csr: signedCert,
+			});
+		} if (req.headers['accept'].toLowerCase() === 'application/json') {
+			return res.send(signedCert); //for ansible
 		}
 		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
 	} catch (e) {
+		if (e.message) {
+			return dynamicResponse(req, res, 400, { error: e.message });
+		}
 		return next(e);
 	}
 };

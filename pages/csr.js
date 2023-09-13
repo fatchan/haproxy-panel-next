@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
+import NProgress from 'nprogress';
 
 export default function Csr(props) {
 
@@ -16,6 +17,17 @@ export default function Csr(props) {
 			API.getAccount(dispatch, setError, router);
 		}
 	}, [state.user, state.maps, router]);
+
+	async function verifyCSR(e) {
+		e.preventDefault();
+		setError(null);
+		await API.verifyCSR({
+			_csrf: csrf,
+			csr: e.target.csr.value,
+			json: true,
+		}, dispatch, setError, router);
+		NProgress.done(true);
+	}
 
 	if (!state.user) {
 		return (
@@ -30,7 +42,7 @@ export default function Csr(props) {
 		);
 	}
 
-	const { user, csrf } = state;
+	const { user, csrf, csr } = state;
 
 	if (user && !user.onboarding) {
 		router.push('/onboarding');
@@ -42,8 +54,6 @@ export default function Csr(props) {
 			<Head>
 				<title>Certificate Signing Request</title>
 			</Head>
-
-			{error && <ErrorAlert error={error} />}
 
 			<h5 className="fw-bold">
 				Certificate Signing Request:
@@ -58,21 +68,42 @@ export default function Csr(props) {
 				</div>
 			</p>
 
-			<div className="table-responsive">
-				<table className="table text-nowrap">
-					<tbody>
-						<tr className="align-middle">
-							<td className="col-1 text-center">
-								<form className="d-flex" action="/forms/csr/verify" method="post">
-									<input type="hidden" name="_csrf" value={csrf} />
-									<textarea className="form-control mx-3" name="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..." required />
-									<input className="btn btn-sm btn-success" type="submit" value="Verify" />
-								</form>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			{/* Verify CSR form */}
+			<div className="list-group-item list-group my-2 pb-4">
+				<form onSubmit={verifyCSR} action="/forms/csr/verify" method="post">
+					<input type="hidden" name="_csrf" value={csrf} />
+					<div className="mb-2">
+						<label className="form-label w-100">Paste your origin.csr file here:
+							<textarea
+								className="form-control"
+								name="csr"
+								placeholder={"-----BEGIN CERTIFICATE REQUEST-----\n..."}
+								rows={4}
+								required />
+						</label>
+					</div>
+					<button className="btn btn-sm btn-success" type="submit">
+						<i className="bi-plus-lg pe-1" width="16" height="16" />
+						Verify CSR
+					</button>
+				</form>
 			</div>
+
+			{csr && <div className="list-group-item list-group my-2 pb-4">
+				<div className="mb-2">
+					<label className="form-label w-100">Here&apos;s your certificate:
+						<textarea
+							className="form-control"
+							name="csr"
+							value={csr}
+							rows={10}
+							readOnly
+							required />
+					</label>
+				</div>
+			</div>}
+
+			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
 			<BackButton to="/account" />
