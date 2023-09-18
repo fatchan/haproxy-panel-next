@@ -6,7 +6,7 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js'
 import { useRouter } from 'next/router';
-import { wildcardCheck } from '../util.js';
+import { wildcardCheck, wildcardMatches } from '../util.js';
 
 export default function Domains(props) {
 
@@ -56,11 +56,10 @@ export default function Domains(props) {
 		//.sort((a, b) => a.localeCompare(b))
 		.filter(d => d.includes(filter))
 		.forEach((d, i) => {
-		//TODO: refactor, to component
 		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
 		const wildcardCert = certs.find(c => {
-			return ((c.subject.startsWith('*') && wildcardCheck(c.subject, [d]))
-				|| c.altnames.some(an => an.startsWith('*') && wildcardCheck(an, [d])));
+			return ((c.subject.startsWith('*') && wildcardMatches(d, c.subject))
+				|| c.altnames.some(an => an.startsWith('*') && wildcardMatches(d, an)));
 		});
 		const isSubdomain = d.split('.').length > 2;
 		let daysRemaining;

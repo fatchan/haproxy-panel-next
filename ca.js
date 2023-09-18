@@ -1,7 +1,7 @@
 'use strict';
 
 const { generateKeyPairSync } = require('crypto')
-	, { wildcardCheck } = require('./util.js')
+	, { wildcardAllowed } = require('./util.js')
 	, fs = require('fs')
 	, forge = require('node-forge')
 	, pki = forge.pki
@@ -86,33 +86,33 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	const csr = pki.certificationRequestFromPem(csrPem);
 	const subject = csr.subject.getField('CN').value;
 	const isWildcard = subject.startsWith('*.');
-	if (isWildcard) {
-		const wildcardOk = wildcardCheck(subject, allowedDomains);
-		if (!wildcardOk) {
-			throw new Error('No permission for subject');
+	if (subject.startsWith('*.')) {
+		if (!wildcardAllowed(subject, allowedDomains)) {
+			throw new Error(`No permission for subject "${subject}"`);
 		}
 	} else if (!allowedDomains.includes(subject)) {
-		throw new Error('No permission for subject');
+		throw new Error(`No permission for subject "${subject}"`);
 	}
-	const exts = csr.getAttribute({name: 'extensionRequest'});
+	const exts = csr.getAttribute({ name: 'extensionRequest' });
 	let altNamesExt;
 	if (exts && exts.extensions) {
 		altNamesExt = exts.extensions.find(ext => ext.name === 'subjectAltName');
 		if (altNamesExt) {
-			const badAltNames = altNamesExt.altNames.some(altName => {
+			const badAltNames = altNamesExt.altNames.filter(altName => {
+				if (altName.value.startsWith('*.')) {
+					return !wildcardAllowed(altName.value, allowedDomains);
+				}
 				return !allowedDomains.includes(altName.value);
 			});
-			if (isWildcard && !altNamesExt.altNames.every(altName => altName.value === subject)) {
-				throw new Error('No permission for altnames');
-			} else if (!isWildcard && badAltNames) {
-				throw new Error('No permission for altnames');
+			if (badAltNames && badAltNames.length > 0) {
+				throw new Error(`No permission for altname(s) ${badAltNames}`);
 			}
 		}
 	}
 	const caCert = RootCACertificate;
 	const caKey = RootCAPrivateKey;
 	if (!csr.verify()) {
-		throw new Error('Signature not verified.');
+		throw new Error('Signature verification failed, please contact support.');
 	}
 	const cert = pki.createCertificate();
 	cert.serialNumber = `00${serialNumber}${Math.floor(Math.random()*100)}`;

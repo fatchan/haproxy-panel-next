@@ -372,17 +372,25 @@ exports.patchMapForm = async (req, res, next) => {
 						name: `websrv${freeSlotId}`,
 						id: `${freeSlotId}`,
 						ssl: 'enabled',
-						verify: 'none',
+						verify: 'required',
 					});
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				if (backendMapEntry) {
 					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
+					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
+					const fullBackendMap = await res.locals
+						.dataPlaneRetry('showRuntimeMap', {
+							map: process.env.BACKENDS_MAP_NAME
+						})
+						.then(res => res.data);
+					const fullBackendMapEntry = fullBackendMap
+						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
 							map: process.env.BACKENDS_MAP_NAME,
 							id: req.body.key,
 						}, {
-							value: `${backendMapEntry.value},websrv${freeSlotId}`,
+							value: `${fullBackendMapEntry.value},websrv${freeSlotId}`,
 						});
 				} else {
 					await res.locals

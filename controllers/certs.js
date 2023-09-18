@@ -1,7 +1,7 @@
 const db = require('../db.js');
 const acme = require('../acme.js');
 const url = require('url');
-const { dynamicResponse, wildcardCheck, filterCertsByDomain } = require('../util.js');
+const { dynamicResponse, wildcardAllowed, filterCertsByDomain } = require('../util.js');
 const { verifyCSR } = require('../ca.js');
 
 /**
@@ -68,18 +68,24 @@ exports.certsJson = async (req, res) => {
  * add cert
  */
 exports.addCert = async (req, res, next) => {
-	let wildcardOk = true;
-	if (req.body.subject.startsWith('*.')) {
-		wildcardOk = wildcardCheck(req.body.subject, res.locals.user.domains);
+	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Missing subject' });
 	}
-	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0
-		|| (!res.locals.user.domains.includes(req.body.subject) && !wildcardOk)) {
-		return dynamicResponse(req, res, 400, { error: 'Add a matching domain in the domains page before generating a certficate' });
+	req.body.subject = req.body.subject.trim();
+	if (!req.body.altnames || typeof req.body.altnames !== 'object') {
+		return dynamicResponse(req, res, 400, { error: 'Missing altname(s)' });
 	}
+	req.body.altnames = req.body.altnames.map(x => x.trim());
 
-	if (!req.body.altnames || typeof req.body.altnames !== 'object'
-		|| (req.body.altnames.some(d => !res.locals.user.domains.includes(d)) && !wildcardOk)) {
-		return dynamicResponse(req, res, 400, { error: 'Add all the altnames on the domains page before generating a certificate' });
+	if (!(res.locals.user.domains.includes(req.body.subject)
+		|| (req.body.subject.startsWith('*.') && wildcardAllowed(req.body.subject, res.locals.user.domains)))) {
+		return dynamicResponse(req, res, 400, { error: `You don't have permission to generate a certificate with subject ${req.body.subject}` });
+	}
+	if (!req.body.altnames.every(altName => {
+		return res.locals.user.domains.includes(altName)
+			|| (altName.startsWith('*.') && wildcardAllowed(req.body.subject, res.locals.user.domains))
+	})) {
+		return dynamicResponse(req, res, 400, { error: `You don't have permission to generate a certificate with altname(s) ${req.body.altnames}` });
 	}
 
 	if (req.body.email && (typeof req.body.email !== 'string'

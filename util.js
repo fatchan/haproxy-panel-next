@@ -58,11 +58,11 @@ const fMap = {
 		columnNames: ['Domain', 'Redirect to'],
 	},
 
-//	[process.env.BACKENDS_MAP_NAME]: {
-//		fname: 'Domain Backend Mappings',
-//		description: 'Which internal server haproxy uses for domains',
-//		columnNames: ['Domain', 'Server Name'],
-//	},
+	// [process.env.BACKENDS_MAP_NAME]: {
+		// fname: 'Domain Backend Mappings',
+		// description: 'Which internal server haproxy uses for domains',
+		// columnNames: ['Domain', 'Server Name'],
+	// },
 
 };
 
@@ -105,12 +105,20 @@ module.exports = {
 		return res.status(code).send(data);
 	},
 
-	wildcardCheck: (subject, allowedDomains) => {
-		if (subject.includes('\\')) { throw new Error('Illegal wildcardCheck'); }
-		const wcRegex = new RegExp(`${subject.replace(/\*\./g, "([^ ]*\\.|^)")}$`);
+	//check if list includes domain of a wildcard
+	wildcardAllowed: (domain, allowedDomains) => {
+		if (domain.includes('\\')) { throw new Error('Illegal wildcardAllowed'); }
+		const wcRegex = new RegExp(`${domain.replace(/\*\./g, "([^ ]*\\.|^)")}$`);
 		return allowedDomains.some(d => {
 			return wcRegex.test(d);
 		});
+	},
+
+	//check if a domain matches a wildcard
+	wildcardMatches: (domain, wildcard) => {
+		if (wildcard.includes('\\')) { throw new Error('Illegal wildcardMatches'); }
+		const wcRegex =	new RegExp(`${wildcard.replace(/\*\./g, "^.*\\.")}$`);
+		return wcRegex.test(domain);
 	},
 
 	getApproxSubject: (storageName) => {

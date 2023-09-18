@@ -48,10 +48,18 @@ export default function Certs(props) {
 		e.preventDefault();
 		try {
 			setError(null);
+			const subject = e.target.subject.value.trim();
+			const altnames = e.target.altnames.value.split(/\r?\n/).map(x => x.trim());
+			if (subject.startsWith('*.')
+				&& altnames.every(an => an.startsWith('*.'))) {
+				if (!confirm('Are you sure you want to generate a wildcard certificate without including the non-wildcard domain?')) {
+					return;
+				}
+			}
 			await API.addCert({
 				_csrf: csrf,
-				subject: e.target.subject.value,
-				altnames: e.target.altnames.value.split(/\r?\n/).map(x => x.trim()),
+				subject: subject,
+				altnames: altnames,
 				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
