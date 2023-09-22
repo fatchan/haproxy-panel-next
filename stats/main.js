@@ -1,20 +1,20 @@
 'use strict';
 
 process
-        .on('uncaughtException', console.error)
-        .on('unhandledRejection', console.error);
+	.on('uncaughtException', console.error)
+	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-dotenv.config({ path: '.env' });
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
 
-const redis = require('../redis.js')
-	, Queue = require('bull')
-	, haproxyStatsQueue = new Queue('stats', { redis: {
-		host: process.env.REDIS_HOST || '127.0.0.1',
-		port: process.env.REDIS_PORT || 6379,
-		password: process.env.REDIS_PASS || '',
-		db: 1,
-	}});
+import Queue from 'bull';
+
+const haproxyStatsQueue = new Queue('stats', { w: {
+	host: process.env.REDIS_HOST || '127.0.0.1',
+	port: process.env.REDIS_PORT || 6379,
+	password: process.env.REDIS_PASS || '',
+	db: 1,
+}});
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');

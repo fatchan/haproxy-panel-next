@@ -4,34 +4,34 @@ process
         .on('uncaughtException', console.error)
         .on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-dotenv.config({ path: '.env' });
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
 
-const redis = require('../redis.js')
-	, redlock = require('../redlock.js')
-	, Queue = require('bull')
-	, haproxyStatsQueue = new Queue('stats', { redis: {
-		host: process.env.REDIS_HOST || '127.0.0.1',
-		port: process.env.REDIS_PORT || 6379,
-		password: process.env.REDIS_PASS || '',
-		db: 1,
-	}});
+import * as redlock from '../redlock.js';
+import Queue from 'bull';
+const haproxyStatsQueue = new Queue('stats', { redis: {
+	host: process.env.REDIS_HOST || '127.0.0.1',
+	port: process.env.REDIS_PORT || 6379,
+	password: process.env.REDIS_PASS || '',
+	db: 1,
+}});
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');
 	process.exit(1);
 }
 
-const { InfluxDB, Point } = require('@influxdata/influxdb-client')
-	, OpenAPIClientAxios = require('openapi-client-axios').default
-	, definition = require('../specification_openapiv3.js')
-	, agent = require('../agent.js')
-	, writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
+import { InfluxDB, Point } from '@influxdata/influxdb-client';
+import OpenAPIClientAxios from 'openapi-client-axios';
+import definition from '../specification_openapiv3.js';
+import agent from '../agent.js';
+
+const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
 	, base64Auth = Buffer.from(`${clusterUrls[0].username}:${clusterUrls[0].password}`).toString("base64");
 
 async function fetchStats(host, parameters) {
-	const singleApi = new OpenAPIClientAxios({ definition, axiosConfigDefaults: { httpsAgent: agent, headers: { 'authorization': `Basic ${base64Auth}` } } });
+	const singleApi = new OpenAPIClientAxios.default({ definition, axiosConfigDefaults: { httpsAgent: agent, headers: { 'authorization': `Basic ${base64Auth}` } } });
 	const singleApiInstance = singleApi.initSync();
 	const clusterUrl = new URL(host);
 	singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;

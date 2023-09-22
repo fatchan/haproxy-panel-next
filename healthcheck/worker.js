@@ -1,26 +1,27 @@
 'use strict';
 
 process
-        .on('uncaughtException', console.error)
-        .on('unhandledRejection', console.error);
+	.on('uncaughtException', console.error)
+	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-dotenv.config({ path: '.env' });
-const { isIPv4 } = require('net');
-const db = require('../db.js');
-const redis = require('../redis.js');
-const redlock = require('../redlock.js');
-const Queue = require('bull');
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+import { isIPv4 } from 'net';
+import * as db from '../db.js';
+import * as redis from '../redis.js';
+import redlock from '../redlock.js';
+import Queue from 'bull';
+import https from 'https';
+const httpsAgent = new https.Agent({
+	rejectUnauthorized: false,
+});
+
 const healthCheckQueue = new Queue('healthchecks', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
 	port: process.env.REDIS_PORT || 6379,
 	password: process.env.REDIS_PASS || '',
 	db: 1,
 }});
-const https = require('https');
-const httpsAgent = new https.Agent({
-	rejectUnauthorized: false,
-});
 
 const ignoredErrorCodes = [
 	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
@@ -68,7 +69,7 @@ async function doCheck(domainKey, hkey, record) {
 					console.info('health check for', domainKey, hkey, record.ip, 'ignoring error', e.cause.code);
 					recordHealth = '1';
 				} else {
-					console.warn(e)
+					console.warn(e);
 					console.warn('health check down for', domainKey, hkey, record.ip);
 					recordHealth = '0';
 				}
@@ -76,7 +77,7 @@ async function doCheck(domainKey, hkey, record) {
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 30, 'NX');
 			console.info('fetch()ed health:', domainKey, hkey, record.ip, recordHealth);
 		} else {
-			recordHealth = recordHealth.toString()
+			recordHealth = recordHealth.toString();
 			console.log('cached health:', domainKey, hkey, record.ip, recordHealth);
 		}
 		if (recordHealth === '1') {

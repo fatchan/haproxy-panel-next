@@ -1,13 +1,14 @@
 'use strict';
 
 process
-        .on('uncaughtException', console.error)
-        .on('unhandledRejection', console.error);
+	.on('uncaughtException', console.error)
+	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-dotenv.config({ path: '.env' });
-const redis = require('../redis.js');
-const Queue = require('bull');
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+
+import * as redis from '../redis.js';
+import Queue from 'bull';
 const healthCheckQueue = new Queue('healthchecks', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
 	port: process.env.REDIS_PORT || 6379,

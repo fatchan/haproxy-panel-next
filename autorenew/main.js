@@ -4,16 +4,17 @@ process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-dotenv.config({ path: '.env' });
-const db = require('../db.js');
-const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
-const firstClusterURL = clusterUrls[0];
-const base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString("base64");
-const fetch = require('node-fetch')
-const FormData = require('form-data');
-const agent = require('../agent.js');
-const acme = require('../acme.js');
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+import * as db from '../db.js';
+import FormData from 'form-data';
+import agent from '../agent.js';
+import * as acme from '../acme.js';
+import fetch from 'node-fetch';
+
+const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
+	, firstClusterURL = clusterUrls[0]
+	, base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString('base64');
 
 async function main() {
 	await db.connect();
@@ -55,10 +56,10 @@ async function updateCert(dbCert) {
 			'authorization': `Basic ${base64Auth}`,
 		},
 	}, haproxyCert,
-		{
-			filename: `${subject}.pem`,
-			contentType: 'text/plain',
-		}
+	{
+		filename: `${subject}.pem`,
+		contentType: 'text/plain',
+	}
 	);
 	if (message) {
 		return console.error('Problem renewing', subject, altnames, 'message:', message);
@@ -69,7 +70,7 @@ async function updateCert(dbCert) {
 		altnames: altnames,
 		csr, key, cert, haproxyCert, // cert creation data
 		date,
-	}
+	};
 	if (description) {
 		//may be null due to "already exists", so we keep existing props
 		update = { ...update, description, file, storageName };
@@ -90,11 +91,11 @@ async function loop() {
 		if (expiringCerts.length === 0) {
 			console.log('No certs close to expiry');
 		}
-		for (let c of expiringCerts) {
+		for (const c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
 			await updateCert(c);
 			await new Promise(res => setTimeout(res, 5000));
-		};
+		}
 	} catch(e) {
 		console.error(e);
 		console.log('Sleeping for', 60000);
