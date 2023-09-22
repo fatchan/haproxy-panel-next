@@ -1,5 +1,8 @@
 'use strict';
 
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+
 import Redis from 'ioredis';;
 
 export const client = new Redis({

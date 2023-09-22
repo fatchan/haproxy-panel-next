@@ -29,7 +29,7 @@ async function main() {
 		clusterUrls.forEach(cu => {
 			//group to a certain amount in each array? ehh probs not
 			haproxyStatsQueue.add({ hosts: [cu] }, { removeOnComplete: true });
-		})
+		});
 	} catch(e) {
 		console.error(e);
 	}

@@ -97,6 +97,7 @@ async function getFormattedStats(host) {
 };
 
 async function processHost(host) {
+	console.log(host)
 	try {
 		const hostname = new URL(host).hostname;
 		const { frontendStats, serverStats } = await getFormattedStats(host);
@@ -141,10 +142,10 @@ async function processHost(host) {
 };
 
 async function handleJob(job, done) {
+	console.log('handleJob')
 	const { hosts } = job.data;
 	hosts.forEach(processHost);
 	done();
 }
 
 haproxyStatsQueue.process(handleJob);
-
