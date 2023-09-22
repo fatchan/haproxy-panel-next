@@ -1,17 +1,19 @@
 'use strict';
 
 process
-        .on('uncaughtException', console.error)
-        .on('unhandledRejection', console.error);
+	.on('uncaughtException', console.error)
+	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
-const db = require('./db.js');
-dotenv.config({ path: '.env' });
-const redis = require('./redis.js');
-let nsTemplate = null;
-let soaTemplate = null;
-let aTemplate = null;
-let aaaaTemplate = null;
+import dotenv from 'dotenv';
+import * as db from './db.js';
+await dotenv.config({ path: '.env' });
+import * as redis from './redis.js';
+import { pathToFileURL } from 'node:url';
+const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;
+
+isMain && await db.connect();
+import { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from './templates.js';
+isMain && update();
 
 async function processKey(domainKey) {
 	const domainHashKeys = await redis.client.hkeys(domainKey);
@@ -20,18 +22,18 @@ async function processKey(domainKey) {
 		try {
 			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
-			if (records['a'] && records['a'][0]["t"] === true) {
+			if (records['a'] && records['a'][0]['t'] === true) {
 				records['a'] = JSON.parse(JSON.stringify((await aTemplate())));
 			}
-			if (records['aaaa'] && records['aaaa'][0]["t"] === true) {
+			if (records['aaaa'] && records['aaaa'][0]['t'] === true) {
 				records['aaaa'] = JSON.parse(JSON.stringify((await aaaaTemplate())));
 			}
-			if (records['ns'] && records['ns'][0]["t"] === true) {
+			if (records['ns'] && records['ns'][0]['t'] === true) {
 				const locked = records['ns']['l'] === true;
 				records['ns'] = JSON.parse(JSON.stringify(nsTemplate()));
 				records['ns'].forEach(r => r['l'] = locked);
 			}
-			if (records['soa'] && records['soa']["t"] === true) {
+			if (records['soa'] && records['soa']['t'] === true) {
 				const locked = records['soa']['l'] === true;
 				records['soa'] = JSON.parse(JSON.stringify(soaTemplate()))[0];
 				records['soa']['l'] = locked;
@@ -44,7 +46,7 @@ async function processKey(domainKey) {
 	}));
 }
 
-async function update() {
+export default async function update() {
 	let allKeys = [];
 	const stream = redis.client.scanStream({
 		match: 'dns:*',
@@ -55,27 +57,11 @@ async function update() {
 	});
 	stream.on('end', async () => {
 		await Promise.all(allKeys.map(async k => processKey(k)))
-			.catch(e => console.error(e))
-		if (require.main === module) {
-			redis.close();
-		}
+			.catch(e => console.error(e));
+		isMain && redis.close();
 	});
 	stream.on('error', (err) => {
 		console.err(err);
-		if (require.main === module) {
-			redis.close();
-		}
+		isMain && redis.close();
 	});
-}
-
-module.exports = update;
-
-if (require.main === module) {
-	(async () => {
-		await db.connect();
-		({ nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('./templates.js'));
-	    update();
-	})();
-} else {
-	({ nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('./templates.js'));
 }

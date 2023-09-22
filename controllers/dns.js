@@ -1,15 +1,14 @@
-const db = require('../db.js');
-const redis = require('../redis.js');
-const url = require('url');
-const { isIPv4, isIPv6 } = require('net');
-const { dynamicResponse } = require('../util.js');
-const { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } = require('../templates.js');
+import * as db from '../db.js';
+import * as redis from '../redis.js';
+import { isIPv4, isIPv6 } from 'node:net';
+import { dynamicResponse } from '../util.js';
+import { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
 
 /**
 * GET /dns/:domain
 * domains records page
 */
-exports.dnsDomainPage = async (app, req, res) => {
+export async function dnsDomainPage(app, req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
@@ -28,7 +27,7 @@ exports.dnsDomainPage = async (app, req, res) => {
 * GET /dns/:domain/:zone/:type
 * record set page
 */
-exports.dnsRecordPage = async (app, req, res) => {
+export async function dnsRecordPage(app, req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
@@ -41,7 +40,7 @@ exports.dnsRecordPage = async (app, req, res) => {
 		recordSet = recordSetRaw[req.params.type];
 		recordSet = Array.isArray(recordSet) ? recordSet : (recordSet ? [recordSet] : []);
 	}
-	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||"name"}/${req.params.type||"a"}`, {
+	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||'name'}/${req.params.type||'a'}`, {
 		csrf: req.csrfToken(),
 		recordSet,
 	});
@@ -51,7 +50,7 @@ exports.dnsRecordPage = async (app, req, res) => {
 * GET /dns/:domain.json
 * domain record json
 */
-exports.dnsDomainJson = async (req, res) => {
+export async function dnsDomainJson(req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
@@ -71,7 +70,7 @@ exports.dnsDomainJson = async (req, res) => {
 * GET /dns/:domain/:zone/:type.json
 * record set json
 */
-exports.dnsRecordJson = async (req, res) => {
+export async function dnsRecordJson(req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
@@ -91,12 +90,11 @@ exports.dnsRecordJson = async (req, res) => {
 	});
 };
 
-
 /**
 * POST /post/:domain/:zone/:type/delete
 * delete record
 */
-exports.dnsRecordDelete = async (req, res) => {
+export async function dnsRecordDelete(req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 302, { redirect: '/domains' });
 	}
@@ -119,7 +117,7 @@ exports.dnsRecordDelete = async (req, res) => {
 * POST /post/:domain/:zone/:type
 * add/update record
 */
-exports.dnsRecordUpdate = async (req, res) => {
+export async function dnsRecordUpdate(req, res) {
 	if (!res.locals.user.domains.includes(req.params.domain)) {
 		return dynamicResponse(req, res, 403, { error: 'No permission for this domain' });
 	}
@@ -153,7 +151,7 @@ exports.dnsRecordUpdate = async (req, res) => {
 			type = 'aaaa';
 			break;
 		default: {
-			for (let i = 0; i < (type == "soa" ? 1 : 100); i++) {
+			for (let i = 0; i < (type == 'soa' ? 1 : 100); i++) {
 				let {
 					[`value_${i}`]: value,
 					//geo
@@ -180,9 +178,9 @@ exports.dnsRecordUpdate = async (req, res) => {
 				} = req.body;
 				if (!value) { break; }
 				try {
-					if ((geok && !["cn", "cc"].includes(geok))
-						|| (sel && !["0", "1", "2", "3"].includes(sel))
-						|| (bsel && !["0", "1", "2", "3", "4", "5", "6"].includes(bsel))
+					if ((geok && !['cn', 'cc'].includes(geok))
+						|| (sel && !['0', '1', '2', '3'].includes(sel))
+						|| (bsel && !['0', '1', '2', '3', '4', '5', '6'].includes(bsel))
 						|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
 						|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
 						|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))
@@ -216,35 +214,35 @@ exports.dnsRecordUpdate = async (req, res) => {
 				}
 				let record;
 				switch(type) {
-					case "a":
+					case 'a':
 						if (!isIPv4(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
 						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
 						break;
-					case "aaaa":
+					case 'aaaa':
 						if (!isIPv6(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
 						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
 						break;
-					case "txt":
+					case 'txt':
 						record = { ttl, text: value };
 						break;
-					case "cname":
-					case "ns":
+					case 'cname':
+					case 'ns':
 						record = { ttl, host: value };
 						break;
-					case "mx":
+					case 'mx':
 						record = { ttl, host: value, preference };
 						break;
-					case "srv":
+					case 'srv':
 						record = { ttl, target: value, port, weight, priority };
 						break;
-					case "caa":
+					case 'caa':
 						record = { ttl, value, flag, tag };
 						break;
-					case "soa":
+					case 'soa':
 						record = { ttl, ns: value, MBox, refresh, retry, expire, minttl: 180 };
 						break;
 					default:
@@ -262,9 +260,9 @@ exports.dnsRecordUpdate = async (req, res) => {
 		recordSetRaw = {};
 	} else if (recordSetRaw[type] && recordSetRaw[type].l === true
 		|| (Array.isArray(recordSetRaw[type]) && recordSetRaw[type][0].l === true)) {
-		return dynamicResponse(req, res, 400, { error: "You can't edit or overwrite locked records" });
+		return dynamicResponse(req, res, 400, { error: 'You can\'t edit or overwrite locked records' });
 	}
-	if (type == "soa") {
+	if (type == 'soa') {
 		template = template || (recordSetRaw[type] && recordSetRaw[type]['t'] === true);
 		recordSetRaw[type] = records[0];
 		recordSetRaw[type]['t'] = template;

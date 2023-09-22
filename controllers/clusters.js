@@ -1,25 +1,25 @@
-const db = require('../db.js');
-const { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } = require('../util.js');
+import * as db from '../db.js';
+import { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } from '../util.js';
 
-exports.clustersPage = async (app, req, res, next) => {
+export async function clustersPage(app, req, res, next) {
 	return app.render(req, res, '/clusters', {
 		csrf: req.csrfToken(),
 	});
 };
 
-exports.clustersJson = async (req, res, next) => {
+export async function clustersJson(req, res, next) {
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
 	});
-}
+};
 
 /**
  * POST /cluster
  * set active cluster
  */
-exports.setCluster = async (req, res, next) => {
-	if (res.locals.user.username !== "admin") {
+export async function setCluster(req, res, next) {
+	if (res.locals.user.username !== 'admin') {
 		return dynamicResponse(req, res, 403, { error: 'Changing cluster is only supported on enterprise plans' });
 	}
 	if (req.body == null || req.body.cluster == null) {
@@ -31,7 +31,7 @@ exports.setCluster = async (req, res, next) => {
 		return dynamicResponse(req, res, 404, { error: 'Invalid cluster' });
 	}
 	try {
-		await db.db.collection('accounts')
+		await db.db().collection('accounts')
 			.updateOne({_id: res.locals.user.username}, {$set: {activeCluster: req.body.cluster }});
 	} catch (e) {
 		return next(e);
@@ -43,8 +43,8 @@ exports.setCluster = async (req, res, next) => {
  * POST /cluster/add
  * add cluster
  */
-exports.addCluster = async (req, res, next) => {
-	if (res.locals.user.username !== "admin") {
+export async function addCluster(req, res, next) {
+	if (res.locals.user.username !== 'admin') {
 		return dynamicResponse(req, res, 403, { error: 'Adding clusters is only supported on enterprise plans' });
 	}
 	if (!req.body || !req.body.cluster
@@ -53,7 +53,7 @@ exports.addCluster = async (req, res, next) => {
 		return dynamicResponse(req, res, 400, { error: 'Invalid cluster' });
 	}
 	try {
-		await db.db.collection('accounts')
+		await db.db().collection('accounts')
 			.updateOne({_id: res.locals.user.username}, {$addToSet: {clusters: req.body.cluster }});
 	} catch (e) {
 		return next(e);
@@ -65,8 +65,8 @@ exports.addCluster = async (req, res, next) => {
  * POST /cluster/delete
  * delete cluster
  */
-exports.deleteClusters = async (req, res, next) => {
-	if (res.locals.user.username !== "admin") {
+export async function deleteClusters(req, res, next) {
+	if (res.locals.user.username !== 'admin') {
 		return dynamicResponse(req, res, 403, { error: 'Removing clusters is only supported on enterprise plans' });
 	}
 	//TODO: warning modal and extra "confirm" param before deleting cluster
@@ -85,7 +85,7 @@ exports.deleteClusters = async (req, res, next) => {
 		newActiveCluster = 0;
 	}
 	try {
-		await db.db.collection('accounts')
+		await db.db().collection('accounts')
 			.updateOne({_id: res.locals.user.username}, {$set: {clusters: filteredClusters, activeCluster: newActiveCluster }});
 	} catch (e) {
 		return next(e);

@@ -36,7 +36,7 @@ const deleteLokiLabel = (value, label="hh") => fetch(`${process.env.LOKI_HOST}lo
 async function loop() {
 	try {
 		const lokiDomains = await getLokiDomains();
-		let userDomains = await db.db.collection('accounts')
+		let userDomains = await db.db().collection('accounts')
 			.find({}, { projection: { domains: 1 } })
 			.toArray();
 		userDomains = userDomains.reduce((acc, account) => {

@@ -22,7 +22,7 @@ async function main() {
 }
 
 function getCertsOlderThan(days=60) {
-	return db.db.collection('certs')
+	return db.db().collection('certs')
 		.find({
 			// _id: '*.zeroddos.net',
 			date: {
@@ -74,7 +74,7 @@ async function updateCert(dbCert) {
 		//may be null due to "already exists", so we keep existing props
 		update = { ...update, description, file, storageName };
 	}
-	await db.db.collection('certs')
+	await db.db().collection('certs')
 		.updateOne({
 			'_id': subject,
 		}, {

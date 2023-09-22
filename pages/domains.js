@@ -4,7 +4,7 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
-import * as API from '../api.js'
+import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import { wildcardCheck, wildcardMatches } from '../util.js';
 
@@ -16,18 +16,18 @@ export default function Domains(props) {
 	const [filter, setFilter] = useState('');
 
 	useEffect(() => {
-		if (!state.user) {
+		if (!state.user || state.certs == null) {
 			API.getDomains(dispatch, setError, router);
 		}
-	}, [state.user, router]);
+	}, [state.user, state.certs, router]);
 
-	if (!state.user) {
+	if (!state.user || state.certs == null) {
 		return (
-			<div className="d-flex flex-column">
+			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
-				<div className="text-center mb-4">
-					<div className="spinner-border mt-5" role="status">
-						<span className="visually-hidden">Loading...</span>
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
 					</div>
 				</div>
 			</div>
@@ -56,61 +56,57 @@ export default function Domains(props) {
 		//.sort((a, b) => a.localeCompare(b))
 		.filter(d => d.includes(filter))
 		.forEach((d, i) => {
-		const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
-		const wildcardCert = certs.find(c => {
-			return ((c.subject.startsWith('*') && wildcardMatches(d, c.subject))
+			const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
+			const wildcardCert = certs.find(c => {
+				return ((c.subject.startsWith('*') && wildcardMatches(d, c.subject))
 				|| c.altnames.some(an => an.startsWith('*') && wildcardMatches(d, an)));
-		});
-		const isSubdomain = d.split('.').length > 2;
-		let daysRemaining;
-		if (domainCert || wildcardCert) {
-			const certDate = (domainCert || wildcardCert).date;
-			const creation = new Date(certDate);
-			const expiry = creation.setDate(creation.getDate()+90);
-			daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
-		}
-		const tableRow = (
-			<tr key={i} className="align-middle">
-				<td className="text-left" style={{width:0}}>
-					<a className="btn btn-sm btn-danger" onClick={() => {
-						if (window.confirm(`Are you sure you want to delete "${d}"?`)) {
-							deleteDomain(csrf, d);
-						}
-					}}>
-						<i className="bi-trash-fill pe-none" width="16" height="16" />
-					</a>
-					{!isSubdomain && <Link href={`/dns/${d}`} passHref>
-						<a className="btn btn-sm btn-primary ms-2">
-							<i className="bi-pencil pe-none" width="16" height="16" />
+			});
+			const isSubdomain = d.split('.').length > 2;
+			let daysRemaining;
+			if (domainCert || wildcardCert) {
+				const certDate = (domainCert || wildcardCert).date;
+				const creation = new Date(certDate);
+				const expiry = creation.setDate(creation.getDate()+90);
+				daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
+			}
+			const tableRow = (
+				<tr key={i} className='align-middle'>
+					<td className='text-left' style={{width:0}}>
+						<a className='btn btn-sm btn-danger' onClick={() => {
+							if (window.confirm(`Are you sure you want to delete "${d}"?`)) {
+								deleteDomain(csrf, d);
+							}
+						}}>
+							<i className='bi-trash-fill pe-none' width='16' height='16' />
 						</a>
-					</Link>}
-				</td>
-				<td>
-					{d}
-					{(domainCert || wildcardCert) && <a target="_blank" rel="noreferrer" href={`https://${d}`}>
-						<i className="bi-box-arrow-up-right pe-none ms-1" width="12" height="12" style={{fontSize: '0.8rem'}} />
-					</a>}
-				</td>
-				<td>
-					{(domainCert || wildcardCert)
-						? <Link href={`/certs#${(domainCert||wildcardCert).storageName}`}>
-							<a className="text-success">
-								<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width="16" height="16" />
+						{!isSubdomain && <Link href={`/dns/${d}`} passHref className='btn btn-sm btn-primary ms-2'>
+							<i className='bi-pencil pe-none' width='16' height='16' />
+						</Link>}
+					</td>
+					<td>
+						{d}
+						{(domainCert || wildcardCert) && <a target='_blank' rel='noreferrer' href={`https://${d}`}>
+							<i className='bi-box-arrow-up-right pe-none ms-1' width='12' height='12' style={{fontSize: '0.8rem'}} />
+						</a>}
+					</td>
+					<td>
+						{(domainCert || wildcardCert)
+							? <Link href={`/certs#${(domainCert||wildcardCert).storageName}`} className='text-success'>
+								<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width='16' height='16' />
 								{(domainCert||wildcardCert).storageName}
 								{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
-							</a>
-						</Link>
-						: <span>
+							</Link>
+							: <span>
 							No Certificate
-						</span>}
-				</td>
-				<td suppressHydrationWarning={true}>
-					{daysRemaining ? `${daysRemaining} days` : '-'}
-				</td>
-			</tr>
-		);
-		isSubdomain ? subdomainList.push(tableRow) : domainList.push(tableRow)
-	});
+							</span>}
+					</td>
+					<td suppressHydrationWarning={true}>
+						{daysRemaining ? `${daysRemaining} days` : '-'}
+					</td>
+				</tr>
+			);
+			isSubdomain ? subdomainList.push(tableRow) : domainList.push(tableRow);
+		});
 
 	return (
 		<>
@@ -119,18 +115,18 @@ export default function Domains(props) {
 				<title>Domains</title>
 			</Head>
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				Domains:
 			</h5>
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 			
 			{/* Domains table */}
-			<div className="table-responsive">
-				<table className="table text-nowrap">
+			<div className='table-responsive'>
+				<table className='table text-nowrap'>
 					<tbody>
 
-						{domainList && domainList.length > 0 && <tr className="align-middle">
+						{domainList && domainList.length > 0 && <tr className='align-middle'>
 							<th/>
 							<th>
 								Domain
@@ -144,22 +140,22 @@ export default function Domains(props) {
 						</tr>}
 
 						{domainList}
-						{subdomainList.length > 0 && <tr className="align-middle">
-							<th colSpan="4">
+						{subdomainList.length > 0 && <tr className='align-middle'>
+							<th colSpan='4'>
 								Subdomains:
 							</th>
 						</tr>}
 						{subdomainList}
 
 						{/* Add new domain form */}
-						<tr className="align-middle">
-							<td className="col-1 text-center" colSpan="4">
-								<form className="d-flex" onSubmit={addDomain} action="/forms/domain/add" method="post">
-									<input type="hidden" name="_csrf" value={csrf} />
-									<button className="btn btn-sm btn-success" type="submit">
-										<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<tr className='align-middle'>
+							<td className='col-1 text-center' colSpan='4'>
+								<form className='d-flex' onSubmit={addDomain} action='/forms/domain/add' method='post'>
+									<input type='hidden' name='_csrf' value={csrf} />
+									<button className='btn btn-sm btn-success' type='submit'>
+										<i className='bi-plus-lg pe-none' width='16' height='16' />
 									</button>
-									<input className="form-control ms-3" type="text" name="domain" placeholder="domain e.g. example.com" required />
+									<input className='form-control ms-3' type='text' name='domain' placeholder='domain e.g. example.com' required />
 								</form>
 							</td>
 						</tr>
@@ -168,10 +164,10 @@ export default function Domains(props) {
 				</table>
 			</div>
 
-			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
+			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
-			<BackButton to="/account" />
+			<BackButton to='/account' />
 
 		</>
 	);
@@ -179,5 +175,5 @@ export default function Domains(props) {
 }
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user || null, ...query } }
+	return { props: { user: res.locals.user || null, ...query } };
 }

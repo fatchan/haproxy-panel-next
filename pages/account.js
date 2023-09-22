@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
-import LoadingPlaceholder from '../components/LoadingPlaceholder.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
@@ -15,14 +14,6 @@ export default function Account(props) {
 
 	useEffect(() => {
 		API.getAccount(dispatch, setError, router);
-	}, []);
-
-	const loadingSection = useMemo(() => {
-		return (
-			<div className="list-group-item list-group-item-action d-flex align-items-start">
-				<LoadingPlaceholder />
-			</div>
-		);
 	}, []);
 
 	let innerData;
@@ -38,7 +29,7 @@ export default function Account(props) {
 		const isAdmin = user.username === 'admin';
 
 		// Next cluster number for > browse button
-		const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0
+		const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0;
 
 		// Links to each map and bubble/pill for map counts
 		const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
@@ -59,15 +50,15 @@ export default function Account(props) {
 			<>
 
 				{/* Global overide */}
-				<div className="list-group-item d-flex align-items-center">
-					<div className="ms-2 me-auto d-flex align-items-center gap-2">
-						<span className="fw-bold">
+				<div className='list-group-item d-flex align-items-center'>
+					<div className='ms-2 me-auto d-flex align-items-center gap-2'>
+						<span className='fw-bold'>
 							Global Override
 						</span>
 					</div>
-					<form onSubmit={toggleGlobal} action="/forms/global/toggle" method="post" className="me-2">
-						<input type="hidden" name="_csrf" value={csrf} />
-						<input className="btn btn-sm btn-primary" type="submit" value="Toggle" />
+					<form onSubmit={toggleGlobal} action='/forms/global/toggle' method='post' className='me-2'>
+						<input type='hidden' name='_csrf' value={csrf} />
+						<input className='btn btn-sm btn-primary' type='submit' value='Toggle' />
 					</form>
 					<div className={`badge rounded-pill bg-${globalAcl?'success':'dark'}`}>
 						{globalAcl?'ON':'OFF'}
@@ -107,76 +98,54 @@ export default function Account(props) {
 								<input type="hidden" name="cluster" value={nextCluster}/>
 								<input className="btn btn-primary px-2 py-0" type="submit" value="&gt;" />
 							</form>
-							<Link href="/clusters">
-								<a className="btn btn-success px-2 py-0 ms-2" style={{ maxHeight: "1.6em" }}>
-									+
-								</a>
+							<Link href="/clusters" className="btn btn-success px-2 py-0 ms-2" style={{ maxHeight: "1.6em" }}>
+								+
 							</Link>
 						</span>
 					</div>
 				</div>*/}
 
 				{/* Domains */}
-				<Link href="/domains">
-					<a className="list-group-item list-group-item-action d-flex align-items-start">
-						<div className="ms-2 me-auto">
-							<div className="fw-bold">
+				<Link href='/domains' className='list-group-item list-group-item-action d-flex align-items-start'>
+					<div className='ms-2 me-auto'>
+						<div className='fw-bold'>
 								Domains
-								<span className="fw-normal">
-									{' '}- Domains you have permission over
-								</span>
-							</div>
+							<span className='fw-normal'>
+								{' '}- Domains you have permission over
+							</span>
 						</div>
-						<div className="badge bg-primary rounded-pill">
-							{user.domains.filter(x => x.split('.').length <= 2).length}
-						</div>
-					</a>
+					</div>
+					<div className='badge bg-primary rounded-pill'>
+						{user.domains.filter(x => x.split('.').length <= 2).length}
+					</div>
 				</Link>
 
 				{/* HTTPS certificates */}
-				<Link href="/certs">
-					<a className="list-group-item list-group-item-action d-flex align-items-start">
-						<div className="ms-2 me-auto">
-							<div className="fw-bold">
+				<Link href='/certs' className='list-group-item list-group-item-action d-flex align-items-start'>
+					<div className='ms-2 me-auto'>
+						<div className='fw-bold'>
 								HTTPS Certificates
-								<span className="fw-normal">
-									{' '}- Generated certs for your domains
-								</span>
-							</div>
+							<span className='fw-normal'>
+								{' '}- Generated certs for your domains
+							</span>
 						</div>
-						<div className="badge bg-primary rounded-pill">
-							{user.numCerts}
-						</div>
-					</a>
+					</div>
+					<div className='badge bg-primary rounded-pill'>
+						{user.numCerts}
+					</div>
 				</Link>
 
 				{/* Origin CSR */}
-				<Link href="/csr">
-					<a className="list-group-item list-group-item-action d-flex align-items-start">
-						<div className="ms-2 me-auto">
-							<div className="fw-bold">
+				<Link href='/csr' className='list-group-item list-group-item-action d-flex align-items-start'>
+					<div className='ms-2 me-auto'>
+						<div className='fw-bold'>
 								Origin CSR
-								<span className="fw-normal">
-									{' '}- Sign CSR to get certs for your origins
-								</span>
-							</div>
+							<span className='fw-normal'>
+								{' '}- Sign CSR to get certs for your origins
+							</span>
 						</div>
-					</a>
+					</div>
 				</Link>
-
-				{/* Statistics 
-				<Link href="/stats">
-					<a className="list-group-item list-group-item-action d-flex align-items-start">
-						<div className="ms-2 me-auto">
-							<div className="fw-bold">
-								Statistics
-								<span className="fw-normal">
-									{' '}- Statistics from cluster servers
-								</span>
-							</div>
-						</div>
-					</a>
-				</Link>*/}
 
 				{/* Map links */}
 				{mapLinks}
@@ -187,9 +156,14 @@ export default function Account(props) {
 	} else {
 
 		innerData = (
-			<>
-				{Array(12).fill(loadingSection)}
-			</>
+			<div className='d-flex flex-column'>
+				{error && <ErrorAlert error={error} />}
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
+					</div>
+				</div>
+			</div>
 		);
 
 	}
@@ -203,20 +177,20 @@ export default function Account(props) {
 
 			{error && <ErrorAlert error={error} />}
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				Account:
 			</h5>
 
-			<div className="list-group col-sm-12 col-xl-8 mx-auto">
+			<div className='list-group col-sm-12 col-xl-8 mx-auto'>
 
-			{innerData}
+				{innerData}
 
 			</div>
 
 		</>
-	)
+	);
 };
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user || null, ...query } }
+	return { props: { user: res.locals.user || null, ...query } };
 };

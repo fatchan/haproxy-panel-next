@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
-import * as API from '../api.js'
+import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import NProgress from 'nprogress';
 
@@ -31,11 +31,11 @@ export default function Csr(props) {
 
 	if (!state.user) {
 		return (
-			<div className="d-flex flex-column">
+			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
-				<div className="text-center mb-4">
-					<div className="spinner-border mt-5" role="status">
-						<span className="visually-hidden">Loading...</span>
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
 					</div>
 				</div>
 			</div>
@@ -55,7 +55,7 @@ export default function Csr(props) {
 				<title>Certificate Signing Request</title>
 			</Head>
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				Certificate Signing Request:
 			</h5>
 
@@ -63,38 +63,38 @@ export default function Csr(props) {
 				To generate a certificate signing request for your domain and/or subdomain(s):
 				<div>
 					<code>
-						{`openssl req -newkey rsa:4096 -new -nodes -subj "/CN=`}<strong>yourdomain.com</strong>{`/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:`}<strong>yourdomain.com</strong>{`,DNS:`}<strong>www.yourdomain.com</strong>{`"))`}
+						{'openssl req -newkey rsa:4096 -new -nodes -subj "/CN='}<strong>yourdomain.com</strong>{'/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:'}<strong>yourdomain.com</strong>{',DNS:'}<strong>www.yourdomain.com</strong>{'"))'}
 					</code>
 				</div>
 			</p>
 
 			{/* Verify CSR form */}
-			<div className="list-group-item list-group my-2 pb-4">
-				<form onSubmit={verifyCSR} action="/forms/csr/verify" method="post">
-					<input type="hidden" name="_csrf" value={csrf} />
-					<div className="mb-2">
-						<label className="form-label w-100">Paste your origin.csr file here:
+			<div className='list-group-item list-group my-2 pb-4'>
+				<form onSubmit={verifyCSR} action='/forms/csr/verify' method='post'>
+					<input type='hidden' name='_csrf' value={csrf} />
+					<div className='mb-2'>
+						<label className='form-label w-100'>Paste your origin.csr file here:
 							<textarea
-								className="form-control"
-								name="csr"
-								placeholder={"-----BEGIN CERTIFICATE REQUEST-----\n..."}
+								className='form-control'
+								name='csr'
+								placeholder={'-----BEGIN CERTIFICATE REQUEST-----\n...'}
 								rows={4}
 								required />
 						</label>
 					</div>
-					<button className="btn btn-sm btn-success" type="submit">
-						<i className="bi-plus-lg pe-1" width="16" height="16" />
+					<button className='btn btn-sm btn-success' type='submit'>
+						<i className='bi-plus-lg pe-1' width='16' height='16' />
 						Verify CSR
 					</button>
 				</form>
 			</div>
 
-			{csr && <div className="list-group-item list-group my-2 pb-4">
-				<div className="mb-2">
-					<label className="form-label w-100">Here&apos;s your certificate:
+			{csr && <div className='list-group-item list-group my-2 pb-4'>
+				<div className='mb-2'>
+					<label className='form-label w-100'>Here&apos;s your certificate:
 						<textarea
-							className="form-control"
-							name="csr"
+							className='form-control'
+							name='csr'
 							value={csr}
 							rows={10}
 							readOnly
@@ -103,10 +103,10 @@ export default function Csr(props) {
 				</div>
 			</div>}
 
-			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
+			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
-			<BackButton to="/account" />
+			<BackButton to='/account' />
 
 		</>
 	);
@@ -114,5 +114,5 @@ export default function Csr(props) {
 }
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user || null, ...query } }
+	return { props: { user: res.locals.user || null, ...query } };
 }

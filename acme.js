@@ -1,12 +1,12 @@
 'use strict';
 
-const fs = require('fs').promises;
-const acme = require('acme-client');
-const dev = process.env.NODE_ENV !== 'production';
-const redis = require('./redis.js');
-const redlock = require('./redlock.js');
-const psl = require('psl');
+import fs from 'fs';
+import acme from 'acme-client';
+import * as redis from './redis.js';
+import * as redlock from './redlock.js';
+import psl from 'psl';
 
+const dev = process.env.NODE_ENV !== 'production';
 
 /**
  * Function used to satisfy an ACME challenge
@@ -35,7 +35,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 	else if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
-		let subdomain = `_acme-challenge`;
+		let subdomain = '_acme-challenge';
 		if (parsed.subdomain && parsed.subdomain.length > 0) {
 			subdomain += `.${parsed.subdomain}`;
 		}
@@ -58,7 +58,6 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 		}
 	}
 }
-
 
 /**
  * Function used to remove an ACME challenge response
@@ -83,7 +82,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 	else if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
-		let subdomain = `_acme-challenge`;
+		let subdomain = '_acme-challenge';
 		if (parsed.subdomain && parsed.subdomain.length > 0) {
 			subdomain += `.${parsed.subdomain}`;
 		}
@@ -110,39 +109,32 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 	}
 }
 
+let _client;
 
+export async function init() {
+	_client = new acme.Client({
+		directoryUrl: dev ? acme.directory.letsencrypt.staging : acme.directory.letsencrypt.production,
+		accountKey: await acme.crypto.createPrivateKey()
+	});
+}
 
-module.exports = {
-
-	client: null,
-
-	init: async function() {
-		/* Init client */
-		module.exports.client = new acme.Client({
-			directoryUrl: dev ? acme.directory.letsencrypt.staging : acme.directory.letsencrypt.production,
-			accountKey: await acme.crypto.createPrivateKey()
-		});
-	},
-
-	generate: async function(domain, altnames, email, challengePriority=['http-01', 'dns-01']) {
-		/* Create CSR */
-		const [key, csr] = await acme.crypto.createCsr({
-			commonName: domain,
-			altNames: altnames,
-		});
-		/* Certificate */
-		const cert = await module.exports.client.auto({
-			csr,
-			email,
-			termsOfServiceAgreed: true,
-			skipChallengeVerification: true,
-			challengeCreateFn,
-			challengeRemoveFn,
-			challengePriority,
-		});
-		/* Done */
-		const haproxyCert = `${cert.toString()}\n${key.toString()}`;
-		return { key, csr, cert, haproxyCert, date: new Date() };
-	},
-
-};
+export async function generate(domain, altnames, email, challengePriority=['http-01', 'dns-01']) {
+	/* Create CSR */
+	const [key, csr] = await acme.crypto.createCsr({
+		commonName: domain,
+		altNames: altnames,
+	});
+	/* Certificate */
+	const cert = await _client.auto({
+		csr,
+		email,
+		termsOfServiceAgreed: true,
+		skipChallengeVerification: true,
+		challengeCreateFn,
+		challengeRemoveFn,
+		challengePriority,
+	});
+	/* Done */
+	const haproxyCert = `${cert.toString()}\n${key.toString()}`;
+	return { key, csr, cert, haproxyCert, date: new Date() };
+}

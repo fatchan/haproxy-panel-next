@@ -1,7 +1,9 @@
-const url = require('url');
+import url from 'url';
+
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
 const fMap = {
-
 	[process.env.HOSTS_MAP_NAME]: {
 		fname: 'Backends',
 		description: 'Backend IP mappings for domains',
@@ -18,7 +20,13 @@ const fMap = {
 	[process.env.DDOS_CONFIG_MAP_NAME]: {
 		fname: 'Protection Settings',
 		description: 'Customise protection settings on a per-domain basis',
-		columnNames: ['Domain/Path', 'Difficulty', 'POW Type', 'Expiry', 'Lock cookie to IP'],
+		columnNames: [
+			'Domain/Path',
+			'Difficulty',
+			'POW Type',
+			'Expiry',
+			'Lock cookie to IP',
+		],
 		columnKeys: ['pd', 'pt', 'cex', 'cip'],
 	},
 
@@ -42,7 +50,8 @@ const fMap = {
 
 	[process.env.MAINTENANCE_MAP_NAME]: {
 		fname: 'Maintenance Mode',
-		description: 'Disable proxying and show maintenance page for selected domains',
+		description:
+      'Disable proxying and show maintenance page for selected domains',
 		columnNames: ['Domain', ''],
 	},
 
@@ -57,85 +66,80 @@ const fMap = {
 		description: 'Redirect one domain to another, stripping path',
 		columnNames: ['Domain', 'Redirect to'],
 	},
-
-	// [process.env.BACKENDS_MAP_NAME]: {
-		// fname: 'Domain Backend Mappings',
-		// description: 'Which internal server haproxy uses for domains',
-		// columnNames: ['Domain', 'Server Name'],
-	// },
-
+  // [process.env.BACKENDS_MAP_NAME]: {
+  // fname: 'Domain Backend Mappings',
+  // description: 'Which internal server haproxy uses for domains',
+  // columnNames: ['Domain', 'Server Name'],
+  // },
 };
 
-module.exports = {
+export function makeArrayIfSingle(obj) {
+	return !Array.isArray(obj) ? [obj] : obj;
+}
 
-	fMap,
+export function validClustersString(string) {
+	return !string.split(',').some((c) => {
+		const cUrl = url.parse(c);
+		return (cUrl.protocol !== 'http:' || !cUrl.hostname);
+	});
+}
 
-	makeArrayIfSingle: (obj) => !Array.isArray(obj) ? [obj] : obj,
+export function extractMap(item) {
+	const name = item.file &&
+    item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
+	if (!fMap[name]) {return null;}
+	const count = item.description &&
+    item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
+	return {
+		name,
+		count,
+		id: item.id,
+		...fMap[name],
+	};
+}
 
-	validClustersString: (string) => {
-		return !string.split(',').some(c => {
-			const cUrl = url.parse(c);
-			return (cUrl.protocol !== 'http:' || !cUrl.hostname)
-		});
-	},
+export function dynamicResponse(req, res, code, data) {
+	const isRedirect = code === 302;
+	if (req.headers && req.headers['content-type'] === 'application/json') {
+		return res
+			.status(isRedirect ? 200 : code)
+			.json(data);
+	}
+	if (isRedirect) {
+		return res.redirect(data.redirect);
+	}
+	return res.status(code).send(data);
+}
 
-	extractMap: (item) => {
-		const name = item.file && item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
-		if (!fMap[name]) { return null; }
-		const count = item.description && item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
-		return {
-			name,
-			count,
-			id: item.id,
-			...fMap[name],
-		};
-	},
+//check if list includes domain of a wildcard
+export function wildcardAllowed(domain, allowedDomains) {
+	if (domain.includes('\\')) {throw new Error('Illegal wildcardAllowed');}
+	const wcRegex = new RegExp(`${domain.replace(/\*\./g, '([^ ]*\\.|^)')}$`);
+	return allowedDomains.some((d) => {
+		return wcRegex.test(d);
+	});
+}
 
-	dynamicResponse: (req, res, code, data) => {
-		const isRedirect = code === 302;
-		if (req.headers && req.headers['content-type'] === 'application/json') {
-			return res
-				.status(isRedirect ? 200 : code)
-				.json(data);
-		}
-		if (isRedirect) {
-			return res.redirect(data.redirect);
-		}
-		//TODO: pass through app (bind to middleware) and app.render an "error" page for nojs users?
-		return res.status(code).send(data);
-	},
+//check if a domain matches a wildcard
+export function wildcardMatches(domain, wildcard) {
+	if (wildcard.includes('\\')) {throw new Error('Illegal wildcardMatches');}
+	const wcRegex = new RegExp(`${wildcard.replace(/\*\./g, '^.*\\.')}$`);
+	return wcRegex.test(domain);
+}
 
-	//check if list includes domain of a wildcard
-	wildcardAllowed: (domain, allowedDomains) => {
-		if (domain.includes('\\')) { throw new Error('Illegal wildcardAllowed'); }
-		const wcRegex = new RegExp(`${domain.replace(/\*\./g, "([^ ]*\\.|^)")}$`);
-		return allowedDomains.some(d => {
-			return wcRegex.test(d);
-		});
-	},
+export function getApproxSubject(storageName) {
+	let ret = storageName
+		.replaceAll('_', '.')
+		.substr(0, storageName.length - 4);
+	if (ret.startsWith('.')) {
+		ret = ret.substring(1);
+	}
+	return ret;
+}
 
-	//check if a domain matches a wildcard
-	wildcardMatches: (domain, wildcard) => {
-		if (wildcard.includes('\\')) { throw new Error('Illegal wildcardMatches'); }
-		const wcRegex =	new RegExp(`${wildcard.replace(/\*\./g, "^.*\\.")}$`);
-		return wcRegex.test(domain);
-	},
-
-	getApproxSubject: (storageName) => {
-		let ret = storageName
-			.replaceAll('_', '.')
-			.substr(0, storageName.length-4);
-		if (ret.startsWith('.')) {
-			ret = ret.substring(1);
-		}
-		return ret;
-	},
-
-	filterCertsByDomain: (certs, allowedDomains) => {
-		return certs.filter(c => {
-			let approxSubject = module.exports.getApproxSubject(c.storage_name);
-			return allowedDomains.includes(approxSubject);
-		});
-	},
-
-};
+export function filterCertsByDomain(certs, allowedDomains) {
+	return certs.filter((c) => {
+		const approxSubject = module.exports.getApproxSubject(c.storage_name);
+		return allowedDomains.includes(approxSubject);
+	});
+}

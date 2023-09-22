@@ -11,7 +11,7 @@ export default function Tos() {
 				<title>Terms of Service</title>
 			</Head>
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				Terms of Service:
 			</h5>
 

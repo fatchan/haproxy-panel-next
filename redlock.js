@@ -1,7 +1,7 @@
 'use strict';
 
-const Redlock = require('redlock').default;
-const redis = require('./redis.js');
+import Redlock from 'redlock';
+import * as redis from './redis.js';
 const redlock = new Redlock([redis.lockClient], {
 	retryCount: 20,
 	retryDelay: 500,
@@ -11,4 +11,4 @@ const redlock = new Redlock([redis.lockClient], {
 
 redlock.on('clientError', console.error);
 
-module.exports = redlock;
+export default redlock;

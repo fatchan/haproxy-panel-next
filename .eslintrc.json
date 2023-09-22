@@ -1,3 +1,36 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "brace-style": [
+      "error",
+      "1tbs",
+      { "allowSingleLine": true }
+    ],
+    "indent": [
+      "error",
+      "tab",
+      { "SwitchCase": 1, "ignoreComments": true, "MemberExpression": 1 }
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "jsx-quotes": [
+      "error",
+      "prefer-single"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "curly": ["error"],
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "no-template-curly-in-string": [
+      "error"
+    ]
+  }
 }

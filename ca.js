@@ -1,36 +1,37 @@
 'use strict';
 
-const { generateKeyPairSync } = require('crypto')
-	, { wildcardAllowed } = require('./util.js')
-	, fs = require('fs')
-	, forge = require('node-forge')
-	, pki = forge.pki
-	, CAAttrs = [
-		// {
-			// name: "commonName",
-			// value: "cp.basedflare.com",
-		// },
-		{
-			name: "countryName",
-			value: "XX",
-		},
-		{
-			shortName: "ST",
-			value: "BASEDFLARE",
-		},
-		{
-			name: "localityName",
-			value: "BASEDFLARE",
-		},
-		{
-			name: "organizationName",
-			value: "BASEDFLARE",
-		},
-		{
-			shortName: "OU",
-			value: "BASEDFLARE",
-		},
-	];
+import { generateKeyPairSync } from 'node:crypto';
+import { wildcardAllowed } from './util.js';
+import fs from 'node:fs';
+import forge from 'node-forge';
+
+const pki = forge.pki;
+const CAAttrs = [
+	// {
+		// name: "commonName",
+		// value: "cp.basedflare.com",
+	// },
+	{
+		name: 'countryName',
+		value: 'XX',
+	},
+	{
+		shortName: 'ST',
+		value: 'BASEDFLARE',
+	},
+	{
+		name: 'localityName',
+		value: 'BASEDFLARE',
+	},
+	{
+		name: 'organizationName',
+		value: 'BASEDFLARE',
+	},
+	{
+		shortName: 'OU',
+		value: 'BASEDFLARE',
+	},
+];
 
 let RootCAPrivateKey = null
 	, RootCAPublicKey = null
@@ -66,11 +67,11 @@ function generateCertificate(privateKey, publicKey) {
 	cert.setIssuer(CAAttrs);
 	cert.setExtensions([	
 		{
-			name: "basicConstraints",
+			name: 'basicConstraints',
 			cA: true,
 		},
 		{
-			name: "keyUsage",
+			name: 'keyUsage',
 			keyCertSign: true,
 			digitalSignature: true,
 			nonRepudiation: true,
@@ -82,7 +83,7 @@ function generateCertificate(privateKey, publicKey) {
 	return pki.certificateToPem(cert);
 }
 
-function verifyCSR(csrPem, allowedDomains, serialNumber) {
+export function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	const csr = pki.certificationRequestFromPem(csrPem);
 	const subject = csr.subject.getField('CN').value;
 	const isWildcard = subject.startsWith('*.');
@@ -124,11 +125,11 @@ function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	cert.setIssuer(caCert.subject.attributes); //CA issuer
 	const certExtensions = [
 		{
-			name: "basicConstraints",
+			name: 'basicConstraints',
 			cA: false,
 		},
 		{
-			name: "keyUsage",
+			name: 'keyUsage',
 			digitalSignature: true,
 			nonRepudiation: true,
 			keyEncipherment: true,
@@ -170,9 +171,3 @@ if (!RootCAPrivateKey || !RootCAPublicKey || !RootCACertificate) {
 	RootCACertificate = pki.certificateFromPem(CACert);
 	fs.writeFileSync('./ca/ca-cert.pem', CACert, { encoding: 'utf-8' });
 }
-
-module.exports = {
-	// generateCAKeyPair,
-	// generateCertificate,
-	verifyCSR,
-};

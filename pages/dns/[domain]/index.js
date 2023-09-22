@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
@@ -16,7 +16,7 @@ const DnsDomainIndexPage = (props) => {
 		...props,
 	});
 	const [error, setError] = useState();
-	const [sortType, setSortType] = useState("name");
+	const [sortType, setSortType] = useState('name');
 	const [sortOrder, setSortOrder] = useState(-1);
 	const [filter, setFilter] = useState('');
 	const { user, recordSets, csrf } = state;
@@ -24,11 +24,11 @@ const DnsDomainIndexPage = (props) => {
 		let sorted;
 		const sameType = newSortType === sortType;
 		const newSortOrder = sortOrder * (sameType ? -1 : 1);
-		if (newSortType === "name") {
+		if (newSortType === 'name') {
 			sorted = recordSets.sort((a, b) => {
 				return (Object.keys(a)[0].localeCompare(Object.keys(b)[0]) * newSortOrder);
 			});
-		} else if (newSortType === "type") {
+		} else if (newSortType === 'type') {
 			sorted = recordSets.map(recordSet => {
 				const k = Object.keys(recordSet)[0];
 				let rs = Object.entries(recordSet[k]);
@@ -40,7 +40,7 @@ const DnsDomainIndexPage = (props) => {
 		setSortOrder(newSortOrder);
 		setSortType(newSortType);
 		dispatch({ ...state, recordSets: sorted });
-	}
+	};
 
 	useEffect(() => {
 		if (!state.recordSets) {
@@ -50,11 +50,11 @@ const DnsDomainIndexPage = (props) => {
 
 	if (recordSets == null) {
 		return (
-			<div className="d-flex flex-column">
+			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
-				<div className="text-center mb-4">
-					<div className="spinner-border mt-5" role="status">
-						<span className="visually-hidden">Loading...</span>
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
 					</div>
 				</div>
 			</div>
@@ -81,7 +81,7 @@ const DnsDomainIndexPage = (props) => {
 			});
 	});
 
-	const sortArrow = sortOrder === 1 ? <i className="bi-caret-down-fill"></i> : <i className="bi-caret-up-fill"></i>
+	const sortArrow = sortOrder === 1 ? <i className='bi-caret-down-fill'></i> : <i className='bi-caret-up-fill'></i>;
 
 	return (
 		<>
@@ -94,27 +94,27 @@ const DnsDomainIndexPage = (props) => {
 
 			{error && <ErrorAlert error={error} />}
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				{domain} / Records list:
 			</h5>
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Record sets table */}
-			<div className="table-responsive">
-				<table className="table text-nowrap">
+			<div className='table-responsive'>
+				<table className='table text-nowrap'>
 					<tbody>
 
 						{/* header row */}
 						<tr>
 							<th />
-							<th role="button" className="user-select-none" onClick={() => handleSetSorting("name")}>
+							<th role='button' className='user-select-none' onClick={() => handleSetSorting('name')}>
 								Name
-								{sortType === "name" && sortArrow}
+								{sortType === 'name' && sortArrow}
 							</th>
-							<th role="button" className="user-select-none" onClick={() => handleSetSorting("type")}>
+							<th role='button' className='user-select-none' onClick={() => handleSetSorting('type')}>
 								Type
-								{sortType === "type" && sortArrow}
+								{sortType === 'type' && sortArrow}
 							</th>
 							<th>
 								Content
@@ -133,16 +133,16 @@ const DnsDomainIndexPage = (props) => {
 				</table>
 			</div>
 
-			<div className="my-3">
+			<div className='my-3'>
 				<Link href={`/dns/${domain}/new`}>
-					<button className="btn btn-sm btn-success">
+					<button className='btn btn-sm btn-success'>
 						+
 					</button>
 				</Link>
 			</div>
 
 			{/* back to account */}
-			<BackButton to="/domains" />
+			<BackButton to='/domains' />
 
 		</>
 	);

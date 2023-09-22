@@ -91,13 +91,12 @@ export async function globalToggle(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
-
 function buildOptions(route, method, body) {
 
 	// Convert method uppercase
 	method = method.toUpperCase();
 	const options = {
-		redirect: "manual",
+		redirect: 'manual',
 		method,
 		headers: {
 			'Content-Type': 'application/json',

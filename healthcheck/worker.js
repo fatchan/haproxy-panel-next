@@ -132,7 +132,7 @@ async function handleJob(job, done) { //job.id, job.data
 
 async function updateDowned() {
 	try {
-		downedIps = await db.db.collection('down')
+		downedIps = await db.db().collection('down')
 			.findOne({
 				_id: 'down',
 			})

@@ -1,12 +1,12 @@
-const { extractMap, dynamicResponse } = require('../util.js');
-const { createCIDR, parse } = require('ip6addr');
-const url = require('url');
+import { extractMap, dynamicResponse } from '../util.js';
+import { createCIDR, parse } from 'ip6addr';
+import url from 'url';
 
 /**
  * GET /maps/:name
  * Show map filtering to users domains
  */
-exports.mapData = async (req, res, next) => {
+export async function mapData(req, res, next) {
 	let map,
 		mapInfo,
 		showValues = false;
@@ -24,6 +24,7 @@ exports.mapData = async (req, res, next) => {
 			})
 			.then(res => res.data);
 	} catch (e) {
+		console.error(e);
 		return next(e);
 	}
 
@@ -61,7 +62,7 @@ exports.mapData = async (req, res, next) => {
 				.map(x => {
 					x.value = res.locals.user.username;
 					return x;
-				})
+				});
 			break;
 		default:
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
@@ -75,23 +76,23 @@ exports.mapData = async (req, res, next) => {
 		name: req.params.name,
 		showValues,
 	};
-};
+}
 
-exports.mapPage = async (app, req, res, next) => {
-	const data = await exports.mapData(req, res, next);
+export async function mapPage(app, req, res, next) {
+	const data = await mapData(req, res, next);
 	return app.render(req, res, `/map/${data.name}`, data);
-};
+}
 
-exports.mapJson = async (req, res, next) => {
-	const data = await exports.mapData(req, res, next);
+export async function mapJson(req, res, next) {
+	const data = await mapData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
-};
+}
 
 /**
  * POST /maps/:name/delete
  * Delete the map entries of the body 'domain'
  */
-exports.deleteMapForm = async (req, res, next) => {
+export async function deleteMapForm(req, res, next) {
 	if(!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
@@ -101,7 +102,7 @@ exports.deleteMapForm = async (req, res, next) => {
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
 		let value;
 		const existingEntry = await res.locals
-			.dataPlaneRetry("getRuntimeMapEntry", {
+			.dataPlaneRetry('getRuntimeMapEntry', {
 				map: req.params.name,
 				id: req.body.key,
 			})
@@ -183,14 +184,13 @@ exports.deleteMapForm = async (req, res, next) => {
 		}
 	}
 	return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
-};
-
+}
 
 /**
  * POST /maps/:name/add
  * Add map entries of the body 'domain'
  */
-exports.patchMapForm = async (req, res, next) => {
+export async function patchMapForm(req, res, next) {
 	if(req.body && req.body.key && typeof req.body.key === 'string') {
 
 		//validate key is domain
@@ -267,7 +267,7 @@ exports.patchMapForm = async (req, res, next) => {
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 			let parsedValue;
 			try {
-				parsedValue = url.parse(`https://${req.body.value}`)
+				parsedValue = url.parse(`https://${req.body.value}`);
 				if (!parsedValue.host || !parsedValue.port) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
@@ -295,7 +295,7 @@ exports.patchMapForm = async (req, res, next) => {
 			case process.env.BLOCKED_ASN_MAP_NAME:
 			case process.env.WHITELIST_MAP_NAME: {
 				const existingEntry = await res.locals
-					.dataPlaneRetry("getRuntimeMapEntry", {
+					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: req.params.name,
 						id: req.body.key,
 					})
@@ -323,7 +323,7 @@ exports.patchMapForm = async (req, res, next) => {
 			case process.env.DDOS_CONFIG_MAP_NAME:
 				value = JSON.stringify({
 					pd: parseInt(req.body.pd || 24),
-					pt: req.body.pt === "argon2" ? "argon2" : "sha256",
+					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
 					cex: parseInt(req.body.cex || 21600),
 					cip: req.body.cip ? true : false,
 				});
@@ -406,12 +406,12 @@ exports.patchMapForm = async (req, res, next) => {
 			const existingEntry = req.params.name === process.env.HOSTS_MAP_NAME
 				? null
 				: (await res.locals
-				.dataPlaneRetry('getRuntimeMapEntry', {
-					map: req.params.name,
-					id: req.body.key,
-				})
-				.then(res => res.data)
-				.catch(() => {}));
+					.dataPlaneRetry('getRuntimeMapEntry', {
+						map: req.params.name,
+						id: req.body.key,
+					})
+					.then(res => res.data)
+					.catch(() => {}));
 			if (existingEntry) {
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
@@ -435,4 +435,4 @@ exports.patchMapForm = async (req, res, next) => {
 		}
 	}
 	return dynamicResponse(req, res, 400, { error: 'Invalid value' });
-};
+}

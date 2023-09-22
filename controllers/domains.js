@@ -1,17 +1,17 @@
-const db = require('../db.js');
-const acme = require('../acme.js');
-const url = require('url');
-const { dynamicResponse } = require('../util.js');
-const redis = require('../redis.js');
-const psl = require('psl');
-const { nsTemplate, soaTemplate } = require('../templates.js');
+import * as db from '../db.js';
+import * as acme from '../acme.js';
+import url from 'node:url';
+import { dynamicResponse } from '../util.js';
+import * as redis from '../redis.js';
+import psl from 'psl';
+import { nsTemplate, soaTemplate } from '../templates.js';
 
 /**
  * GET /domains
  * domains page
  */
-exports.domainsPage = async (app, req, res) => {
-	const certs = await db.db.collection('certs')
+export async function domainsPage(app, req, res) {
+	const certs = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -24,10 +24,10 @@ exports.domainsPage = async (app, req, res) => {
 			}
 		})
 		.toArray();
-	certs.forEach(c => c.date = c.date.toISOString())
+	certs.forEach(c => c.date = c.date.toISOString());
 	return app.render(req, res, '/domains', {
 		csrf: req.csrfToken(),
-		certs,
+		certs: certs || [],
 	});
 };
 
@@ -35,8 +35,8 @@ exports.domainsPage = async (app, req, res) => {
  * GET /domains.json
  * domains json data
  */
-exports.domainsJson = async (req, res) => {
-	const certs = await db.db.collection('certs')
+export async function domainsJson(req, res) {
+	const certs = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -49,11 +49,11 @@ exports.domainsJson = async (req, res) => {
 			}
 		})
 		.toArray();
-	certs.forEach(c => c.date = c.date.toISOString())
+	certs.forEach(c => c.date = c.date.toISOString());
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
-		certs,
+		certs: certs || [],
 	});
 };
 
@@ -61,13 +61,13 @@ exports.domainsJson = async (req, res) => {
  * POST /domain/add
  * add domain
  */
-exports.addDomain = async (req, res, next) => {
+export async function addDomain(req, res, next) {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	if (res.locals.user.username !== "admin" && res.locals.user.domains && res.locals.user.domains.length >= 20) {
+	if (res.locals.user.username !== 'admin' && res.locals.user.domains && res.locals.user.domains.length >= 20) {
 		return dynamicResponse(req, res, 403, { error: 'Domain limit reached' });
 	}
 
@@ -87,13 +87,13 @@ exports.addDomain = async (req, res, next) => {
 	try {
 		const parsed = psl.parse(domain);
 		if (!parsed || !parsed.domain) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' })
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 		}
 		if (parsed.domain !== domain && !res.locals.user.domains.includes(parsed.domain)) {
 			return dynamicResponse(req, res, 403, { error: 'Add the root domain before adding subdomains' });
 		}
 		const domains = [domain, parsed.domain];
-		const existing = await db.db.collection('accounts')
+		const existing = await db.db().collection('accounts')
 			.findOne({
 				'$or': [
 					{ domains: domain },
@@ -103,7 +103,7 @@ exports.addDomain = async (req, res, next) => {
 		if (existing) {
 			return dynamicResponse(req, res, 400, { error: 'This domain is already in use or belongs to another user' });
 		}
-		await db.db.collection('accounts')
+		await db.db().collection('accounts')
 			.updateOne({
 				_id: res.locals.user.username
 			}, {
@@ -152,7 +152,7 @@ exports.addDomain = async (req, res, next) => {
  * POST /domain/delete
  * delete domain
  */
-exports.deleteDomain = async (req, res) => {
+export async function deleteDomain(req, res) {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0
 		|| !res.locals.user.domains.includes(req.body.domain)) {
@@ -177,10 +177,10 @@ exports.deleteDomain = async (req, res) => {
 	]);
 
 	if (existingHost || existingMaintenance || existingRewrite || existingDdos) {
-		return dynamicResponse(req, res, 400, { error: "Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first." });
+		return dynamicResponse(req, res, 400, { error: 'Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first.' });
 	}
 
-	await db.db.collection('accounts')
+	await db.db().collection('accounts')
 		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
 	await res.locals
 		.dataPlaneAll('deleteRuntimeMapEntry', {

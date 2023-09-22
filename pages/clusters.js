@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import BackButton from '../components/BackButton.js'
+import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import ClusterRow from '../components/ClusterRow.js';
-import * as API from '../api.js'
+import * as API from '../api.js';
 import { useRouter } from 'next/router';
 
 export default function Clusters(props) {
@@ -20,11 +20,11 @@ export default function Clusters(props) {
 
 	if (!state.user) {
 		return (
-			<div className="d-flex flex-column">
+			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
-				<div className="text-center mb-4">
-					<div className="spinner-border mt-5" role="status">
-						<span className="visually-hidden">Loading...</span>
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
 					</div>
 				</div>
 			</div>
@@ -73,29 +73,29 @@ export default function Clusters(props) {
 				<title>Clusters</title>
 			</Head>
 
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				Clusters ({user.clusters.length}):
 			</h5>
 
 			{/* Clusters table */}
-			<div className="table-responsive">
-				<form className="d-flex" onSubmit={addCluster} action="/forms/cluster/add" method="post">
-					<input type="hidden" name="_csrf" value={csrf} />
-					<table className="table text-nowrap">
+			<div className='table-responsive'>
+				<form className='d-flex' onSubmit={addCluster} action='/forms/cluster/add' method='post'>
+					<input type='hidden' name='_csrf' value={csrf} />
+					<table className='table text-nowrap'>
 						<tbody>
 
 							{clusterList}
 
 							{/* Add new cluster form */}
-							<tr className="align-middle">
+							<tr className='align-middle'>
 								<td>
-									<button className="btn btn-sm btn-success" type="submit">
-										<i className="bi-plus-lg pe-none" width="16" height="16" />
+									<button className='btn btn-sm btn-success' type='submit'>
+										<i className='bi-plus-lg pe-none' width='16' height='16' />
 									</button>
 								</td>
-								<td colSpan="2">
+								<td colSpan='2'>
 
-									<input className="form-control" type="text" name="cluster" placeholder="http://username:password@host:port, comma separated for multiple" required />
+									<input className='form-control' type='text' name='cluster' placeholder='http://username:password@host:port, comma separated for multiple' required />
 								</td>
 							</tr>
 
@@ -104,12 +104,12 @@ export default function Clusters(props) {
 				</form>
 			</div>
 
-			{error && <span className="mx-1">
+			{error && <span className='mx-1'>
 				<ErrorAlert error={error} />
 			</span>}
 
 			{/* back to account */}
-			<BackButton to="/account" />
+			<BackButton to='/account' />
 
 		</>
 	);
@@ -117,5 +117,5 @@ export default function Clusters(props) {
 }
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return { props: { user: res.locals.user || null, ...query } }
+	return { props: { user: res.locals.user || null, ...query } };
 }

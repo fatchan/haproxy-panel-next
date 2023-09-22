@@ -7,7 +7,7 @@ export default function Menu() {
 			<title>Menu</title>
 		</Head>
 
-		<div className="p-4 mobile-menu">
+		<div className='p-4 mobile-menu'>
 			<MenuLinks />
 		</div>
 	</>);

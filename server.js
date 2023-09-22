@@ -4,22 +4,24 @@ process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
-const server = require('express')
-	, nextjs = require('next')
-	, dev = process.env.NODE_ENV !== 'production'
+import express from 'express';
+import next from 'next';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+
+import * as acme from './acme.js';
+import * as redis from './redis.js';
+import * as db from './db.js';
+import router from './router.js';
+
+const dev = process.env.NODE_ENV !== 'production'
 	, hostname = 'localhost'
 	, port = 3000
-	, app = nextjs({ dev, hostname, port })
-	, handle = app.getRequestHandler()
-	, express = require('express')
-	, bodyParser = require('body-parser')
-	, cookieParser = require('cookie-parser')
-	, acme = require('./acme.js')
-	, redis = require('./redis.js')
-	, db = require('./db.js');
+	, app = next({ dev, hostname, port })
+	, handle = app.getRequestHandler();
 
 app.prepare()
 	.then(async () => {
@@ -34,16 +36,15 @@ app.prepare()
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);
-		server.use('/.well-known/acme-challenge', express.static('/tmp/.well-known/acme-challenge'))
+		server.use('/.well-known/acme-challenge', express.static('/tmp/.well-known/acme-challenge'));
 
-		const testRouter = require('./router.js');
-		testRouter(server, app);
+		router(server, app);
 
 		server.get('*', (req, res) => {
 			return handle(req, res);
 		});
 
-		server.use((err, req, res, next) => {
+		server.use((err, _req, res, _next) => {
 			const now = Date.now();
 			console.error('An error occurred', now, err);
 			return res.send('An error occurred. Please contact support with code: '+now);
@@ -60,7 +61,6 @@ app.prepare()
 			console.log('> Ready on http://localhost:3000');
 		});
 
-		//graceful stop handling
 		const gracefulStop = () => {
 			console.log('SIGINT SIGNAL RECEIVED');
 			db.client.close();

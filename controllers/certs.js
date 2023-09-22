@@ -1,15 +1,15 @@
-const db = require('../db.js');
-const acme = require('../acme.js');
-const url = require('url');
-const { dynamicResponse, wildcardAllowed, filterCertsByDomain } = require('../util.js');
-const { verifyCSR } = require('../ca.js');
+import * as db from '../db.js';
+import * as acme from '../acme.js';
+import url from 'node:url';
+import { dynamicResponse, wildcardAllowed, filterCertsByDomain } from '../util.js';
+import { verifyCSR } from '../ca.js';
 
 /**
  * GET /certs
  * certs page
  */
-exports.certsPage = async (app, req, res) => {
-	const dbCerts = await db.db.collection('certs')
+export async function certsPage(app, req, res) {
+	const dbCerts = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -21,15 +21,15 @@ exports.certsPage = async (app, req, res) => {
 				storageName: 1,
 			}
 		})
-		.toArray()
+		.toArray();
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals
 		.dataPlaneRetry('getAllStorageSSLCertificates')
 		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
 	return app.render(req, res, '/certs', {
 		csrf: req.csrfToken(),
-		dbCerts,
-		clusterCerts,
+		dbCerts: dbCerts || [],
+		clusterCerts: clusterCerts || [],
 	});
 };
 
@@ -37,8 +37,8 @@ exports.certsPage = async (app, req, res) => {
  * GET /certs.json
  * certs json data
  */
-exports.certsJson = async (req, res) => {
-	const dbCerts = await db.db.collection('certs')
+export async function certsJson(req, res) {
+	const dbCerts = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
 		}, {
@@ -50,7 +50,7 @@ exports.certsJson = async (req, res) => {
 				storageName: 1,
 			}
 		})
-		.toArray()
+		.toArray();
 	dbCerts.forEach(c => c.date = c.date.toISOString());
 	const clusterCerts = await res.locals
 		.dataPlaneRetry('getAllStorageSSLCertificates')
@@ -58,8 +58,8 @@ exports.certsJson = async (req, res) => {
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
-		dbCerts,
-		clusterCerts,
+		dbCerts: dbCerts || [],
+		clusterCerts: clusterCerts || [],
 	});
 };
 
@@ -67,7 +67,7 @@ exports.certsJson = async (req, res) => {
  * POST /cert/add
  * add cert
  */
-exports.addCert = async (req, res, next) => {
+export async function addCert(req, res, next) {
 	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Missing subject' });
 	}
@@ -83,7 +83,7 @@ exports.addCert = async (req, res, next) => {
 	}
 	if (!req.body.altnames.every(altName => {
 		return res.locals.user.domains.includes(altName)
-			|| (altName.startsWith('*.') && wildcardAllowed(req.body.subject, res.locals.user.domains))
+			|| (altName.startsWith('*.') && wildcardAllowed(req.body.subject, res.locals.user.domains));
 	})) {
 		return dynamicResponse(req, res, 400, { error: `You don't have permission to generate a certificate with altname(s) ${req.body.altnames}` });
 	}
@@ -97,7 +97,7 @@ exports.addCert = async (req, res, next) => {
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
 	const email = req.body.email;
 
-	const existingCert = await db.db.collection('certs').findOne({ _id: subject });
+	const existingCert = await db.db().collection('certs').findOne({ _id: subject });
 	if (existingCert) {
 		return dynamicResponse(req, res, 400, { error: 'Cert with this subject already exists' });
 	}
@@ -137,12 +137,12 @@ exports.addCert = async (req, res, next) => {
 			username: res.locals.user.username,
 			csr, key, cert, haproxyCert, // cert creation data
 			date,
-		}
+		};
 		if (description) {
 			//may be null due to "already exists", so we keep existing props
 			update = { ...update, description, file, storageName };
-        }
-		await db.db.collection('certs')
+		}
+		await db.db().collection('certs')
 			.updateOne({
 				_id: subject,
 			}, {
@@ -163,7 +163,7 @@ exports.addCert = async (req, res, next) => {
  * POST /cert/upload
  * push existing db cert to cluster
  */
-exports.uploadCert = async (req, res, next) => {
+export async function uploadCert(req, res, next) {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0
 		|| !res.locals.user.domains.includes(req.body.domain)) {
@@ -172,7 +172,7 @@ exports.uploadCert = async (req, res, next) => {
 
 	const domain = req.body.domain.toLowerCase();
 
-	const existingCert = await db.db.collection('certs').findOne({ _id: domain, username: res.locals.user.username });
+	const existingCert = await db.db().collection('certs').findOne({ _id: domain, username: res.locals.user.username });
 	if (!existingCert || !existingCert.haproxyCert) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -206,11 +206,11 @@ exports.uploadCert = async (req, res, next) => {
  * POST /cert/delete
  * delete cers
  */
-exports.deleteCert = async (req, res) => {
+export async function deleteCert(req, res) {
 
 	if (!req.body.subject || typeof req.body.subject !== 'string' || req.body.subject.length === 0
 		//|| !res.locals.user.domains.includes(req.body.subject)
-		) {
+	) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
@@ -238,7 +238,7 @@ exports.deleteCert = async (req, res) => {
 	}
 
 	//otherwise completely delete from db
-	await db.db.collection('certs')
+	await db.db().collection('certs')
 		.deleteOne({ _id: subject, username: res.locals.user.username });
 
 	return dynamicResponse(req, res, 302, { redirect: '/certs' });
@@ -249,12 +249,12 @@ exports.deleteCert = async (req, res) => {
  * POST /csr/verify
  * Delete the map entries of the body 'domain'
  */
-exports.verifyUserCSR = async (req, res, next) => {
+export async function verifyUserCSR(req, res, next) {
 	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid CSR' });
 	}
 	try {
-		const serial = await db.db.collection('certs')
+		const serial = await db.db().collection('certs')
 			.findOneAndUpdate({
 				_id: 'serial',
 			}, {
@@ -264,7 +264,7 @@ exports.verifyUserCSR = async (req, res, next) => {
 			}, {
 				upsert: true,
 			});
-		await db.db.collection('accounts')
+		await db.db().collection('accounts')
 			.updateOne({
 				_id: res.locals.user.username
 			}, {
@@ -273,7 +273,7 @@ exports.verifyUserCSR = async (req, res, next) => {
 				}
 			});
 		const serialNumber = serial && serial.value && serial.value.number || 1;
-		console.log('Attempting to sign CSR, serial', serialNumber)
+		console.log('Attempting to sign CSR, serial', serialNumber);
 		const signedCert = verifyCSR(req.body.csr, res.locals.user.domains, serialNumber);
 		if (req.body.json) {
 			return res.json({

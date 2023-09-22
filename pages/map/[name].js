@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import MapRow from '../../components/MapRow.js';
@@ -24,11 +24,11 @@ const MapPage = (props) => {
 
 	if (state.map == null || changedMap) {
 		return (
-			<div className="d-flex flex-column">
+			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
-				<div className="text-center mb-4">
-					<div className="spinner-border mt-5" role="status">
-						<span className="visually-hidden">Loading...</span>
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
 					</div>
 				</div>
 			</div>
@@ -75,114 +75,113 @@ const MapPage = (props) => {
 				|| rowValue.includes(filter);
 		})
 		.map((row, i) => {
-		return (
-			<MapRow
-				key={i}
-				row={row}
-				name={mapInfo.name}
-				csrf={csrf}
-				showValues={showValues}
-				mapValueNames={mapValueNames}
-				onDeleteSubmit={deleteFromMap}
-				columnKeys={mapInfo.columnKeys}
-			/>
-		)
-	});
-
+			return (
+				<MapRow
+					key={i}
+					row={row}
+					name={mapInfo.name}
+					csrf={csrf}
+					showValues={showValues}
+					mapValueNames={mapValueNames}
+					onDeleteSubmit={deleteFromMap}
+					columnKeys={mapInfo.columnKeys}
+				/>
+			);
+		});
 
 	let formElements;
 	//TODO: env var case map names
 	switch (mapInfo.name) {
-		case "ddos": {
+		case 'ddos': {
 			const mapValueOptions = Object.entries(mapValueNames)
-				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>))
+				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>));
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<input className="form-control" type="text" name="key" placeholder="domain/path" required />
+						<input className='form-control' type='text' name='key' placeholder='domain/path' required />
 					</td>
 					<td>
-						<select className="form-select" name="m" defaultValue="" required>
-							<option disabled value="">protection mode</option>
+						<select className='form-select' name='m' defaultValue='' required>
+							<option disabled value=''>protection mode</option>
 							{mapValueOptions}
 						</select>
 					</td>
 					<td>
-						<div className="form-check">
-							<input className="form-check-input" type="checkbox" name="t" value="t" id="t" />
-							<label className="form-check-label" htmlFor="t">Tor exits only</label>
+						<div className='form-check'>
+							<input className='form-check-input' type='checkbox' name='t' value='t' id='t' />
+							<label className='form-check-label' htmlFor='t'>Tor exits only</label>
 						</div>
 					</td>
 				</>
 			);
 			break;
 		}
-		case "ddos_config": {
+		case 'ddos_config': {
 			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<select className="form-select" name="key" defaultValue="" required>
-							<option value="" />
+						<select className='form-select' name='key' defaultValue='' required>
+							<option value='' />
 							{domainSelectOptions}
 						</select>
 					</td>
 					<td>
-						<input className="form-control" type="number" min="8" defaultValue="24" name="pd" placeholder="difficulty" required />
+						<input className='form-control' type='number' min='8' defaultValue='24' name='pd' placeholder='difficulty' required />
 					</td>
 					<td>
-						<select className="form-select" name="pt" required>
-							<option disabled value="">pow type</option>
-							<option value="sha256">sha256</option>
-							<option value="argon2">argon2</option>
+						<select className='form-select' name='pt' required>
+							<option disabled value=''>pow type</option>
+							<option value='sha256'>sha256</option>
+							<option value='argon2'>argon2</option>
 						</select>
 					</td>
 					<td>
-						<input className="form-control" type="number" name="cex" placeholder="cookie expiry (seconds)" required />
+						<input className='form-control' type='number' name='cex' placeholder='cookie expiry (seconds)' required />
 					</td>
 					<td>
-						<div className="form-check">
-							<input className="form-check-input" type="checkbox" name="cip" value="cip" id="cip" />
-							<label className="form-check-label" htmlFor="cip">Lock cookie to IP</label>
+						<div className='form-check'>
+							<input className='form-check-input' type='checkbox' name='cip' value='cip' id='cip' />
+							<label className='form-check-label' htmlFor='cip'>Lock cookie to IP</label>
 						</div>
 					</td>
 				</>
 			);
 			break;
 		}
-		case "hosts": {
+		case 'hosts': {
 			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<select className="form-select" name="key" defaultValue="" required>
-							<option value="" />
+						<select className='form-select' name='key' defaultValue='' required>
+							<option value='' />
 							{domainSelectOptions}
 						</select>
 					</td>
 					{
-						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapInfo.name === "hosts") &&
+						(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED && mapInfo.name === 'hosts') &&
 						<td>
 							<input
-								className="form-control"
-								type="text"
-								name="value"
-								placeholder="backend ip:port"
+								className='form-control'
+								type='text'
+								name='value'
+								placeholder='backend ip:port'
 								required
 							/>
 						</td>
@@ -191,20 +190,20 @@ const MapPage = (props) => {
 			);
 			break;
 		}
-		case "maintenance": {
+		case 'maintenance': {
 			const activeDomains = map.map(e => e.key);
 			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<select className="form-select" name="key" defaultValue="" required>
-							<option value="" />
+						<select className='form-select' name='key' defaultValue='' required>
+							<option value='' />
 							{domainSelectOptions}
 						</select>
 					</td>
@@ -212,49 +211,49 @@ const MapPage = (props) => {
 			);
 			break;
 		}
-		case "blockedip":
-		case "whitelist":
+		case 'blockedip':
+		case 'whitelist':
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<input className="form-control" type="text" name="key" placeholder="ip or subnet" required />
+						<input className='form-control' type='text' name='key' placeholder='ip or subnet' required />
 					</td>
 				</>
 			);
 			break;
-		case "blockedasn":
+		case 'blockedasn':
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<input className="form-control" type="text" name="key" placeholder="ASN" required />
+						<input className='form-control' type='text' name='key' placeholder='ASN' required />
 					</td>
 				</>
 			);
 			break;
-		case "redirect":
-		case "rewrite":
+		case 'redirect':
+		case 'rewrite':
 			formElements = (
 				<>
 					<td>
-						<button className="btn btn-sm btn-success" type="submit">
-							<i className="bi-plus-lg pe-none" width="16" height="16" />
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
 						</button>
 					</td>
 					<td>
-						<input className="form-control" type="text" name="key" placeholder="domain" required />
+						<input className='form-control' type='text' name='key' placeholder='domain' required />
 					</td>
 					<td>
-						<input className="form-control" type="text" name="value" placeholder="domain or domain/path" required />
+						<input className='form-control' type='text' name='value' placeholder='domain or domain/path' required />
 					</td>
 				</>
 			);
@@ -271,16 +270,16 @@ const MapPage = (props) => {
 			</Head>
 
 			{/* Map friendly name (same as shown on acc page) */}
-			<h5 className="fw-bold">
+			<h5 className='fw-bold'>
 				{mapInfo.fname}:
 			</h5>
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Map table */}
-			<div className="table-responsive w-100">
-				<form onSubmit={addToMap} className="d-flex" action={`/forms/map/${mapInfo.name}/add`} method="post">
-					<table className="table text-nowrap mb-0">
+			<div className='table-responsive w-100'>
+				<form onSubmit={addToMap} className='d-flex' action={`/forms/map/${mapInfo.name}/add`} method='post'>
+					<table className='table text-nowrap mb-0'>
 						<tbody>
 
 							{/* header row */}
@@ -300,7 +299,7 @@ const MapPage = (props) => {
 							{mapRows}
 
 							{/* Add new row form */}
-							<tr className="align-middle">
+							<tr className='align-middle'>
 								{formElements}
 							</tr>
 
@@ -309,10 +308,10 @@ const MapPage = (props) => {
 				</form>
 			</div>
 
-			{error && <span className="mx-2"><ErrorAlert error={error} /></span>}
+			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
 			{/* back to account */}
-			<BackButton to="/account" />
+			<BackButton to='/account' />
 
 		</>
 	);
