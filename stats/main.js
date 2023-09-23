@@ -5,11 +5,11 @@ process
 	.on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 import Queue from 'bull';
 
-const haproxyStatsQueue = new Queue('stats', { w: {
+const haproxyStatsQueue = new Queue('stats', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
 	port: process.env.REDIS_PORT || 6379,
 	password: process.env.REDIS_PASS || '',

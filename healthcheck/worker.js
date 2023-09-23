@@ -78,7 +78,7 @@ async function doCheck(domainKey, hkey, record) {
 			console.info('fetch()ed health:', domainKey, hkey, record.ip, recordHealth);
 		} else {
 			recordHealth = recordHealth.toString();
-			console.log('cached health:', domainKey, hkey, record.ip, recordHealth);
+			// console.log('cached health:', domainKey, hkey, record.ip, recordHealth);
 		}
 		if (recordHealth === '1') {
 			record.u = true;

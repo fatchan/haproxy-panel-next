@@ -5,9 +5,8 @@ process
         .on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
-import * as redlock from '../redlock.js';
 import Queue from 'bull';
 const haproxyStatsQueue = new Queue('stats', { redis: {
 	host: process.env.REDIS_HOST || '127.0.0.1',
@@ -97,7 +96,6 @@ async function getFormattedStats(host) {
 };
 
 async function processHost(host) {
-	console.log(host)
 	try {
 		const hostname = new URL(host).hostname;
 		const { frontendStats, serverStats } = await getFormattedStats(host);
@@ -142,7 +140,6 @@ async function processHost(host) {
 };
 
 async function handleJob(job, done) {
-	console.log('handleJob')
 	const { hosts } = job.data;
 	hosts.forEach(processHost);
 	done();
