@@ -139,7 +139,7 @@ export function getApproxSubject(storageName) {
 
 export function filterCertsByDomain(certs, allowedDomains) {
 	return certs.filter((c) => {
-		const approxSubject = module.exports.getApproxSubject(c.storage_name);
+		const approxSubject = getApproxSubject(c.storage_name);
 		return allowedDomains.includes(approxSubject);
 	});
 }

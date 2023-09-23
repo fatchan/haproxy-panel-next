@@ -10,7 +10,7 @@ import * as db from './db.js';
 import { dynamicResponse } from './util.js';
 import definition from './specification_openapiv3.js';
 import * as update from './update.js';
-import * as agent from './agent.js';
+import agent from './agent.js';
 
 import * as accountController from './controllers/account.js';
 import * as mapsController from './controllers/maps.js';

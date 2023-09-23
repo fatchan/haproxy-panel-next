@@ -28,6 +28,7 @@ export async function certsPage(app, req, res) {
 		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
 	return app.render(req, res, '/certs', {
 		csrf: req.csrfToken(),
+		user: res.locals.user,
 		dbCerts: dbCerts || [],
 		clusterCerts: clusterCerts || [],
 	});

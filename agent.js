@@ -1,6 +1,8 @@
 'use strict';
 
 import https from 'https';
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
 
 const agentOptions = {
 	rejectUnauthorized: !process.env.ALLOW_SELF_SIGNED_SSL,

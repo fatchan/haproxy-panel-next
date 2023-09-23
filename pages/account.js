@@ -157,7 +157,6 @@ export default function Account(props) {
 
 		innerData = (
 			<div className='d-flex flex-column'>
-				{error && <ErrorAlert error={error} />}
 				<div className='text-center mb-4'>
 					<div className='spinner-border mt-5' role='status'>
 						<span className='visually-hidden'>Loading...</span>
