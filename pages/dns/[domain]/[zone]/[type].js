@@ -5,7 +5,8 @@ import BackButton from '../../../../components/BackButton.js';
 import ErrorAlert from '../../../../components/ErrorAlert.js';
 import Select from 'react-select';
 import countries from 'i18n-iso-countries';
-countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
+import enCountries from 'i18n-iso-countries/langs/en.json';
+countries.registerLocale(enCountries);
 import * as API from '../../../../api.js';
 
 const continentMap = {
