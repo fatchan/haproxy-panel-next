@@ -3,7 +3,7 @@
 import fs from 'fs';
 import acme from 'acme-client';
 import * as redis from './redis.js';
-import * as redlock from './redlock.js';
+import redlock from './redlock.js';
 import psl from 'psl';
 
 const dev = process.env.NODE_ENV !== 'production';
