@@ -59,49 +59,53 @@ export default function Csr(props) {
 				Certificate Signing Request:
 			</h5>
 
-			<p>
-				To generate a certificate signing request for your domain and/or subdomain(s):
-				<div>
-					<code>
-						{'openssl req -newkey rsa:4096 -new -nodes -subj "/CN='}<strong>yourdomain.com</strong>{'/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:'}<strong>yourdomain.com</strong>{',DNS:'}<strong>www.yourdomain.com</strong>{'"))'}
-					</code>
+			<div className='list-group'>
+				<div className='list-group-item'>
+					<p>
+						To generate a certificate signing request for your domain and/or subdomain(s):
+						<div>
+							<code>
+								{'openssl req -newkey rsa:4096 -new -nodes -subj "/CN='}<strong>yourdomain.com</strong>{'/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:'}<strong>yourdomain.com</strong>{',DNS:'}<strong>www.yourdomain.com</strong>{'"))'}
+							</code>
+						</div>
+					</p>
 				</div>
-			</p>
 
-			{/* Verify CSR form */}
-			<div className='list-group-item list-group my-2 pb-4'>
-				<form onSubmit={verifyCSR} action='/forms/csr/verify' method='post'>
-					<input type='hidden' name='_csrf' value={csrf} />
+				{/* Verify CSR form */}
+				<div className='list-group-item pb-3'>
+					<form onSubmit={verifyCSR} action='/forms/csr/verify' method='post'>
+						<input type='hidden' name='_csrf' value={csrf} />
+						<div className='mb-2'>
+							<label className='form-label w-100'>Paste your origin.csr file here:
+								<textarea
+									className='form-control'
+									name='csr'
+									placeholder={'-----BEGIN CERTIFICATE REQUEST-----\n...'}
+									rows={4}
+									required />
+							</label>
+						</div>
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-1' width='16' height='16' />
+							Verify CSR
+						</button>
+					</form>
+				</div>
+
+				{csr && <div className='list-group-item'>
 					<div className='mb-2'>
-						<label className='form-label w-100'>Paste your origin.csr file here:
+						<label className='form-label w-100'>Here&apos;s your certificate:
 							<textarea
 								className='form-control'
 								name='csr'
-								placeholder={'-----BEGIN CERTIFICATE REQUEST-----\n...'}
-								rows={4}
+								value={csr}
+								rows={10}
+								readOnly
 								required />
 						</label>
 					</div>
-					<button className='btn btn-sm btn-success' type='submit'>
-						<i className='bi-plus-lg pe-1' width='16' height='16' />
-						Verify CSR
-					</button>
-				</form>
+				</div>}
 			</div>
-
-			{csr && <div className='list-group-item list-group my-2 pb-4'>
-				<div className='mb-2'>
-					<label className='form-label w-100'>Here&apos;s your certificate:
-						<textarea
-							className='form-control'
-							name='csr'
-							value={csr}
-							rows={10}
-							readOnly
-							required />
-					</label>
-				</div>
-			</div>}
 
 			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 

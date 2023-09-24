@@ -277,7 +277,7 @@ const MapPage = (props) => {
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Map table */}
-			<div className='table-responsive w-100'>
+			<div className='table-responsive w-100 round-shadow'>
 				<form onSubmit={addToMap} className='d-flex' action={`/forms/map/${mapInfo.name}/add`} method='post'>
 					<table className='table text-nowrap mb-0'>
 						<tbody>

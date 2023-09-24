@@ -185,7 +185,7 @@ export default function Certs(props) {
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Certs table */}
-			<div className='table-responsive'>
+			<div className='table-responsive round-shadow'>
 				<form className='d-flex' onSubmit={addCert} action='/forms/cert/add' method='post'>
 					<input type='hidden' name='_csrf' value={csrf} />
 					<table className='table text-nowrap notaborder'>

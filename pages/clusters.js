@@ -78,7 +78,7 @@ export default function Clusters(props) {
 			</h5>
 
 			{/* Clusters table */}
-			<div className='table-responsive'>
+			<div className='table-responsive round-shadow'>
 				<form className='d-flex' onSubmit={addCluster} action='/forms/cluster/add' method='post'>
 					<input type='hidden' name='_csrf' value={csrf} />
 					<table className='table text-nowrap'>

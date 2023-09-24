@@ -19,7 +19,7 @@ footer { margin-top: auto; }
 .sidebar { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
 .card { background: var(--bs-body-bg) !important; color: var(--bs-body-color) !important; }
 .table { margin-bottom: 0; }
-.table-responsive { box-shadow: 0 0px 3px rgba(0,0,0,0.2); }
+.round-shadow { box-shadow: 0 0px 3px rgba(0,0,0,0.2); border-radius: 5px; }
 a.text-success:visited, a.text-success:hover { color: rgba(var(--bs-success-rgb),var(--bs-text-opacity)) !important }
 .select__control {
 	transition: none;
