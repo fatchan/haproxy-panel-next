@@ -89,12 +89,16 @@ const MapPage = (props) => {
 			);
 		});
 
-	let formElements;
+	let formElements
+		, mapInfoHelper;
 	//TODO: env var case map names
 	switch (mapInfo.name) {
 		case 'ddos': {
 			const mapValueOptions = Object.entries(mapValueNames)
 				.map((entry, i) => (<option key={'option'+i} value={entry[0]}>{entry[1]}</option>));
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Select which domains or domain+paths have an interstitial bot-check page enabled. Recommended for the best protection and/or if you are frequently targeted by attacks.
+			</div>;
 			formElements = (
 				<>
 					<td>
@@ -123,6 +127,9 @@ const MapPage = (props) => {
 		}
 		case 'ddos_config': {
 			const domainSelectOptions = user.domains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Set the parameters of the bot check for a domain or domain+path.
+			</div>;
 			formElements = (
 				<>
 					<td>
@@ -194,6 +201,9 @@ const MapPage = (props) => {
 			const activeDomains = map.map(e => e.key);
 			const inactiveDomains = user.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (<option key={'option'+i} value={d}>{d}</option>));
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Serve a page from the edge letting your visitors know your site is undergoing maintenance or downtime.
+			</div>;
 			formElements = (
 				<>
 					<td>
@@ -227,6 +237,9 @@ const MapPage = (props) => {
 			);
 			break;
 		case 'blockedasn':
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				ASN Blocking blocks entire networks containing multiple netblocks. Visit <a target='_blank' rel='noreferrer' href='https://bgp.tools'>bgp.tools</a> to search ASNs, or find the ASN of a particular IP or netblock.
+			</div>;
 			formElements = (
 				<>
 					<td>
@@ -241,7 +254,29 @@ const MapPage = (props) => {
 			);
 			break;
 		case 'redirect':
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Redirects redirect all requests from a domain to another domain or a domain+path e.g. &quot;www.example.com&quot; -&gt; &quot;example.com&quot; or &quot;example.com/something&quot;.
+			</div>;
+			formElements = (
+				<>
+					<td>
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
+						</button>
+					</td>
+					<td>
+						<input className='form-control' type='text' name='key' placeholder='domain' required />
+					</td>
+					<td>
+						<input className='form-control' type='text' name='value' placeholder='domain or domain/path' required />
+					</td>
+				</>
+			);
+			break;
 		case 'rewrite':
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Rewrites redirect a specific path to another path e.g. &quot;example.com/blog&quot; -&gt; &quot;example.com/new-blog&quot;.
+			</div>;
 			formElements = (
 				<>
 					<td>
@@ -273,6 +308,8 @@ const MapPage = (props) => {
 			<h5 className='fw-bold'>
 				{mapInfo.fname}:
 			</h5>
+
+			{mapInfoHelper}
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
