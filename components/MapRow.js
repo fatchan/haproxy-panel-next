@@ -5,7 +5,10 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 	return (
 		<tr className='align-middle'>
 			<td className='text-left'>
-				<a className='btn btn-sm btn-danger' onClick={() => onDeleteSubmit(csrf, key)}>
+				<a className='btn btn-sm btn-danger' onClick={() => {
+					name === 'hosts' && confirm('If you get an error deleting a backend please contact support');
+					onDeleteSubmit(csrf, key);
+				}}>
 					<i className='bi-trash-fill pe-none' width='16' height='16' />
 				</a>
 			</td>

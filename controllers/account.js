@@ -3,6 +3,9 @@ import * as db from '../db.js';
 import { extractMap, dynamicResponse } from '../util.js';
 import { Resolver } from 'node:dns/promises';
 
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+
 const resolver = new Resolver();
 resolver.setServers(process.env.NAMESERVERS.split(','));
 
@@ -171,10 +174,14 @@ export function logout(req, res) {
 
 /**
  * POST /forms/onboarding
- * finish/skip onboarding
+ * update onboarding step
  */
-export async function finishOnboarding(req, res) {
+export async function updateOnboarding(req, res) {
 	if (!res.locals.user) {
+		return dynamicResponse(req, res, 400, { error: 'Bad request' });
+	}
+	const step = req.body.step;
+	if (!step || isNaN(step) || parseInt(step) !== +step) {
 		return dynamicResponse(req, res, 400, { error: 'Bad request' });
 	}
 	await db.db().collection('accounts')
@@ -182,7 +189,7 @@ export async function finishOnboarding(req, res) {
 			_id: res.locals.user.username
 		}, {
 			'$set': {
-				onboarding: true,
+				onboarding: parseInt(step),
 			}
 		});
 	return dynamicResponse(req, res, 302, { redirect: '/account' });

@@ -120,3 +120,4 @@ export default function Csr(props) {
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
 	return { props: { user: res.locals.user || null, ...query } };
 }
+

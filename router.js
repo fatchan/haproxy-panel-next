@@ -229,7 +229,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		accountController.finishOnboarding,
+		accountController.updateOnboarding,
 	);
 	server.post('/forms/logout', useSession, accountController.logout);
 	server.post(
