@@ -29,12 +29,6 @@ async function reset() {
 			}, {
 				$set: {
 					passwordHash,
-					clusters: [process.env.DEFAULT_CLUSTER],
-					domains: ['localhost'],
-					clusters: [process.env.DEFAULT_CLUSTER],
-					activeCluster: 0,
-					balance: 0,
-					onboarding: true,
 				}
 			});
 	}
