@@ -16,12 +16,12 @@ export default function Domains(props) {
 	const [filter, setFilter] = useState('');
 
 	useEffect(() => {
-		if (!state.user || state.certs == null) {
+		if (!state.user || !state.certs || !state.user.domains) {
 			API.getDomains(dispatch, setError, router);
 		}
-	}, [state.user, state.certs, router]);
+	}, []);
 
-	if (!state.user || state.certs == null) {
+	if (!state.user || state.certs == null || state.user.domains == null) {
 		return (
 			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
@@ -54,7 +54,7 @@ export default function Domains(props) {
 	const subdomainList = [];
 	user.domains
 		//.sort((a, b) => a.localeCompare(b))
-		.filter(d => d.includes(filter))
+		.filter(d => (!filter || filter.length === 0) || (d && d.includes(filter)))
 		.forEach((d, i) => {
 			const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
 			const wildcardCert = certs.find(c => {

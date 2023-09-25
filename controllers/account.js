@@ -43,7 +43,7 @@ export async function accountData(req, res, _next) {
  */
 export async function accountPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
-	return app.render(req, res, '/account', { ...data, user: res.locals.user });
+	return app.render(req, res, '/account', JSON.stringify({ ...data, user: res.locals.user }));
 }
 
 /**
@@ -52,7 +52,7 @@ export async function accountPage(app, req, res, next) {
  */
 export async function onboardingPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
-	return app.render(req, res, '/onboarding', { ...data, user: res.locals.user });
+	return app.render(req, res, '/onboarding', JSON.stringify({ ...data, user: res.locals.user }));
 }
 
 /**

@@ -9,7 +9,7 @@ import FormData from 'form-data';
 import * as db from './db.js';
 import { dynamicResponse } from './util.js';
 import definition from './specification_openapiv3.js';
-import * as update from './update.js';
+import update from './update.js';
 import agent from './agent.js';
 
 import * as accountController from './controllers/account.js';

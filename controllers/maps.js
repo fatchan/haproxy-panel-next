@@ -80,7 +80,7 @@ export async function mapData(req, res, next) {
 
 export async function mapPage(app, req, res, next) {
 	const data = await mapData(req, res, next);
-	return app.render(req, res, `/map/${data.name}`, data);
+	return app.render(req, res, `/map/${data.name}`, JSON.stringify(data));
 }
 
 export async function mapJson(req, res, next) {

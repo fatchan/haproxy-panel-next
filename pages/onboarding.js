@@ -33,10 +33,10 @@ export default function Onboarding(props) {
 	}
 
 	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords } = state;
-	const domainAdded = false; //user.domains && user.domains.length > 0;
-	const backendMap = false; //maps && maps.find(m => m.name === 'hosts');
-	const backendAdded = false; //backendMap && backendMap.count > 0;
-	const certAdded = false; //user.numCerts && user.numCerts > 0;
+	const domainAdded = user.domains && user.domains.length > 0;
+	const backendMap = maps && maps.find(m => m.name === 'hosts');
+	const backendAdded = backendMap && backendMap.count > 0;
+	const certAdded = user.numCerts && user.numCerts > 0;
 
 	async function updateOnboarding(step) {
 		await API.updateOnboarding({
