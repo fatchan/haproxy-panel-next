@@ -582,12 +582,7 @@ const DnsEditRecordPage = (props) => {
 };
 
 export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
-	return {
-		props: {
-			user: res.locals.user || null,
-			...query
-		}
-	};
+	return { props: res.locals.data };
 }
 
 export default DnsEditRecordPage;

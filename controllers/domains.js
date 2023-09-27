@@ -25,11 +25,12 @@ export async function domainsPage(app, req, res) {
 		})
 		.toArray();
 	certs.forEach(c => c.date = c.date.toISOString());
-	return app.render(req, res, '/domains', JSON.stringify({
+	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
 		certs: certs || [],
-	}));
+	};
+	return app.render(req, res, '/domains');
 };
 
 /**

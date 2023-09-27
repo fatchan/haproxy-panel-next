@@ -17,11 +17,12 @@ export async function dnsDomainPage(app, req, res) {
 		.map(k => {
 			return { [k]: JSON.parse(recordSetsRaw[k]) };
 		}) || [];
-	return app.render(req, res, `/dns/${req.params.domain}`, JSON.stringify({
+	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
 		recordSets,
-	}));
+	};
+	return app.render(req, res, `/dns/${req.params.domain}`);
 };
 
 /**
@@ -41,11 +42,12 @@ export async function dnsRecordPage(app, req, res) {
 		recordSet = recordSetRaw[req.params.type];
 		recordSet = Array.isArray(recordSet) ? recordSet : (recordSet ? [recordSet] : []);
 	}
-	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||'name'}/${req.params.type||'a'}`, JSON.stringify({
+	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
 		recordSet,
-	}));
+	};
+	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||'name'}/${req.params.type||'a'}`);
 };
 
 /**

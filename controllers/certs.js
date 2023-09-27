@@ -26,12 +26,13 @@ export async function certsPage(app, req, res) {
 	const clusterCerts = await res.locals
 		.dataPlaneRetry('getAllStorageSSLCertificates')
 		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
-	return app.render(req, res, '/certs', JSON.stringify({
+	res.locals.data = {
 		csrf: req.csrfToken(),
 		user: res.locals.user,
 		dbCerts: dbCerts || [],
 		clusterCerts: clusterCerts || [],
-	}));
+	}
+	return app.render(req, res, '/certs');
 };
 
 /**

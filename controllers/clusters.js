@@ -2,9 +2,11 @@ import * as db from '../db.js';
 import { validClustersString, makeArrayIfSingle, extractMap, dynamicResponse } from '../util.js';
 
 export async function clustersPage(app, req, res, next) {
-	return app.render(req, res, '/clusters', JSON.stringify({
+	res.locals.data = {
+		user: res.locals.user,
 		csrf: req.csrfToken(),
-	}));
+	}
+	return app.render(req, res, '/clusters');
 };
 
 export async function clustersJson(req, res, next) {
