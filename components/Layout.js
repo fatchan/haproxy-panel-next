@@ -1,10 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import MenuLinks from './MenuLinks';
+import KnowledgebaseLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
 export default withRouter(function Layout({ children, router }) {
-	const showMenu = !['/tos', '/login', '/register', '/changepassword', '/'].includes(router.pathname);
+	const noSidebar = ['/tos', '/login', '/register', '/changepassword', '/'].includes(router.pathname);
 	return (
 		<>
 
@@ -16,7 +17,7 @@ export default withRouter(function Layout({ children, router }) {
 
 			<div className='row h-100 p-0 m-0'>
 
-				{showMenu && <div className='col-auto sidebar h-100 m-0 px-0'>
+				{!noSidebar && <div className='col-auto sidebar h-100 m-0 px-0'>
 					<div className='d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto' style={{ width: '250px' }}>
 						<MenuLinks />
 					</div>
@@ -24,9 +25,9 @@ export default withRouter(function Layout({ children, router }) {
 
 				<div className='col-1 flex-fill m-0 px-0 h-100 overflow-auto'>
 					<div className='p-3 h-100 d-flex flex-column'>
-						<span className='corner-ribbon'>Beta</span>
+						{/*<span className='corner-ribbon'>Beta</span>*/}
 						<main className='mx-auto col col-12 col-xl-8'>
-							{showMenu && <Link href='/menu' className='btn btn-sm btn-primary mobile-btn mb-4 d-inline-block'>
+							{!noSidebar && <Link href='/menu' className='btn btn-sm btn-primary mobile-btn mb-4 d-inline-block'>
 								<i className='bi-list pe-none me-2' width='16' height='16' />
 									Menu
 							</Link>}
