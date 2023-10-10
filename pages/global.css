@@ -84,6 +84,7 @@ table.notaborder textarea {
 		background-color: #7289da;
 	}
 	.text-muted, a, a:visited, a:hover, .nav-link, .nav-link:hover { color:#fff!important; }
+	.alert a { color: var(--bs-body-bg)!important }
 	.list-group-item { color: #fff; background-color: #2c2f33!important; border-color: var(--bs-body-bg) }
 	input:not(.btn):not(.select__input), option, select.form-select, textarea, .input-group-text { color: #fff!important; background-color: #2c2f33!important; border: 1px solid black!important; }
 	.list-group-item-action:focus, .list-group-item-action:hover { color: #fff; background-color: #1F1F1F; }
