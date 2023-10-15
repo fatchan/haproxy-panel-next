@@ -20,107 +20,126 @@ export default withRouter(function MenuLinks({ router }) {
 	switch(true) {
 		case router.pathname.startsWith('/kb'):
 			mainLinks = (<>
-				<li className='nav-item'>
-					<Link href='/kb' className={path === '/kb' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-layers pe-none me-2' width='16' height='16' />
-							Index
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/kb/firewall' className={path === '/kb/firewall' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-bricks pe-none me-2' width='16' height='16' />
-							Firewall
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/kb/https' className={path === '/kb/https' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-file-earmark-lock pe-none me-2' width='16' height='16' />
-							HTTPS & CSRs
-					</Link>
-				</li>
+				<ul className='nav nav-pills flex-column mb-auto'>
+					<li className='nav-item'>
+						<Link href='/kb' className={path === '/kb' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-layers pe-none me-2' width='16' height='16' />
+								Index
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/kb/firewall' className={path === '/kb/firewall' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-bricks pe-none me-2' width='16' height='16' />
+								Firewall
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/kb/https' className={path === '/kb/https' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-file-earmark-lock pe-none me-2' width='16' height='16' />
+								HTTPS & CSRs
+						</Link>
+					</li>
+				</ul>
 			</>);
 			bottomLinks = null;
 			break;
 		default:
 			mainLinks = (<>
-				<li className='nav-item'>
-					<Link href='/account' className={path === '/account' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-person-square pe-none me-2' width='16' height='16' />
-							Account
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/domains' className={path === '/domains' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-layers pe-none me-2' width='16' height='16' />
-							Domains
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/hosts' className={path === '/map/hosts' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-hdd-network pe-none me-2' width='16' height='16' />
-							Backends
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/certs' className={path === '/certs' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-file-earmark-lock pe-none me-2' width='16' height='16' />
-							HTTPS Certificates
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/csr' className={path === '/csr' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-building-lock pe-none me-2' width='16' height='16' />
-							Origin CSR
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/ddos_config' className={path === '/map/ddos_config' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-sliders2 pe-none me-2' width='16' height='16' />
-							Protection Settings
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/ddos' className={path === '/map/ddos' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-shield-check pe-none me-2' width='16' height='16' />
-							Protection Rules
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/rewrite' className={path === '/map/rewrite' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-pencil pe-none me-2' width='16' height='16' />
-							Rewrites
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/redirect' className={path === '/map/redirect' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-signpost pe-none me-2' width='16' height='16' />
-							Redirects
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/whitelist' className={path === '/map/whitelist' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-person-check pe-none me-2' width='16' height='16' />
-							IP Whitelist
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/blockedip' className={path === '/map/blockedip' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-person-slash pe-none me-2' width='16' height='16' />
-							IP Blacklist
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/blockedasn' className={path === '/map/blockedasn' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-building-slash pe-none me-2' width='16' height='16' />
-							ASN Blacklist
-					</Link>
-				</li>
-				<li className='nav-item'>
-					<Link href='/map/maintenance' className={path === '/map/maintenance' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-info-square pe-none me-2' width='16' height='16' />
-							Maintenance Mode
-					</Link>
-				</li>
+				<ul className='nav nav-pills flex-column mb-auto'>
+					<li className='nav-item'>
+						<Link href='/account' className={path === '/account' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-person-square pe-none me-2' width='16' height='16' />
+								Account
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/domains' className={path === '/domains' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-layers pe-none me-2' width='16' height='16' />
+								Domains
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/hosts' className={path === '/map/hosts' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-hdd-network pe-none me-2' width='16' height='16' />
+								Backends
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/certs' className={path === '/certs' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-file-earmark-lock pe-none me-2' width='16' height='16' />
+								HTTPS Certificates
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/csr' className={path === '/csr' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-building-lock pe-none me-2' width='16' height='16' />
+								Origin CSR
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/ddos_config' className={path === '/map/ddos_config' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-sliders2 pe-none me-2' width='16' height='16' />
+								Protection Settings
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/ddos' className={path === '/map/ddos' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-shield-check pe-none me-2' width='16' height='16' />
+								Protection Rules
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/rewrite' className={path === '/map/rewrite' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-pencil pe-none me-2' width='16' height='16' />
+								Rewrites
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/redirect' className={path === '/map/redirect' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-signpost pe-none me-2' width='16' height='16' />
+								Redirects
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/maintenance' className={path === '/map/maintenance' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-info-square pe-none me-2' width='16' height='16' />
+								Maintenance Mode
+						</Link>
+					</li>
+				</ul>
+				<hr />
+				<ul className='nav nav-pills flex-column'>
+					<li className='nav-item'>
+						<Link href='/map/whitelist' className={path === '/map/whitelist' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-person-check pe-none me-2' width='16' height='16' />
+								IP Whitelist
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/blockedip' className={path === '/map/blockedip' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-person-slash pe-none me-2' width='16' height='16' />
+								IP Blacklist
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/blockedasn' className={path === '/map/blockedasn' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-building-slash pe-none me-2' width='16' height='16' />
+								ASN Blacklist
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/blockedcc' className={path === '/map/blockedcc' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-globe2 pe-none me-2' width='16' height='16' />
+								Country Blacklist
+						</Link>
+					</li>
+					<li className='nav-item'>
+						<Link href='/map/blockedcn' className={path === '/map/blockedcn' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-globe2 pe-none me-2' width='16' height='16' />
+								Continent Blacklist
+						</Link>
+					</li>
+				</ul>
 			</>);
 			bottomLinks = (<>
 				<hr />
@@ -159,9 +178,7 @@ export default withRouter(function MenuLinks({ router }) {
 			<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
 		</Link>
 		<hr />
-		<ul className='nav nav-pills flex-column mb-auto'>
-			{mainLinks}
-		</ul>
+		{mainLinks}
 		{bottomLinks}
 	</>);
 

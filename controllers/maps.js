@@ -1,7 +1,17 @@
 import { extractMap, dynamicResponse } from '../util.js';
 import { createCIDR, parse } from 'ip6addr';
 import url from 'url';
-
+import countries from 'i18n-iso-countries';
+const countryMap = countries.getAlpha2Codes();
+const continentMap = {
+	'NA': 'North America',
+	'SA': 'South America',
+	'EU': 'Europe',
+	'AS': 'Asia',
+	'OC': 'Oceania',
+	'AF': 'Africa',
+	'AN': 'Antarctica',
+};
 /**
  * GET /maps/:name
  * Show map filtering to users domains
@@ -54,6 +64,8 @@ export async function mapData(req, res, next) {
 			break;
 		case process.env.BLOCKED_IP_MAP_NAME:
 		case process.env.BLOCKED_ASN_MAP_NAME:
+		case process.env.BLOCKED_CC_MAP_NAME:
+		case process.env.BLOCKED_CN_MAP_NAME:
 		case process.env.WHITELIST_MAP_NAME:
 			map = map
 				.filter(a => {
@@ -100,6 +112,8 @@ export async function deleteMapForm(req, res, next) {
 
 	if (req.params.name === process.env.BLOCKED_IP_MAP_NAME
 		|| req.params.name === process.env.BLOCKED_ASN_MAP_NAME
+		|| req.params.name === process.env.BLOCKED_CC_MAP_NAME
+		|| req.params.name === process.env.BLOCKED_CN_MAP_NAME
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
 		let value;
 		const existingEntry = await res.locals
@@ -233,6 +247,22 @@ export async function patchMapForm(req, res, next) {
 			//req.body.key is a number
 		}
 
+		//validate key is country code
+		if (req.params.name === process.env.BLOCKED_CC_MAP_NAME) {
+			if (!countryMap[req.body.key]) {
+				return dynamicResponse(req, res, 403, { error: 'Invalid country code' });
+			}
+			//req.body.key is a cc
+		}
+
+		//validate key is country code
+		if (req.params.name === process.env.BLOCKED_CN_MAP_NAME) {
+			if (!continentMap[req.body.key]) {
+				return dynamicResponse(req, res, 403, { error: 'Invalid continent code' });
+			}
+			//req.body.key is a cn
+		}
+
 		//validate value is url (roughly)
 		if (req.params.name === process.env.REWRITE_MAP_NAME
 			|| req.params.name === process.env.REDIRECT_MAP_NAME) {
@@ -294,6 +324,8 @@ export async function patchMapForm(req, res, next) {
 				break;
 			case process.env.BLOCKED_IP_MAP_NAME:
 			case process.env.BLOCKED_ASN_MAP_NAME:
+			case process.env.BLOCKED_CC_MAP_NAME:
+			case process.env.BLOCKED_CN_MAP_NAME:
 			case process.env.WHITELIST_MAP_NAME: {
 				const existingEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {

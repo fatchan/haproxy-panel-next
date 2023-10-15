@@ -42,6 +42,18 @@ const fMap = {
 		columnNames: ['AS Number', ''],
 	},
 
+	[process.env.BLOCKED_CC_MAP_NAME]: {
+		fname: 'Country Blacklist',
+		description: 'Countries that are outright blocked',
+		columnNames: ['Country Code', ''],
+	},
+
+	[process.env.BLOCKED_CN_MAP_NAME]: {
+		fname: 'Continent Blacklist',
+		description: 'Continents that are outright blocked',
+		columnNames: ['Continent Code', ''],
+	},
+
 	[process.env.WHITELIST_MAP_NAME]: {
 		fname: 'IP Whitelist',
 		description: 'IPs/subnets that bypass protection rules',

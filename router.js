@@ -242,6 +242,8 @@ export default function router(server, app) {
 	const mapNames = [
 			process.env.BLOCKED_IP_MAP_NAME,
 			process.env.BLOCKED_ASN_MAP_NAME,
+			process.env.BLOCKED_CC_MAP_NAME,
+			process.env.BLOCKED_CN_MAP_NAME,
 			process.env.MAINTENANCE_MAP_NAME,
 			process.env.WHITELIST_MAP_NAME,
 			process.env.REDIRECT_MAP_NAME,

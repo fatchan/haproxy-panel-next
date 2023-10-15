@@ -1,11 +1,28 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Select from 'react-select';
 import MapRow from '../../components/MapRow.js';
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
 import SearchFilter from '../../components/SearchFilter.js';
 import * as API from '../../api.js';
+
+import countries from 'i18n-iso-countries';
+import enCountries from 'i18n-iso-countries/langs/en.json';
+countries.registerLocale(enCountries);
+const continentMap = {
+	'NA': 'North America',
+	'SA': 'South America',
+	'EU': 'Europe',
+	'AS': 'Asia',
+	'OC': 'Oceania',
+	'AF': 'Africa',
+	'AN': 'Antarctica',
+};
+
+const countryOptions = Object.entries(countries.getNames('en'))
+	.map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
 const MapPage = (props) => {
 
@@ -253,6 +270,73 @@ const MapPage = (props) => {
 				</>
 			);
 			break;
+		case 'blockedcc':
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Blocked countries based on geoip data. Uses <a target='_blank' rel='noreferrer' href='https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes'>ISO 3166-1 alpha-2 country codes</a>.
+			</div>;
+			formElements = (
+				<>
+					<td>
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
+						</button>
+					</td>
+					<td>
+						<Select
+							theme={(theme) => ({
+								...theme,
+								borderRadius: 5,
+							})}
+							required
+							closeMenuOnSelect={true}
+							options={countryOptions}
+							// value={(rec.geov||[]).map(x => ({ value: x, label: `${countries.getName(x, 'en')} (${x})` }))}
+							getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
+							classNamePrefix='select'
+							name='key'
+							className='basic-multi-select'
+						/>
+					</td>
+				</>
+			);
+			break;
+		case 'blockedcn':
+			mapInfoHelper = <div className='alert alert-info' role='info'>
+				Block continents based on geoip data.
+			</div>;
+			formElements = (
+				<>
+					<td>
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
+						</button>
+					</td>
+					<td>
+						<Select
+							theme={(theme) => ({
+								...theme,
+								borderRadius: 5,
+							})}
+							required
+							closeMenuOnSelect={true}
+							options={[
+								{ value: 'NA', label: 'North America' },
+								{ value: 'SA', label: 'South America' },
+								{ value: 'EU', label: 'Europe' },
+								{ value: 'AS', label: 'Asia' },
+								{ value: 'OC', label: 'Oceania' },
+								{ value: 'AF', label: 'Africa' },
+								{ value: 'AN', label: 'Antarctica' },
+							]}
+							getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
+							classNamePrefix='select'
+							name='key'
+							className='basic-multi-select'
+						/>
+					</td>
+				</>
+			);
+			break;
 		case 'redirect':
 			mapInfoHelper = <div className='alert alert-info' role='info'>
 				Redirects redirect all requests from a domain to another domain or a domain+path e.g. &quot;www.example.com&quot; -&gt; &quot;example.com&quot; or &quot;example.com/something&quot;.
@@ -314,7 +398,7 @@ const MapPage = (props) => {
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Map table */}
-			<div className='table-responsive w-100 round-shadow'>
+			<div className='w-100 round-shadow'>
 				<form onSubmit={addToMap} className='d-flex' action={`/forms/map/${mapInfo.name}/add`} method='post'>
 					<table className='table text-nowrap mb-0'>
 						<tbody>
