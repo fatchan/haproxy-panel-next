@@ -51,7 +51,7 @@ export default withRouter(function MenuLinks({ router }) {
 			break;
 		default:
 			mainLinks = (<>
-				<ul className='nav nav-pills flex-column mb-auto'>
+				<ul className='nav nav-pills flex-column'>
 					<li className='nav-item'>
 						<Link href='/account' className={path === '/account' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
 							<i className='bi-person-square pe-none me-2' width='16' height='16' />
@@ -114,7 +114,7 @@ export default withRouter(function MenuLinks({ router }) {
 					</li>
 				</ul>
 				<hr />
-				<ul className='nav nav-pills flex-column'>
+				<ul className='nav nav-pills flex-column mb-auto'>
 					<li className='nav-item'>
 						<Link href='/map/whitelist' className={path === '/map/whitelist' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
 							<i className='bi-person-check pe-none me-2' width='16' height='16' />
