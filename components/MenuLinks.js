@@ -39,6 +39,12 @@ export default withRouter(function MenuLinks({ router }) {
 								HTTPS & CSRs
 						</Link>
 					</li>
+					<li className='nav-item'>
+						<Link href='/kb/debug' className={path === '/kb/debug' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-code-slash pe-none me-2' width='16' height='16' />
+								/.basedflare/ URLs
+						</Link>
+					</li>
 				</ul>
 			</>);
 			bottomLinks = null;
