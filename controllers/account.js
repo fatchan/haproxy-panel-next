@@ -125,7 +125,7 @@ export async function login(req, res) {
 export async function register(req, res) {
 
 	if (!res.locals.user || res.locals.user.username !== 'admin') {
-		return dynamicResponse(req, res, 400, { error: 'Registration is currently disabled, please try again later.' });
+		return dynamicResponse(req, res, 400, { error: 'Registration is currently invite-only, please email contact@ceoofbased.com to inquire about openings.' });
 	}
 
 	const username = req.body.username.toLowerCase();
