@@ -65,6 +65,18 @@ export default function Account(props) {
 					</div>
 				</div>
 
+				{/* Downs ips */}
+				<Link href='/down' className='list-group-item list-group-item-action d-flex align-items-start'>
+					<div className='ms-2 me-auto'>
+						<div className='fw-bold'>
+								Downed IPs
+							<span className='fw-normal'>
+								{' '}- IPs that are forced down for maintenance
+							</span>
+						</div>
+					</div>
+				</Link>
+
 				{/* Manage Clusters */}
 				{/*<div className="list-group-item list-group-item-action d-flex align-items-start flex-column">
 					<div className="flex-row d-flex w-100">

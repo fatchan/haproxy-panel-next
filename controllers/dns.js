@@ -278,3 +278,37 @@ export async function dnsRecordUpdate(req, res) {
 	await redis.hset(`dns:${domain}.`, zone, recordSetRaw);
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${domain}` });
 };
+
+
+/**
+* GET /down
+* downed ips page
+*/
+export async function downPage(app, req, res) {
+	if (!res.locals.user.username === 'admin') {
+		return dynamicResponse(req, res, 302, { redirect: '/account' });
+	}
+	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
+	res.locals.data = {
+		user: res.locals.user,
+		csrf: req.csrfToken(),
+		ips: ipsRecord ? ipsRecord.ips : [],
+	};
+	return app.render(req, res, '/down');
+};
+
+/**
+* GET /down.json
+* downed ips json
+*/
+export async function downJson(req, res) {
+	if (!res.locals.user.username === 'admin') {
+		return dynamicResponse(req, res, 403, { error: 'No permission' });
+	}
+	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
+	return res.json({
+		csrf: req.csrfToken(),
+		user: res.locals.user,
+		ips: ipsRecord ? ipsRecord.ips : [],
+	});
+};

@@ -13,6 +13,12 @@ export async function login(body, dispatch, errorCallback, router) {
 export async function register(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/register', 'POST', body, dispatch, errorCallback, router);
 }
+export async function getDownIps(dispatch, errorCallback, router) {
+	return ApiCall('/down.json', 'GET', null, dispatch, errorCallback, router);
+}
+export async function setDownIps(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/down', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 
 // Clusters
 export async function getClusters(dispatch, errorCallback, router) {

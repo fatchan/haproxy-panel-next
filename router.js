@@ -379,6 +379,22 @@ export default function router(server, app) {
 		dnsController.dnsRecordPage.bind(null, app),
 	);
 	server.get(
+		'/down',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		dnsController.downPage.bind(null, app),
+	);
+	server.get(
+		'/down.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		dnsController.downJson,
+	);
+	server.get(
 		'/certs',
 		useSession,
 		fetchSession,
