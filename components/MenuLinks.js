@@ -166,6 +166,12 @@ export default withRouter(function MenuLinks({ router }) {
 				<hr />
 				<ul className='nav nav-pills flex-column'>
 					<li className='nav-item'>
+						<Link href='/billing' className={path.startsWith('/billing') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-wallet2 pe-none me-2' width='16' height='16' />
+								Billing
+						</Link>
+					</li>
+					<li className='nav-item'>
 						<form action='/forms/logout' method='POST'>
 							<button className='nav-link text-body' type='submit'>
 								<i className='bi-door-open pe-none me-2' width='16' height='16' />

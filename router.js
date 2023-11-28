@@ -285,6 +285,24 @@ export default function router(server, app) {
 		accountController.accountJson,
 	);
 	server.get(
+		'/billing',
+		useSession,
+		fetchSession,
+		checkSession,
+		useHaproxy,
+		csrfMiddleware,
+		accountController.billingPage.bind(null, app),
+	);
+	server.get(
+		'/billing.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		useHaproxy,
+		csrfMiddleware,
+		accountController.billingJson,
+	);
+	server.get(
 		`/map/:name(${mapNamesOrString})`,
 		useSession,
 		fetchSession,

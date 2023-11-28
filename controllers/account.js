@@ -196,3 +196,29 @@ export async function updateOnboarding(req, res) {
 		});
 	return dynamicResponse(req, res, 302, { redirect: '/account' });
 };
+
+
+/**
+ * GET /billing
+ * billing page
+ */
+export async function billingPage(app, req, res, next) {
+	const [data, invoices] = await Promise.all([
+		accountData(req, res, next),
+		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
+	])
+	res.locals.data = { ...data, invoices, user: res.locals.user };
+	return app.render(req, res, '/billing');
+}
+
+/**
+ * GET /billing.json
+ * billing page json data
+ */
+export async function billingJson(req, res, next) {
+	const [data, invoices] = await Promise.all([
+		accountData(req, res, next),
+		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
+	])
+	return res.json({ ...data, invoices, user: res.locals.user });
+}
