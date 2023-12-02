@@ -52,7 +52,7 @@ const MapPage = (props) => {
 		);
 	}
 
-	const { user, mapValueNames, mapInfo, map, csrf, showValues } = state;
+	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state;
 
 	if (user && !user.onboarding) {
 		router.push('/onboarding');
@@ -65,6 +65,7 @@ const MapPage = (props) => {
 			//general maps
 			key: e.target.key.value,
 			value: e.target.value?.value,
+			note: e.target.note?.value,
 			//ddos_config
 			pd: e.target.pd?.value,
 			pt: e.target.pt?.value,
@@ -101,6 +102,7 @@ const MapPage = (props) => {
 					showValues={showValues}
 					mapValueNames={mapValueNames}
 					onDeleteSubmit={deleteFromMap}
+					mapNote={mapNotes[row.key]}
 					columnKeys={mapInfo.columnKeys}
 				/>
 			);
@@ -267,6 +269,9 @@ const MapPage = (props) => {
 					<td>
 						<input className='form-control' type='text' name='key' placeholder='ASN' required />
 					</td>
+					<td>
+						<input className='form-control' type='text' name='note' placeholder='Note' />
+					</td>
 				</>
 			);
 			break;
@@ -409,7 +414,7 @@ const MapPage = (props) => {
 								<th>
 									{mapInfo.columnNames[0]}
 								</th>
-								{showValues === true && mapInfo.columnNames.slice(1).map((x, mci) => (
+								{(showValues === true || mapInfo.showAllColumns === true) && mapInfo.columnNames.slice(1).map((x, mci) => (
 									<th key={`mci_${mci}`}>
 										{x}
 									</th>

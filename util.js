@@ -39,7 +39,8 @@ const fMap = {
 	[process.env.BLOCKED_ASN_MAP_NAME]: {
 		fname: 'ASN Blacklist',
 		description: 'ASNs that are outright blocked',
-		columnNames: ['AS Number', ''],
+		columnNames: ['AS Number', 'Note'],
+		showAllColumns: true,
 	},
 
 	[process.env.BLOCKED_CC_MAP_NAME]: {

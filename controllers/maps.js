@@ -1,5 +1,6 @@
 import { extractMap, dynamicResponse } from '../util.js';
 import { createCIDR, parse } from 'ip6addr';
+import * as db from '../db.js';
 import url from 'url';
 import countries from 'i18n-iso-countries';
 const countryMap = countries.getAlpha2Codes();
@@ -19,8 +20,17 @@ const continentMap = {
 export async function mapData(req, res, next) {
 	let map,
 		mapInfo,
-		showValues = false;
+		showValues = false,
+		mapNotes = {};
 	try {
+		mapNotes = await db.db().collection('mapnotes').find({
+			username: res.locals.user.username,
+			map: req.params.name
+		}).toArray();
+		mapNotes = mapNotes.reduce((acc, note) => {
+			acc[note.key] = note.note;
+			return acc;
+		}, {});
 		mapInfo = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', req.params.name)
 			.then(res => res.data)
@@ -80,6 +90,7 @@ export async function mapData(req, res, next) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 	}
 
+
 	return {
 		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'Proof-of-work+Captcha' },
 		mapInfo,
@@ -87,6 +98,7 @@ export async function mapData(req, res, next) {
 		csrf: req.csrfToken(),
 		name: req.params.name,
 		showValues,
+		mapNotes,
 	};
 }
 
@@ -106,8 +118,11 @@ export async function mapJson(req, res, next) {
  * Delete the map entries of the body 'domain'
  */
 export async function deleteMapForm(req, res, next) {
-	if(!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
+	if (!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
+	}
+	if (req.body && req.body.note && (typeof req.body.note !== 'string' || req.body.note.length > 200)) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid note' });
 	}
 
 	if (req.params.name === process.env.BLOCKED_IP_MAP_NAME
@@ -198,6 +213,11 @@ export async function deleteMapForm(req, res, next) {
 			return next(e);
 		}
 	}
+	await db.db().collection('mapnotes').deleteMany({
+		username: res.locals.user.username,
+		map: req.params.name,
+		key: req.body.key,
+	});
 	return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 }
 
@@ -462,6 +482,18 @@ export async function patchMapForm(req, res, next) {
 						value: value,
 					}]);
 			}
+			await db.db().collection('mapnotes').replaceOne({
+				username: res.locals.user.username,
+				map: req.params.name,
+				key: req.body.key,
+			}, {
+				username: res.locals.user.username,
+				map: req.params.name,
+				key: req.body.key,
+				note: req.body.note,
+			}, {
+				upsert: true,
+			});
 			return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);
