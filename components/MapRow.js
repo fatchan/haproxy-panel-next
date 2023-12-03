@@ -1,6 +1,6 @@
 import asnMap from '../maps/asn.json';
 
-export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote }) {
+export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote }) {
 
 	const { _id, key, value } = row;
 
@@ -17,8 +17,12 @@ export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, ma
 			<td>
 				{key}{name === 'blockedasn' && asnMap[key] && ` (${asnMap[key]})`}
 			</td>
-			{mapNote && <td>
-				{mapNote}
+			{showNote && <td>
+				{mapNote
+					? mapNote
+					: <span className='text-secondary'>
+						<i className='bi-dash-lg pe-none me-2' width='16' height='16' />
+					</span>}
 			</td>}
 			{typeof value === 'string' && showValues === true && (
 				<td>

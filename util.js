@@ -33,7 +33,8 @@ const fMap = {
 	[process.env.BLOCKED_IP_MAP_NAME]: {
 		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',
-		columnNames: ['IP/Subnet', ''],
+		columnNames: ['IP/Subnet', 'Note'],
+		showAllColumns: true,
 	},
 
 	[process.env.BLOCKED_ASN_MAP_NAME]: {
@@ -46,25 +47,27 @@ const fMap = {
 	[process.env.BLOCKED_CC_MAP_NAME]: {
 		fname: 'Country Blacklist',
 		description: 'Countries that are outright blocked',
-		columnNames: ['Country Code', ''],
+		columnNames: ['Country Code', 'Note'],
+		showAllColumns: true,
 	},
 
 	[process.env.BLOCKED_CN_MAP_NAME]: {
 		fname: 'Continent Blacklist',
 		description: 'Continents that are outright blocked',
-		columnNames: ['Continent Code', ''],
+		columnNames: ['Continent Code', 'Note'],
+		showAllColumns: true,
 	},
 
 	[process.env.WHITELIST_MAP_NAME]: {
 		fname: 'IP Whitelist',
 		description: 'IPs/subnets that bypass protection rules',
-		columnNames: ['IP/Subnet', ''],
+		columnNames: ['IP/Subnet', 'Note'],
+		showAllColumns: true,
 	},
 
 	[process.env.MAINTENANCE_MAP_NAME]: {
 		fname: 'Maintenance Mode',
-		description:
-      'Disable proxying and show maintenance page for selected domains',
+		description: 'Disable proxying and show maintenance page for selected domains',
 		columnNames: ['Domain', ''],
 	},
 

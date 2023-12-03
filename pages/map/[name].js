@@ -103,6 +103,7 @@ const MapPage = (props) => {
 					mapValueNames={mapValueNames}
 					onDeleteSubmit={deleteFromMap}
 					mapNote={mapNotes[row.key]}
+					showNote={mapInfo.showAllColumns}
 					columnKeys={mapInfo.columnKeys}
 				/>
 			);
@@ -252,6 +253,9 @@ const MapPage = (props) => {
 					<td>
 						<input className='form-control' type='text' name='key' placeholder='ip or subnet' required />
 					</td>
+					<td>
+						<input className='form-control' type='text' name='note' placeholder='Note' />
+					</td>
 				</>
 			);
 			break;
@@ -302,6 +306,9 @@ const MapPage = (props) => {
 							className='basic-multi-select'
 						/>
 					</td>
+					<td>
+						<input className='form-control' type='text' name='note' placeholder='Note' />
+					</td>
 				</>
 			);
 			break;
@@ -338,6 +345,9 @@ const MapPage = (props) => {
 							name='key'
 							className='basic-multi-select'
 						/>
+					</td>
+					<td>
+						<input className='form-control' type='text' name='note' placeholder='Note' />
 					</td>
 				</>
 			);
