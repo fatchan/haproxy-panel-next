@@ -137,7 +137,7 @@ async function updateDowned() {
 				_id: 'down',
 			})
 			.then(res => res && res.ips ? res.ips : []);
-		console.log(downedIps);
+		downedIps && downedIps.length > 0 && console.log('downed IPs:', downedIps);
 	} catch (e) {
 		console.error(e);
 	}
