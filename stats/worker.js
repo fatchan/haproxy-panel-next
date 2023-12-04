@@ -98,7 +98,9 @@ async function getFormattedStats(host) {
 async function processHost(host) {
 	try {
 		const hostname = new URL(host).hostname;
+		console.time(`Fetched stats from ${hostname}`);
 		const { frontendStats, serverStats } = await getFormattedStats(host);
+		console.timeEnd(`Fetched stats from ${hostname}`);
 		let points = [];
 		const now = new Date();
 		frontendStats.forEach((s, i) => {
@@ -127,9 +129,10 @@ async function processHost(host) {
 				points = points.concat(statPoints);
 			 });
 		});
+		console.time(`Flushed ${points.length} points to influx`);
 		await writeApi.writePoints(points);
-		await writeApi.flush()
-		console.log('Flushed', points.length, 'points to influx');
+		await writeApi.flush();
+		console.timeEnd(`Flushed ${points.length} points to influx`);
 	} catch (e) {
 		if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
 			console.error('Error writing stats', new URL(host).hostname, e.cause.code);
