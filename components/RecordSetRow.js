@@ -39,7 +39,7 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 						</button>
 					</form>
 				</span>
-				{recordSetArray[0].l !== true && <Link href={`/dns/${domain}/${name}/${type}`} className='btn btn-sm btn-primary ms-2'>
+				{recordSetArray.length > 0 && recordSetArray[0].l !== true && <Link href={`/dns/${domain}/${name}/${type}`} className='btn btn-sm btn-primary ms-2'>
 					<i className='bi-pencil-fill pe-none' width='16' height='16' />
 				</Link>}
 			</td>
@@ -58,8 +58,8 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				{recordSetArray && recordSetArray.length > 0 ? recordSetArray[0].ttl : '-'}
 			</td>
 			<td>
-				{recordSetArray[0].t && <div className='text-warning'>Template</div>}
-				{recordSetArray[0].l && <div className='text-danger'>Locked</div>}
+				{recordSetArray && recordSetArray.length > 0 && recordSetArray[0].t && <div className='text-warning'>Template</div>}
+				{recordSetArray && recordSetArray.length > 0 && recordSetArray[0].l && <div className='text-danger'>Locked</div>}
 			</td>
 		</tr>
 	);

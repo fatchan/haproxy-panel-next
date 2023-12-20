@@ -263,7 +263,7 @@ export async function dnsRecordUpdate(req, res) {
 	if (!recordSetRaw) {
 		recordSetRaw = {};
 	} else if (recordSetRaw[type] && recordSetRaw[type].l === true
-		|| (Array.isArray(recordSetRaw[type]) && recordSetRaw[type][0].l === true)) {
+		|| (Array.isArray(recordSetRaw[type]) && (recordSetRaw[type].length > 0 && recordSetRaw[type][0].l === true))) {
 		return dynamicResponse(req, res, 400, { error: 'You can\'t edit or overwrite locked records' });
 	}
 	if (type == 'soa') {
