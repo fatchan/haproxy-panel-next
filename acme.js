@@ -36,12 +36,16 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';
+		let caaSubdomain = '@';
 		if (parsed.subdomain && parsed.subdomain.length > 0) {
 			subdomain += `.${parsed.subdomain}`;
+			caaSubdomain = parsed.subdomain;
 		}
 		const lock = await redlock.acquire([`lock:${domain}:${subdomain}`], 10000);
+		const lock2 = await redlock.acquire([`lock:${domain}:${caaSubdomain}`], 10000);
 		try {
 			const recordValue = keyAuthorization;
+			//TXT record
 			console.log(`Creating TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
 			const record = { ttl: 300, text: recordValue, l: true, t: true };
 			let recordSetRaw = await redis.hget(`dns:${domain}.`, subdomain);
@@ -51,10 +55,28 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 			recordSetRaw['txt'] = (recordSetRaw['txt']||[]).concat([record]);
 			await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
 			console.log(`Created TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
+			//CAA record (testing)
+			console.log(`Creating TXT record for "${caaSubdomain}.${domain}"`);
+			let caaRecordSetRaw = await redis.hget(`dns:${domain}.`, caaSubdomain);
+			if (!caaRecordSetRaw) {
+				caaRecordSetRaw = {};
+			}
+			if (!caaRecordSetRaw['caa']) {
+				caaRecordSetRaw['caa'] = [{
+					'ttl': 86400,
+					'value': 'letsencrypt.org',
+					'flag': 0,
+					'tag': 'issue',
+					't': true
+				}];
+				await redis.hset(`dns:${domain}.`, caaSubdomain, caaRecordSetRaw);
+			}
+			console.log(`Created TXT record for "${caaSubdomain}.${domain}"`);
 		} catch(e) {
 			console.error(e);
 		} finally {
 			await lock.release();
+			await lock2.release();
 		}
 	}
 }
@@ -83,12 +105,16 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';
+		let caaSubdomain = '@';
 		if (parsed.subdomain && parsed.subdomain.length > 0) {
 			subdomain += `.${parsed.subdomain}`;
+			caaSubdomain = parsed.subdomain;
 		}
 		const lock = await redlock.acquire([`lock:${domain}:${subdomain}`], 10000);
+		const lock2 = await redlock.acquire([`lock:${domain}:${caaSubdomain}`], 10000);
 		try {
 			const recordValue = keyAuthorization;
+			//TXT record
 			console.log(`Removing TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
 			let recordSetRaw = await redis.hget(`dns:${domain}.`, subdomain);
 			if (!recordSetRaw) {
@@ -101,10 +127,25 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 				await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
 			}
 			console.log(`Removed TXT record "${subdomain}.${domain}" with value "${recordValue}"`);
+			//CAA record (testing)
+			console.log(`Removing TXT record for "${caaSubdomain}.${domain}"`);
+			let caaRecordSetRaw = await redis.hget(`dns:${domain}.`, caaSubdomain);
+			if (!caaRecordSetRaw) {
+				caaRecordSetRaw = {};
+			}
+			if (caaRecordSetRaw['caa']) {
+				caaRecordSetRaw['caa'] = caaRecordSetRaw['caa'].filter(r => r.t === false);
+			}
+			if (!caaRecordSetRaw['caa'] || caaRecordSetRaw['caa'].length === 0) {
+				delete caaRecordSetRaw['caa'];
+			}
+			await redis.hset(`dns:${domain}.`, caaSubdomain, caaRecordSetRaw);
+			console.log(`Removed TXT record for "${caaSubdomain}.${domain}"`);
 		} catch(e) {
 			console.error(e);
 		} finally {
 			await lock.release();
+			await lock2.release();
 		}
 	}
 }
