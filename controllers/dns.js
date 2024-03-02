@@ -179,6 +179,10 @@ export async function dnsRecordUpdate(req, res) {
 					//other
 					[`tag_${i}`]: tag,
 					[`mbox_${i}`]: MBox,
+					//closest
+					[`c_${i}`]: closest,
+					[`lat_${i}`]: lat,
+					[`long_${i}`]: long,
 				} = req.body;
 				if (!value) { break; }
 				try {
@@ -194,6 +198,8 @@ export async function dnsRecordUpdate(req, res) {
 						|| (refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh))
 						|| (retry && (isNaN(retry) || parseInt(retry) !== +retry))
 						|| (expire && (isNaN(expire) || parseInt(expire) !== +expire))
+						|| (lat && isNaN(lat))
+						|| (long && isNaN(long))
 						|| (geov && !Array.isArray(geov))
 						|| (fb && !Array.isArray(fb))) {
 						return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -210,6 +216,9 @@ export async function dnsRecordUpdate(req, res) {
 					sel && (sel = parseInt(sel));
 					bsel && (bsel = parseInt(bsel));
 					h && (h = (h != null ? true : false));
+					closest != null && (closest = true);
+					lat && (lat = parseFloat(lat));
+					long && (long = parseFloat(long));
 					geov && (geov = geov.map(x => x.trim()).slice(0,300)); //todo: country/continent filter
 					fb && (fb = fb.map(x => x.trim()).slice(0,20));
 				} catch(e) {
@@ -222,13 +231,13 @@ export async function dnsRecordUpdate(req, res) {
 						if (!isIPv4(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
-						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, c, lat, long };
 						break;
 					case 'aaaa':
 						if (!isIPv6(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
-						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true };
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, c, lat, long };
 						break;
 					case 'txt':
 						record = { ttl, text: value };
