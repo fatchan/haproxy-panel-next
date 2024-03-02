@@ -231,13 +231,13 @@ export async function dnsRecordUpdate(req, res) {
 						if (!isIPv4(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
-						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, c, lat, long };
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, closest, lat, long };
 						break;
 					case 'aaaa':
 						if (!isIPv6(value)) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
-						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, c, lat, long };
+						record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, closest, lat, long };
 						break;
 					case 'txt':
 						record = { ttl, text: value };
