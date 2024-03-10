@@ -1,8 +1,15 @@
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
 import * as db from '../db.js';
 import * as acme from '../acme.js';
 import url from 'node:url';
 import { dynamicResponse, wildcardAllowed, filterCertsByDomain } from '../util.js';
 import { verifyCSR } from '../ca.js';
+import { Resolver } from 'node:dns/promises';
+import psl from 'psl';
+
+const resolver = new Resolver();
+resolver.setServers(process.env.NAMESERVERS.split(','));
 
 /**
  * GET /certs
@@ -78,6 +85,18 @@ export async function addCert(req, res, next) {
 		return dynamicResponse(req, res, 400, { error: 'Missing altname(s)' });
 	}
 	req.body.altnames = req.body.altnames.map(x => x.trim());
+
+	const rootDomain = psl.parse(req.body.subject).domain;
+	let certDomainNameservers = [];
+	try {
+		certDomainNameservers = await resolver.resolve(rootDomain, 'NS');
+	} catch(e) {
+		console.warn(e); //probably just no NS records, bad domain
+		certDomainNameservers = null;
+	}
+	if (!certDomainNameservers || certDomainNameservers.some(d => ![ 'ns1.basedns.net', 'ns2.basedns.cloud', 'ns3.basedns.services' ].includes(d))) {
+		return dynamicResponse(req, res, 400, { error: 'Domain nameservers are not correct, please visit onboarding' });
+	}
 
 	if (!(res.locals.user.domains.includes(req.body.subject)
 		|| (req.body.subject.startsWith('*.') && wildcardAllowed(req.body.subject, res.locals.user.domains)))) {

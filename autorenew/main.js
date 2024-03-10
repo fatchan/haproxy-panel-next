@@ -11,12 +11,17 @@ import FormData from 'form-data';
 import agent from '../agent.js';
 import * as acme from '../acme.js';
 import fetch from 'node-fetch';
+import { Resolver } from 'node:dns/promises';
+import psl from 'psl';
+
+const resolver = new Resolver();
+resolver.setServers(process.env.NAMESERVERS.split(','));
 
 const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
 	, firstClusterURL = clusterUrls[0]
 	, base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString('base64');
 
-async function main() {
+async function main() {	
 	await db.connect();
 	await acme.init();
 	loop();
@@ -93,8 +98,20 @@ async function loop() {
 		}
 		for (const c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
-			await updateCert(c);
-			await new Promise(res => setTimeout(res, 5000));
+			const rootDomain = psl.parse(c.subject).domain;
+			let certDomainNameservers = [];
+			try {
+				certDomainNameservers = await resolver.resolve(rootDomain, 'NS');
+			} catch(e) {
+				console.warn(e); //probably just no NS records, bad domain
+				certDomainNameservers = null;
+			}
+			if (!certDomainNameservers || certDomainNameservers.some(d => ![ 'ns1.basedns.net', 'ns2.basedns.cloud', 'ns3.basedns.services' ].includes(d))) {
+				console.warn('Skipping', rootDomain, 'renewal because of incorrect NS records:', certDomainNameservers);
+			} else {
+				await updateCert(c);
+				await new Promise(res => setTimeout(res, 5000));
+			}
 		}
 	} catch(e) {
 		console.error(e);
