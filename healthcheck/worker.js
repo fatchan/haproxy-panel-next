@@ -26,6 +26,7 @@ const healthCheckQueue = new Queue('healthchecks', { redis: {
 const ignoredErrorCodes = [
 	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
 	'ERR_TLS_CERT_ALTNAME_INVALID',
+	'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
 ];
 
 let downedIps = [];
