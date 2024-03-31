@@ -98,7 +98,7 @@ async function loop() {
 		}
 		for (const c of expiringCerts) {
 			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
-			const rootDomain = psl.parse(c.subject).domain;
+			const rootDomain = psl.parse(c.subject.replace('*', 'x')).domain;
 			let certDomainNameservers = [];
 			try {
 				certDomainNameservers = await resolver.resolve(rootDomain, 'NS');

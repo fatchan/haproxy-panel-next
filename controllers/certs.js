@@ -86,7 +86,7 @@ export async function addCert(req, res, next) {
 	}
 	req.body.altnames = req.body.altnames.map(x => x.trim());
 
-	const rootDomain = psl.parse(req.body.subject).domain;
+	const rootDomain = psl.parse(req.body.subject.replace('*', 'x')).domain;
 	let certDomainNameservers = [];
 	try {
 		certDomainNameservers = await resolver.resolve(rootDomain, 'NS');
