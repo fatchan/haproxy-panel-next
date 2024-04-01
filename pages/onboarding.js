@@ -32,10 +32,10 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords } = state;
+	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords, hasBackend } = state;
 	const domainAdded = user.domains && user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
-	const backendAdded = backendMap && backendMap.count > 0;
+	const backendAdded = backendMap && backendMap.count > 0 && hasBackend === true;
 	const certAdded = user.numCerts && user.numCerts > 0;
 
 	async function updateOnboarding(step) {
@@ -212,7 +212,7 @@ export default function Onboarding(props) {
 							<input className='btn btn-success' type='submit' value='Add backend' disabled={backendAdded} />
 						</form>
 					</>}
-					{backendAdded && (<div><strong>
+					{backendAdded === true && (<div><strong>
 						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
 						Backend server successfully added
 					</strong></div>)}
