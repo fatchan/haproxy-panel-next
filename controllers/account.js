@@ -15,7 +15,8 @@ resolver.setServers(process.env.NAMESERVERS.split(','));
 export async function accountData(req, res, _next) {
 	let maps = []
 		, globalAcl
-		, txtRecords = [];
+		, txtRecords = []
+		, hasBackend = false;
 	if (res.locals.user.clusters.length > 0) {
 		maps = res.locals
 			.dataPlaneRetry('getAllRuntimeMapFiles')
@@ -27,12 +28,17 @@ export async function accountData(req, res, _next) {
 			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 			.then(res => res.data.description.split('').reverse()[0]);
 		txtRecords = resolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
+		hasBackend = (await db.db().collection('mapnotes').findOne({
+			username: res.locals.user.username,
+			map: 'hosts'
+		})) != null;
 	}
 	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
 		maps,
 		globalAcl: globalAcl === '1',
+		hasBackend,
 		txtRecords,
 	};
 };
@@ -197,7 +203,6 @@ export async function updateOnboarding(req, res) {
 	return dynamicResponse(req, res, 302, { redirect: '/account' });
 };
 
-
 /**
  * GET /billing
  * billing page
@@ -206,7 +211,7 @@ export async function billingPage(app, req, res, next) {
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
 		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
-	])
+	]);
 	res.locals.data = { ...data, invoices, user: res.locals.user };
 	return app.render(req, res, '/billing');
 }
@@ -219,6 +224,6 @@ export async function billingJson(req, res, next) {
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
 		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
-	])
+	]);
 	return res.json({ ...data, invoices, user: res.locals.user });
 }
