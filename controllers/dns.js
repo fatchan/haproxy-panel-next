@@ -288,7 +288,6 @@ export async function dnsRecordUpdate(req, res) {
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${domain}` });
 };
 
-
 /**
 * GET /down
 * downed ips page

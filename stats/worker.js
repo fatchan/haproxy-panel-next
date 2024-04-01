@@ -1,8 +1,8 @@
 'use strict';
 
 process
-        .on('uncaughtException', console.error)
-        .on('unhandledRejection', console.error);
+	.on('uncaughtException', console.error)
+	.on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
@@ -27,7 +27,7 @@ import agent from '../agent.js';
 
 const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
-	, base64Auth = Buffer.from(`${clusterUrls[0].username}:${clusterUrls[0].password}`).toString("base64");
+	, base64Auth = Buffer.from(`${clusterUrls[0].username}:${clusterUrls[0].password}`).toString('base64');
 
 async function fetchStats(host, parameters) {
 	const singleApi = new OpenAPIClientAxios.default({ definition, axiosConfigDefaults: { httpsAgent: agent, headers: { 'authorization': `Basic ${base64Auth}` } } });
@@ -122,7 +122,7 @@ async function processHost(host) {
 							.tag('type', 'backend')
 							.tag('hostname', hostname)
 							.tag('server_name', ss.name)
-							.tag('server_address', ss.stats["Address"])
+							.tag('server_address', ss.stats['Address'])
 							.floatField('value', e[1])
 							.timestamp(now);
 					});

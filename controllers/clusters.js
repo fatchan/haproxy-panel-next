@@ -5,7 +5,7 @@ export async function clustersPage(app, req, res, next) {
 	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
-	}
+	};
 	return app.render(req, res, '/clusters');
 };
 

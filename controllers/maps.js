@@ -90,7 +90,6 @@ export async function mapData(req, res, next) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 	}
 
-
 	return {
 		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'Proof-of-work+Captcha' },
 		mapInfo,

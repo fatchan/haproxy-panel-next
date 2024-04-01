@@ -38,7 +38,7 @@ export async function certsPage(app, req, res) {
 		user: res.locals.user,
 		dbCerts: dbCerts || [],
 		clusterCerts: clusterCerts || [],
-	}
+	};
 	return app.render(req, res, '/certs');
 };
 
