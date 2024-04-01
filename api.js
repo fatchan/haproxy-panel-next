@@ -4,6 +4,9 @@ import NProgress from 'nprogress';
 export async function getAccount(dispatch, errorCallback, router) {
 	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router);
 }
+export async function getOnboarding(dispatch, errorCallback, router) {
+	return ApiCall('/onboarding.json', 'GET', null, dispatch, errorCallback, router);
+}
 export async function getBilling(dispatch, errorCallback, router) {
 	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router);
 }

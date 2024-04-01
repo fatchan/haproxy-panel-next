@@ -13,11 +13,22 @@ export default function Onboarding(props) {
 	const [error, setError] = useState();
 	const [csrState, setCsrState] = useState();
 
+	async function fetchOnboarding() {
+		API.getOnboarding(dispatch, setError, router);
+	}
+
 	useEffect(() => {
-		if (!state.user) {
-			API.getAccount(dispatch, setError, router);
+		if (state.hasBackend == null) {
+			fetchOnboarding();
 		}
 	}, [state.user, state.maps, router]);
+
+	useEffect(() => {
+		const interval = setInterval(fetchOnboarding, 60000);
+		return () => {
+			clearInterval(interval);
+		};
+	}, []);
 
 	if (state.user == null || !state.txtRecords || state.txtRecords.length === 0) {
 		return (
@@ -32,7 +43,7 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords, hasBackend } = state;
+	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords, hasBackend, nameserversPropagated } = state;
 	const domainAdded = user.domains && user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
 	const backendAdded = backendMap && backendMap.count > 0 && hasBackend === true;
@@ -128,22 +139,28 @@ export default function Onboarding(props) {
 				</span>
 			</div>
 			<div className='list-group-item d-flex gap-3'>
-				<span className='flex-shrink-0 mx-1 mt-2'>&bull;</span>
+				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={nameserversPropagated} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong>
+					<strong style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
 						<i className='bi-globe2 pe-none me-2' width='1em' height='1em' />
 						2. Update the nameservers for your domain to the following:
 					</strong>
-					<span className='d-block text-body-secondary mt-3'>
-						<ul>
-							{txtRecords
-								.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
-								.map((r, i) => <li key={'a'+i}>{r}</li>)}
-						</ul>
-					</span>
-					<span className='d-block text-body-secondary mt-3'>
-						<p>This is usually done through your domain registrar. Use all the nameservers, or as many as the registrar allows for your domain.</p>
-					</span>
+					{!nameserversPropagated && <>
+						<span className='d-block text-body-secondary mt-3'>
+							<ul>
+								{txtRecords
+									.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
+									.map((r, i) => <li key={'a'+i}>{r}</li>)}
+							</ul>
+						</span>
+						<span className='d-block text-body-secondary mt-3'>
+							<p>This is usually done through your domain registrar. Use all the nameservers, or as many as the registrar allows for your domain.</p>
+						</span>
+					</>}
+					{nameserversPropagated && (<div><strong>
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						Nameservers configured successfully
+					</strong></div>)}
 				</span>
 			</div>
 			<div className='list-group-item d-flex gap-3'>
@@ -160,21 +177,27 @@ export default function Onboarding(props) {
 				</span>
 			</div>
 			<div className='list-group-item d-flex gap-3'>
-				<span className='flex-shrink-0 mx-1 mt-2'>&bull;</span>
+				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={nameserversPropagated} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong>
+					<strong style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
 						<i className='bi-hourglass-split pe-none me-2' width='1em' height='1em' />
-						Wait for the nameserver and DNS updates to propagate.
+						4. Wait for the nameserver and DNS updates to propagate.
 					</strong>
-					<span className='d-block text-body-secondary mt-3'>
-						<p>This may take up to 48 hours depending on your domain registrar, but typically starts working within 30 minutes.</p>
-						<p>You can use these external tools to check the propagation of the DNS:</p>
-						<ul>
-							<li><a rel='noreferrer' target='_blank' href='https://ping.sx/dig'>{'https://ping.sx/dig'}</a></li>
-							<li><a rel='noreferrer' target='_blank' href='https://www.whatsmydns.net/'>{'https://www.whatsmydns.net/'}</a></li>
-							<li><a rel='noreferrer' target='_blank' href='https://dnschecker.org/'>{'https://dnschecker.org/'}</a></li>
-						</ul>
-					</span>
+					{!nameserversPropagated && <>
+						<span className='d-block text-body-secondary mt-3'>
+							<p>This may take up to 48 hours depending on your domain registrar, but typically starts working within 30 minutes.</p>
+							<p>You can use these external tools to check the propagation of the DNS:</p>
+							<ul>
+								<li><a rel='noreferrer' target='_blank' href='https://ping.sx/dig'>{'https://ping.sx/dig'}</a></li>
+								<li><a rel='noreferrer' target='_blank' href='https://www.whatsmydns.net/'>{'https://www.whatsmydns.net/'}</a></li>
+								<li><a rel='noreferrer' target='_blank' href='https://dnschecker.org/'>{'https://dnschecker.org/'}</a></li>
+							</ul>
+						</span>
+					</>}
+					{nameserversPropagated && (<div><strong>
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						Nameserver changes propagated successfully
+					</strong></div>)}
 				</span>
 			</div>
 			{<div className='list-group-item d-flex gap-3'>
@@ -182,7 +205,7 @@ export default function Onboarding(props) {
 				<span className='pt-1 form-checked-content'>
 					<strong style={{ textDecoration: backendAdded ? 'line-through' : '' }}>
 						<i className='bi-hdd-network-fill pe-none me-2' width='1em' height='1em' />
-						4. Add a backend
+						5. Add a backend
 					</strong>
 					{!backendAdded && <>
 						<span className='d-block text-body-secondary mt-3'>
@@ -223,7 +246,7 @@ export default function Onboarding(props) {
 				<span className='pt-1 form-checked-content'>
 					<strong style={{ textDecoration: certAdded ? 'line-through' : '' }}>
 						<i className='bi-file-earmark-lock-fill pe-none me-2' width='1em' height='1em' />
-						5. Generate HTTPS certificate
+						6. Generate HTTPS certificate
 					</strong>
 					{!certAdded && <>
 						<span className='d-block text-body-secondary mt-3'>
@@ -256,7 +279,7 @@ export default function Onboarding(props) {
 				<span className='pt-1 form-checked-content'>
 					<strong>
 						<i className='bi-building-fill-lock pe-none me-2' width='1em' height='1em' />
-						6. Get your HTTPS CSR signed
+						8. Get your HTTPS CSR signed
 					</strong>
 					<span className='d-block text-body-secondary mt-3'>
 						<p>Finally, generate a certificate signing request for your origin server(s) and have BasedFlare sign it.</p>

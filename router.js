@@ -285,6 +285,15 @@ export default function router(server, app) {
 		accountController.accountJson,
 	);
 	server.get(
+		'/onboarding.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		useHaproxy,
+		csrfMiddleware,
+		accountController.onboardingJson,
+	);
+	server.get(
 		'/billing',
 		useSession,
 		fetchSession,

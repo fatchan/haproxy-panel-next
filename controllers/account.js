@@ -6,8 +6,15 @@ import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 
-const resolver = new Resolver();
-resolver.setServers(process.env.NAMESERVERS.split(','));
+const basedflareNSResolver = new Resolver();
+basedflareNSResolver.setServers(process.env.NAMESERVERS.split(','));
+const cloudflareResolver = new Resolver();
+cloudflareResolver.setServers(['1.1.1.1']);
+const googleResolver = new Resolver();
+googleResolver.setServers(['8.8.8.8']);
+const quad9Resolver = new Resolver();
+quad9Resolver.setServers(['9.9.9.9']);
+const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
 
 /**
  * account page data shared between html/json routes
@@ -15,8 +22,7 @@ resolver.setServers(process.env.NAMESERVERS.split(','));
 export async function accountData(req, res, _next) {
 	let maps = []
 		, globalAcl
-		, txtRecords = []
-		, hasBackend = false;
+		, txtRecords = [];
 	if (res.locals.user.clusters.length > 0) {
 		maps = res.locals
 			.dataPlaneRetry('getAllRuntimeMapFiles')
@@ -27,21 +33,41 @@ export async function accountData(req, res, _next) {
 		globalAcl = res.locals
 			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 			.then(res => res.data.description.split('').reverse()[0]);
-		txtRecords = resolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
-		hasBackend = (await db.db().collection('mapnotes').findOne({
-			username: res.locals.user.username,
-			map: 'hosts'
-		})) != null;
+		txtRecords = basedflareNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	}
 	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
 		maps,
 		globalAcl: globalAcl === '1',
-		hasBackend,
 		txtRecords,
 	};
 };
+
+//TODO: move to lib
+const expectedNameservers = new Set(process.env.NAMESERVERS_HOSTS.split(','));
+async function checkPublicDNSRecord(domain, type, expectedSet) {
+	const results = await Promise.all(publicResolvers.map(async pr => {
+		const res = await pr.resolve(domain, type);
+		return new Set(res||[]);
+	}));
+	return results.every(res => res.size === new Set([...res, ...expectedSet]).size);
+}
+
+/**
+ * extra information needed for the onboarding page to display known completed steps
+ */
+export async function onboardingData(req, res, _next) {
+	const firstDomain = res.locals.user.domains && res.locals.user.domains.length > 0 ? res.locals.user.domains[0] : null;
+	const [anyBackend, nameserversPropagated] = await Promise.all([
+		db.db().collection('mapnotes').findOne({ username: res.locals.user.username, map: 'hosts' }),
+		firstDomain	? checkPublicDNSRecord(firstDomain, 'NS', expectedNameservers) : void 0,
+	]);
+	return {
+		hasBackend: anyBackend != null,
+		nameserversPropagated,
+	};
+}
 
 /**
  * GET /account
@@ -58,8 +84,11 @@ export async function accountPage(app, req, res, next) {
  * account page html
  */
 export async function onboardingPage(app, req, res, next) {
-	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: res.locals.user };
+	const [addData, onbData] = await Promise.all([
+		accountData(req, res, next),
+		onboardingData(req, res, next),
+	]);
+	res.locals.data = { ...addData, ...onbData, user: res.locals.user };
 	return app.render(req, res, '/onboarding');
 }
 
@@ -71,6 +100,19 @@ export async function accountJson(req, res, next) {
 	const data = await accountData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
+
+/**
+ * GET /onboarding.json
+ * onboarding page json data
+ */
+export async function onboardingJson(req, res, next) {
+	const [addData, onbData] = await Promise.all([
+		accountData(req, res, next),
+		onboardingData(req, res, next),
+	]);
+	return res.json({ ...addData, ...onbData, user: res.locals.user });
+}
+
 
 /**
  * POST /forms/global/toggle
