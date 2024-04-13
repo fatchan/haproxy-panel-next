@@ -158,6 +158,9 @@ export async function login(req, res) {
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 	}
+	if (!account.inactive) {
+		return dynamicResponse(req, res, 403, { error: 'Your account has been suspended for inactivity, please contact support.' });
+	}
 	const passwordMatch = await bcrypt.compare(password, account.passwordHash);
 	if (passwordMatch === true) {
 		req.session.user = account._id;
