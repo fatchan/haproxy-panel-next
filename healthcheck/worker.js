@@ -53,7 +53,7 @@ async function doCheck(domainKey, hkey, record) {
 				const signal = controller.signal;
 				setTimeout(() => {
 					controller.abort();
-				}, 7000);
+				}, 10000);
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
 				const hostHeader = domainKey.substring(4, domainKey.length-1);
 				await fetch(`https://${host}/.basedflare/cgi/trace`, {
