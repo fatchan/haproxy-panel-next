@@ -28,17 +28,8 @@ export default function Account(props) {
 
 		const isAdmin = user.username === 'admin';
 
-		// Next cluster number for > browse button
-		const nextCluster = user.clusters[user.activeCluster+1] ? user.activeCluster+1 : 0;
-
 		// Links to each map and bubble/pill for map counts
 		const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
-
-		async function switchCluster(e) {
-			e.preventDefault();
-			await API.changeCluster({ _csrf: csrf, cluster: nextCluster }, dispatch, setError, router);
-			await API.getAccount(dispatch, setError, router);
-		}
 
 		async function toggleGlobal(e) {
 			e.preventDefault();
@@ -76,46 +67,6 @@ export default function Account(props) {
 						</div>
 					</div>
 				</Link>
-
-				{/* Manage Clusters */}
-				{/*<div className="list-group-item list-group-item-action d-flex align-items-start flex-column">
-					<div className="flex-row d-flex w-100">
-						<div className="ms-2 me-auto">
-							<div className="fw-bold">
-								Manage Clusters
-								<span className="fw-normal">
-									{' '}- Add/Delete/Select cluster
-								</span>
-							</div>
-						</div>
-						<span className="ml-auto badge bg-info rounded-pill" style={{ maxHeight: "1.6em" }}>
-							Cluster: {user.activeCluster+1}/{user.clusters.length}
-						</span>
-					</div>
-					<div className="d-flex w-100 justify-content-between mt-2">
-						<div className="ms-2 overflow-hidden">
-							<div className="fw-bold overflow-hidden text-truncate">
-								Cluster ({user.clusters.length === 0 ? 0 : user.clusters[user.activeCluster].split(',').length} servers)
-								{user.clusters.length > 0 && (<span className="fw-normal">
-									: {user.clusters[user.activeCluster].split(',').map(x => {
-										const cUrl = new URL(x);
-										return cUrl.hostname;
-									}).join(', ')}
-								</span>)}
-							</div>
-						</div>
-						<span className="ml-auto d-flex flex-row">
-							<form onSubmit={switchCluster} action="/forms/cluster" method="post">
-								<input type="hidden" name="_csrf" value={csrf}/>
-								<input type="hidden" name="cluster" value={nextCluster}/>
-								<input className="btn btn-primary px-2 py-0" type="submit" value="&gt;" />
-							</form>
-							<Link href="/clusters" className="btn btn-success px-2 py-0 ms-2" style={{ maxHeight: "1.6em" }}>
-								+
-							</Link>
-						</span>
-					</div>
-				</div>*/}
 
 				{/* Domains */}
 				<Link href='/domains' className='list-group-item list-group-item-action d-flex align-items-start'>

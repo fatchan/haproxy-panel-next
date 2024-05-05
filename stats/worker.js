@@ -129,10 +129,10 @@ async function processHost(host) {
 				points = points.concat(statPoints);
 			 });
 		});
-		console.time(`Flushed ${points.length} points to influx`);
+		console.time(`Flushed ${points.length} points for ${hostname} to influx`);
 		await writeApi.writePoints(points);
 		await writeApi.flush();
-		console.timeEnd(`Flushed ${points.length} points to influx`);
+		console.timeEnd(`Flushed ${points.length} points for ${hostname} to influx`);
 	} catch (e) {
 		if (e && e.cause && e.cause.code && e.cause.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
 			console.error('Error writing stats', new URL(host).hostname, e.cause.code);

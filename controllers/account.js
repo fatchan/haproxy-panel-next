@@ -20,21 +20,16 @@ const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
  * account page data shared between html/json routes
  */
 export async function accountData(req, res, _next) {
-	let maps = []
-		, globalAcl
-		, txtRecords = [];
-	if (res.locals.user.clusters.length > 0) {
-		maps = res.locals
-			.dataPlaneRetry('getAllRuntimeMapFiles')
-			.then(res => res.data)
-			.then(data => data.map(extractMap))
-			.then(maps => maps.filter(n => n))
-			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
-		globalAcl = res.locals
-			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
-			.then(res => res.data.description.split('').reverse()[0]);
-		txtRecords = basedflareNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
-	}
+	let maps = res.locals
+		.dataPlaneRetry('getAllRuntimeMapFiles')
+		.then(res => res.data)
+		.then(data => data.map(extractMap))
+		.then(maps => maps.filter(n => n))
+		.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
+	let globalAcl = res.locals
+		.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
+		.then(res => res.data.description.split('').reverse()[0]);
+	let txtRecords = basedflareNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
@@ -207,8 +202,6 @@ export async function register(req, res) {
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
-			clusters: process.env.DEFAULT_CLUSTER ? [process.env.DEFAULT_CLUSTER] : [],
-			activeCluster: 0,
 			onboarding: false,
 		});
 

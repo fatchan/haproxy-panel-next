@@ -14,7 +14,6 @@ import agent from './agent.js';
 
 import * as accountController from './controllers/account.js';
 import * as mapsController from './controllers/maps.js';
-import * as clustersController from './controllers/clusters.js';
 import * as certsController from './controllers/certs.js';
 import * as dnsController from './controllers/dns.js';
 import * as domainsController from './controllers/domains.js';
@@ -47,23 +46,9 @@ export default function router(server, app) {
 			if (account) {
 				const numCerts = await db.db().collection('certs')
 					.countDocuments({ username: account._id });
-				const strippedClusters = account.clusters
-					.map((c) => {
-						return c.split(',')
-							.map((clusterString) => {
-								const clusterUrl = new URL(clusterString);
-								clusterUrl.username = '';
-								clusterUrl.password = '';
-								return clusterUrl.toString();
-							})
-							.join(',');
-					});
-				res.locals.clusters = account.clusters;
 				res.locals.user = {
 					username: account._id,
 					domains: account.domains,
-					clusters: strippedClusters,
-					activeCluster: account.activeCluster,
 					onboarding: account.onboarding,
 					numCerts,
 				};
@@ -90,17 +75,13 @@ export default function router(server, app) {
 
 	const csrfMiddleware = csrf();
 
-  //dataplaneapi middleware
+	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
+
+	//dataplaneapi middleware
 	const useHaproxy = (req, res, next) => {
-		if (res.locals.clusters.length === 0) {
-			return next();
-		}
 		try {
 			res.locals.fMap = server.locals.fMap;
 			res.locals.mapValueNames = server.locals.mapValueNames;
-			const clusterUrls = res.locals.clusters[res.locals.user.activeCluster]
-				.split(',')
-				.map((u) => new URL(u));
 			const firstClusterURL = clusterUrls[0];
 
 			//NOTE: all servers in cluster must have same credentials for now
@@ -201,17 +182,7 @@ export default function router(server, app) {
 		}
 	};
 
-	const hasCluster = (req, res, next) => {
-		if (
-			res.locals.user.clusters.length > 0 ||
-      (req.baseUrl + req.path) === '/forms/cluster/add'
-		) {
-			return next();
-		}
-		return dynamicResponse(req, res, 302, { redirect: '/clusters' });
-	};
-
-  //unauthed pages
+	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, next) => {
 		return app.render(req, res, '/index');
 	});
@@ -318,7 +289,6 @@ export default function router(server, app) {
 		checkSession,
 		checkOnboarding,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		mapsController.mapPage.bind(null, app),
 	);
@@ -328,26 +298,8 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		mapsController.mapJson,
-	);
-	server.get(
-		'/clusters',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		csrfMiddleware,
-		clustersController.clustersPage.bind(null, app),
-	);
-	server.get(
-		'/clusters.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		clustersController.clustersJson,
 	);
 	server.get(
 		'/domains',
@@ -448,7 +400,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		accountController.globalToggle,
 	);
@@ -458,7 +409,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		mapsController.patchMapForm,
 	);
@@ -468,7 +418,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		mapsController.deleteMapForm,
 	);
@@ -489,39 +438,11 @@ export default function router(server, app) {
 		dnsController.dnsRecordUpdate,
 	);
 	clusterRouter.post(
-		'/cluster',
-		useSession,
-		fetchSession,
-		checkSession,
-		hasCluster,
-		csrfMiddleware,
-		clustersController.setCluster,
-	);
-	clusterRouter.post(
-		'/cluster/add',
-		useSession,
-		fetchSession,
-		checkSession,
-		hasCluster,
-		csrfMiddleware,
-		clustersController.addCluster,
-	);
-	clusterRouter.post(
-		'/cluster/delete',
-		useSession,
-		fetchSession,
-		checkSession,
-		hasCluster,
-		csrfMiddleware,
-		clustersController.deleteClusters,
-	);
-	clusterRouter.post(
 		'/domain/add',
 		useSession,
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		domainsController.addDomain,
 	);
@@ -531,7 +452,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		domainsController.deleteDomain,
 	);
@@ -541,7 +461,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		certsController.addCert,
 	);
@@ -551,7 +470,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		certsController.uploadCert,
 	);
@@ -561,7 +479,6 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		useHaproxy,
-		hasCluster,
 		csrfMiddleware,
 		certsController.deleteCert,
 	);
@@ -570,7 +487,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		hasCluster,
 		csrfMiddleware,
 		certsController.verifyUserCSR,
 	);
@@ -579,7 +495,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		hasCluster,
 		csrfMiddleware,
 		async (req, res, next) => {
 			if (res.locals.user.username !== 'admin') {
@@ -600,7 +515,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		hasCluster,
 		csrfMiddleware,
 		async (req, res, next) => {
 			if (res.locals.user.username !== 'admin') {
@@ -615,7 +529,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		hasCluster,
 		csrfMiddleware,
 		async (req, res, next) => {
 			if (res.locals.user.username !== 'admin') {
@@ -639,7 +552,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		hasCluster,
 		csrfMiddleware,
 		(req, res, next) => {
 			return res.send(req.csrfToken());

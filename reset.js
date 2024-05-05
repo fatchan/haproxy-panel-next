@@ -17,8 +17,6 @@ async function reset() {
 				_id: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],
-				clusters: [process.env.DEFAULT_CLUSTER],
-				activeCluster: 0,
 				balance: 0,
 				onboarding: null,
 			});
