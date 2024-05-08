@@ -58,7 +58,7 @@ app.prepare()
 				console.log('SENT READY SIGNAL TO PM2');
 				process.send('ready');
 			}
-			console.log('> Ready on http://localhost:3000');
+			console.log(`> Ready on ${hostname}:${port}`);
 		});
 
 		const gracefulStop = () => {
