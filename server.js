@@ -18,7 +18,7 @@ import * as db from './db.js';
 import router from './router.js';
 
 const dev = process.env.NODE_ENV !== 'production'
-	, hostname = 'localhost'
+	, hostname = '0.0.0.0' // know what youre doing
 	, port = 3000
 	, app = next({ dev, hostname, port })
 	, handle = app.getRequestHandler();
@@ -50,7 +50,7 @@ app.prepare()
 			return res.send('An error occurred. Please contact support with code: '+now);
 		});
 
-		server.listen(3000, (err) => {
+		server.listen(port, hostname, (err) => {
 			if (err) {
 				throw err;
 			}
