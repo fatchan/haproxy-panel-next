@@ -1,11 +1,12 @@
 'use strict';
 
+import fs from 'node:fs';
 import https from 'https';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 
 const agentOptions = {
-	rejectUnauthorized: !process.env.ALLOW_SELF_SIGNED_SSL,
+	rejectUnauthorized: process.env.ALLOW_SELF_SIGNED_SSL !== "true",
 };
 
 if (process.env.PINNED_FP) {
@@ -19,12 +20,10 @@ if (process.env.PINNED_FP) {
 	};
 }
 
-import fs from 'fs';
 if (process.env.CUSTOM_CA_PATH) {
 	console.log('Private CA file path:', process.env.CUSTOM_CA_PATH);
 	agentOptions.ca = fs.readFileSync(process.env.CUSTOM_CA_PATH);
 }
 
-const agent = new https.Agent(agentOptions);
+export default new https.Agent(agentOptions);
 
-export default agent;

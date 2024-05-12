@@ -21,21 +21,29 @@ if (!process.env.INFLUX_HOST) {
 }
 
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
-import OpenAPIClientAxios from 'openapi-client-axios';
-import definition from '../specification_openapiv3.js';
 import agent from '../agent.js';
 
+import fetch, { AbortError } from 'node-fetch';
 const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
 	, base64Auth = Buffer.from(`${clusterUrls[0].username}:${clusterUrls[0].password}`).toString('base64');
 
 async function fetchStats(host, parameters) {
-	const singleApi = new OpenAPIClientAxios.default({ definition, axiosConfigDefaults: { httpsAgent: agent, headers: { 'authorization': `Basic ${base64Auth}` } } });
-	const singleApiInstance = singleApi.initSync();
+	const controller = new AbortController();
+	const signal = controller.signal;
+	setTimeout(() => {
+		controller.abort();
+	}, 10000);
 	const clusterUrl = new URL(host);
-	singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;
-	const statsRes = await singleApiInstance['getStats'](parameters, null, { baseUrl: `${clusterUrl.origin}/v2` });
-	return statsRes && statsRes.data && statsRes.data;
+	const statsRes = await fetch(`https://${clusterUrl.host}/v2/services/haproxy/stats/native?${new URLSearchParams(parameters).toString()}`, {		
+		agent,
+		headers: { 'authorization': `Basic ${base64Auth}` },
+		signal,
+	})
+	.then(res => res.json())
+	.catch(err => console.error(err));
+	return statsRes;
+	
 };
 
 async function getFormattedStats(host) {
