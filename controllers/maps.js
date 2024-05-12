@@ -130,13 +130,16 @@ export async function deleteMapForm(req, res, next) {
 		|| req.params.name === process.env.BLOCKED_CN_MAP_NAME
 		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
 		let value;
-		const existingEntry = await res.locals
-			.dataPlaneRetry('getRuntimeMapEntry', {
+		const existingEntries = await res.locals
+			.dataPlaneRetry('showRuntimeMap', {
 				map: req.params.name,
-				id: req.body.key,
+				// id: req.body.key,
 			})
 			.then((res) => res.data)
 			.catch(() => {});
+		const existingEntry = existingEntries && existingEntries
+			.find(en => en.key === req.body.key);
+		console.log('existingEntry', existingEntry);
 		if (existingEntry && existingEntry.value) {
 			let existingEntries = existingEntry.value.split(':');
 			if (!existingEntries || !existingEntries.includes(res.locals.user.username)) {
