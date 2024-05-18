@@ -140,7 +140,7 @@ const DnsEditRecordPage = (props) => {
 			>
 				<input type='hidden' name='_csrf' value={csrf} />
 				{recordSet && Array.isArray(recordSet) && recordSet[0].t === true && <div className='alert alert-warning' role='alert'>
-					This is a template record. Changes may be overwritten with updates to the BasedFlare platform.
+					This is a template record. Changes will be overwritten when the linked template is updated.
 				</div>}
 				{newRecord && zone === '@' && <div className='alert alert-info' role='info'>
 					The &quot;@&quot; symbol indicates that this is a record for the root domain i.e &quot;{domain}&quot;. You can change the name to create other subdomains e.g. &quot;www&quot;.
@@ -170,7 +170,7 @@ const DnsEditRecordPage = (props) => {
 										<option value='caa'>CAA</option>
 										<option value='soa'>SOA</option>
 									</optgroup>
-									<optgroup label='BasedFlare Templates'>
+									<optgroup label='Templates'>
 										<option value='a_template'>A</option>
 										<option value='aaaa_template'>AAAA</option>
 										<option value='soa_template'>SOA</option>
