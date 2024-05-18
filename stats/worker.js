@@ -25,8 +25,7 @@ import agent from '../agent.js';
 
 import fetch, { AbortError } from 'node-fetch';
 const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
-	, clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
-	, base64Auth = Buffer.from(`${clusterUrls[0].username}:${clusterUrls[0].password}`).toString('base64');
+	, base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
 
 async function fetchStats(host, parameters) {
 	const controller = new AbortController();
@@ -35,7 +34,7 @@ async function fetchStats(host, parameters) {
 		controller.abort();
 	}, 10000);
 	const clusterUrl = new URL(host);
-	const statsRes = await fetch(`https://${clusterUrl.host}/v2/services/haproxy/stats/native?${new URLSearchParams(parameters).toString()}`, {		
+	const statsRes = await fetch(`https://${clusterUrl.host}/v2/services/haproxy/stats/native?${new URLSearchParams(parameters).toString()}`, {
 		agent,
 		headers: { 'authorization': `Basic ${base64Auth}` },
 		signal,
