@@ -21,11 +21,31 @@ if (!process.env.INFLUX_HOST) {
 	process.exit(1);
 }
 
-//TODO: a better process for storing and discovering these? i.e collect from all clusters in db
-const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
+let clusterUrls = [];
+
+const base64Auth = Buffer.from(`${process.env.AUTODISCOVER_USER}:${process.env.AUTODISCOVER_PASS}`).toString('base64');
+const fetchOptions = {
+	headers: {
+		'Authorization': `Basic ${base64Auth}`,
+	}
+};
+
+async function autodiscover() {
+	try {
+		fetch(`${process.env.AUTODISCOVER_HOST}/v1/autodiscover`, fetchOptions)
+			.then(res => res.json())
+			.then(json => {
+				console.log('Autodiscovered found %d hosts', json.length);
+				clusterUrls = json.map(h => (new URL(`https://${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}@${h.hostname}:2001/`)));
+			});
+	} catch(e) {
+		console.error(e);
+	}
+}
 
 async function main() {
 	try {
+		console.log('Collecting stats for %d nodes', clusterUrls.length);
 		clusterUrls.forEach(cu => {
 			//group to a certain amount in each array? ehh probs not
 			haproxyStatsQueue.add({ hosts: [cu] }, { removeOnComplete: true });
@@ -35,5 +55,7 @@ async function main() {
 	}
 }
 
-main();
+autodiscover()
+	.then(() => main());
+setInterval(autodiscover, 60000);
 setInterval(main, 10000);
