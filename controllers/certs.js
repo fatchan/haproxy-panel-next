@@ -307,6 +307,7 @@ export async function verifyUserCSR(req, res, next) {
 		}
 		return dynamicResponse(req, res, 200, `<pre>${signedCert}</pre>`);
 	} catch (e) {
+		console.error(e);
 		if (e.message) {
 			return dynamicResponse(req, res, 400, { error: e.message });
 		}
