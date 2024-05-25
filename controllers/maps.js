@@ -183,28 +183,28 @@ export async function deleteMapForm(req, res, next) {
 		try {
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
-				const backendMapEntry = await res.locals
-					.dataPlaneRetry('getRuntimeMapEntry', {
+				const backendEntries = await res.locals
+					.dataPlaneRetry('showRuntimeMap', {
 						map: process.env.BACKENDS_MAP_NAME,
-						id: req.body.key,
 					})
-					.then(res => res.data)
-					.catch(() => {});
-				if (backendMapEntry) {
-					await res.locals
-						.dataPlaneAll('deleteRuntimeServer', {
-							backend: 'servers',
-							name: backendMapEntry.value,
-						});
-					await res.locals
-						.dataPlaneAll('deleteRuntimeMapEntry', {
-							map: process.env.BACKENDS_MAP_NAME, //'backends'
-							id: req.body.key, //'example.com'
-						});
-				} else {
-					console.warn('no backend found to remove');
-					//dont return because otherwise they will have a domain stuck in the hosts map
-				}
+					.then((res) => res.data);
+				const matchingBackends = backendEntries
+					.filter(mb => mb.key === req.body.key);
+				console.log('matchingBackends', matchingBackends);
+				await Promise.all(matchingBackends.map(async mb => {
+					return Promise.all([
+						res.locals
+							.dataPlaneAll('deleteRuntimeServer', {
+								backend: 'servers',
+								name: mb.value,
+							}),
+						res.locals
+							.dataPlaneAll('deleteRuntimeMapEntry', {
+								map: process.env.BACKENDS_MAP_NAME,
+								id: mb.key, //'example.com'
+							})
+					]);
+				}));
 			}
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
