@@ -162,7 +162,7 @@ export default function Certs(props) {
 						/>
 					</td>
 					<td suppressHydrationWarning={true}>
-						{expiry ? `${daysRemaining} days` : '-'}
+						{expiry ? `${daysRemaining} days` : '-'} <span className={`dot ms-2 ${daysRemaining < 30 ? 'bg-warning' : ''}`} title='Auto-renewal enabled' />
 					</td>
 					<td>
 						{d.storageName || '-'}
