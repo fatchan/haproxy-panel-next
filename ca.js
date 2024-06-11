@@ -7,10 +7,6 @@ import forge from 'node-forge';
 
 const pki = forge.pki;
 const CAAttrs = [
-	// {
-		// name: "commonName",
-		// value: "cp.basedflare.com",
-	// },
 	{
 		name: 'countryName',
 		value: 'XX',

@@ -6,8 +6,8 @@ import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 
-const basedflareNSResolver = new Resolver();
-basedflareNSResolver.setServers(process.env.NAMESERVERS.split(','));
+const localNSResolver = new Resolver();
+localNSResolver.setServers(process.env.NAMESERVERS.split(','));
 const cloudflareResolver = new Resolver();
 cloudflareResolver.setServers(['1.1.1.1']);
 const googleResolver = new Resolver();
@@ -29,7 +29,7 @@ export async function accountData(req, res, _next) {
 	let globalAcl = res.locals
 		.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 		.then(res => res.data.description.split('').reverse()[0]);
-	let txtRecords = basedflareNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
+	let txtRecords = localNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
 	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
