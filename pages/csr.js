@@ -44,9 +44,11 @@ export default function Csr(props) {
 
 	const { user, csrf, csr } = state;
 
-	if (user && !user.onboarding) {
-		router.push('/onboarding');
-	}
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
 
 	return (
 		<>

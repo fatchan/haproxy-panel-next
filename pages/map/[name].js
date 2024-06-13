@@ -54,9 +54,12 @@ const MapPage = (props) => {
 
 	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state;
 
-	if (user && !user.onboarding) {
-		router.push('/onboarding');
-	}
+
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
 
 	async function addToMap(e) {
 		e.preventDefault();
