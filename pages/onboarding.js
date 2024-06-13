@@ -116,7 +116,7 @@ export default function Onboarding(props) {
 			<div className='list-group-item d-flex gap-3'>
 				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={domainAdded} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong style={{ textDecoration: domainAdded ? 'line-through' : '' }}>
+					<strong suppressHydrationWarning style={{ textDecoration: domainAdded ? 'line-through' : '' }}>
 						<i className='bi-card-list pe-none me-2' width='1em' height='1em' />
 						1. Add a domain
 					</strong>
@@ -141,7 +141,7 @@ export default function Onboarding(props) {
 			<div className='list-group-item d-flex gap-3'>
 				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={nameserversPropagated} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
+					<strong suppressHydrationWarning style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
 						<i className='bi-globe2 pe-none me-2' width='1em' height='1em' />
 						2. Update the nameservers for your domain to the following:
 					</strong>
@@ -150,7 +150,7 @@ export default function Onboarding(props) {
 							<ul>
 								{txtRecords
 									.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
-									.map((r, i) => <li key={'a'+i}>{r}</li>)}
+									.map((r, i) => <li suppressHydrationWarning key={r}>{r}</li>)}
 							</ul>
 						</span>
 						<span className='d-block text-body-secondary mt-3'>
@@ -179,7 +179,7 @@ export default function Onboarding(props) {
 			<div className='list-group-item d-flex gap-3'>
 				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={nameserversPropagated} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
+					<strong suppressHydrationWarning style={{ textDecoration: nameserversPropagated ? 'line-through' : '' }}>
 						<i className='bi-hourglass-split pe-none me-2' width='1em' height='1em' />
 						4. Wait for the nameserver and DNS updates to propagate.
 					</strong>
@@ -203,7 +203,7 @@ export default function Onboarding(props) {
 			{<div className='list-group-item d-flex gap-3'>
 				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={backendAdded} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong style={{ textDecoration: backendAdded ? 'line-through' : '' }}>
+					<strong suppressHydrationWarning style={{ textDecoration: backendAdded ? 'line-through' : '' }}>
 						<i className='bi-hdd-network-fill pe-none me-2' width='1em' height='1em' />
 						5. Add a backend
 					</strong>
@@ -244,7 +244,7 @@ export default function Onboarding(props) {
 			<div className='list-group-item d-flex gap-3'>
 				<input className='form-check-input flex-shrink-0' type='checkbox' value='' checked={certAdded} disabled />
 				<span className='pt-1 form-checked-content'>
-					<strong style={{ textDecoration: certAdded ? 'line-through' : '' }}>
+					<strong suppressHydrationWarning style={{ textDecoration: certAdded ? 'line-through' : '' }}>
 						<i className='bi-file-earmark-lock-fill pe-none me-2' width='1em' height='1em' />
 						6. Generate HTTPS certificate
 					</strong>
