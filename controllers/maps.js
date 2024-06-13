@@ -425,7 +425,9 @@ export async function patchMapForm(req, res, next) {
 						address,
 						port: parseInt(port),
 						name: `websrv${freeSlotId}`,
-						id: `${freeSlotId}`,
+						// id: `${freeSlotId}`,
+						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',
+						// ssl_cafile: '@system-ca',
 						ssl: 'enabled',
 						verify: 'required',
 					});

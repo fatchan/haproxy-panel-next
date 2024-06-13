@@ -89,7 +89,7 @@ export default function router(server, app) {
 				`${firstClusterURL.username}:${firstClusterURL.password}`,
 			).toString('base64');
 			const api = new OpenAPIClientAxios.default({
-				//definition: `${firstClusterURL.origin}/v2/specification_openapiv3`,
+				//definition: `${firstClusterURL.origin}/v3/specification_openapiv3`,
 				definition,
 				axiosConfigDefaults: {
 					httpsAgent: agent,
@@ -99,7 +99,7 @@ export default function router(server, app) {
 				},
 			});
 			const apiInstance = api.initSync();
-			apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v2`;
+			apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v3`;
 			res.locals.dataPlane = apiInstance;
 			async function dataPlaneRetry(operationId, ...args) {
 				let retryCnt = 0;
@@ -119,7 +119,7 @@ export default function router(server, app) {
 							err,
 						);
 						console.trace();
-						apiInstance.defaults.baseURL = `${clusterUrls[retryCnt].origin}/v2`;
+						apiInstance.defaults.baseURL = `${clusterUrls[retryCnt].origin}/v3`;
 						if (retryCnt > clusterUrls.length - 1) {
 							console.error(
 								'Max retries exceeded in dataPlaneRetry',
@@ -151,10 +151,10 @@ export default function router(server, app) {
 							},
 						});
 						const singleApiInstance = singleApi.initSync();
-						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v2`;
+						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v3`;
 						return singleApiInstance[operationId](parameters, data, {
 							...config,
-							baseUrl: `${clusterUrl.origin}/v2`,
+							baseUrl: `${clusterUrl.origin}/v3`,
 						});
 					}),
 				);

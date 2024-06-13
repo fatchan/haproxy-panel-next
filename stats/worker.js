@@ -34,7 +34,7 @@ async function fetchStats(host, parameters) {
 		controller.abort();
 	}, 10000);
 	const clusterUrl = new URL(host);
-	const statsRes = await fetch(`https://${clusterUrl.host}/v2/services/haproxy/stats/native?${new URLSearchParams(parameters).toString()}`, {
+	const statsRes = await fetch(`https://${clusterUrl.host}/v3/services/haproxy/stats/native?${new URLSearchParams(parameters).toString()}`, {
 		agent,
 		headers: { 'authorization': `Basic ${base64Auth}` },
 		signal,
