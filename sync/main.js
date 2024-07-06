@@ -21,17 +21,16 @@ const autodiscoverService = new AutodiscoverService();
 
 //TODO: move to worker
 import agent from '../agent.js';
-// import fetch from 'node-fetch';
+
 const base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
-async function overwriteMap(host, mapName, entries) {
+async function overwriteMap(url, mapName, entries) {
 	const controller = new AbortController();
 	const signal = controller.signal;
 	setTimeout(() => {
 		controller.abort();
 	}, 10000);
-	const clusterUrl = new URL(host);
 	const queryString = new URLSearchParams({ map: mapName }).toString();
-	await fetch(`http://${clusterUrl.host}/v3/services/haproxy/runtime/maps_entries?${queryString}`, {
+	await fetch(`${url.protocol}//${url.host}/v3/services/haproxy/runtime/maps_entries?${queryString}`, {
 		method: 'POST',
 		agent,
 		headers: {
@@ -50,8 +49,7 @@ async function main() {
 		console.log('Running a sync for %d nodes', autodiscoverService.urls.length);
 		//TODO: push urls to task queue
 		//temp
-		// console.log(autodiscoverService.urls);
-		await overwriteMap('https://localhost:2001', 'alt-svc.map', [{key:'x1',value:'y1'},{key:'x2',value:'y2'}]);
+		await overwriteMap(autodiscoverService.urls[0], 'alt-svc.map', [{key:'x1',value:'y1'},{key:'x2',value:'y2'}]);
 	} catch(e) {
 		console.error(e);
 	}
