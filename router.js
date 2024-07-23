@@ -103,8 +103,10 @@ export default function router(server, app) {
 			res.locals.dataPlane = apiInstance;
 			async function dataPlaneRetry(operationId, ...args) {
 				let retryCnt = 0;
+				console.log('dataplaneRetry', retryCnt, 'operation:', operationId);
 				function run() {
 					return apiInstance[operationId](...args).catch(function (err) {
+						console.warn('dataplaneRetry error', retryCnt, 'error:', err);
 						if (
 							operationId === 'getRuntimeMapEntry' && err && err.response &&
 							err.response.data && err.response.data.code === 404
