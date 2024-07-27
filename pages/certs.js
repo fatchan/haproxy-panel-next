@@ -25,6 +25,14 @@ export default function Certs(props) {
 		}
 	}, [state.user, state.dbCerts, router]);
 
+	const { user, csrf, dbCerts, clusterCerts } = state || {};
+
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
+
 	if (!state.user || state.dbCerts == null) {
 		return (
 			<div className='d-flex flex-column'>
@@ -37,15 +45,6 @@ export default function Certs(props) {
 			</div>
 		);
 	}
-
-	const { user, csrf, dbCerts, clusterCerts } = state;
-
-
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
 
 	async function addCert(e) {
 		e.preventDefault();

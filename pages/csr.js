@@ -29,6 +29,14 @@ export default function Csr(props) {
 		NProgress.done(true);
 	}
 
+	const { user, csrf, csr } = state || {};
+
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
+
 	if (!state.user) {
 		return (
 			<div className='d-flex flex-column'>
@@ -41,14 +49,6 @@ export default function Csr(props) {
 			</div>
 		);
 	}
-
-	const { user, csrf, csr } = state;
-
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
 
 	return (
 		<>

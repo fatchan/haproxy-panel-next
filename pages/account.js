@@ -18,15 +18,15 @@ export default function Account(props) {
 
 	let innerData;
 
+	const { user, maps, globalAcl, csrf } = state || {};
+
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
+
 	if (state && state.user && state.maps != null) {
-
-		const { user, maps, globalAcl, csrf } = state;
-
-		useEffect(() => {
-			if (user && !user.onboarding) {
-				router.push('/onboarding');
-			}
-		}, []);
 
 		const isAdmin = user.username === 'admin';
 

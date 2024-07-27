@@ -39,6 +39,14 @@ const MapPage = (props) => {
 		}
 	}, [state.map, mapName, router, changedMap]);
 
+	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } =  state || {};
+
+	useEffect(() => {
+		if (user && !user.onboarding) {
+			router.push('/onboarding');
+		}
+	}, []);
+
 	if (state.map == null || changedMap) {
 		return (
 			<div className='d-flex flex-column'>
@@ -51,15 +59,6 @@ const MapPage = (props) => {
 			</div>
 		);
 	}
-
-	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state;
-
-
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
 
 	async function addToMap(e) {
 		e.preventDefault();
