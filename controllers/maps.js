@@ -418,20 +418,30 @@ export async function patchMapForm(req, res, next) {
 					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 				}
 				const { hostname: address, port } = new URL(`http://${value}`);
+				const serverName = `websrv${freeSlotId}`;
 				const runtimeServerResp = await res.locals
 					.dataPlaneAll('addRuntimeServer', {
 						backend: 'servers',
 					}, {
 						address,
 						port: parseInt(port),
-						name: `websrv${freeSlotId}`,
+						name: serverName,
 						// id: `${freeSlotId}`,
 						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',
 						// ssl_cafile: '@system-ca',
+						ssl_reuse: 'enabled',
 						ssl: 'enabled',
 						verify: 'required',
 					});
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
+				await res.locals
+					.dataPlaneAll("replaceRuntimeServer", {
+						name: serverName,
+						backend: "servers",
+					}, {
+						admin_state: "ready",
+						operational_state: "up",
+					});
 				if (backendMapEntry) {
 					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
 					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
