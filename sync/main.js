@@ -161,6 +161,7 @@ async function main() {
 					[masterHostname]: mapTable[masterHostname],
 					[key]: mapTable[key],
 				});
+				fetch(process.env.SYNC_WARNING_ENDPOINT, { method: 'HEAD' });
 				//TODO: push a sync job to bull queue
 			}
 		}
@@ -172,5 +173,5 @@ async function main() {
 
 autodiscoverService.init().then(() => {
 	main();
-	setInterval(main, 60000);
+	setInterval(main, 120000);
 });
