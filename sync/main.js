@@ -12,16 +12,6 @@ dotenv.config({ path: '.env' });
 import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
 
-// import Queue from 'bull';
-// 
-// const haproxyStatsQueue = new Queue('stats', { redis: {
-	// host: process.env.REDIS_HOST || '127.0.0.1',
-	// port: process.env.REDIS_PORT || 6379,
-	// password: process.env.REDIS_PASS || '',
-	// db: 1,
-// }});
-
-//TODO: move to worker
 import agent from '../agent.js';
 
 const base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
@@ -156,13 +146,26 @@ async function main() {
 
 		for (let key in mapTable) {
 			if (!mapTable[key].synced) {
+				
 				console.warn('WARNING:', key, 'is out of sync with', masterHostname);
 				console.table({
 					[masterHostname]: mapTable[masterHostname],
 					[key]: mapTable[key],
 				});
-				fetch(process.env.SYNC_WARNING_ENDPOINT, { method: 'HEAD' });
-				//TODO: push a sync job to bull queue
+
+				fetch(process.env.SYNC_WARNING_ENDPOINT)
+					.then(res => console.log('sending sync warning, status:', res.status))
+					.catch(err => console.error(err));
+
+				for (let mapName of MAPS_TO_SYNC) {
+					const masterEntries = await getMapEntries(new URL(`https://${masterHostname}:2001`), mapName);
+					if (masterEntries) {
+						console.log(`Fetched entries for ${mapName} from master.`);
+						await overwriteMap(new URL(`https://${key}:2001`), mapName, masterEntries);
+						console.log(`Overwritten ${mapName} on ${key} with entries from master.`);
+					}
+				}
+
 			}
 		}
 
