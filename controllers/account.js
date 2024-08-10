@@ -126,7 +126,7 @@ export async function globalToggle(req, res, next) {
 				.dataPlaneAll('deleteRuntimeMapEntry', {
 					map: 'ddos_global',
 					id: 'true'
-				});
+				}, null, null, false, false);
 		} else {
 			await res.locals
 				.dataPlaneAll('addPayloadRuntimeMap', {
@@ -134,7 +134,7 @@ export async function globalToggle(req, res, next) {
 				}, [{
 					key: 'true',
 					value: 'true'
-				}]);
+				}], null, false, false);
 		}
 	} catch (e) {
 		return next(e);

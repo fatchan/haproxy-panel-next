@@ -121,7 +121,7 @@ export async function addDomain(req, res, next) {
 			}, [{
 				key: domain,
 				value: res.locals.user.username,
-			}]);
+			}], null, false, false);
 		if (domain.split('.').length < 3 //naive
 			&& soaTemplate && nsTemplate) {
 			const records = [];
@@ -188,7 +188,7 @@ export async function deleteDomain(req, res) {
 		.dataPlaneAll('deleteRuntimeMapEntry', {
 			map: process.env.DOMTOACC_MAP_NAME,
 			id: domain,
-		});
+		}, null, null, false, false);
 	await redis.del(`dns:${domain}.`);
 
 	return dynamicResponse(req, res, 302, { redirect: '/domains' });

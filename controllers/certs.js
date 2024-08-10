@@ -254,7 +254,7 @@ export async function deleteCert(req, res) {
 			.dataPlaneAll('deleteStorageSSLCertificate', {
 				name: storageName,
 				skip_reload: true,
-			});
+			}, null, null, false, true);
 		return dynamicResponse(req, res, 302, { redirect: '/certs' });
 	}
 

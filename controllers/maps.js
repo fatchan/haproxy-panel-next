@@ -156,14 +156,14 @@ export async function deleteMapForm(req, res, next) {
 							id: req.body.key,
 						}, {
 							value: value,
-						});
+						}, null, false, false);
 				} else {
 					//else we were the last/only one, so remove
 					await res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
 							map: req.params.name,
 							id: req.body.key,
-						});
+						}, null, null, false, false);
 				}
 			} catch (e) {
 				return next(e);
@@ -197,12 +197,12 @@ export async function deleteMapForm(req, res, next) {
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
 								name: mb.value,
-							}),
+							}, null, null, false, true),
 						res.locals
 							.dataPlaneAll('deleteRuntimeMapEntry', {
 								map: process.env.BACKENDS_MAP_NAME,
 								id: mb.key, //'example.com'
-							})
+							}, null, null, false, true)
 					]);
 				}));
 			}
@@ -210,7 +210,7 @@ export async function deleteMapForm(req, res, next) {
 				.dataPlaneAll('deleteRuntimeMapEntry', {
 					map: req.params.name, //'ddos'
 					id: req.body.key, //'example.com'
-				});
+				}, null, null, false, false);
 		} catch (e) {
 			return next(e);
 		}
@@ -432,7 +432,7 @@ export async function patchMapForm(req, res, next) {
 						ssl_reuse: 'enabled',
 						ssl: 'enabled',
 						verify: 'required',
-					});
+					}, null, false, true);
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				await res.locals
 					.dataPlaneAll("replaceRuntimeServer", {
@@ -441,7 +441,7 @@ export async function patchMapForm(req, res, next) {
 					}, {
 						admin_state: "ready",
 						operational_state: "up",
-					});
+					}, null, false, true);
 				if (backendMapEntry) {
 					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
 					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
@@ -458,7 +458,7 @@ export async function patchMapForm(req, res, next) {
 							id: req.body.key,
 						}, {
 							value: `${fullBackendMapEntry.value},websrv${freeSlotId}`,
-						});
+						}, null, false, false);
 				} else {
 					await res.locals
 						.dataPlaneAll('addPayloadRuntimeMap', {
@@ -466,7 +466,7 @@ export async function patchMapForm(req, res, next) {
 						}, [{
 							key: req.body.key,
 							value: `websrv${freeSlotId}`,
-						}]);
+						}], null, false, false);
 				}
 			}
 
@@ -486,7 +486,7 @@ export async function patchMapForm(req, res, next) {
 						id: req.body.key,
 					}, {
 						value: value,
-					});
+					}, null, false, false);
 			} else {
 				await res.locals
 					.dataPlaneAll('addPayloadRuntimeMap', {
@@ -494,7 +494,7 @@ export async function patchMapForm(req, res, next) {
 					}, [{
 						key: req.body.key,
 						value: value,
-					}]);
+					}], null, null, false);
 			}
 			await db.db().collection('mapnotes').replaceOne({
 				username: res.locals.user.username,

@@ -142,9 +142,10 @@ export default function router(server, app) {
 				data,
 				config,
 				all = false,
+				blocking = true,
 			) => {
-				const promiseResults = await Promise.all(
-					clusterUrls.map((clusterUrl) => {
+				const promiseResults = await Promise[blocking ? 'all' : 'any'](
+					clusterUrls.map(async (clusterUrl) => {
 						const singleApi = new OpenAPIClientAxios.default({
 							definition,
 							axiosConfigDefaults: {
@@ -154,13 +155,22 @@ export default function router(server, app) {
 						});
 						const singleApiInstance = singleApi.initSync();
 						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v3`;
-						return singleApiInstance[operationId](parameters, data, {
-							...config,
-							baseUrl: `${clusterUrl.origin}/v3`,
-						});
+						console.time(`dataplaneAll ${clusterUrl.origin} ${operationId}`);
+						let singleRes;
+						try {
+							singleRes = await singleApiInstance[operationId](parameters, data, {
+								...config,
+								baseUrl: `${clusterUrl.origin}/v3`,
+							});
+						} catch(e) {
+							return e;
+						}
+						console.timeEnd(`dataplaneAll ${clusterUrl.origin} ${operationId}`);
+						return singleRes;
 					}),
 				);
-				return all ? promiseResults.map((p) => p.data) : promiseResults[0]; //TODO: better desync handling
+				console.log('dataplaneAll return, blocking:', blocking);
+				return (all && blocking) ? promiseResults.map((p) => p.data) : promiseResults[0]; //TODO: better desync handling
 			};
 			res.locals.postFileAll = async (path, options, file, fdOptions) => {
         //used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
