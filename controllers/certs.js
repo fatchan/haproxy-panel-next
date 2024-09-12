@@ -6,7 +6,9 @@ import url from 'node:url';
 import { dynamicResponse, wildcardAllowed, filterCertsByDomain } from '../util.js';
 import { verifyCSR } from '../ca.js';
 import { Resolver } from 'node:dns/promises';
+import { trimmedNsHosts } from '../templates.js';
 import psl from 'psl';
+
 
 const resolver = new Resolver();
 resolver.setServers(process.env.NAMESERVERS.split(','));
@@ -94,8 +96,9 @@ export async function addCert(req, res, next) {
 		console.warn(e); //probably just no NS records, bad domain
 		certDomainNameservers = null;
 	}
-	if (!certDomainNameservers || certDomainNameservers.some(d => ![ 'ns1.basedns.net', 'ns2.basedns.cloud', 'ns3.basedns.services' ].includes(d))) {
-		return dynamicResponse(req, res, 400, { error: 'Domain nameservers are not correct, please visit onboarding' });
+	if (!certDomainNameservers
+		|| !trimmedNsHosts.some(nsHost => certDomainNameservers.includes(nsHost))) {
+		return dynamicResponse(req, res, 400, { error: 'Domain nameservers incorrect, please visit onboarding' });
 	}
 
 	if (!(res.locals.user.domains.includes(req.body.subject)

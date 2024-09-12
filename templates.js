@@ -38,3 +38,6 @@ export const nsTemplate = () => Object.seal(Object.freeze(Object.preventExtensio
 		't': true
 	}
 ])));
+
+// Trim trailing . from ns hosts and map to array of just hosts
+export const trimmedNsHosts = nsTemplate().map(nsRec => nsRec.host.substring(0, nsRec.host.length-1));
