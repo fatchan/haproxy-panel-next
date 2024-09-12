@@ -145,18 +145,16 @@ export default function Onboarding(props) {
 						<i className='bi-globe2 pe-none me-2' width='1em' height='1em' />
 						2. Update the nameservers for your domain to the following:
 					</strong>
-					{!nameserversPropagated && <>
-						<span className='d-block text-body-secondary mt-3'>
-							<ul>
-								{txtRecords
-									.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
-									.map((r, i) => <li suppressHydrationWarning key={r}>{r}</li>)}
-							</ul>
-						</span>
-						<span className='d-block text-body-secondary mt-3'>
-							<p>This is usually done through your domain registrar. Use all the nameservers, or as many as the registrar allows for your domain.</p>
-						</span>
-					</>}
+					<span className='d-block text-body-secondary mt-3'>
+						<ul>
+							{txtRecords
+								.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
+								.map((r, i) => <li suppressHydrationWarning key={r}>{r}</li>)}
+						</ul>
+					</span>
+					<span className='d-block text-body-secondary mt-3'>
+						<p>This is usually done through your domain registrar. Using at least 2 nameservers is recommended for redundancy.</p>
+					</span>
 					{nameserversPropagated && (<div><strong>
 						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
 						Nameservers configured successfully

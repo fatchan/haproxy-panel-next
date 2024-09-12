@@ -16,6 +16,32 @@ const quad9Resolver = new Resolver();
 quad9Resolver.setServers(['9.9.9.9']);
 const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
 
+//TODO: move to lib
+const nameserverTxtDomains = process.env.NAMESERVER_TXT_DOMAINS.split(',');
+async function getNameserverTxtRecords() {
+	for (const ntd of nameserverTxtDomains) {
+		try {
+			let txtRecords = await localNSResolver.resolve(ntd, 'TXT');
+			if (txtRecords && txtRecords.length > 0) {
+				return txtRecords;
+			}
+		} catch (error) {
+			console.error(`Error querying TXT records for ${ntd}:`, error);
+		}
+	}
+	return []; //todo: handle better on FE if none found at all
+}
+
+//TODO: move to lib
+const expectedNameservers = new Set(process.env.NAMESERVERS_HOSTS.split(','));
+async function checkPublicDNSRecord(domain, type, expectedSet) {
+	const results = await Promise.all(publicResolvers.map(async pr => {
+		const res = await pr.resolve(domain, type);
+		return new Set(res||[]);
+	}));
+	return results.every(res => res.size === new Set([...res, ...expectedSet]).size);
+}
+
 /**
  * account page data shared between html/json routes
  */
@@ -29,7 +55,7 @@ export async function accountData(req, res, _next) {
 	let globalAcl = res.locals
 		.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
 		.then(res => res.data.description.split('').reverse()[0]);
-	let txtRecords = localNSResolver.resolve(process.env.NAMESERVER_TXT_DOMAIN, 'TXT');
+	let txtRecords = getNameserverTxtRecords();
 	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	return {
 		csrf: req.csrfToken(),
@@ -38,16 +64,6 @@ export async function accountData(req, res, _next) {
 		txtRecords,
 	};
 };
-
-//TODO: move to lib
-const expectedNameservers = new Set(process.env.NAMESERVERS_HOSTS.split(','));
-async function checkPublicDNSRecord(domain, type, expectedSet) {
-	const results = await Promise.all(publicResolvers.map(async pr => {
-		const res = await pr.resolve(domain, type);
-		return new Set(res||[]);
-	}));
-	return results.every(res => res.size === new Set([...res, ...expectedSet]).size);
-}
 
 /**
  * extra information needed for the onboarding page to display known completed steps
