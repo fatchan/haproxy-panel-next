@@ -42,7 +42,7 @@ async function doCheck(domainKey, hkey, record) {
 	try {
 		let recordHealth;
 		if (downedIps.includes(record.ip)) {
-			console.log('FORCED DOWNTIME:', record.ip);
+			// console.log('FORCED DOWNTIME:', record.ip);
 			recordHealth = '0';
 		} else {
 			recordHealth = await redis.get(`health:${record.ip}`);
@@ -139,7 +139,7 @@ async function updateDowned() {
 				_id: 'down',
 			})
 			.then(res => res && res.ips ? res.ips : []);
-		downedIps && downedIps.length > 0 && console.log('downed IPs:', downedIps);
+		downedIps && downedIps.length > 0 && console.log('downedIps.length', downedIps.length, ', [0]:', downedIps[0]);
 	} catch (e) {
 		console.error(e);
 	}
