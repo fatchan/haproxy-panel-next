@@ -1,11 +1,15 @@
 import * as db from './db.js';
 
-export function aTemplate() {
-	return db.db().collection('templates').findOne({ _id: 'a' }).then(res => res.data);
+export function aTemplate(name) {
+	return db.db().collection('templates').findOne({
+		_id: name || 'a',
+	}).then(res => res.data);
 }
 
-export function aaaaTemplate() {
-	return db.db().collection('templates').findOne({ _id: 'aaaa' }).then(res => res.data);
+export function aaaaTemplate(name) {
+	return db.db().collection('templates').findOne({
+		_id: name || 'aaaa',
+	}).then(res => res.data);
 };
 
 export const soaTemplate = () => Object.seal(Object.freeze(Object.preventExtensions([

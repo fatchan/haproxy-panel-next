@@ -131,7 +131,7 @@ export async function dnsRecordUpdate(req, res) {
 	let { ttl } = req.body;
 	let { domain, zone, type } = req.params;
 	let records = [];
-	let template = false;
+	let template = type.endsWith('_template');
 	switch (type) {
 		case 'ns_template':
 			records = JSON.parse(JSON.stringify(nsTemplate()));

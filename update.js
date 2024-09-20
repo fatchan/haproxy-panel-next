@@ -3,7 +3,7 @@
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
-
+h
 import dotenv from 'dotenv';
 import * as db from './db.js';
 await dotenv.config({ path: '.env' });
@@ -23,10 +23,10 @@ async function processKey(domainKey) {
 			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
 			if (records['a'] && records['a'][0]['t'] === true) {
-				records['a'] = JSON.parse(JSON.stringify((await aTemplate())));
+				records['a'] = JSON.parse(JSON.stringify((await aTemplate(records['a'][0]['tn']))));
 			}
 			if (records['aaaa'] && records['aaaa'][0]['t'] === true) {
-				records['aaaa'] = JSON.parse(JSON.stringify((await aaaaTemplate())));
+				records['aaaa'] = JSON.parse(JSON.stringify((await aaaaTemplate(records['aaaa'][0]['tn']))));
 			}
 			if (records['ns'] && records['ns'][0]['t'] === true) {
 				const locked = records['ns']['l'] === true;
