@@ -73,19 +73,19 @@ const DnsEditRecordPage = (props) => {
 					if (res && res.recordSet) {
 						if (newRecord) {
 							setRecordSet([{
-						        'geok': 'cc',
-						        'geov': [],
-						        'id': '',
-						        'ip': '',
-						        'fb': [],
-						        'sel': 0,
-						        'bsel': 0,
-						        't': false,
-						        'h': false,
-						        'u': true,
-						        'ttl': 86400,
-						    }]);
-						    return;
+								'geok': 'cc',
+								'geov': [],
+								'id': '',
+								'ip': '',
+								'fb': [],
+								'sel': 0,
+								'bsel': 0,
+								't': false,
+								'h': false,
+								'u': true,
+								'ttl': 86400,
+							}]);
+							return;
 						}
 						setRecordSet(res.recordSet.length > 0 ? [...res.recordSet] : [{}]);
 						setRecordSelection(res.recordSet.length > 0 && res.recordSet[0].geok ? 'geo' : 'roundrobin');
@@ -171,8 +171,10 @@ const DnsEditRecordPage = (props) => {
 										<option value='soa'>SOA</option>
 									</optgroup>
 									<optgroup label='Templates'>
-										<option value='a_template'>A</option>
-										<option value='aaaa_template'>AAAA</option>
+										<option value='a_template:basic'>A (Standard)</option>
+										<option value='aaaa_template:basic'>AAAA (Standard)</option>
+										<option value='a_template:nocogent'>A (No Cogent)</option>
+										<option value='aaaa_template:nocogent'>AAAA (No Cogent)</option>
 										<option value='soa_template'>SOA</option>
 										<option value='ns_template'>NS</option>
 									</optgroup>
@@ -260,7 +262,7 @@ const DnsEditRecordPage = (props) => {
 							</div>
 						</div>
 					</div>}
-					{!type.endsWith('_template') && <div className='col'>
+					{!type.inclues('_template') && <div className='col'>
 						<div className='row'>
 							<div className='col'>
 								Records:

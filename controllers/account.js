@@ -218,6 +218,7 @@ export async function register(req, res) {
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
+			allowedTemplates: ['basic']
 			onboarding: false,
 		});
 
