@@ -173,7 +173,7 @@ export default function router(server, app) {
 				return (all && blocking) ? promiseResults.map((p) => p.data) : promiseResults[0]; //TODO: better desync handling
 			};
 			res.locals.postFileAll = async (path, options, file, fdOptions) => {
-        //used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
+				//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
 				const promiseResults = await Promise.all(
 					clusterUrls.map((clusterUrl) => {
 						const fd = new FormData(); //must resonctruct each time, or get a socket hang up
@@ -512,13 +512,33 @@ export default function router(server, app) {
 			if (res.locals.user.username !== 'admin') {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
-			const { id, data } = req.body;
-			if (!id || !data) {
+			if (!Array.isArray(req.body) || req.body.length === 0) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
 			}
-			await db.db().collection('templates').updateOne({ _id: id }, {
-				$set: { data },
-			}, { upsert: true });
+			const { type, template, data } = req.body[0];
+			if (!type || !template || !data) { //good enough for admin only route
+				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
+			}
+			const templateNames = req.body.map(x => x.template);
+			for (const rec of req.body) {
+				//upsert all the templates
+				await db.db().collection('templates').updateOne({
+					type: rec.type,
+					template: rec.template,
+				}, {
+					$set: {
+						type: rec.type,
+						template: rec.template,
+						data: rec.data,
+					},
+				}, { upsert: true });
+			}
+			//delete any no longer existing templates
+			//TODO: consider how to handle template overwrites if a template is deleted
+			await db.db().collection('templates').deleteMany({
+				type: type,
+				template: { $nin: templateNames }
+			});
 			return res.json({ ok: true });
 		},
 	);

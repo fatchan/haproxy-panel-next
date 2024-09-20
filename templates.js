@@ -2,13 +2,15 @@ import * as db from './db.js';
 
 export function aTemplate(name) {
 	return db.db().collection('templates').findOne({
-		_id: name || 'a',
+		type: 'a',
+		...(name ? { name } : { name: 'basic' })
 	}).then(res => res.data);
 }
 
 export function aaaaTemplate(name) {
 	return db.db().collection('templates').findOne({
-		_id: name || 'aaaa',
+		type: 'aaaa',
+		...(name ? { name } : { name: 'basic' })
 	}).then(res => res.data);
 };
 
