@@ -124,7 +124,6 @@ export async function onboardingJson(req, res, next) {
 	return res.json({ ...addData, ...onbData, user: res.locals.user });
 }
 
-
 /**
  * POST /forms/global/toggle
  * toggle global ACL
@@ -218,7 +217,7 @@ export async function register(req, res) {
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
-			allowedTemplates: ['basic']
+			allowedTemplates: ['basic'],
 			onboarding: false,
 		});
 

@@ -1,5 +1,6 @@
 {
   "extends": "next/core-web-vitals",
+  "ignorePatterns": ["node_modules/", "specification_openapiv3.js"],
   "rules": {
     "brace-style": [
       "error",

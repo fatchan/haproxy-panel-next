@@ -9,7 +9,6 @@ import { Resolver } from 'node:dns/promises';
 import { trimmedNsHosts } from '../templates.js';
 import psl from 'psl';
 
-
 const resolver = new Resolver();
 resolver.setServers(process.env.NAMESERVERS.split(','));
 

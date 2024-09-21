@@ -39,8 +39,8 @@ async function fetchStats(host, parameters) {
 		headers: { 'authorization': `Basic ${base64Auth}` },
 		signal,
 	})
-	.then(res => res.json())
-	.catch(err => console.error(err));
+		.then(res => res.json())
+		.catch(err => console.error(err));
 	return statsRes;
 	
 };

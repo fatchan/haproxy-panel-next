@@ -435,12 +435,12 @@ export async function patchMapForm(req, res, next) {
 					}, null, false, true);
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				await res.locals
-					.dataPlaneAll("replaceRuntimeServer", {
+					.dataPlaneAll('replaceRuntimeServer', {
 						name: serverName,
-						backend: "servers",
+						backend: 'servers',
 					}, {
-						admin_state: "ready",
-						operational_state: "up",
+						admin_state: 'ready',
+						operational_state: 'up',
 					}, null, false, true);
 				if (backendMapEntry) {
 					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);

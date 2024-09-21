@@ -23,16 +23,12 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 	// console.log('challenge', challenge);
 	// console.log('keyAuthorization', keyAuthorization);
 
-	/* http-01 */
 	if (challenge.type === 'http-01') {
 		const filePath = `/tmp/.well-known/acme-challenge/${challenge.token}`;
 		const fileContents = keyAuthorization;
 		console.log(`Creating challenge response for ${authz.identifier.value} at path: ${filePath}`);
 		await fs.writeFile(filePath, fileContents);
-	}
-
-	/* dns-01 */
-	else if (challenge.type === 'dns-01') {
+	} else if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';
@@ -93,15 +89,11 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 	console.log('Triggered challengeRemoveFn()');
 
-	/* http-01 */
 	if (challenge.type === 'http-01') {
 		const filePath = `/tmp/.well-known/acme-challenge/${challenge.token}`;
 		console.log(`Removing challenge response for ${authz.identifier.value} at path: ${filePath}`);
 		await fs.unlink(filePath);
-	}
-
-	/* dns-01 */
-	else if (challenge.type === 'dns-01') {
+	} else if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';

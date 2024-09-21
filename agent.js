@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 
 const agentOptions = {
-	rejectUnauthorized: process.env.ALLOW_SELF_SIGNED_SSL !== "true",
+	rejectUnauthorized: process.env.ALLOW_SELF_SIGNED_SSL !== 'true',
 };
 
 if (process.env.PINNED_FP) {
