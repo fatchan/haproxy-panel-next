@@ -1,5 +1,6 @@
 import * as db from '../db.js';
 import * as redis from '../redis.js';
+import { parse } from 'ip6addr';
 import { isIPv4, isIPv6 } from 'node:net';
 import { dynamicResponse } from '../util.js';
 import { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
@@ -172,6 +173,13 @@ export async function dnsRecordUpdate(req, res) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 		}
 	} else {
+		//TODO: not required the "all" ones
+		const allAs = await getAllTemplateIps('a');
+		const allowedAIps = await getAllTemplateIps('a', res.locals.user.allowedTemplates);
+		const allAAAAs = (await getAllTemplateIps('aaaa'))
+			.map(x => parse(x).toString({ zeroElide: false, zeroPad:false })); // prevent bypass with compressed addresses
+		const allowedAAAAIps = (await getAllTemplateIps('aaaa', res.locals.user.allowedTemplates))
+			.map(x => parse(x).toString({ zeroElide: false, zeroPad:false })); // prevent bypass with compressed addresses
 		switch (type) {
 			default: {
 				for (let i = 0; i < (type == 'soa' ? 1 : 100); i++) {
@@ -246,18 +254,30 @@ export async function dnsRecordUpdate(req, res) {
 					}
 					let record;
 					switch(type) {
-						case 'a':
+						case 'a': {
 							if (!isIPv4(value)) {
 								return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 							}
-							record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, closest, lat, long };
-							break;
-						case 'aaaa':
-							if (!isIPv6(value)) {
-								return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+							//Prevent manually inputting IPs from templates you dont have access to
+							if (allAs.includes(value)
+								&& !allowedAIps.includes(value)) {
+								return dynamicResponse(req, res, 400, { error: 'Restricted IP, please contact support' });
 							}
 							record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, closest, lat, long };
 							break;
+						}
+						case 'aaaa': {
+							if (!isIPv6(value)) {
+								return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+							}
+							const parsedIpv6 = parse(value).toString({ zeroElide: false, zeroPad:false });
+							if (allAAAAs.includes(parsedIpv6)
+								&& !allowedAAAAIps.includes(parsedIpv6)) {
+								return dynamicResponse(req, res, 400, { error: 'Restricted IP, please contact support' });
+							}
+							record = { ttl, id, ip: value, geok, geov, h, sel, bsel, fb, u: true, closest, lat, long };
+							break;
+						}
 						case 'txt':
 							record = { ttl, text: value };
 							break;
