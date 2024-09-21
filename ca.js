@@ -55,7 +55,8 @@ function generateCertificate(privateKey, publicKey) {
 	const cert = pki.createCertificate();
 	cert.publicKey = pubKey;
 	cert.serialNumber = `00${Math.floor(Math.random()*1000)}`;
-    //TODO: shorter/customisable
+
+	//TODO: shorter/customisable
 	cert.validity.notBefore = new Date();
 	cert.validity.notAfter = new Date();
 	cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
@@ -82,7 +83,7 @@ function generateCertificate(privateKey, publicKey) {
 export function verifyCSR(csrPem, allowedDomains, serialNumber) {
 	const csr = pki.certificationRequestFromPem(csrPem);
 	const subject = csr.subject.getField('CN').value;
-	const isWildcard = subject.startsWith('*.');
+	// const isWildcard = subject.startsWith('*.');
 	if (subject.startsWith('*.')) {
 		if (!wildcardAllowed(subject, allowedDomains)) {
 			throw new Error(`No permission for subject "${subject}"`);

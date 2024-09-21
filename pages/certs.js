@@ -266,6 +266,6 @@ export default function Certs(props) {
 
 };
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 };

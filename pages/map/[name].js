@@ -76,7 +76,7 @@ const MapPage = (props) => {
 			//ddos
 			m: e.target.m?.value,
 			t: e.target.t?.checked || null,
-		 }, dispatch, setError, router);
+		}, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 		e.target.reset();
 	}
@@ -431,7 +431,6 @@ const MapPage = (props) => {
 										{x}
 									</th>
 								))}
-								
 							</tr>
 
 							{mapRows}
@@ -456,7 +455,7 @@ const MapPage = (props) => {
 
 };
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
 

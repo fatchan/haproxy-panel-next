@@ -6,15 +6,15 @@ let ResolvedImage = Image;
 if ('default' in ResolvedImage) {
 	ResolvedImage = ResolvedImage.default;
 }
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import Link from 'next/link';
-import * as API from '../api.js';
+// import * as API from '../api.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import { useState } from 'react';
 
 export default function ChangePassword() {
 
-	const router = useRouter();
+	// const router = useRouter();
 	const [error, setError] = useState();
 
 	async function changepassword(e) {

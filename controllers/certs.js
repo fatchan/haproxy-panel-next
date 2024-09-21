@@ -239,10 +239,6 @@ export async function deleteCert(req, res) {
 
 	const subject = req.body.subject.toLowerCase();
 
-	const clusterCerts = await res.locals
-		.dataPlaneRetry('getAllStorageSSLCertificates')
-		.then(certs => filterCertsByDomain(certs.data, res.locals.user.domains));
-
 	//Delete cert from cluster if storage_name sent
 	if (req.body.storage_name && typeof req.body.storage_name === 'string') {
 		const storageName = req.body.storage_name;

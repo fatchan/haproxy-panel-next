@@ -43,7 +43,7 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, globalAcl, csrf, aRecords, aaaaRecords, txtRecords, hasBackend, nameserversPropagated } = state;
+	const { user, maps, csrf, txtRecords, hasBackend, nameserversPropagated } = state;
 	const domainAdded = user.domains && user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
 	const backendAdded = backendMap && backendMap.count > 0 && hasBackend === true;
@@ -149,7 +149,7 @@ export default function Onboarding(props) {
 						<ul>
 							{txtRecords
 								.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
-								.map((r, i) => <li suppressHydrationWarning key={r}>{r}</li>)}
+								.map(r => <li suppressHydrationWarning key={r}>{r}</li>)}
 						</ul>
 					</span>
 					<span className='d-block text-body-secondary mt-3'>
@@ -285,7 +285,7 @@ export default function Onboarding(props) {
 						<ol className='text-break'>
 							<li>Generate the private key and certificate signing request for your domains on your origin server:
 								<p>
-									<code>																																																																																																				
+									<code>
 										{'openssl req -newkey rsa:4096 -new -nodes -subj "/CN='}<strong>yourdomain.com</strong>{'/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:'}<strong>yourdomain.com</strong>{',DNS:'}<strong>www.yourdomain.com</strong>{'"))'}
 									</code>
 								</p>
@@ -332,6 +332,6 @@ export default function Onboarding(props) {
 	</>);
 }
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 };

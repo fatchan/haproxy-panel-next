@@ -1,5 +1,4 @@
 import * as db from '../db.js';
-import * as acme from '../acme.js';
 import url from 'node:url';
 import { dynamicResponse } from '../util.js';
 import * as redis from '../redis.js';
@@ -124,7 +123,6 @@ export async function addDomain(req, res, next) {
 			}], null, false, false);
 		if (domain.split('.').length < 3 //naive
 			&& soaTemplate && nsTemplate) {
-			const records = [];
 			const soaRecords = JSON.parse(JSON.stringify(soaTemplate()));
 			soaRecords[0].MBox = `root.${domain}.`;
 			soaRecords[0].l = true;
@@ -173,7 +171,7 @@ export async function deleteDomain(req, res) {
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
 		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.DDOS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => {
-				const { hostname, pathname } = url.parse(`https://${e.key}`);
+				const { hostname } = url.parse(`https://${e.key}`);
 				return hostname === domain;
 			}))
 	]);

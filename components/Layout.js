@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import MenuLinks from './MenuLinks';
-import KnowledgebaseLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
 export default withRouter(function Layout({ children, router }) {

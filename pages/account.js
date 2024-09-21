@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MapLink from '../components/MapLink.js';
@@ -27,8 +27,6 @@ export default function Account(props) {
 	}, []);
 
 	if (state && state.user && state.maps != null) {
-
-		const isAdmin = user.username === 'admin';
 
 		// Links to each map and bubble/pill for map counts
 		const mapLinks = maps.map((map, i) => <MapLink key={i} map={map} />);
@@ -155,6 +153,6 @@ export default function Account(props) {
 	);
 };
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 };

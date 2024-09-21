@@ -14,7 +14,6 @@ export default withRouter(function MenuLinks({ router }) {
 
 	const [path, setPath] = useState(router.pathname);
 	Router.events.on('routeChangeStart', setPath);
-	const kbMenu = router.pathname.startsWith('/kb');
 	let mainLinks, bottomLinks;
 
 	switch(true) {

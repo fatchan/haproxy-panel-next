@@ -34,6 +34,14 @@ const fromEntries = (pairs) => {
 		}, {});
 };
 
+//TODO: once there are more, we should pull these from the db
+const templateOptions = [
+	{ value: 'a_template:basic', label: 'A (Standard)' },
+	{ value: 'aaaa_template:basic', label: 'AAAA (Standard)' },
+	{ value: 'a_template:nocogent', label: 'A (No Cogent)' },
+	{ value: 'aaaa_template:nocogent', label: 'AAAA (No Cogent)' }
+];
+
 const DnsEditRecordPage = (props) => {
 
 	const router = useRouter();
@@ -113,7 +121,7 @@ const DnsEditRecordPage = (props) => {
 		await API.addUpdateDnsRecord(domain, zone, type, fromEntries([...new FormData(e.target).entries()]), dispatch, setError, router);
 	}
 
-	const { csrf } = state;
+	const { csrf, user } = state;
 	const supportsGeo = ['a', 'aaaa'].includes(type) && recordSelection === 'geo';
 	const supportsHealth = ['a', 'aaaa'].includes(type);
 
@@ -171,10 +179,16 @@ const DnsEditRecordPage = (props) => {
 										<option value='soa'>SOA</option>
 									</optgroup>
 									<optgroup label='Templates'>
-										<option value='a_template:basic'>A (Standard)</option>
-										<option value='aaaa_template:basic'>AAAA (Standard)</option>
-										<option value='a_template:nocogent'>A (No Cogent)</option>
-										<option value='aaaa_template:nocogent'>AAAA (No Cogent)</option>
+										{templateOptions
+											.filter(({ value }) => {
+												const [_, templateName] = value.split(':');
+												return user.allowedTemplates.includes(templateName);
+											})
+											.map(({ value, label }) => (
+												<option key={value} value={value}>
+													{label}
+												</option>
+											))}
 										<option value='soa_template'>SOA</option>
 										<option value='ns_template'>NS</option>
 									</optgroup>
@@ -583,7 +597,7 @@ const DnsEditRecordPage = (props) => {
 
 };
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
 

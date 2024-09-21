@@ -23,7 +23,7 @@ if (!process.env.INFLUX_HOST) {
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import agent from '../agent.js';
 
-import fetch, { AbortError } from 'node-fetch';
+import fetch from 'node-fetch';
 const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
 
@@ -42,7 +42,6 @@ async function fetchStats(host, parameters) {
 		.then(res => res.json())
 		.catch(err => console.error(err));
 	return statsRes;
-	
 };
 
 async function getFormattedStats(host) {
@@ -72,7 +71,7 @@ async function getFormattedStats(host) {
 		}));
 
 	serverStats.forEach(server => {
-		 server.stats = server.stats
+		server.stats = server.stats
 			.filter(t => t.backend_name === 'servers')
 			.map(t => ({
 				'name': t.name,
@@ -110,7 +109,7 @@ async function processHost(host) {
 		console.timeEnd(`Fetched stats from ${hostname}`);
 		let points = [];
 		const now = new Date();
-		frontendStats.forEach((s, i) => {
+		frontendStats.forEach(s => {
 			const statPoints = Object.entries(s.stats[0].stats)
 				.map(e => {
 					return new Point(e[0])
@@ -122,7 +121,7 @@ async function processHost(host) {
 			points = points.concat(statPoints);
 		});
 		serverStats.forEach(server => {
-			 server.stats.forEach(ss => {
+			server.stats.forEach(ss => {
 				const statPoints = Object.entries(ss.stats)
 					.map(e => {
 						return new Point(e[0])
@@ -134,7 +133,7 @@ async function processHost(host) {
 							.timestamp(now);
 					});
 				points = points.concat(statPoints);
-			 });
+			});
 		});
 		console.time(`Flushed ${points.length} points for ${hostname} to influx`);
 		await writeApi.writePoints(points);

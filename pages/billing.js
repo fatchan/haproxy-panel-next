@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
-import { wildcardCheck, wildcardMatches } from '../util.js';
 
 const statusColors = {
 	'cancelled': 'secondary',
@@ -53,7 +51,7 @@ export default function Billing(props) {
 			<h5 className='fw-bold'>
 				Invoices:
 			</h5>
-			
+
 			{/* Domains table */}
 			<div className='table-responsive round-shadow'>
 				<table className='table text-nowrap'>
@@ -73,7 +71,7 @@ export default function Billing(props) {
 								Status
 							</th>
 						</tr>
-						
+
 						{invoices.map(inv => (<tr key={inv._id} className='align-middle'>
 							<td>
 								{inv.description}
@@ -105,7 +103,7 @@ export default function Billing(props) {
 
 }
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
 

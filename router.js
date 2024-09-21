@@ -195,13 +195,13 @@ export default function router(server, app) {
 	};
 
 	//unauthed pages
-	server.get('/', useSession, fetchSession, (req, res, next) => {
+	server.get('/', useSession, fetchSession, (req, res, _next) => {
 		return app.render(req, res, '/index');
 	});
-	server.get('/login', useSession, fetchSession, (req, res, next) => {
+	server.get('/login', useSession, fetchSession, (req, res, _next) => {
 		return app.render(req, res, '/login');
 	});
-	server.get('/register', useSession, fetchSession, (req, res, next) => {
+	server.get('/register', useSession, fetchSession, (req, res, _next) => {
 		return app.render(req, res, '/register');
 	});
 
@@ -508,7 +508,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		async (req, res, next) => {
+		async (req, res, _next) => {
 			if (res.locals.user.username !== 'admin') {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
@@ -548,7 +548,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		async (req, res, next) => {
+		async (req, res, _next) => {
 			if (res.locals.user.username !== 'admin') {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
@@ -562,7 +562,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		async (req, res, next) => {
+		async (req, res, _next) => {
 			if (res.locals.user.username !== 'admin') {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
@@ -585,7 +585,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		(req, res, next) => {
+		(req, res, _next) => {
 			return res.send(req.csrfToken());
 		},
 	);

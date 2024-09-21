@@ -5,7 +5,6 @@ process
 	.on('unhandledRejection', console.error);
 
 import fetch from 'node-fetch';
-import https from 'https';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -31,6 +30,7 @@ async function overwriteMap(url, mapName, entries) {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify(entries),
+		signal,
 	})
 		.catch(err => console.error(err));
 };
@@ -71,11 +71,11 @@ async function listMaps(url) {
 		.then(res => res.json())
 		.then(jsonData => {
 			jsonData.forEach(obj => {
-			  const match = obj.description.match(/entry_cnt=(\d+)/);
-			  if (match) {
-			    const size = parseInt(match[1]);
-			    obj.size = size;
-			  }
+				const match = obj.description.match(/entry_cnt=(\d+)/);
+				if (match) {
+					const size = parseInt(match[1]);
+					obj.size = size;
+				}
 			});
 			return jsonData;
 		})
@@ -141,12 +141,12 @@ async function main() {
 		}
 
 		console.table(mapTable);
-		
+
 		console.timeEnd('Running sync check');
 
 		for (let key in mapTable) {
 			if (!mapTable[key].synced) {
-				
+
 				console.warn('WARNING:', key, 'is out of sync with', masterHostname);
 				console.table({
 					[masterHostname]: mapTable[masterHostname],

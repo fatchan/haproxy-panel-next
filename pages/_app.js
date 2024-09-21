@@ -11,7 +11,7 @@ const loadRoutes = ['/login', '/register', '/changepassword', '/'];
 NProgress.configure({ showSpinner: false });
 Router.events.on('routeChangeStart', (url) => loadRoutes.includes(url) && NProgress.start());
 Router.events.on('routeChangeComplete', (url) => loadRoutes.includes(url) && NProgress.done());
-Router.events.on('routeChangeError', (url) => NProgress.done());
+Router.events.on('routeChangeError', () => NProgress.done());
 
 export default function App({ Component, pageProps }) {
 	return (

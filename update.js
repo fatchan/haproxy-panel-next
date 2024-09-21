@@ -31,7 +31,7 @@ async function processKey(domainKey) {
 				}
 			}
 			if (records['aaaa'] && records['aaaa'][0]['t'] === true) {
-				const existingAAAATemplate = await aTemplate(records['aaaa'][0]['tn']);
+				const existingAAAATemplate = await aaaaTemplate(records['aaaa'][0]['tn']);
 				if (existingAAAATemplate) {
 					records['aaaa'] = JSON.parse(JSON.stringify(existingAAAATemplate));
 				} else {

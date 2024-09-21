@@ -19,7 +19,7 @@ const DnsDomainIndexPage = (props) => {
 	const [sortType, setSortType] = useState('name');
 	const [sortOrder, setSortOrder] = useState(-1);
 	const [filter, setFilter] = useState('');
-	const { user, recordSets, csrf } = state;
+	const { recordSets, csrf } = state;
 	const handleSetSorting = (newSortType) => {
 		let sorted;
 		const sameType = newSortType === sortType;
@@ -149,7 +149,7 @@ const DnsDomainIndexPage = (props) => {
 
 };
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
 

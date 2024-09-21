@@ -6,7 +6,7 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
-import { wildcardCheck, wildcardMatches } from '../util.js';
+import { wildcardMatches } from '../util.js';
 
 export default function Domains(props) {
 
@@ -120,7 +120,7 @@ export default function Domains(props) {
 			</h5>
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
-			
+
 			{/* Domains table */}
 			<div className='table-responsive round-shadow'>
 				<table className='table text-nowrap'>
@@ -174,6 +174,6 @@ export default function Domains(props) {
 
 }
 
-export async function getServerSideProps({ req, res, query, resolvedUrl, locale, locales, defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
