@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
+    "password": "node reset.js",
     "build": "next build",
     "lint": "next lint",
     "next": "next build",

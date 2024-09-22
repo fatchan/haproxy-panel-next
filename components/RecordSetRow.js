@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import * as API from '../api.js';
 
+//TODO: once there are more, we should pull these from the db
+const templateNameMap = {
+	'nocogent': 'No Cogent',
+	'basic': 'Standard',
+};
+
 export default function RecordSetRow({ dispatch, setError, router, domain, name, recordSet, csrf }) {
 	const type = recordSet[0];
 	const recordSetArray = Array.isArray(recordSet[1]) ? recordSet[1] : [recordSet[1]];
@@ -58,7 +64,7 @@ export default function RecordSetRow({ dispatch, setError, router, domain, name,
 				{recordSetArray && recordSetArray.length > 0 ? recordSetArray[0].ttl : '-'}
 			</td>
 			<td>
-				{recordSetArray && recordSetArray.length > 0 && recordSetArray[0].t && <div className='text-warning'>Template</div>}
+				{recordSetArray && recordSetArray.length > 0 && recordSetArray[0].t && <div className='text-warning'>Template {recordSetArray[0].tn ? `(${templateNameMap[recordSetArray[0].tn] || recordSetArray[0].tn})` : null}</div>}
 				{recordSetArray && recordSetArray.length > 0 && recordSetArray[0].l && <div className='text-danger'>Locked</div>}
 			</td>
 		</tr>

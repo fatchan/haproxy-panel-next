@@ -3,7 +3,7 @@ import * as redis from '../redis.js';
 import { parse } from 'ip6addr';
 import { isIPv4, isIPv6 } from 'node:net';
 import { dynamicResponse } from '../util.js';
-import { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
+import { getAllTemplateIps, nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
 
 /**
 * GET /dns/:domain
@@ -309,11 +309,16 @@ export async function dnsRecordUpdate(req, res) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 	let recordSetRaw = await redis.hget(`dns:${req.params.domain}.`, req.params.zone);
+	let originalTemplateName; //take template name from redis
 	if (!recordSetRaw) {
 		recordSetRaw = {};
-	} else if (recordSetRaw[type] && recordSetRaw[type].l === true
-		|| (Array.isArray(recordSetRaw[type]) && (recordSetRaw[type].length > 0 && recordSetRaw[type][0].l === true))) {
+	} else if (recordSetRaw[type] && recordSetRaw[type].l === true //single check for SOAs
+		|| (Array.isArray(recordSetRaw[type]) && (recordSetRaw[type].length > 0 && recordSetRaw[type][0].l === true))) { //array check for others
 		return dynamicResponse(req, res, 400, { error: 'You can\'t edit or overwrite locked records' });
+	}
+	if (Array.isArray(recordSetRaw[type]) && recordSetRaw[type].length > 0 && recordSetRaw[type][0].tn) {
+		originalTemplateName = recordSetRaw[type][0].tn;
+		console.log('found original template name (.tn):', originalTemplateName);
 	}
 	if (type == 'soa') {
 		template = template
@@ -323,10 +328,12 @@ export async function dnsRecordUpdate(req, res) {
 	} else {
 		template = template
 			|| (recordSetRaw[type] && recordSetRaw[type].length > 0 && recordSetRaw[type][0]['t'] === true);
-		const originalTemplateName = recordSetRaw[type][0]['tn']; //take original tn from original before setting to records
 		recordSetRaw[type] = records;
 		recordSetRaw[type].forEach(rr => rr['t'] = template);
-		recordSetRaw[type].forEach(rr => rr['tn'] = originalTemplateName);
+		if (originalTemplateName) {
+			//maintain original template name even when editing a template
+			recordSetRaw[type].forEach(rr => rr['tn'] = originalTemplateName);
+		}
 	}
 	await redis.hset(`dns:${domain}.`, zone, recordSetRaw);
 	return dynamicResponse(req, res, 302, { redirect: `/dns/${domain}` });

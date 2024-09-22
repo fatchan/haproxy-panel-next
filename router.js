@@ -50,6 +50,7 @@ export default function router(server, app) {
 					username: account._id,
 					domains: account.domains,
 					onboarding: account.onboarding,
+					allowedTemplates: account.allowedTemplates,
 					numCerts,
 				};
 				return next();
@@ -434,7 +435,7 @@ export default function router(server, app) {
 		mapsController.deleteMapForm,
 	);
 	clusterRouter.post(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_]+)/delete',
+		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)/delete',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -442,7 +443,7 @@ export default function router(server, app) {
 		dnsController.dnsRecordDelete,
 	);
 	clusterRouter.post(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_]+)',
+		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -512,15 +513,15 @@ export default function router(server, app) {
 			if (res.locals.user.username !== 'admin') {
 				return dynamicResponse(req, res, 403, { error: 'No permission' });
 			}
-			if (!Array.isArray(req.body) || req.body.length === 0) {
+			if (!Array.isArray(req.body.templates) || req.body.templates.length === 0) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
 			}
-			const { type, template, data } = req.body[0];
+			const { type, template, data } = req.body.templates[0];
 			if (!type || !template || !data) { //good enough for admin only route
 				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
 			}
-			const templateNames = req.body.map(x => x.template);
-			for (const rec of req.body) {
+			const templateNames = req.body.templates.map(x => x.template);
+			for (const rec of req.body.templates) {
 				//upsert all the templates
 				await db.db().collection('templates').updateOne({
 					type: rec.type,

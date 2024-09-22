@@ -19,6 +19,7 @@ async function reset() {
 				domains: ['localhost'],
 				balance: 0,
 				onboarding: null,
+				allowedTemplates: ['basic', 'nocogent']
 			});
 	} else {
 		await db.db().collection('accounts')

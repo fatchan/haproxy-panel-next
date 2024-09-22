@@ -276,7 +276,7 @@ const DnsEditRecordPage = (props) => {
 							</div>
 						</div>
 					</div>}
-					{!type.inclues('_template') && <div className='col'>
+					{!type.includes('_template') && <div className='col'>
 						<div className='row'>
 							<div className='col'>
 								Records:
