@@ -22,8 +22,15 @@ async function processKey(domainKey) {
 		try {
 			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
+			let defaultTemplate = 'basic';
+			const domainAccount = await db.db().collection('accounts').findOne({ domains: domain });
+			if (domainAccount && domainAccount.allowedTemplates[0] !== 'basic') {
+				//For initial sync of accounts that dont have access to the public template
+				defaultTemplate = domainAccount.allowedTemplates[0];
+			}
 			if (records['a'] && records['a'][0]['t'] === true) {
-				const existingATemplate = await aTemplate(records['a'][0]['tn']);
+				const templateName = records['a'][0]['tn'] || defaultTemplate;
+				const existingATemplate = await aTemplate(templateName);
 				if (existingATemplate) {
 					records['a'] = JSON.parse(JSON.stringify(existingATemplate));
 				} else {
@@ -31,7 +38,8 @@ async function processKey(domainKey) {
 				}
 			}
 			if (records['aaaa'] && records['aaaa'][0]['t'] === true) {
-				const existingAAAATemplate = await aaaaTemplate(records['aaaa'][0]['tn']);
+				const templateName = records['aaaa'][0]['tn'] || defaultTemplate;
+				const existingAAAATemplate = await aaaaTemplate(templateName);
 				if (existingAAAATemplate) {
 					records['aaaa'] = JSON.parse(JSON.stringify(existingAAAATemplate));
 				} else {
