@@ -219,6 +219,7 @@ export async function register(req, res) {
 			domains: [],
 			allowedTemplates: ['basic'],
 			onboarding: false,
+			maxDomains: 5,
 		});
 
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
