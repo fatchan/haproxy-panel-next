@@ -103,13 +103,13 @@ export default function Onboarding(props) {
 
 		<h5 className='fw-bold'>
 			Onboarding
-			<div className='my-2'>
+			{user.onboarding === false && <div className='my-2'>
 				<input onClick={() => {
 					if (confirm('Are you sure you want to skip onboarding?')) {
 						updateOnboarding(7);
 					}
 				}} className='btn btn-sm btn-warning' type='submit' value='Skip Onboarding' />
-			</div>
+			</div>}
 		</h5>
 
 		<div className='list-group'>

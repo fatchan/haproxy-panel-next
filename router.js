@@ -68,7 +68,7 @@ export default function router(server, app) {
 	};
 
 	const checkOnboarding = (req, res, next) => {
-		if (!res.locals.user || res.locals.user.onboarding === false) {
+		if (res.locals.user && res.locals.user.onboarding === false) {
 			return dynamicResponse(req, res, 302, { redirect: '/onboarding' });
 		}
 		next();
@@ -264,6 +264,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
+		checkOnboarding,
 		useHaproxy,
 		csrfMiddleware,
 		accountController.accountJson,
@@ -310,6 +311,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
+		checkOnboarding,
 		useHaproxy,
 		csrfMiddleware,
 		mapsController.mapJson,
@@ -401,6 +403,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
+		checkOnboarding,
 		useHaproxy,
 		csrfMiddleware,
 		certsController.certsJson,
@@ -535,7 +538,6 @@ export default function router(server, app) {
 				}, { upsert: true });
 			}
 			//delete any no longer existing templates
-			//TODO: consider how to handle template overwrites if a template is deleted
 			await db.db().collection('templates').deleteMany({
 				type: type,
 				template: { $nin: templateNames }

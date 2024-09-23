@@ -218,7 +218,7 @@ export async function register(req, res) {
 			passwordHash: passwordHash,
 			domains: [],
 			allowedTemplates: ['basic'],
-			onboarding: false,
+			onboarding: true,
 			maxDomains: 5,
 		});
 
