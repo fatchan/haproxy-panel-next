@@ -10,11 +10,21 @@ export default function Onboarding(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
+	const [loading, setLoading] = useState({});
 	const [error, setError] = useState();
 	const [csrState, setCsrState] = useState();
 
-	async function fetchOnboarding() {
-		API.getOnboarding(dispatch, setError, router);
+	async function fetchOnboarding(key) {
+		key && setLoading(oldLoading => ({ ...oldLoading, [key]: true }));
+		try {
+			await API.getOnboarding(async res => {
+				dispatch(res);
+				key && setLoading(oldLoading => ({ ...oldLoading, [key]: false }));
+			}, setError, router);
+		} finally {
+			await new Promise(setTimeout(res, 1000));
+			key && setLoading(oldLoading => ({ ...oldLoading, [key]: false }));
+		}
 	}
 
 	useEffect(() => {
@@ -192,6 +202,12 @@ export default function Onboarding(props) {
 							</ul>
 						</span>
 					</>}
+					<span className='d-block text-body-secondary mt-3'>
+						<input onClick={() => {
+							fetchOnboarding('nameservers');
+						}} className='btn btn-sm btn-info' type='submit' value='Check Propagation' disabled={loading['nameservers']} />
+						{loading['nameservers'] && <div className='spinner-border ms-2' role='status' style={{ width: 15, height: 15 }} />}
+					</span>
 					{nameserversPropagated && (<div><strong>
 						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
 						Nameserver changes propagated successfully
