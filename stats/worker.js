@@ -40,7 +40,9 @@ async function fetchStats(host, parameters) {
 		signal,
 	})
 		.then(res => res.json())
-		.catch(err => console.error(err));
+		.catch(err => {
+			console.warn(`Error fetching stats for ${clusterUrl.hostname}`, err.code, err.message);
+		});
 	return statsRes;
 };
 
@@ -49,6 +51,10 @@ async function getFormattedStats(host) {
 		fetchStats(host, { type: 'server', parent: 'servers' }),
 		fetchStats(host, { type: 'frontend', name: 'www-http-https' })
 	]);
+
+	if (!Array.isArray(frontendStats) || frontendStats.length === 0) {
+		return { frontendStats: null, serverStats: null };
+	}
 
 	frontendStats[0].stats = frontendStats[0].stats
 		.filter(t => t.name === 'www-http-https')
@@ -106,6 +112,10 @@ async function processHost(host) {
 		const hostname = new URL(host).hostname;
 		console.time(`Fetched stats from ${hostname}`);
 		const { frontendStats, serverStats } = await getFormattedStats(host);
+		if (!frontendStats || !serverStats) {
+			console.warn(`Failed to fetch stats for ${hostname}`);
+			return console.timeEnd(`Fetched stats from ${hostname}`);
+		}
 		console.timeEnd(`Fetched stats from ${hostname}`);
 		let points = [];
 		const now = new Date();

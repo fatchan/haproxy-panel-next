@@ -32,7 +32,9 @@ async function overwriteMap(url, mapName, entries) {
 		body: JSON.stringify(entries),
 		signal,
 	})
-		.catch(err => console.error(err));
+		.catch(err => {
+			console.warn(`Error overwriting map for ${url.host}`, err.code, err.message);
+		});
 };
 
 async function getMapEntries(url, mapName) {
@@ -51,7 +53,9 @@ async function getMapEntries(url, mapName) {
 		signal,
 	})
 		.then(res => res.json())
-		.catch(err => console.error(err));
+		.catch(err => {
+			console.warn(`Error fetching map entries for ${url.host}`, err.code, err.message);
+		});
 };
 
 async function listMaps(url) {
@@ -79,7 +83,9 @@ async function listMaps(url) {
 			});
 			return jsonData;
 		})
-		.catch(err => console.error(err));
+		.catch(err => {
+			console.warn(`Error fetching map list for ${url.host}`, err.code, err.message);
+		});
 };
 
 const MAPS_TO_SYNC = new Set([
@@ -115,6 +121,9 @@ async function main() {
 		await Promise.all(autodiscoverService.urls.map(async url => {
 			try {
 				const serverMapList = await listMaps(url);
+				if (!serverMapList) {
+					return;
+				}
 				const mapCounts = serverMapList
 					.filter(m => MAPS_TO_SYNC.has(m.storage_name))
 					.reduce((acc, m) => {
