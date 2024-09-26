@@ -86,11 +86,11 @@ export async function verifyCSR(body, dispatch, errorCallback, router) {
 export async function getMap(mapName, dispatch, errorCallback, router) {
 	return ApiCall(`/map/${mapName}.json`, 'GET', null, dispatch, errorCallback, router);
 }
-export async function addToMap(mapName, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function addToMap(mapName, body, dispatch, errorCallback, router, progress) {
+	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, progress || 0.5);
 }
-export async function deleteFromMap(mapName, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/map/${mapName}/delete`, 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function deleteFromMap(mapName, body, dispatch, errorCallback, router, progress) {
+	return ApiCall(`/forms/map/${mapName}/delete`, 'POST', body, dispatch, errorCallback, router, progress || 0.5);
 }
 
 // Stats

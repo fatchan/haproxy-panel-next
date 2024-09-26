@@ -508,6 +508,9 @@ export async function patchMapForm(req, res, next) {
 			}, {
 				upsert: true,
 			});
+			if (req.body.edit) {
+				return dynamicResponse(req, res, 200, {});
+			}
 			return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
 		} catch (e) {
 			return next(e);

@@ -82,11 +82,11 @@ ssl_certificate_key /path/to/your/origin.key;
 			<hr />
 
 			<h5 className='fw-bold'>Caution</h5>
-			
+
 			<p>
 				While the provided configurations and commands are standard, they might not be compatible with all environments. Depending on your specific requirements and existing configurations, you might need to adjust or tweak them. Always test configurations in a safe environment before deploying them in production.
 			</p>
-		
+
 			<small>Last Updated: October 3, 2023</small>
 
 		</>

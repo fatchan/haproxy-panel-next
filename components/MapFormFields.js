@@ -1,0 +1,491 @@
+import React from 'react';
+import Select from 'react-select';
+import countries from 'i18n-iso-countries';
+import enCountries from 'i18n-iso-countries/langs/en.json';
+
+countries.registerLocale(enCountries);
+const continentMap = {
+	'NA': 'North America',
+	'SA': 'South America',
+	'EU': 'Europe',
+	'AS': 'Asia',
+	'OC': 'Oceania',
+	'AF': 'Africa',
+	'AN': 'Antarctica',
+};
+
+const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
+const continentOptions = Object.entries(continentMap).map(([value, label]) => ({ value, label }));
+
+const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel }) => {
+	let formElements;
+
+	switch (mapName) {
+		case 'ddos': {
+			const mapValueOptions = Object.entries(mapValueNames).map((entry, i) => (
+				<option key={`option${i}`} value={entry[0]}>{entry[1]}</option>
+			));
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							placeholder='domain/path'
+							required
+						/>
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.m || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('m', e.target.value)}
+							name='m'
+							required
+						>
+							<option disabled value=''>protection mode</option>
+							{mapValueOptions}
+						</select>
+					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.t === true } : { defaultChecked: editValue.t === true })}
+								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? 'true' : 'false')}
+								name='t'
+							/>
+							<label className='form-check-label'>Tor exits only</label>
+						</div>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'ddos_config': {
+			const domainSelectOptions = user?.domains.map((d, i) => (
+				<option key={`option${i}`} value={d}>{d}</option>
+			));
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							required
+						>
+							<option value='' />
+							{domainSelectOptions}
+						</select>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='number'
+							min='8'
+							{...(handleFieldChange ? { value: editValue.pd || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value)}
+							name='pd'
+							placeholder='difficulty'
+							required
+						/>
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.pt || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('pt', e.target.value)}
+							name='pt'
+							required
+						>
+							<option disabled value=''>pow type</option>
+							<option value='sha256'>sha256</option>
+							<option value='argon2'>argon2</option>
+						</select>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='number'
+							value={editValue.cex || ''}
+							onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value)}
+							name='cex'
+							placeholder='cookie expiry (seconds)'
+							required
+						/>
+					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.cip === true } : { defaultChecked: editValue.cip === true })}
+								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? 'true' : 'false')}
+								name='cip'
+							/>
+							<label className='form-check-label'>Lock cookie to IP</label>
+						</div>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'redirect':
+		case 'rewrite': {
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							placeholder='domain'
+							required
+						/>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.value || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('value', e.target.value)}
+							name='value'
+							placeholder='domain or domain/path'
+							required
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'maintenance': {
+			const activeDomains = (map||[]).map(e => e.key);
+			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
+			const domainSelectOptions = inactiveDomains.map((d, i) => (
+				<option key={`option${i}`} value={d}>{d}</option>
+			));
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							required
+						>
+							<option value='' />
+							{domainSelectOptions}
+						</select>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'blockedip':
+		case 'whitelist': {
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							placeholder='ip or subnet'
+							name='key'
+							required
+						/>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
+							name='note'
+							placeholder='Note'
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'blockedasn': {
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							placeholder='ASN'
+							required
+						/>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
+							name='note'
+							placeholder='Note'
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'hosts': {
+			const domainSelectOptions = user?.domains.map((d, i) => (
+				<option key={`option${i}`} value={d}>{d}</option>
+			));
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							required
+						>
+							<option value='' />
+							{domainSelectOptions}
+						</select>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.value || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('value', e.target.value)}
+							name='value'
+							placeholder='backend ip:port'
+							required
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'blockedcc': {
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<Select
+							options={countryOptions}
+							{...(handleFieldChange ? { value: countryOptions.find(option => option.value === editValue.key) || '' } : { defaultValue: '' })}
+							onChange={(option) => handleFieldChange && handleFieldChange('key', option.value)}
+							classNamePrefix='select'
+							className='basic-multi-select'
+							name='key'
+							required
+						/>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
+							name='note'
+							placeholder='Note'
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		case 'blockedcn': {
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<Select
+							options={continentOptions}
+							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.key) || '' } : { defaultValue: '' })}
+							onChange={(option) => handleFieldChange && handleFieldChange('key', option.value)}
+							classNamePrefix='select'
+							className='basic-multi-select'
+							name='key'
+							required
+						/>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
+							name='note'
+							placeholder='Note'
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
+		default:
+			// should never really get here
+			formElements = <td>Unsupported map type</td>;
+	}
+
+	return formElements;
+};
+
+export default MapFormFields;
