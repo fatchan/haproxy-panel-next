@@ -62,7 +62,7 @@ function generateCertificate(privateKey, publicKey) {
 	cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
 	cert.setSubject(CAAttrs);
 	cert.setIssuer(CAAttrs);
-	cert.setExtensions([	
+	cert.setExtensions([
 		{
 			name: 'basicConstraints',
 			cA: true,

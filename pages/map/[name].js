@@ -29,7 +29,6 @@ const MapPage = (props) => {
 	const [editValue, setEditValue] = useState({});
 
 	const handleFieldChange = (field, newValue) => {
-		console.log('handleFieldChange', field, newValue)
 		setEditValue((prev) => ({
 			...prev,
 			[field]: newValue,

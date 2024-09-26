@@ -21,7 +21,7 @@ const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
 	, firstClusterURL = clusterUrls[0]
 	, base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString('base64');
 
-async function main() {	
+async function main() {
 	await db.connect();
 	await acme.init();
 	loop();
