@@ -306,7 +306,7 @@ export async function patchMapForm(req, res, next) {
 
 		//validate ddos
 		if (req.params.name === process.env.DDOS_MAP_NAME
-			&& (!req.body.m || !['0', '1', '2'].includes(req.body.m))) {
+			&& (!req.body.m || !['0', '1', '2'].includes(req.body.m.toString()))) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 		}
 		if (req.params.name === process.env.DDOS_MAP_NAME) {

@@ -57,7 +57,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					<td>
 						<select
 							className='form-select'
-							{...(handleFieldChange ? { value: editValue.m || '' } : { defaultValue: '' })}
+							{...(handleFieldChange ? { value: editValue?.m?.toString() || '' } : { defaultValue: '' })}
 							onChange={(e) => handleFieldChange && handleFieldChange('m', e.target.value.toString())}
 							name='m'
 							required
@@ -121,7 +121,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							className='form-control'
 							type='number'
 							min='8'
-							{...(handleFieldChange ? { value: editValue.pd || '' } : { defaultValue: '' })}
+							{...(handleFieldChange ? { value: editValue?.pd?.toString() || '' } : { defaultValue: '' })}
 							onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value.toString())}
 							name='pd'
 							placeholder='difficulty'
@@ -145,7 +145,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						<input
 							className='form-control'
 							type='number'
-							value={editValue.cex || ''}
+							{...(handleFieldChange ? { value: editValue?.cex?.toString() || '' } : { defaultValue: '' })}
 							onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value.toString())}
 							name='cex'
 							placeholder='cookie expiry (seconds)'
