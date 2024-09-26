@@ -79,7 +79,7 @@ const MapPage = (props) => {
 		.map((row, i) => {
 			return (
 				<MapRow
-					key={`i_${JSON.stringify(row)}`}
+					key={`${i}_${JSON.stringify(row)}`}
 					row={row}
 					name={mapInfo.name}
 					csrf={csrf}
