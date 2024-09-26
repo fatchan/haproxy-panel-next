@@ -23,7 +23,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 	switch (mapName) {
 		case 'ddos': {
 			const mapValueOptions = Object.entries(mapValueNames).map((entry, i) => (
-				<option key={`option${i}`} value={entry[0]}>{entry[1]}</option>
+				<option key={`option${i}`} value={entry[0].toString()}>{entry[1]}</option>
 			));
 			formElements = (
 				<>
@@ -58,7 +58,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						<select
 							className='form-select'
 							{...(handleFieldChange ? { value: editValue.m || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('m', e.target.value)}
+							onChange={(e) => handleFieldChange && handleFieldChange('m', e.target.value.toString())}
 							name='m'
 							required
 						>
@@ -72,7 +72,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 								className='form-check-input'
 								type='checkbox'
 								{...(handleFieldChange ? { checked: editValue.t === true } : { defaultChecked: editValue.t === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? true : null)}
+								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? true : false)}
 								name='t'
 							/>
 							<label className='form-check-label'>Tor exits only</label>
@@ -122,7 +122,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							type='number'
 							min='8'
 							{...(handleFieldChange ? { value: editValue.pd || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value)}
+							onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value.toString())}
 							name='pd'
 							placeholder='difficulty'
 							required
@@ -146,7 +146,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							className='form-control'
 							type='number'
 							value={editValue.cex || ''}
-							onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value)}
+							onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value.toString())}
 							name='cex'
 							placeholder='cookie expiry (seconds)'
 							required
@@ -158,7 +158,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 								className='form-check-input'
 								type='checkbox'
 								{...(handleFieldChange ? { checked: editValue.cip === true } : { defaultChecked: editValue.cip === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? true : null)}
+								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? true : false)}
 								name='cip'
 							/>
 							<label className='form-check-label'>Lock cookie to IP</label>

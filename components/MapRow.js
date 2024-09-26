@@ -12,12 +12,12 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 	const [editValue, setEditValue] = useState({
 		key,
 		...(typeof value === 'object' ? { ...value } : { value: value}),
-		note: mapNote
+		...(mapNote ? { note: mapNote } : {})
 	});
 	const [originalState, setOriginalState] = useState({
 		key,
 		...(typeof value === 'object' ? { ...value } : { value: value}),
-		note: mapNote
+		...(mapNote ? { note: mapNote } : {})
 	});
 
 	const handleEdit = () => {
