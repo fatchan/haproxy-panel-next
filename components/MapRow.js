@@ -4,7 +4,7 @@ import MapFormFields from './MapFormFields.js';
 import asnMap from '../maps/asn.json';
 import * as API from '../api.js';
 
-export default function MapRow({ row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
+export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
 	const { key, value } = row;
 	const router = useRouter();
 
