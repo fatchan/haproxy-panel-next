@@ -72,7 +72,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 								className='form-check-input'
 								type='checkbox'
 								{...(handleFieldChange ? { checked: editValue.t === true } : { defaultChecked: editValue.t === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? 'true' : 'false')}
+								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? true : null)}
 								name='t'
 							/>
 							<label className='form-check-label'>Tor exits only</label>
@@ -158,7 +158,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 								className='form-check-input'
 								type='checkbox'
 								{...(handleFieldChange ? { checked: editValue.cip === true } : { defaultChecked: editValue.cip === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? 'true' : 'false')}
+								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? true : null)}
 								name='cip'
 							/>
 							<label className='form-check-label'>Lock cookie to IP</label>
