@@ -372,7 +372,7 @@ export async function patchMapForm(req, res, next) {
 			case process.env.DDOS_MAP_NAME:
 				value = JSON.stringify({
 					m: parseInt(req.body.m || 1),
-					t: req.body.t != null,
+					t: req.body.t === true ? true : false,
 				});
 				break;
 			case process.env.DDOS_CONFIG_MAP_NAME:
@@ -380,7 +380,7 @@ export async function patchMapForm(req, res, next) {
 					pd: parseInt(req.body.pd || 24),
 					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
 					cex: parseInt(req.body.cex || 21600),
-					cip: req.body.cip ? true : false,
+					cip: req.body.cip === true ? true : false,
 				});
 				break;
 			default:
