@@ -284,7 +284,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
 		csrfMiddleware,
 		accountController.billingPage.bind(null, app),
 	);
@@ -293,7 +292,6 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
 		csrfMiddleware,
 		accountController.billingJson,
 	);

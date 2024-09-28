@@ -48,17 +48,22 @@ async function checkPublicDNSRecord(domain, type, expectedSet) {
  * account page data shared between html/json routes
  */
 export async function accountData(req, res, _next) {
-	let maps = res.locals
-		.dataPlaneRetry('getAllRuntimeMapFiles')
-		.then(res => res.data)
-		.then(data => data.map(extractMap))
-		.then(maps => maps.filter(n => n))
-		.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
-	let globalAcl = res.locals
-		.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
-		.then(res => res.data.description.split('').reverse()[0]);
-	let txtRecords = getNameserverTxtRecords();
-	([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
+	let maps = []
+		, txtRecords = []
+		, globalAcl = '0';
+	if (res.locals.dataPlaneRetry) {
+		maps = res.locals
+			.dataPlaneRetry('getAllRuntimeMapFiles')
+			.then(res => res.data)
+			.then(data => data.map(extractMap))
+			.then(maps => maps.filter(n => n))
+			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
+		globalAcl = res.locals
+			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
+			.then(res => res.data.description.split('').reverse()[0]);
+		txtRecords = getNameserverTxtRecords();
+		([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
+	}
 	return {
 		csrf: req.csrfToken(),
 		maps,
