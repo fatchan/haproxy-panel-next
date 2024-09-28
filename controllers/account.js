@@ -316,6 +316,11 @@ export async function createPaymentRequest(req, res) {
 			invoice.amount
 		);
 
+		if (!shkeeperResponse || !shkeeperResponse.wallet) {
+			console.warn('shkeeperResponse:', shkeeperResponse);
+			return dynamicResponse(req, res, 500, { error: 'Payment gateway error, try again later' });
+		}
+
 		const qrCodeURL = shkeeperResponse.wallet;
 		const qrCodeText = await QRCode.toString(qrCodeURL, { type: 'utf8' });
 
