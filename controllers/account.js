@@ -311,7 +311,7 @@ export async function createPaymentRequest(req, res) {
 
 		const shkeeperManager = new ShkeeperManager();
 		const shkeeperResponse = await shkeeperManager.createPaymentRequest(
-			'TRX',  //TODO: option on frontend, add backend check above for supported cryptos (or use shkeeper api available wallets api?)
+			'LTC',  //TODO: option on frontend, add backend check above for supported cryptos (or use shkeeper api available wallets api?)
 			invoice._id.toString(),
 			invoice.amount
 		);
