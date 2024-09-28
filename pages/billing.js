@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import PaymentModal from '../components/PaymentModal.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 
@@ -15,10 +16,12 @@ const statusColors = {
 };
 
 export default function Billing(props) {
-
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const [paymentInfo, setPaymentInfo] = useState(null);
+	const [selectedInvoice, setSelectedInvoice] = useState(null);
+	const [qrCodeText, setQrCodeText] = useState(null);
 
 	useEffect(() => {
 		if (!state.invoices) {
@@ -39,11 +42,21 @@ export default function Billing(props) {
 		);
 	}
 
-	const { invoices } = state;
+	const { invoices, csrf } = state;
+
+	async function handlePayClick(invoiceId) {
+		API.createPaymentRequest({
+			_csrf: csrf,
+			invoiceId
+		}, async (data) => {
+			setPaymentInfo(data.shkeeperResponse);
+			setQrCodeText(data.qrCodeText);
+			setSelectedInvoice(invoiceId);
+		}, setError, router);
+	}
 
 	return (
 		<>
-
 			<Head>
 				<title>Billing</title>
 			</Head>
@@ -52,58 +65,61 @@ export default function Billing(props) {
 				Invoices:
 			</h5>
 
-			{/* Domains table */}
+			{/* Invoices table */}
 			<div className='table-responsive round-shadow'>
 				<table className='table text-nowrap'>
 					<tbody>
-
 						<tr className='align-middle'>
-							<th>
-								Description
-							</th>
-							<th>
-								Date
-							</th>
-							<th>
-								Amount
-							</th>
-							<th>
-								Status
-							</th>
+							<th>Description</th>
+							<th>Date</th>
+							<th>Amount</th>
+							<th>Status</th>
+							<th>Action</th>
 						</tr>
-
-						{invoices.map(inv => (<tr key={inv._id} className='align-middle'>
-							<td>
-								{inv.description}
-							</td>
-							<td suppressHydrationWarning={true}>
-								{new Date(inv.date).toLocaleString()}
-							</td>
-							<td>
-								${(inv.amount/100).toFixed(2)}
-							</td>
-							<td>
-								<span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
-									{inv.status}
-								</span>
-							</td>
-						</tr>))}
-
+						{invoices.map((inv) => (
+							<tr key={inv._id} className='align-middle'>
+								<td>{inv.description}</td>
+								<td suppressHydrationWarning={true}>
+									{new Date(inv.date).toLocaleString()}
+								</td>
+								<td>${(inv.amount / 100).toFixed(2)}</td>
+								<td>
+									<span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
+										{inv.status}
+									</span>
+								</td>
+								<td>
+									<button
+										className='btn btn-primary btn-sm'
+										onClick={() => handlePayClick(inv._id)}
+										disabled={inv.status === 'paid'}
+									>
+										Pay
+									</button>
+								</td>
+							</tr>
+						))}
 					</tbody>
 				</table>
 			</div>
 
 			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
-			{/* back to account */}
-			<BackButton to='/account' />
+			{/* Payment Information Modal */}
+			{paymentInfo && <PaymentModal
+				setPaymentInfo={setPaymentInfo}
+				setQrCodeText={setQrCodeText}
+				qrCodeText={qrCodeText}
+				paymentInfo={paymentInfo}
+				selectedInvoice={selectedInvoice}
+			/>}
 
+			{/* Back to account */}
+			<BackButton to='/account' />
 		</>
 	);
-
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data)) };
 }
-

@@ -25,6 +25,9 @@ export async function getDownIps(dispatch, errorCallback, router) {
 export async function setDownIps(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/down', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
+export async function createPaymentRequest(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 
 // Clusters
 export async function getClusters(dispatch, errorCallback, router) {

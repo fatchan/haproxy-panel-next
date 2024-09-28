@@ -2,7 +2,9 @@ import bcrypt from 'bcrypt';
 import * as db from '../db.js';
 import { extractMap, dynamicResponse } from '../util.js';
 import { Resolver } from 'node:dns/promises';
-
+import ShkeeperManager from '../billing/shkeeper.js';
+import QRCode from 'qrcode';
+import  { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 
@@ -282,3 +284,46 @@ export async function billingJson(req, res, next) {
 	]);
 	return res.json({ ...data, invoices, user: res.locals.user });
 }
+
+/**
+ * POST /forms/billing/payment_request
+ * billing page json data
+ */
+export async function createPaymentRequest(req, res) {
+
+	const { invoiceId } = req.body;
+
+	if (!invoiceId || typeof invoiceId !== 'string' || invoiceId.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invoice ID is required' });
+	}
+
+	try {
+
+		//check if invoice exists
+		const invoice = await db.db().collection('invoices').findOne({
+			username: res.locals.user.username,
+			_id: ObjectId(invoiceId)
+		});
+
+		if (!invoice) {
+			return dynamicResponse(req, res, 404, { error: 'Invoice not found' });
+		}
+
+		const shkeeperManager = new ShkeeperManager();
+		const shkeeperResponse = await shkeeperManager.createPaymentRequest(
+			'TRX',  //TODO: option on frontend, add backend check above for supported cryptos (or use shkeeper api available wallets api?)
+			invoice._id.toString(),
+			invoice.amount
+		);
+
+		const qrCodeURL = shkeeperResponse.wallet;
+		const qrCodeText = await QRCode.toString(qrCodeURL, { type: 'utf8' });
+
+		// Return the SHKeeper response to the client
+		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText });
+
+	} catch (error) {
+		console.error('Error processing payment request:', error);
+		return dynamicResponse(req, res, 500, { error: 'Internal server error' });
+	}
+};

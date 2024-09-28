@@ -5,7 +5,7 @@ import csrf from 'csurf';
 import OpenAPIClientAxios from 'openapi-client-axios';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
-
+import ShkeeperManager from './billing/shkeeper.js';
 import * as db from './db.js';
 import { dynamicResponse } from './util.js';
 import definition from './specification_openapiv3.js';
@@ -21,6 +21,7 @@ import * as domainsController from './controllers/domains.js';
 const dev = process.env.NODE_ENV !== 'production';
 
 export default function router(server, app) {
+	const shkeeperManager = new ShkeeperManager();
 	const sessionStore = session({
 		secret: process.env.COOKIE_SECRET,
 		store: MongoStore.create({ mongoUrl: process.env.DB_URL }),
@@ -592,5 +593,17 @@ export default function router(server, app) {
 			return res.send(req.csrfToken());
 		},
 	);
+
+	//wip billing
+	clusterRouter.post(
+		'/billing/payment_request',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		accountController.createPaymentRequest,
+	);
+	server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
+
 	server.use('/forms', clusterRouter);
 }
