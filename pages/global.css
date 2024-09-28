@@ -58,7 +58,17 @@ table.notaborder textarea {
 	:root {
 		--bs-body-color: #fff;
 		--bs-body-bg: #23272a;
+		--bs-border-color-translucent: #2c2f33;
 		--bs-secondary-color: #fff;
+	}
+	.modal {
+		--bs-modal-border-color: #2c2f33;
+		--bs-modal-footer-border-color: #2c2f33;
+		--bs-modal-header-border-color: #2c2f33;
+	}
+	.modal .btn-close {
+		--bs-btn-close-color: #fff;
+		background: red var(--bs-btn-close-bg) center/1em auto no-repeat;
 	}
 	table * {
 		--bs-table-accent-bg: #2c2f33;

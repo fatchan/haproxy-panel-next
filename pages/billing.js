@@ -17,17 +17,43 @@ const statusColors = {
 
 export default function Billing(props) {
 	const router = useRouter();
-	const [state, dispatch] = useState(props);
+	const [state, dispatch] = useState(props||{});
 	const [error, setError] = useState();
 	const [paymentInfo, setPaymentInfo] = useState(null);
 	const [selectedInvoice, setSelectedInvoice] = useState(null);
 	const [qrCodeText, setQrCodeText] = useState(null);
+	const [previousInvoices, setPreviousInvoices] = useState(state.invoices || []);
 
 	useEffect(() => {
 		if (!state.invoices) {
 			API.getBilling(dispatch, setError, router);
 		}
 	}, []);
+
+	// auto refresh invoices
+	useEffect(() => {
+		const interval = setInterval(() => {
+			API.getBilling(dispatch, setError, router, false);
+		}, 10000);
+
+		return () => clearInterval(interval);
+	}, [dispatch, router]);
+
+	useEffect(() => {
+		if (state.invoices) {
+			//close when an invoice changes to paid if it wasn't before, not perfect but good for now
+			const statusChangedToPaid = state.invoices.some((inv, index) =>
+				inv.status === 'paid' && previousInvoices[index]?.status !== 'paid'
+			);
+
+			if (statusChangedToPaid) {
+				setPaymentInfo(null);
+				setQrCodeText(null);
+				setSelectedInvoice(null);
+			}
+			setPreviousInvoices(state.invoices);
+		}
+	}, [state.invoices, previousInvoices]);
 
 	if (!state.invoices) {
 		return (

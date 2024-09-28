@@ -8,7 +8,7 @@ export async function getOnboarding(dispatch, errorCallback, router) {
 	return ApiCall('/onboarding.json', 'GET', null, dispatch, errorCallback, router);
 }
 export async function getBilling(dispatch, errorCallback, router) {
-	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router);
+	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router, false);
 }
 export async function updateOnboarding(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/onboarding', 'POST', body, dispatch, errorCallback, router);
@@ -26,7 +26,7 @@ export async function setDownIps(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/down', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function createPaymentRequest(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router);
 }
 
 // Clusters
@@ -127,7 +127,9 @@ function buildOptions(route, method, body) {
 export async function ApiCall(route, method='get', body, dispatch, errorCallback, router, finishProgress=1) {
 
 	// Start progress bar
-	NProgress.start();
+	if (finishProgress !== false) {
+		NProgress.start();
+	}
 
 	// Build request options for fetch
 	const requestOptions = buildOptions(route, method, body);
@@ -141,7 +143,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	} finally {
 		if (finishProgress != null) {
 			NProgress.set(finishProgress);
-		} else {
+		} else if (finishProgress !== false) {
 			NProgress.done(true);
 		}
 	}
