@@ -58,5 +58,5 @@ export default function PaymentModal({
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

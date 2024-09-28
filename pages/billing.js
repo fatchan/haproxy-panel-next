@@ -33,9 +33,8 @@ export default function Billing(props) {
 	// auto refresh invoices
 	useEffect(() => {
 		const interval = setInterval(() => {
-			API.getBilling(dispatch, setError, router, false);
+			API.getBilling(dispatch, setError, router, false); //false for no progress bar
 		}, 10000);
-
 		return () => clearInterval(interval);
 	}, [dispatch, router]);
 
