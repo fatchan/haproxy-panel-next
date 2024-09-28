@@ -39,6 +39,16 @@ export default function Billing(props) {
 		return () => clearInterval(interval);
 	}, []);
 
+	useEffect(() => {
+		if (selectedInvoice) {
+			const matchingSelectedInvoice = state.invoices
+				.find(i => i._id.toString() === selectedInvoice._id.toString());
+			if (matchingSelectedInvoice) {
+				setSelectedInvoice(matchingSelectedInvoice);
+			}
+		}
+	}, [state.invoices]);
+
 	if (!state.invoices) {
 		return (
 			<div className='d-flex flex-column'>
@@ -106,7 +116,7 @@ export default function Billing(props) {
 								</td>
 								<td>
 									<div className='d-flex gap-2'>
-										{inv?.paymentData?.paid !== true && (
+										{inv?.paymentData?.paid !== true ? (
 											//dropdown and pay button for unpaid invoices
 											<>
 												<select
@@ -128,8 +138,7 @@ export default function Billing(props) {
 													Pay
 												</button>
 											</>
-										)}
-										{inv?.paymentData?.transactions?.length > 0 && (
+										) : (
 											//view button for paid invoices
 											<button
 												className='btn btn-primary btn-sm'

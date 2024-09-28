@@ -7,8 +7,8 @@ export async function getAccount(dispatch, errorCallback, router) {
 export async function getOnboarding(dispatch, errorCallback, router) {
 	return ApiCall('/onboarding.json', 'GET', null, dispatch, errorCallback, router);
 }
-export async function getBilling(dispatch, errorCallback, router, finishProgress=1) {
-	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router, finishProgress);
+export async function getBilling(dispatch, errorCallback, router) {
+	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router);
 }
 export async function updateOnboarding(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/onboarding', 'POST', body, dispatch, errorCallback, router);

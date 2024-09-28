@@ -47,13 +47,8 @@ export default function PaymentModal({
 								<p><strong>Exchange Rate:</strong> {paymentInfo.exchange_rate}</p>
 								<p><strong>Wallet Address:</strong> <code>{paymentInfo.wallet}</code></p>
 								<p><strong>Amount To Pay:</strong> <code>{paymentInfo.amount - (selectedInvoice?.paymentData?.balance_crypto||0)}</code></p>
-								{selectedInvoice?.paymentData?.balance_crypto > 0 &&
-									<p><strong>Amount Paid:</strong> <code>{selectedInvoice?.paymentData?.balance_crypto}</code></p>
-								}
 							</>
 						)}
-
-						{selectedInvoice.recalculate_after && <RemainingTime selectedInvoice={selectedInvoice} />}
 
 						{/* Show QR code text only if the invoice is not fully paid */}
 						{!isPaid && qrCodeText && (<>
@@ -69,7 +64,7 @@ export default function PaymentModal({
 							}}>{qrCodeText}</pre>
 						</>)}
 
-						{isPaid && (
+						{isPaid ? (
 							<>
 								<p><strong>Status:</strong> PAID</p>
 								<p><strong>Paid with Crypto:</strong> {selectedInvoice.paymentData.crypto}</p>
@@ -77,7 +72,12 @@ export default function PaymentModal({
 								<p><strong>Total Fiat Paid:</strong> ${selectedInvoice.paymentData.balance_fiat}</p>
 								<p><strong>Total Crypto Paid:</strong> {selectedInvoice.paymentData.balance_crypto} {selectedInvoice.paymentData.crypto}</p>
 							</>
-						)}
+						) : <>
+							{selectedInvoice?.paymentData?.balance_crypto > 0 &&
+								<p><strong>Amount Paid:</strong> {selectedInvoice?.paymentData?.balance_crypto}</p>
+							}
+							{selectedInvoice.recalculate_after && <RemainingTime selectedInvoice={selectedInvoice} />}
+						</>}
 
 						{/* Show transaction table if there are any transactions */}
 						{transactions.length > 0 && (
