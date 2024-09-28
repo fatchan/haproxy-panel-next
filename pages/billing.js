@@ -3,6 +3,7 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import PaymentModal from '../components/PaymentModal.js';
+import { allowedCryptos } from '../util.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 
@@ -17,42 +18,26 @@ const statusColors = {
 
 export default function Billing(props) {
 	const router = useRouter();
-	const [state, dispatch] = useState(props||{});
+	const [state, dispatch] = useState(props || {});
 	const [error, setError] = useState();
 	const [paymentInfo, setPaymentInfo] = useState(null);
 	const [selectedInvoice, setSelectedInvoice] = useState(null);
 	const [qrCodeText, setQrCodeText] = useState(null);
-	const [previousInvoices, setPreviousInvoices] = useState(state.invoices || []);
+	const [selectedCrypto, setSelectedCrypto] = useState({});
 
 	useEffect(() => {
 		if (!state.invoices) {
-			API.getBilling(dispatch, setError, router);
+			API.getBilling(dispatch, setError, router, false);
 		}
 	}, []);
 
 	// auto refresh invoices
 	useEffect(() => {
 		const interval = setInterval(() => {
-			API.getBilling(dispatch, setError, router, false); //false for no progress bar
+			API.getBilling(dispatch, setError, router, false); // false for no progress bar
 		}, 10000);
 		return () => clearInterval(interval);
-	}, [dispatch, router]);
-
-	useEffect(() => {
-		if (state.invoices) {
-			//close when an invoice changes to paid if it wasn't before, not perfect but good for now
-			const statusChangedToPaid = state.invoices.some((inv, index) =>
-				inv.status === 'paid' && previousInvoices[index]?.status !== 'paid'
-			);
-
-			if (statusChangedToPaid) {
-				setPaymentInfo(null);
-				setQrCodeText(null);
-				setSelectedInvoice(null);
-			}
-			setPreviousInvoices(state.invoices);
-		}
-	}, [state.invoices, previousInvoices]);
+	}, []);
 
 	if (!state.invoices) {
 		return (
@@ -69,16 +54,22 @@ export default function Billing(props) {
 
 	const { invoices, csrf } = state;
 
-	async function handlePayClick(invoiceId) {
+	function handlePayClick(invoice) {
+		const crypto = selectedCrypto[invoice._id] || invoice?.paymentData?.crypto;
 		API.createPaymentRequest({
 			_csrf: csrf,
-			invoiceId
-		}, async (data) => {
+			invoiceId: invoice._id,
+			crypto
+		}, (data) => {
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
-			setSelectedInvoice(invoiceId);
+			setSelectedInvoice(invoice);
 		}, setError, router);
 	}
+
+	const handleCryptoChange = (invoiceId, crypto) => {
+		setSelectedCrypto((prev) => ({ ...prev, [invoiceId]: crypto }));
+	};
 
 	return (
 		<>
@@ -114,13 +105,40 @@ export default function Billing(props) {
 									</span>
 								</td>
 								<td>
-									<button
-										className='btn btn-primary btn-sm'
-										onClick={() => handlePayClick(inv._id)}
-										disabled={inv.status === 'paid'}
-									>
-										Pay
-									</button>
+									<div className='d-flex gap-2'>
+										{inv?.paymentData?.paid !== true && (
+											//dropdown and pay button for unpaid invoices
+											<>
+												<select
+													className='form-select form-select-sm'
+													onChange={(e) => handleCryptoChange(inv._id, e.target.value)}
+													value={inv?.paymentData?.crypto || selectedCrypto[inv._id] || ''}
+													disabled={inv.status === 'paid' || inv?.paymentData?.crypto}
+													required
+												>
+													<option value='' disabled>Select crypto</option>
+													{allowedCryptos.map((crypto) => (
+														<option key={crypto} value={crypto}>{crypto}</option>
+													))}
+												</select>
+												<button
+													className='btn btn-success btn-sm'
+													onClick={() => handlePayClick(inv)}
+												>
+													Pay
+												</button>
+											</>
+										)}
+										{inv?.paymentData?.transactions?.length > 0 && (
+											//view button for paid invoices
+											<button
+												className='btn btn-primary btn-sm'
+												onClick={() => handlePayClick(inv)}
+											>
+												View
+											</button>
+										)}
+									</div>
 								</td>
 							</tr>
 						))}

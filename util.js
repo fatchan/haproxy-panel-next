@@ -3,6 +3,40 @@ import url from 'url';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+import QRCode from 'qrcode';
+
+export const createQrCodeText = async (shkeeperResponse, crypto) => {
+	const { wallet, amount } = shkeeperResponse;
+	let qrCodeURL;
+
+	switch (crypto) {
+		case 'BTC':
+			qrCodeURL = `bitcoin:${wallet}?amount=${amount}`;
+			break;
+		case 'LTC':
+			qrCodeURL = `litecoin:${wallet}?amount=${amount}`;
+			break;
+		case 'ETH':
+		case 'ETH-USDT':
+		case 'ETH-USDC':
+			qrCodeURL = `ethereum:${wallet}?value=${amount}`;
+			break;
+		case 'XMR':
+			qrCodeURL = `monero:${wallet}?tx_amount=${amount}`;
+			break;
+		default:
+			qrCodeURL = wallet;
+			break;
+	}
+
+	const qrCodeText = await QRCode.toString(qrCodeURL, { type: 'utf8' });
+	return qrCodeText;
+};
+
+export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS||'')
+	.split(',')
+	.map(x => x.trim());
+
 const fMap = {
 	[process.env.HOSTS_MAP_NAME]: {
 		fname: 'Backends',

@@ -1,9 +1,8 @@
 import bcrypt from 'bcrypt';
 import * as db from '../db.js';
-import { extractMap, dynamicResponse } from '../util.js';
+import { extractMap, dynamicResponse, allowedCryptos, createQrCodeText } from '../util.js';
 import { Resolver } from 'node:dns/promises';
 import ShkeeperManager from '../billing/shkeeper.js';
-import QRCode from 'qrcode';
 import  { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
@@ -296,27 +295,38 @@ export async function billingJson(req, res, next) {
  */
 export async function createPaymentRequest(req, res) {
 
-	const { invoiceId } = req.body;
+	const { invoiceId, crypto } = req.body;
 
 	if (!invoiceId || typeof invoiceId !== 'string' || invoiceId.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invoice ID is required' });
 	}
 
+	//check if invoice exists
+	const invoice = await db.db().collection('invoices').findOne({
+		username: res.locals.user.username,
+		_id: ObjectId(invoiceId)
+	});
+
+	if (!invoice) {
+		return dynamicResponse(req, res, 404, { error: 'Invoice not found' });
+	}
+
+	const existingCrypto = invoice?.paymentData?.crypto;
+	const usingCrypto = existingCrypto || crypto;
+
+	if (!existingCrypto && (!crypto || !allowedCryptos.includes(crypto))) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid or unsupported cryptocurrency' });
+	}
+
+	if (existingCrypto && crypto !== existingCrypto) {
+		return dynamicResponse(req, res, 400, { error: `Crypto mismatch, partial payment already received in: "${invoice.paymentData.crypto}"` });
+	}
+
 	try {
-
-		//check if invoice exists
-		const invoice = await db.db().collection('invoices').findOne({
-			username: res.locals.user.username,
-			_id: ObjectId(invoiceId)
-		});
-
-		if (!invoice) {
-			return dynamicResponse(req, res, 404, { error: 'Invoice not found' });
-		}
 
 		const shkeeperManager = new ShkeeperManager();
 		const shkeeperResponse = await shkeeperManager.createPaymentRequest(
-			'LTC',  //TODO: option on frontend, add backend check above for supported cryptos (or use shkeeper api available wallets api?)
+			usingCrypto,
 			invoice._id.toString(),
 			invoice.amount
 		);
@@ -326,10 +336,21 @@ export async function createPaymentRequest(req, res) {
 			return dynamicResponse(req, res, 500, { error: 'Payment gateway error, try again later' });
 		}
 
-		const qrCodeURL = shkeeperResponse.wallet;
-		const qrCodeText = await QRCode.toString(qrCodeURL, { type: 'utf8' });
+		if (!invoice.recalculate_after && shkeeperResponse.recalculate_after) {
+			await db.db().collection('invoices').updateOne({
+				username: res.locals.user.username,
+				_id: ObjectId(invoiceId)
+			}, {
+				$set: {
+					recalculate_after: shkeeperResponse.recalculate_after,
+					recalculate_after_start: new Date(),
+				}
+			});
+		}
 
-		// Return the SHKeeper response to the client
+		//generate different qr code uri depending on the crypto
+		const qrCodeText = await createQrCodeText(shkeeperResponse, usingCrypto);
+
 		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText });
 
 	} catch (error) {
