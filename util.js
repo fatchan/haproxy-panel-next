@@ -29,7 +29,8 @@ export const createQrCodeText = async (shkeeperResponse, crypto) => {
 			break;
 	}
 
-	const qrCodeText = await QRCode.toString(qrCodeURL, { type: 'utf8' });
+	const qrCodeText = await QRCode.toDataURL(qrCodeURL);
+	console.log('qrCodeText', qrCodeText);
 	return qrCodeText;
 };
 
