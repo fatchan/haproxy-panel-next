@@ -56,7 +56,7 @@ export default function PaymentModal({
 								'background': 'white',
 								'color': 'black',
 								'lineHeight': '1.15em',
-								'fontFamily': 'monospace',
+								'fontFamily': 'monospace, "Roboto Mono", "Droid Sans Mono", "Courier New"',
 								'margin': '10px auto',
 								'letterSpacing': '-0.22px',
 								'overflow': 'hidden',
