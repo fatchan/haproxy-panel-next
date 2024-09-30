@@ -30,7 +30,6 @@ export const createQrCodeText = async (shkeeperResponse, crypto) => {
 	}
 
 	const qrCodeText = await QRCode.toDataURL(qrCodeURL);
-	console.log('qrCodeText', qrCodeText);
 	return qrCodeText;
 };
 
