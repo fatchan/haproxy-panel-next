@@ -51,9 +51,7 @@ export default function PaymentModal({
 						)}
 
 						{/* Show QR code text only if the invoice is not fully paid */}
-						{!isPaid && qrCodeText && (<span className='w-100'>
-							<img className='mb-3 w-75 d-block mx-auto' src={qrCodeText} />
-						</span>)}
+						{!isPaid && qrCodeText && <img className='mb-3 d-block mx-auto' src={qrCodeText} />}
 
 						{isPaid ? (
 							<>

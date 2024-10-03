@@ -71,6 +71,7 @@ export default function Billing(props) {
 			invoiceId: invoice._id,
 			crypto
 		}, (data) => {
+			setError(null);
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
 			setSelectedInvoice(invoice);
