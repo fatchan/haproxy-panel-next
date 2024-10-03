@@ -176,3 +176,15 @@ table.notaborder textarea {
 		opacity: 0.5;
 	}
 }
+.custom-offset {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+@media (min-width: 800px) {
+	.custom-offset {
+		margin-left: 275px;
+		margin-right: 25px;
+		max-width: calc(100% - 250px);
+	}
+}

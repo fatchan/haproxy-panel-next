@@ -18,8 +18,8 @@ export default function PaymentModal({
 	};
 
 	return (
-		<div className='modal show d-block' tabIndex='-1' role='dialog'>
-			<div className='modal-dialog' role='document'>
+		<div className='modal show d-block' tabIndex='-1' role='dialog' style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+			<div className='modal-dialog custom-offset' role='document'>
 				<div className='modal-content'>
 					<div className='modal-header'>
 						<h5 className='modal-title'>Payment Information</h5>
