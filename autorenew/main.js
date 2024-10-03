@@ -10,6 +10,7 @@ import * as db from '../db.js';
 import FormData from 'form-data';
 import agent from '../agent.js';
 import * as acme from '../acme.js';
+import { trimmedNsHosts } from '../templates.js';
 import fetch from 'node-fetch';
 import { Resolver } from 'node:dns/promises';
 import psl from 'psl';
@@ -106,7 +107,8 @@ async function loop() {
 				console.warn(e); //probably just no NS records, bad domain
 				certDomainNameservers = null;
 			}
-			if (!certDomainNameservers || certDomainNameservers.some(d => ![ 'ns1.basedns.net', 'ns2.basedns.cloud', 'ns3.basedns.services' ].includes(d))) {
+			if (!certDomainNameservers
+				|| !trimmedNsHosts.some(nsHost => certDomainNameservers.includes(nsHost))) {
 				console.warn('Skipping', rootDomain, 'renewal because of incorrect NS records:', certDomainNameservers);
 			} else {
 				await updateCert(c);
