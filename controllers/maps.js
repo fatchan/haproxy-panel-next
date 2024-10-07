@@ -13,6 +13,38 @@ const continentMap = {
 	'AF': 'Africa',
 	'AN': 'Antarctica',
 };
+
+export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
+
+	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.HOSTS_MAP_NAME })
+		.then(res => res.data)
+		.then(res => {
+			return res.map(e => {
+				const [splitIp, _] = e.value.split(':'); //TODO: handle ipv6 backend (not supported yet anyway)
+				const parsedIp = parse(splitIp).toString({ zeroElide: false, zeroPad:false }); // prevent bypass with compressed addresses
+				return {
+					ip: parsedIp, //parsed ip
+					domain: e.key, //domain
+				};
+			});
+		});
+	const existingEntry = hostsMap.find(e => e.ip === backendIp);
+	if (existingEntry) {
+		//theres already another backend with this IP, check domtoacc mapping
+		const backendMapEntry = await dataPlaneRetry('getRuntimeMapEntry', {
+			map: process.env.DOMTOACC_MAP_NAME,
+			id: existingEntry.domain,
+		})
+			.then(res => res.data);
+		if (backendMapEntry) {
+			return backendMapEntry.value === username; //Return true if this user already owns this backend IP
+		}
+	}
+
+	return true; //No existing entry, fresh ip
+
+}
+
 /**
  * GET /maps/:name
  * Show map filtering to users domains
@@ -390,6 +422,11 @@ export async function patchMapForm(req, res, next) {
 		try {
 
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
+				const { hostname: address, port } = new URL(`http://${value}`);
+				const backendAllowed = await backendIpAllowed(res.locals.dataPlaneRetry, res.locals.user.username, address);
+				if (!backendAllowed) {
+					return dynamicResponse(req, res, 403, { error: 'No permission to add a backend with that IP' });
+				}
 				const backendMapEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: process.env.BACKENDS_MAP_NAME,
@@ -417,7 +454,6 @@ export async function patchMapForm(req, res, next) {
 				if (!freeSlotId) {
 					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 				}
-				const { hostname: address, port } = new URL(`http://${value}`);
 				const serverName = `websrv${freeSlotId}`;
 				const runtimeServerResp = await res.locals
 					.dataPlaneAll('addRuntimeServer', {
