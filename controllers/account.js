@@ -250,7 +250,7 @@ export async function updateOnboarding(req, res) {
 		return dynamicResponse(req, res, 400, { error: 'Bad request' });
 	}
 	const step = req.body.step;
-	if (!step || isNaN(step) || parseInt(step) !== +step) {
+	if (!step || isNaN(step) || parseInt(step, 10) !== +step) {
 		return dynamicResponse(req, res, 400, { error: 'Bad request' });
 	}
 	await db.db().collection('accounts')
@@ -258,7 +258,7 @@ export async function updateOnboarding(req, res) {
 			_id: res.locals.user.username
 		}, {
 			'$set': {
-				onboarding: parseInt(step),
+				onboarding: parseInt(step, 10),
 			}
 		});
 	return dynamicResponse(req, res, 302, { redirect: '/account' });

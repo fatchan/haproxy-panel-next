@@ -298,8 +298,8 @@ export async function patchMapForm(req, res, next) {
 		//validate ddos_config
 		if (req.params.name === process.env.DDOS_CONFIG_MAP_NAME) {
 			const { pd, cex } = req.body;
-			if ((pd && (isNaN(pd) || parseInt(pd) !== +pd || pd < 8))
-				|| (cex && (isNaN(cex) || parseInt(cex) !== +cex))) {
+			if ((pd && (isNaN(pd) || parseInt(pd, 10) !== +pd || pd < 8))
+				|| (cex && (isNaN(cex) || parseInt(cex, 10) !== +cex))) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 		}
@@ -311,7 +311,7 @@ export async function patchMapForm(req, res, next) {
 		}
 		if (req.params.name === process.env.DDOS_MAP_NAME) {
 			const { m } = req.body; //t, v, etc
-			if (m && (isNaN(m) || parseInt(m) !== +m || m < 0)) {
+			if (m && (isNaN(m) || parseInt(m, 10) !== +m || m < 0)) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 		}
@@ -371,15 +371,15 @@ export async function patchMapForm(req, res, next) {
 				break;
 			case process.env.DDOS_MAP_NAME:
 				value = JSON.stringify({
-					m: parseInt(req.body.m || 1),
+					m: parseInt(req.body.m || 1, 10),
 					t: req.body.t === true ? true : false,
 				});
 				break;
 			case process.env.DDOS_CONFIG_MAP_NAME:
 				value = JSON.stringify({
-					pd: parseInt(req.body.pd || 24),
+					pd: parseInt(req.body.pd || 24, 10),
 					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
-					cex: parseInt(req.body.cex || 21600),
+					cex: parseInt(req.body.cex || 21600, 10),
 					cip: req.body.cip === true ? true : false,
 				});
 				break;
@@ -405,10 +405,10 @@ export async function patchMapForm(req, res, next) {
 					.then(servers => {
 						if (servers.length > 0) {
 							const serverIds = servers
-								.map(s => parseInt(s.id))
+								.map(s => parseInt(s.id, 10))
 								.sort((a, b) => a-b);
 							const serverNameIds = servers
-								.map(s => parseInt(s.name.substr(6)))
+								.map(s => parseInt(s.name.substr(6), 10))
 								.sort((a, b) => a-b);
 							return Math.max(serverIds[serverIds.length-1], serverNameIds[serverNameIds.length-1])+1;
 						}
@@ -424,7 +424,7 @@ export async function patchMapForm(req, res, next) {
 						backend: 'servers',
 					}, {
 						address,
-						port: parseInt(port),
+						port: parseInt(port, 10),
 						name: serverName,
 						// id: `${freeSlotId}`,
 						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',

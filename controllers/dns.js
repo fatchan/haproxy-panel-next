@@ -216,32 +216,32 @@ export async function dnsRecordUpdate(req, res) {
 						if ((geok && !['cn', 'cc'].includes(geok))
 							|| (sel && !['0', '1', '2', '3'].includes(sel))
 							|| (bsel && !['0', '1', '2', '3', '4', '5', '6'].includes(bsel))
-							|| (flag && (isNaN(flag) || parseInt(flag) !== +flag))
-							|| (ttl && (isNaN(ttl) || parseInt(ttl) !== +ttl))
-							|| (preference && (isNaN(preference) || parseInt(preference) !== +preference))
-							|| (port && (isNaN(port) || parseInt(port) !== +port))
-							|| (weight && (isNaN(weight) || parseInt(weight) !== +weight))
-							|| (priority && (isNaN(priority) || parseInt(priority) !== +priority))
-							|| (refresh && (isNaN(refresh) || parseInt(refresh) !== +refresh))
-							|| (retry && (isNaN(retry) || parseInt(retry) !== +retry))
-							|| (expire && (isNaN(expire) || parseInt(expire) !== +expire))
+							|| (flag && (isNaN(flag) || parseInt(hflag, 10) !== +flag))
+							|| (ttl && (isNaN(ttl) || parseInt(ttl, 10) !== +ttl))
+							|| (preference && (isNaN(preference) || parseInt(preference, 10) !== +preference))
+							|| (port && (isNaN(port) || parseInt(port, 10) !== +port))
+							|| (weight && (isNaN(weight) || parseInt(weight, 10) !== +weight))
+							|| (priority && (isNaN(priority) || parseInt(priority, 10) !== +priority))
+							|| (refresh && (isNaN(refresh) || parseInt(refresh, 10) !== +refresh))
+							|| (retry && (isNaN(retry) || parseInt(retry, 10) !== +retry))
+							|| (expire && (isNaN(expire) || parseInt(expire, 10) !== +expire))
 							|| (lat && isNaN(lat))
 							|| (long && isNaN(long))
 							|| (geov && !Array.isArray(geov))
 							|| (fb && !Array.isArray(fb))) {
 							return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 						}
-						flag && (flag = parseInt(flag));
-						ttl && (ttl = parseInt(ttl));
-						preference && (preference = parseInt(preference));
-						port && (port = parseInt(port));
-						weight && (weight = parseInt(weight));
-						priority && (priority = parseInt(priority));
-						refresh && (refresh = parseInt(refresh));
-						retry && (retry = parseInt(retry));
-						expire && (expire = parseInt(expire));
-						sel && (sel = parseInt(sel));
-						bsel && (bsel = parseInt(bsel));
+						flag && (flag = parseInt(flag, 10));
+						ttl && (ttl = parseInt(ttl, 10));
+						preference && (preference = parseInt(preference, 10));
+						port && (port = parseInt(port, 10));
+						weight && (weight = parseInt(weight, 10));
+						priority && (priority = parseInt(priority, 10));
+						refresh && (refresh = parseInt(refresh, 10));
+						retry && (retry = parseInt(retry, 10));
+						expire && (expire = parseInt(expire, 10));
+						sel && (sel = parseInt(sel, 10));
+						bsel && (bsel = parseInt(bsel, 10));
 						h && (h = (h != null ? true : false));
 						closest != null && (closest = true);
 						lat && (lat = parseFloat(lat));
