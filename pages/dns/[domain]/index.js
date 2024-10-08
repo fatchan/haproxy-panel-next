@@ -101,7 +101,7 @@ const DnsDomainIndexPage = (props) => {
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Record sets table */}
-			<div className='table-responsive round-shadow'>
+			<div className='table-responsive round-border'>
 				<table className='table text-nowrap'>
 					<tbody>
 

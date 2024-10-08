@@ -122,7 +122,7 @@ export default function Domains(props) {
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Domains table */}
-			<div className='table-responsive round-shadow'>
+			<div className='table-responsive round-border'>
 				<table className='table text-nowrap'>
 					<tbody>
 

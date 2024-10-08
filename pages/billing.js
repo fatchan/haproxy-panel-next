@@ -93,7 +93,7 @@ export default function Billing(props) {
 			</h5>
 
 			{/* Invoices table */}
-			<div className='table-responsive round-shadow'>
+			<div className='table-responsive round-border'>
 				<table className='table text-nowrap'>
 					<tbody>
 						<tr className='align-middle'>
