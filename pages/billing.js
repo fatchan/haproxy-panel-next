@@ -112,6 +112,7 @@ export default function Billing(props) {
 						</tr>
 						{invoices.map((inv) => {
 							const remainingHours = inv.recalculate_after && calculateRemainingHours(inv.recalculate_after_start, inv.recalculate_after);
+							const pseudoExpired = remainingHours != null && remainingHours <= 0 && inv.status === 'unpaid';
 							return (
 								<tr key={inv._id} className='align-middle'>
 									<td>{inv.description}</td>
@@ -120,7 +121,7 @@ export default function Billing(props) {
 									</td>
 									<td>${(inv.amount / 100).toFixed(2)}</td>
 									<td>
-										{remainingHours <= 0
+										{pseudoExpired
 											? <span className={`badge rounded-pill text-bg-${statusColors['expired']} text-uppercase`}>
 												expired
 											</span>
@@ -130,7 +131,7 @@ export default function Billing(props) {
 									</td>
 									<td>
 										<div className='d-flex gap-2'>
-											{inv?.paymentData?.paid !== true ? (
+											{inv?.paymentData?.paid !== true /*&& !pseudoExpired*/ ? (
 												//dropdown and pay button for unpaid invoices
 												<>
 													<select

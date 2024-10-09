@@ -364,7 +364,8 @@ export async function createPaymentRequest(req, res) {
 				...invoice,
 				status: 'unpaid',
 				_id: new ObjectId(),
-				recalculate_after_start: new Date()
+				recalculate_after_start: new Date(),
+				paymentData: null
 			};
 
 			//TODO: refactor
