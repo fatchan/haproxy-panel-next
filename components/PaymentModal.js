@@ -1,6 +1,6 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import RemainingTime from './RemainingTime.js';
+import { calculateRemainingHours } from '../util.js';
 
 export default function PaymentModal({
 	setPaymentInfo,
@@ -8,14 +8,30 @@ export default function PaymentModal({
 	qrCodeText,
 	paymentInfo,
 	selectedInvoice,
+	crypto,
+	regenerateInvoice,
 }) {
-	const isPaid = selectedInvoice?.paymentData?.paid;
+	const isPaid = selectedInvoice?.paymentData?.paid === true;
 	const transactions = selectedInvoice?.paymentData?.transactions || [];
 	const [expandedTxs, setExpandedTxs] = useState({});
+	const [remainingHours, setRemainingHours] = useState(true);
 
 	const handleToggleTx = (index) => {
 		setExpandedTxs((prev) => ({ ...prev, [index]: !prev[index] }));
 	};
+
+	const updateRemainingHours = () => {
+		if (selectedInvoice.recalculate_after_start) {
+			const hours = calculateRemainingHours(selectedInvoice.recalculate_after_start, selectedInvoice.recalculate_after);
+			setRemainingHours(hours);
+		}
+	};
+
+	useEffect(() => {
+		updateRemainingHours();
+		const intervalId = setInterval(updateRemainingHours, 60000);
+		return () => clearInterval(intervalId);
+	}, [selectedInvoice?._id, qrCodeText]);
 
 	return (
 		<div className='modal show d-block' tabIndex='-1' role='dialog' style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
@@ -46,12 +62,12 @@ export default function PaymentModal({
 								<p><strong>Fiat:</strong> USD</p>
 								<p><strong>Exchange Rate:</strong> {paymentInfo.exchange_rate}</p>
 								<p><strong>Wallet Address:</strong> <code>{paymentInfo.wallet}</code></p>
-								<p><strong>Amount To Pay:</strong> <code>{paymentInfo.amount - (selectedInvoice?.paymentData?.balance_crypto||0)}</code></p>
+								<p><strong>Amount To Pay:</strong> <code>{paymentInfo.amount - (selectedInvoice?.paymentData?.balance_crypto || 0)}</code></p>
 							</>
 						)}
 
-						{/* Show QR code text only if the invoice is not fully paid */}
-						{!isPaid && qrCodeText && <img className='mb-3 d-block mx-auto' src={qrCodeText} />}
+						{/* Show QR code text only if the invoice is not fully paid and not expired */}
+						{!isPaid && qrCodeText && remainingHours > 0 && <img className='mb-3 d-block mx-auto' src={qrCodeText} />}
 
 						{isPaid ? (
 							<>
@@ -61,12 +77,25 @@ export default function PaymentModal({
 								<p><strong>Total Fiat Paid:</strong> ${selectedInvoice.paymentData.balance_fiat}</p>
 								<p><strong>Total Crypto Paid:</strong> {selectedInvoice.paymentData.balance_crypto} {selectedInvoice.paymentData.crypto}</p>
 							</>
-						) : <>
-							{selectedInvoice?.paymentData?.balance_crypto > 0 &&
-								<p><strong>Amount Paid:</strong> {selectedInvoice?.paymentData?.balance_crypto}</p>
-							}
-							{selectedInvoice.recalculate_after && <RemainingTime selectedInvoice={selectedInvoice} />}
-						</>}
+						) : (
+							<>
+								{selectedInvoice?.paymentData?.balance_crypto > 0 && (
+									<p><strong>Amount Paid:</strong> {selectedInvoice?.paymentData?.balance_crypto}</p>
+								)}
+								{selectedInvoice.recalculate_after && <RemainingTime remainingHours={remainingHours} />}
+
+								{/* Show regen button if the time is expired */}
+								{remainingHours <= 0 && selectedInvoice.status !== 'expired' && (
+									<button
+										type='button'
+										className='btn btn-primary mt-2'
+										onClick={() => regenerateInvoice(selectedInvoice, crypto)}
+									>
+										Regenerate
+									</button>
+								)}
+							</>
+						)}
 
 						{/* Show transaction table if there are any transactions */}
 						{transactions.length > 0 && (
@@ -124,4 +153,3 @@ export default function PaymentModal({
 		</div>
 	);
 }
-

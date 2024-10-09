@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import * as db from '../db.js';
-import { extractMap, dynamicResponse, allowedCryptos, createQrCodeText } from '../util.js';
+import { extractMap, dynamicResponse, allowedCryptos, createQrCodeText, calculateRemainingHours } from '../util.js';
 import { Resolver } from 'node:dns/promises';
 import ShkeeperManager from '../billing/shkeeper.js';
 import  { ObjectId } from 'mongodb';
@@ -301,8 +301,7 @@ export async function createPaymentRequest(req, res) {
 		return dynamicResponse(req, res, 400, { error: 'Invoice ID is required' });
 	}
 
-	//check if invoice exists
-	const invoice = await db.db().collection('invoices').findOne({
+	let invoice = await db.db().collection('invoices').findOne({
 		username: res.locals.user.username,
 		_id: ObjectId(invoiceId)
 	});
@@ -325,7 +324,7 @@ export async function createPaymentRequest(req, res) {
 	try {
 
 		const shkeeperManager = new ShkeeperManager();
-		const shkeeperResponse = await shkeeperManager.createPaymentRequest(
+		let shkeeperResponse = await shkeeperManager.createPaymentRequest(
 			usingCrypto,
 			invoice._id.toString(),
 			invoice.amount
@@ -336,22 +335,67 @@ export async function createPaymentRequest(req, res) {
 			return dynamicResponse(req, res, 500, { error: 'Payment gateway error, try again later' });
 		}
 
-		if (!invoice.recalculate_after && shkeeperResponse.recalculate_after) {
+		const responseRecalculateAfter = shkeeperResponse.recalculate_after;
+		let hoursRemaining;
+		if (!invoice.recalculate_after && responseRecalculateAfter) {
+			const recalculateAfterStart = new Date();
 			await db.db().collection('invoices').updateOne({
 				username: res.locals.user.username,
 				_id: ObjectId(invoiceId)
 			}, {
 				$set: {
-					recalculate_after: shkeeperResponse.recalculate_after,
+					recalculate_after: responseRecalculateAfter,
 					recalculate_after_start: new Date(),
 				}
 			});
+			invoice.recalculate_after_start = recalculateAfterStart;
+			invoice.recalculate_after = responseRecalculateAfter;
+			hoursRemaining = calculateRemainingHours(recalculateAfterStart, responseRecalculateAfter);
+		} else {
+			hoursRemaining = calculateRemainingHours(invoice.recalculate_after_start, invoice.recalculate_after);
+		}
+
+		console.log('hoursRemaining', hoursRemaining);
+		console.log('invoice', invoice);
+
+		// If no time remaining and no tpaid yet, create a new invoice
+		if (hoursRemaining <= 0 && !invoice?.paymentData?.paid && invoice?.status !== 'expired') {
+			const newInvoice = {
+				...invoice,
+				status: 'unpaid',
+				_id: new ObjectId(),
+				recalculate_after_start: new Date()
+			};
+
+			//TODO: refactor
+			shkeeperResponse = await shkeeperManager.createPaymentRequest(
+				usingCrypto,
+				newInvoice._id.toString(),
+				newInvoice.amount //TODO: subtract part already paid from old invoice
+			);
+
+			if (!shkeeperResponse || !shkeeperResponse.wallet) {
+				console.warn('shkeeperResponse:', shkeeperResponse);
+				return dynamicResponse(req, res, 500, { error: 'Payment gateway error, try again later' });
+			}
+
+			const newInvoiceInsert = await db.db().collection('invoices').insertOne(newInvoice);
+			if (!newInvoiceInsert.insertedId) {
+				return dynamicResponse(req, res, 500, { error: 'Failed to create new invoice' });
+			}
+			await db.db().collection('invoices').updateOne(
+				{ username: res.locals.user.username, _id: ObjectId(invoiceId) },
+				{ $set: { status: 'expired' } }
+			);
+			invoice = newInvoice;
+			invoice.recalculate_after = shkeeperResponse.recalculate_after;
+
 		}
 
 		//generate different qr code uri depending on the crypto
 		const qrCodeText = await createQrCodeText(shkeeperResponse, usingCrypto);
 
-		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText });
+		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText, invoice: invoice  });
 
 	} catch (error) {
 		console.error('Error processing payment request:', error);

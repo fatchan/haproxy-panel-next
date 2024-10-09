@@ -1,36 +1,27 @@
 import { useEffect, useState } from 'react';
+import ErrorAlert from './ErrorAlert';
 
-const RemainingTime = ({ selectedInvoice }) => {
-	const [remainingTime, setRemainingTime] = useState('');
+export default function RemainingTime({ remainingHours }) {
+	const [timeText, setTimeText] = useState('');
+	const isTimeExpired = remainingHours <= 0;
+
 	useEffect(() => {
-		const calculateRemainingTime = () => {
-			const recalculateAfterHours = selectedInvoice.recalculate_after;
-			const recalculateStartDate = new Date(selectedInvoice.recalculate_after_start);
-			const currentTime = new Date();
+		if (!isTimeExpired) {
+			const hoursLeft = Math.floor(remainingHours);
+			const minutesLeft = Math.floor((remainingHours - hoursLeft) * 60);
+			setTimeText(`${hoursLeft} hours, ${minutesLeft} minutes`);
+		} else {
+			setTimeText('');
+		}
+	}, [remainingHours, isTimeExpired]);
 
-			const timeDifferenceMs = currentTime - recalculateStartDate;
-			const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
-			const remainingHours = recalculateAfterHours - timeDifferenceHours;
-
-			if (remainingHours > 0) {
-				const hoursLeft = Math.floor(remainingHours);
-				const minutesLeft = Math.floor((remainingHours - hoursLeft) * 60);
-				setRemainingTime(`${hoursLeft} hours, ${minutesLeft} minutes`);
-			} else {
-				setRemainingTime('Time expired');
-			}
-		};
-		calculateRemainingTime();
-		const intervalId = setInterval(calculateRemainingTime, 60000);
-		return () => clearInterval(intervalId);
-	}, []);
-	return (
-		<div>
-			{selectedInvoice.recalculate_after && selectedInvoice.recalculate_after_start && (
-				<p><strong>Remaining Time:</strong> {remainingTime}</p>
-			)}
-		</div>
-	);
-};
-
-export default RemainingTime;
+	return (<div className='text-center mb-4'>
+		{isTimeExpired ? (
+			<ErrorAlert error='This invoice has expired.' />
+		) : (
+			<>
+				<p><strong>Remaining Time:</strong> {timeText} <span style={{ width: 15, height: 15 }} className='ms-1 spinner-border' role='status' /></p>
+			</>
+		)}
+	</div>);
+}

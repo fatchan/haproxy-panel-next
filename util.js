@@ -5,6 +5,15 @@ dotenv.config({ path: '.env' });
 
 import QRCode from 'qrcode';
 
+export const calculateRemainingHours = (recalculate_after_start, recalculate_after) => {
+	const recalculateAfterHours = recalculate_after;
+	const recalculateStartDate = new Date(recalculate_after_start);
+	const currentTime = new Date();
+	const timeDifferenceMs = currentTime - recalculateStartDate;
+	const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+	return recalculateAfterHours - timeDifferenceHours;
+};
+
 export const createQrCodeText = async (shkeeperResponse, crypto) => {
 	const { wallet, amount } = shkeeperResponse;
 	let qrCodeURL;

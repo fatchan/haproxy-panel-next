@@ -6,6 +6,7 @@ import PaymentModal from '../components/PaymentModal.js';
 import { allowedCryptos } from '../util.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
+import { calculateRemainingHours } from '../util.js';
 
 const statusColors = {
 	'cancelled': 'secondary',
@@ -14,6 +15,7 @@ const statusColors = {
 	'unpaid': 'warning',
 	'overdue': 'danger',
 	'other': 'info',
+	'expired': 'secondary'
 };
 
 export default function Billing(props) {
@@ -25,17 +27,17 @@ export default function Billing(props) {
 	const [qrCodeText, setQrCodeText] = useState(null);
 	const [selectedCrypto, setSelectedCrypto] = useState({});
 
+	const updateBilling = () => API.getBilling(dispatch, setError, router, false);
+
 	useEffect(() => {
 		if (!state.invoices) {
-			API.getBilling(dispatch, setError, router, false);
+			updateBilling();
 		}
 	}, []);
 
 	// auto refresh invoices
 	useEffect(() => {
-		const interval = setInterval(() => {
-			API.getBilling(dispatch, setError, router, false); // false for no progress bar
-		}, 10000);
+		const interval = setInterval(() => updateBilling(), 10000);
 		return () => clearInterval(interval);
 	}, []);
 
@@ -64,17 +66,22 @@ export default function Billing(props) {
 
 	const { invoices, csrf } = state;
 
-	function handlePayClick(invoice) {
-		const crypto = selectedCrypto[invoice._id] || invoice?.paymentData?.crypto;
+	function handlePayClick(invoice, previousCrypto) {
+		const crypto = selectedCrypto[invoice._id] || invoice?.paymentData?.crypto || previousCrypto;
 		API.createPaymentRequest({
 			_csrf: csrf,
 			invoiceId: invoice._id,
 			crypto
 		}, (data) => {
+			updateBilling();
 			setError(null);
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
-			setSelectedInvoice(invoice);
+			if (data.invoice) {
+				setSelectedInvoice(data.invoice);
+			} else {
+				setSelectedInvoice(invoice);
+			}
 		}, setError, router);
 	}
 
@@ -103,55 +110,62 @@ export default function Billing(props) {
 							<th>Status</th>
 							<th>Action</th>
 						</tr>
-						{invoices.map((inv) => (
-							<tr key={inv._id} className='align-middle'>
-								<td>{inv.description}</td>
-								<td suppressHydrationWarning={true}>
-									{new Date(inv.date).toLocaleString()}
-								</td>
-								<td>${(inv.amount / 100).toFixed(2)}</td>
-								<td>
-									<span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
-										{inv.status}
-									</span>
-								</td>
-								<td>
-									<div className='d-flex gap-2'>
-										{inv?.paymentData?.paid !== true ? (
-											//dropdown and pay button for unpaid invoices
-											<>
-												<select
-													className='form-select form-select-sm'
-													onChange={(e) => handleCryptoChange(inv._id, e.target.value)}
-													value={inv?.paymentData?.crypto || selectedCrypto[inv._id] || ''}
-													disabled={inv.status === 'paid' || inv?.paymentData?.crypto}
-													required
-												>
-													<option value='' disabled>Select crypto</option>
-													{allowedCryptos.map((crypto) => (
-														<option key={crypto} value={crypto}>{crypto}</option>
-													))}
-												</select>
+						{invoices.map((inv) => {
+							const remainingHours = inv.recalculate_after && calculateRemainingHours(inv.recalculate_after_start, inv.recalculate_after);
+							return (
+								<tr key={inv._id} className='align-middle'>
+									<td>{inv.description}</td>
+									<td suppressHydrationWarning={true}>
+										{new Date(inv.date).toLocaleString()}
+									</td>
+									<td>${(inv.amount / 100).toFixed(2)}</td>
+									<td>
+										{remainingHours <= 0
+											? <span className={`badge rounded-pill text-bg-${statusColors['expired']} text-uppercase`}>
+												expired
+											</span>
+											: <span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
+												{inv.status} {remainingHours > 0 && `(Expires in ${remainingHours.toFixed(0)} hours)`}
+											</span>}
+									</td>
+									<td>
+										<div className='d-flex gap-2'>
+											{inv?.paymentData?.paid !== true ? (
+												//dropdown and pay button for unpaid invoices
+												<>
+													<select
+														className='form-select form-select-sm'
+														onChange={(e) => handleCryptoChange(inv._id, e.target.value)}
+														value={inv?.paymentData?.crypto || selectedCrypto[inv._id] || ''}
+														disabled={inv.status === 'paid' || inv?.paymentData?.crypto}
+														required
+													>
+														<option value='' disabled>Select crypto</option>
+														{allowedCryptos.map((crypto) => (
+															<option key={crypto} value={crypto}>{crypto}</option>
+														))}
+													</select>
+													<button
+														className='btn btn-success btn-sm'
+														onClick={() => handlePayClick(inv)}
+													>
+														Pay
+													</button>
+												</>
+											) : (
+												//view button for paid invoices
 												<button
-													className='btn btn-success btn-sm'
+													className='btn btn-primary btn-sm'
 													onClick={() => handlePayClick(inv)}
 												>
-													Pay
+													View
 												</button>
-											</>
-										) : (
-											//view button for paid invoices
-											<button
-												className='btn btn-primary btn-sm'
-												onClick={() => handlePayClick(inv)}
-											>
-												View
-											</button>
-										)}
-									</div>
-								</td>
-							</tr>
-						))}
+											)}
+										</div>
+									</td>
+								</tr>
+							);
+						})}
 					</tbody>
 				</table>
 			</div>
@@ -165,6 +179,8 @@ export default function Billing(props) {
 				qrCodeText={qrCodeText}
 				paymentInfo={paymentInfo}
 				selectedInvoice={selectedInvoice}
+				crypto={selectedCrypto[selectedInvoice._id]}
+				regenerateInvoice={handlePayClick}
 			/>}
 
 			{/* Back to account */}
