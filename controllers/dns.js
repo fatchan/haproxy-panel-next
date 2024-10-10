@@ -170,7 +170,7 @@ export async function dnsRecordUpdate(req, res) {
 				type = 'soa';
 				break;
 			default:
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+				return dynamicResponse(req, res, 400, { error: 'Invalid input, unknown record type' });
 		}
 	} else {
 		//TODO: not required the "all" ones
@@ -216,7 +216,7 @@ export async function dnsRecordUpdate(req, res) {
 						if ((geok && !['cn', 'cc'].includes(geok))
 							|| (sel && !['0', '1', '2', '3'].includes(sel))
 							|| (bsel && !['0', '1', '2', '3', '4', '5', '6'].includes(bsel))
-							|| (flag && (isNaN(flag) || parseInt(hflag, 10) !== +flag))
+							|| (flag && (isNaN(flag) || parseInt(flag, 10) !== +flag))
 							|| (ttl && (isNaN(ttl) || parseInt(ttl, 10) !== +ttl))
 							|| (preference && (isNaN(preference) || parseInt(preference, 10) !== +preference))
 							|| (port && (isNaN(port) || parseInt(port, 10) !== +port))
