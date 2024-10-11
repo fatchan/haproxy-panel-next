@@ -35,7 +35,7 @@ export default function Billing(props) {
 		setQrCodeText(null);
 		router.push({
 			pathname: '/billing',
-			query: nulle
+			query: null
 		}, undefined, { shallow: true });
 	};
 
@@ -67,7 +67,7 @@ export default function Billing(props) {
 			setLoading(true);
 			const matchedInvoice = state.invoices.find(inv => inv._id === invoice);
 			if (matchedInvoice) {
-				handlePayClick(matchedInvoice, crypto);
+				openInvoice(matchedInvoice, crypto);
 			}
 		}
 	}, []);
@@ -97,7 +97,8 @@ export default function Billing(props) {
 
 	const { invoices, csrf } = state;
 
-	function handlePayClick(invoice, previousCrypto) {
+	function openInvoice(invoice, previousCrypto) {
+		setLoading(true);
 		const crypto = selectedCrypto[invoice._id] || invoice?.paymentData?.crypto || previousCrypto;
 		API.createPaymentRequest({
 			_csrf: csrf,
@@ -118,7 +119,10 @@ export default function Billing(props) {
 					crypto,
 				}
 			}, undefined, { shallow: true });
-		}, setError, router);
+		}, err => {
+			setError(err);
+			setLoading(false);
+		}, router);
 	}
 
 	const handleCryptoChange = (invoiceId, crypto) => {
@@ -184,7 +188,7 @@ export default function Billing(props) {
 													</select>
 													<button
 														className='btn btn-success btn-sm'
-														onClick={() => handlePayClick(inv)}
+														onClick={() => openInvoice(inv)}
 													>
 														Pay
 													</button>
@@ -193,7 +197,7 @@ export default function Billing(props) {
 												//view button for paid invoices
 												<button
 													className='btn btn-primary btn-sm'
-													onClick={() => handlePayClick(inv)}
+													onClick={() => openInvoice(inv)}
 												>
 													View
 												</button>
@@ -217,7 +221,7 @@ export default function Billing(props) {
 				paymentInfo={paymentInfo}
 				selectedInvoice={selectedInvoice}
 				crypto={selectedInvoice ? selectedCrypto[selectedInvoice._id] : null}
-				regenerateInvoice={handlePayClick}
+				regenerateInvoice={openInvoice}
 				closeModal={closeModal}
 				loading={loading}
 			/>}
