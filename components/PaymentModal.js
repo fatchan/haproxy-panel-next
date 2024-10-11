@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import RemainingTime from './RemainingTime.js';
 import { calculateRemainingHours } from '../util.js';
+import { useRouter } from 'next/router';
 
 export default function PaymentModal({
 	setPaymentInfo,
@@ -15,6 +16,7 @@ export default function PaymentModal({
 	const transactions = selectedInvoice?.paymentData?.transactions || [];
 	const [expandedTxs, setExpandedTxs] = useState({});
 	const [remainingHours, setRemainingHours] = useState(true);
+	const router = useRouter();
 
 	const handleToggleTx = (index) => {
 		setExpandedTxs((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -26,6 +28,15 @@ export default function PaymentModal({
 			setRemainingHours(hours);
 		}
 	};
+
+	const closeModal = () => {
+		setPaymentInfo(null);
+		setQrCodeText(null);
+		router.push({
+			pathname: '/billing',
+			query: null
+		}, undefined, { shallow: true });
+	}
 
 	useEffect(() => {
 		updateRemainingHours();
@@ -42,10 +53,7 @@ export default function PaymentModal({
 						<button
 							type='button'
 							className='btn-close'
-							onClick={() => {
-								setPaymentInfo(null);
-								setQrCodeText(null);
-							}}
+							onClick={() => closeModal()}
 						></button>
 					</div>
 					<div className='modal-body'>
@@ -140,10 +148,7 @@ export default function PaymentModal({
 						<button
 							type='button'
 							className='btn btn-sm btn-secondary'
-							onClick={() => {
-								setPaymentInfo(null);
-								setQrCodeText(null);
-							}}
+							onClick={() => closeModal()}
 						>
 							Close
 						</button>

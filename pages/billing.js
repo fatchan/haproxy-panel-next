@@ -41,6 +41,19 @@ export default function Billing(props) {
 		return () => clearInterval(interval);
 	}, []);
 
+	//load up initial invoice from query on refresh
+	useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const invoice = params.get('invoice');
+		const crypto = params.get('crypto');
+		if (invoice) {
+			const matchedInvoice = state.invoices.find(inv => inv._id === invoice);
+			if (matchedInvoice) {
+				handlePayClick(matchedInvoice, crypto);
+			}
+		}
+	}, []);
+
 	useEffect(() => {
 		if (selectedInvoice) {
 			const matchingSelectedInvoice = state.invoices
@@ -77,11 +90,15 @@ export default function Billing(props) {
 			setError(null);
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
-			if (data.invoice) {
-				setSelectedInvoice(data.invoice);
-			} else {
-				setSelectedInvoice(invoice);
-			}
+			const setInvoice = data.invoice || invoice
+			setSelectedInvoice(data.invoice);
+			router.push({
+				pathname: '/billing',
+				query: {
+					invoice: setInvoice._id,
+					crypto,
+				}
+			}, undefined, { shallow: true });
 		}, setError, router);
 	}
 
