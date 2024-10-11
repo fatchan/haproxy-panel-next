@@ -90,7 +90,7 @@ export default function Billing(props) {
 			setError(null);
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
-			const setInvoice = data.invoice || invoice
+			const setInvoice = data.invoice || invoice;
 			setSelectedInvoice(data.invoice);
 			router.push({
 				pathname: '/billing',

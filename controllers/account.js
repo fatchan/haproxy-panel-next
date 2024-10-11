@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import * as db from '../db.js';
 import { extractMap, dynamicResponse } from '../util.js';
 import { Resolver } from 'node:dns/promises';
-import  { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
 

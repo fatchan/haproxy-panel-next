@@ -36,7 +36,7 @@ export default function PaymentModal({
 			pathname: '/billing',
 			query: null
 		}, undefined, { shallow: true });
-	}
+	};
 
 	useEffect(() => {
 		updateRemainingHours();
