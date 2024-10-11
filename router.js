@@ -17,6 +17,7 @@ import * as mapsController from './controllers/maps.js';
 import * as certsController from './controllers/certs.js';
 import * as dnsController from './controllers/dns.js';
 import * as domainsController from './controllers/domains.js';
+import * as billingController from './controllers/billing.js';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -285,7 +286,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		accountController.billingPage.bind(null, app),
+		billingController.billingPage.bind(null, app),
 	);
 	server.get(
 		'/billing.json',
@@ -293,7 +294,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		accountController.billingJson,
+		billingController.billingJson,
 	);
 	server.get(
 		`/map/:name(${mapNamesOrString})`,
@@ -599,7 +600,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
-		accountController.createPaymentRequest,
+		billingController.createPaymentRequest,
 	);
 	server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
 
