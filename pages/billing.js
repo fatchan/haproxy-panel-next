@@ -44,7 +44,7 @@ export default function Billing(props) {
 		if (paymentInfo) {
 			setLoading(false);
 		}
-	}, [paymentInfo])
+	}, [paymentInfo]);
 
 	useEffect(() => {
 		if (!state.invoices) {

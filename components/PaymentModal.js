@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 import RemainingTime from './RemainingTime.js';
 import { calculateRemainingHours } from '../util.js';
-import { useRouter } from 'next/router';
 
 export default function PaymentModal({
-	setPaymentInfo,
-	setQrCodeText,
 	qrCodeText,
 	paymentInfo,
 	selectedInvoice,
@@ -18,7 +15,6 @@ export default function PaymentModal({
 	const transactions = selectedInvoice?.paymentData?.transactions || [];
 	const [expandedTxs, setExpandedTxs] = useState({});
 	const [remainingHours, setRemainingHours] = useState(true);
-	const router = useRouter();
 
 	const handleToggleTx = (index) => {
 		setExpandedTxs((prev) => ({ ...prev, [index]: !prev[index] }));
