@@ -25,9 +25,26 @@ export default function Billing(props) {
 	const [paymentInfo, setPaymentInfo] = useState(null);
 	const [selectedInvoice, setSelectedInvoice] = useState(null);
 	const [qrCodeText, setQrCodeText] = useState(null);
+	const [loading, setLoading] = useState(false);
 	const [selectedCrypto, setSelectedCrypto] = useState({});
 
 	const updateBilling = () => API.getBilling(dispatch, setError, router, false);
+
+	const closeModal = () => {
+		setPaymentInfo(null);
+		setQrCodeText(null);
+		router.push({
+			pathname: '/billing',
+			query: nulle
+		}, undefined, { shallow: true });
+	};
+
+	//disable loading state after open
+	useEffect(() => {
+		if (paymentInfo) {
+			setLoading(false);
+		}
+	}, [paymentInfo])
 
 	useEffect(() => {
 		if (!state.invoices) {
@@ -47,6 +64,7 @@ export default function Billing(props) {
 		const invoice = params.get('invoice');
 		const crypto = params.get('crypto');
 		if (invoice) {
+			setLoading(true);
 			const matchedInvoice = state.invoices.find(inv => inv._id === invoice);
 			if (matchedInvoice) {
 				handlePayClick(matchedInvoice, crypto);
@@ -86,12 +104,13 @@ export default function Billing(props) {
 			invoiceId: invoice._id,
 			crypto
 		}, (data) => {
+			setLoading(false);
 			updateBilling();
 			setError(null);
 			setPaymentInfo(data.shkeeperResponse);
 			setQrCodeText(data.qrCodeText);
 			const setInvoice = data.invoice || invoice;
-			setSelectedInvoice(data.invoice);
+			setSelectedInvoice(setInvoice);
 			router.push({
 				pathname: '/billing',
 				query: {
@@ -191,14 +210,16 @@ export default function Billing(props) {
 			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
 			{/* Payment Information Modal */}
-			{paymentInfo && <PaymentModal
+			{(paymentInfo != null || loading === true) && <PaymentModal
 				setPaymentInfo={setPaymentInfo}
 				setQrCodeText={setQrCodeText}
 				qrCodeText={qrCodeText}
 				paymentInfo={paymentInfo}
 				selectedInvoice={selectedInvoice}
-				crypto={selectedCrypto[selectedInvoice._id]}
+				crypto={selectedInvoice ? selectedCrypto[selectedInvoice._id] : null}
 				regenerateInvoice={handlePayClick}
+				closeModal={closeModal}
+				loading={loading}
 			/>}
 
 			{/* Back to account */}
