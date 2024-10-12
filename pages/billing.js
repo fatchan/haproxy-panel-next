@@ -166,7 +166,7 @@ export default function Billing(props) {
 												expired
 											</span>
 											: <span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
-												{inv.status} {remainingHours > 0 && `(Expires in ${remainingHours.toFixed(0)} hours)`}
+												{inv.status} {remainingHours > 0 && `(Expires in ${remainingHours.toFixed(remainingHours < 1 ? 1 : 0)} hours)`}
 											</span>}
 									</td>
 									<td>
