@@ -25,13 +25,13 @@ export default withRouter(function Layout({ children, router }) {
 				<div className='col-1 flex-fill m-0 px-0 h-100 overflow-auto'>
 					<div className='p-3 h-100 d-flex flex-column'>
 						<main className='mx-auto col col-12 col-xl-8'>
-							{!noSidebar && <>
-								<Link href='/menu' className='btn btn-sm btn-primary mobile-btn d-inline-block'>
+							{!noSidebar && <span className='mobile-btn'>
+								<Link href='/menu' className='btn btn-sm btn-primary d-inline-block'>
 									<i className='bi-list pe-none me-2' width='16' height='16' />
 									Menu
 								</Link>
 								<hr />
-							</>}
+							</span>}
 							{children}
 						</main>
 

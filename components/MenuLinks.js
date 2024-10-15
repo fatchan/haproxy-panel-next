@@ -89,7 +89,7 @@ const MenuLinks = ({ router }) => {
 				</ul>
 			</div>
 		</div>
-	)
+	);
 
 	useEffect(() => {
 		Router.events.on('routeChangeStart', setPath);
