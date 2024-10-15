@@ -4,7 +4,7 @@ import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
 export default withRouter(function Layout({ children, router }) {
-	const noSidebar = ['/tos', '/login', '/register', '/changepassword', '/'].includes(router.pathname);
+	const noSidebar = ['/tos', '/login', '/register', '/changepassword', '/', '/menu'].includes(router.pathname);
 	return (
 		<>
 
@@ -17,19 +17,21 @@ export default withRouter(function Layout({ children, router }) {
 			<div className='row h-100 p-0 m-0'>
 
 				{!noSidebar && <div className='col-auto sidebar h-100 m-0 px-0'>
-					<div className='d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto' style={{ width: '250px' }}>
+					<div className='d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto' style={{ width: '265px' }}>
 						<MenuLinks />
 					</div>
 				</div>}
 
 				<div className='col-1 flex-fill m-0 px-0 h-100 overflow-auto'>
 					<div className='p-3 h-100 d-flex flex-column'>
-						{/*<span className='corner-ribbon'>Beta</span>*/}
 						<main className='mx-auto col col-12 col-xl-8'>
-							{!noSidebar && <Link href='/menu' className='btn btn-sm btn-primary mobile-btn mb-4 d-inline-block'>
-								<i className='bi-list pe-none me-2' width='16' height='16' />
+							{!noSidebar && <>
+								<Link href='/menu' className='btn btn-sm btn-primary mobile-btn d-inline-block'>
+									<i className='bi-list pe-none me-2' width='16' height='16' />
 									Menu
-							</Link>}
+								</Link>
+								<hr />
+							</>}
 							{children}
 						</main>
 

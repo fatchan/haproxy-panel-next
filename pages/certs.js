@@ -25,13 +25,7 @@ export default function Certs(props) {
 		}
 	}, [state.user, state.dbCerts, router]);
 
-	const { user, csrf, dbCerts, clusterCerts } = state || {};
-
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
+	const { csrf, dbCerts, clusterCerts } = state || {};
 
 	if (!state.user || state.dbCerts == null) {
 		return (

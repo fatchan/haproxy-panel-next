@@ -37,12 +37,6 @@ const MapPage = (props) => {
 
 	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state || {};
 
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
-
 	if (state.map == null || changedMap) {
 		return (
 			<div className='d-flex flex-column'>

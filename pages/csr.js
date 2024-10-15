@@ -29,13 +29,7 @@ export default function Csr(props) {
 		NProgress.done(true);
 	}
 
-	const { user, csrf, csr } = state || {};
-
-	useEffect(() => {
-		if (user && !user.onboarding) {
-			router.push('/onboarding');
-		}
-	}, []);
+	const { csrf, csr } = state || {};
 
 	if (!state.user) {
 		return (

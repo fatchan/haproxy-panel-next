@@ -189,6 +189,6 @@ table.notaborder textarea {
 	.custom-offset {
 		margin-left: 275px;
 		margin-right: 25px;
-		max-width: calc(100% - 250px);
+		max-width: calc(100% - 265px);
 	}
 }
