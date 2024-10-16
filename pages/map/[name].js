@@ -31,10 +31,9 @@ const MapPage = (props) => {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 	const [filter, setFilter] = useState('');
-	const [currentMap, _setCurrentMap] = useState(mapName);
 
 	useEffect(() => {
-		if (!state.map || (currentMap !== mapName)) {
+		if (!state.map || (state.mapInfo && state.mapInfo.name !== mapName)) {
 			API.getMap(mapName, dispatch, setError, router);
 		}
 	}, [state.map, mapName, router]);
