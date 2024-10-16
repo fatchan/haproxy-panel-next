@@ -100,15 +100,15 @@ export async function mapData(req, res, next) {
 			});
 			if (req.params.name === 'images') {
 				map = map.map(a => {
-						return {
-							...a,
-							key: new URL(`http://${a.key}`).hostname,
-							value: {
-								image: 'bot-check', //TODO: make dynamic once other image types are supported
-								value: a.value,
-							}
-						};
-					});
+					return {
+						...a,
+						key: new URL(`http://${a.key}`).hostname,
+						value: {
+							image: 'bot-check', //TODO: make dynamic once other image types are supported
+							value: a.value,
+						}
+					};
+				});
 				mapInfo = {
 					...mapInfo,
 					...fMap[req.params.name],
