@@ -1,4 +1,4 @@
-import { extractMap, dynamicResponse } from '../util.js';
+import { extractMap, dynamicResponse, metaMapMapping, fMap } from '../util.js';
 import { createCIDR, parse } from 'ip6addr';
 import * as db from '../db.js';
 import url from 'url';
@@ -54,17 +54,18 @@ export async function mapData(req, res, next) {
 		mapInfo,
 		showValues = false,
 		mapNotes = {};
+	const mapName = metaMapMapping[req.params.name] || req.params.name;
 	try {
 		mapNotes = await db.db().collection('mapnotes').find({
 			username: res.locals.user.username,
-			map: req.params.name
+			map: mapName
 		}).toArray();
 		mapNotes = mapNotes.reduce((acc, note) => {
 			acc[note.key] = note.note;
 			return acc;
 		}, {});
 		mapInfo = await res.locals
-			.dataPlaneRetry('getOneRuntimeMap', req.params.name)
+			.dataPlaneRetry('getOneRuntimeMap', mapName)
 			.then(res => res.data)
 			.then(extractMap);
 		if (!mapInfo) {
@@ -72,7 +73,7 @@ export async function mapData(req, res, next) {
 		}
 		map = await res.locals
 			.dataPlaneRetry('showRuntimeMap', {
-				map: req.params.name
+				map: mapName
 			})
 			.then(res => res.data);
 	} catch (e) {
@@ -90,6 +91,29 @@ export async function mapData(req, res, next) {
 			/* falls through */
 		case process.env.REWRITE_MAP_NAME:
 		case process.env.REDIRECT_MAP_NAME:
+		case 'images':
+			map = map.filter(a => {
+				const { pathname } = url.parse(`https://${a.key}`);
+				const isImages = req.params.name === 'images';
+				const isPowIconPath = pathname === '/.basedflare/pow-icon';
+				return isImages ? isPowIconPath : !isPowIconPath;
+			});
+			if (req.params.name === 'images') {
+				map = map.map(a => {
+						return {
+							...a,
+							key: new URL(`http://${a.key}`).hostname,
+							value: {
+								image: 'bot-check', //TODO: make dynamic once other image types are supported
+								value: a.value,
+							}
+						};
+					});
+				mapInfo = {
+					...mapInfo,
+					...fMap[req.params.name],
+				};
+			}
 			showValues = true;
 			/* falls through */
 		case process.env.BACKENDS_MAP_NAME:
@@ -155,7 +179,7 @@ export async function deleteMapForm(req, res, next) {
 	if (req.body && req.body.note && (typeof req.body.note !== 'string' || req.body.note.length > 200)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid note' });
 	}
-
+	const mapName = metaMapMapping[req.params.name] || req.params.name;
 	if (req.params.name === process.env.BLOCKED_IP_MAP_NAME
 		|| req.params.name === process.env.BLOCKED_ASN_MAP_NAME
 		|| req.params.name === process.env.BLOCKED_CC_MAP_NAME
@@ -206,11 +230,17 @@ export async function deleteMapForm(req, res, next) {
 		|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
 		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
 		|| req.params.name === process.env.REDIRECT_MAP_NAME
-		|| req.params.name === process.env.REWRITE_MAP_NAME) {
+		|| req.params.name === process.env.REWRITE_MAP_NAME
+		|| req.params.name === 'images') {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
 			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
+		}
+		//TODO: handle for other image types and make dynamic for e.g. css, translations map(s)
+		if (req.params.name === 'images') {
+			//tood: handle for images other than bot-check
+			req.body.key = `${hostname}/.basedflare/pow-icon`;
 		}
 		try {
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
@@ -240,7 +270,7 @@ export async function deleteMapForm(req, res, next) {
 			}
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
-					map: req.params.name, //'ddos'
+					map: mapName, //'ddos'
 					id: req.body.key, //'example.com'
 				}, null, null, false, false);
 		} catch (e) {
@@ -262,18 +292,30 @@ export async function deleteMapForm(req, res, next) {
 export async function patchMapForm(req, res, next) {
 	if(req.body && req.body.key && typeof req.body.key === 'string') {
 
+		const mapName = metaMapMapping[req.params.name] || req.params.name;
+
 		//validate key is domain
 		if (req.params.name === process.env.DDOS_MAP_NAME
 			|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
 			|| req.params.name === process.env.HOSTS_MAP_NAME
 			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
 			|| req.params.name === process.env.REDIRECT_MAP_NAME
-			|| req.params.name === process.env.REWRITE_MAP_NAME) {
+			|| req.params.name === process.env.REWRITE_MAP_NAME
+			|| req.params.name === 'images') {
 			const { hostname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
 				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 			}
+		}
+
+		if (req.params.name === 'images') {
+			//TODO: update once more image types are available, refactor mapping to reuse logic in delete map endpoint
+			if (req.body.image !== 'bot-check') {
+				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+			}
+			const { hostname } = url.parse(`https://${req.body.key}`);
+			req.body.key = `${hostname}/.basedflare/pow-icon`;
 		}
 
 		//validate key is valid ip address
@@ -319,7 +361,8 @@ export async function patchMapForm(req, res, next) {
 
 		//validate value is url (roughly)
 		if (req.params.name === process.env.REWRITE_MAP_NAME
-			|| req.params.name === process.env.REDIRECT_MAP_NAME) {
+			|| req.params.name === process.env.REDIRECT_MAP_NAME
+			|| req.params.name === 'images') {
 			try {
 				new URL(`http://${req.body.value}`);
 			} catch {
@@ -367,6 +410,7 @@ export async function patchMapForm(req, res, next) {
 		switch (req.params.name) {
 			case process.env.REWRITE_MAP_NAME:
 			case process.env.REDIRECT_MAP_NAME:
+			case 'images':
 				value = req.body.value;
 				break;
 			case process.env.HOSTS_MAP_NAME:
@@ -506,11 +550,11 @@ export async function patchMapForm(req, res, next) {
 				}
 			}
 
-			const existingEntry = req.params.name === process.env.HOSTS_MAP_NAME
+			const existingEntry = mapName === process.env.HOSTS_MAP_NAME
 				? null
 				: (await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: req.params.name,
+						map: mapName,
 						id: req.body.key,
 					})
 					.then(res => res.data)
@@ -518,7 +562,7 @@ export async function patchMapForm(req, res, next) {
 			if (existingEntry) {
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
-						map: req.params.name,
+						map: mapName,
 						id: req.body.key,
 					}, {
 						value: value,
@@ -526,7 +570,7 @@ export async function patchMapForm(req, res, next) {
 			} else {
 				await res.locals
 					.dataPlaneAll('addPayloadRuntimeMap', {
-						name: req.params.name
+						name: mapName
 					}, [{
 						key: req.body.key,
 						value: value,
@@ -534,11 +578,11 @@ export async function patchMapForm(req, res, next) {
 			}
 			await db.db().collection('mapnotes').replaceOne({
 				username: res.locals.user.username,
-				map: req.params.name,
+				map: mapName,
 				key: req.body.key,
 			}, {
 				username: res.locals.user.username,
-				map: req.params.name,
+				map: mapName,
 				key: req.body.key,
 				note: req.body.note,
 			}, {

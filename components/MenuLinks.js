@@ -10,10 +10,13 @@ import Router from 'next/router';
 
 const sections = [
 	{
-		name: 'DNS',
-		icon: 'bi-layers',
 		links: [
-			{ href: '/domains', subpaths: ['/dns/'], label: 'Domains', icon: 'bi-layers' },
+			{ href: '/account', label: 'Dashboard Home', icon: 'bi-house' },
+		],
+	},
+	{
+		links: [
+			{ href: '/domains', subpaths: ['/dns/'], label: 'DNS', icon: 'bi-layers' },
 		],
 	},
 	{
@@ -35,7 +38,7 @@ const sections = [
 	},
 	{
 		name: 'Edge Rules',
-		icon: 'bi-arrow-right',
+		icon: 'bi-globe2',
 		links: [
 			{ href: '/map/redirect', label: 'Domain Redirects', icon: 'bi-arrow-right' },
 			{ href: '/map/rewrite', label: 'Path Rewrites', icon: 'bi-pencil' },
@@ -44,7 +47,21 @@ const sections = [
 			{ href: '/map/blockedasn', label: 'ASN Blacklist', icon: 'bi-building-slash' },
 			{ href: '/map/blockedcc', label: 'Country Blacklist', icon: 'bi-globe2' },
 			{ href: '/map/blockedcn', label: 'Continent Blacklist', icon: 'bi-globe2' },
-			{ href: '/map/maintenance', label: 'Maintenance Mode', icon: 'bi-info-square' },
+			{ href: '/map/maintenance', label: 'Maintenance Mode', icon: 'bi-tools' },
+		],
+	},
+	{
+		name: 'Customisation',
+		icon: 'bi-brush',
+		links: [
+			{ href: '/map/images', label: 'Images', icon: 'bi-card-image' },
+			{ href: '/map/css', label: 'CSS', icon: 'bi-filetype-css', disabled: true },
+			{ href: '/map/translation', label: 'Custom Translations', icon: 'bi-translate', disabled: true },
+		],
+	},
+	{
+		links: [
+			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up' },
 		],
 	},
 	{
@@ -62,34 +79,52 @@ const MenuLinks = ({ router }) => {
 	const [path, setPath] = useState(router.asPath);
 	const [openSections, setOpenSections] = useState({});
 
-	const renderSection = (section, index) => (
-		<div key={`${section.name}_${index}`}>
-			<button
-				onClick={() => toggleSection(section.name)}
-				className='nav nav-link d-flex align-items-center btn-link text-body text-decoration-none w-100'
-			>
-				<i className={`${section.icon} pe-2`} width='16' height='16' />
-				{section.name}
-			</button>
-			<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length*50}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
-				<ul className='nav nav-pills mb-auto'>
-					{section.links.map((link, linkIndex) => (
-						<li className='nav-item w-100' key={`${section.name}_${linkIndex}`}>
-							<Link
-								href={link.href}
-								className={path === link.href || link?.subpaths?.some(l => path.startsWith(l)) ? 'nav-link active' : 'nav-link text-body'}
-								aria-current='page'
-								onClick={() => handleLinkClick(section.name)}
-							>
-								<i className={`${link.icon} pe-none me-2`} width='16' height='16' />
-								{link.label}
-							</Link>
-						</li>
-					))}
-				</ul>
-			</div>
-		</div>
-	);
+	const renderSection = (section, index) => {
+		return section.links.length === 1
+			? <ul key={`section_${section.links[0].name}_${index}`} className='nav nav-pills mb-2'>
+				<li className='nav-item w-100' key={`${section.name}_${index}`}>
+					<Link
+						href={section.links[0].href}
+						className={path === section.links[0].href || section.links[0]?.subpaths?.some(l => path.startsWith(l)) ? 'nav-link active' : 'nav-link text-body'}
+						aria-current='page'
+						onClick={() => handleLinkClick(section.name)}
+					>
+						<i className={`${section.links[0].icon} pe-none me-2`} width='16' height='16' />
+						{section.links[0].label}
+					</Link>
+				</li>
+			</ul>
+			: <div key={`${section.name}_${index}`}>
+				<button
+					onClick={() => toggleSection(section.name)}
+					className='nav nav-link d-flex align-items-center btn-link text-body text-decoration-none w-100'
+				>
+					<i className={`${section.icon} pe-2`} width='16' height='16' />
+					{section.name}
+				</button>
+				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length*60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
+					<ul className='nav nav-pills mb-auto'>
+						{section.links.map((link, linkIndex) => (
+							<li className='nav-item w-100' key={`${section.name}_${linkIndex}`}>
+								<Link
+									href={link.href}
+									style={{
+										pointerEvents: link.disabled ? 'none' : 'auto',
+									}}
+									className={path === link.href || link?.subpaths?.some(l => path.startsWith(l)) ? 'nav-link active' : 'nav-link text-body'}
+									aria-current='page'
+									onClick={() => handleLinkClick(section.name)}
+								>
+									<i className={`${link.icon} pe-none me-2`} width='16' height='16' />
+									{link.label}
+									{link.disabled && <div><small>(coming soon)</small></div>}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>;
+	};
 
 	useEffect(() => {
 		Router.events.on('routeChangeStart', setPath);

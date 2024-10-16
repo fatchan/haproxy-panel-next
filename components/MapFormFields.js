@@ -214,6 +214,69 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 			);
 			break;
 		}
+		case 'images': {
+			const activeDomains = (map||[]).map(e => e.key);
+			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
+			const domainSelectOptions = inactiveDomains.map((d, i) => (
+				<option key={`option${i}`} value={d}>{d}</option>
+			));
+			formElements = (
+				<>
+					<td>
+						{formType === 'add' ? (
+							<button className='btn btn-sm btn-success' type='submit'>
+								<i className='bi-plus-lg pe-none' width='16' height='16' />
+							</button>
+						) : (
+							<>
+								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+									<i className='bi-save-fill pe-none' width='16' height='16' />
+								</button>
+								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+									<i className='bi-x-lg pe-none' width='16' height='16' />
+								</button>
+							</>
+						)}
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+							name='key'
+							required
+						>
+							<option value='' />
+							{domainSelectOptions}
+						</select>
+					</td>
+					<td>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.image || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('image', e.target.value)}
+							name='image'
+							required
+						>
+							<option value=''>Image</option>
+							<option value='bot-check'>Bot-check page icon</option>
+						</select>
+					</td>
+					<td>
+						<input
+							className='form-control'
+							type='text'
+							{...(handleFieldChange ? { value: editValue.value || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('value', e.target.value)}
+							name='value'
+							placeholder='example.com/image.png'
+							required
+						/>
+					</td>
+				</>
+			);
+			break;
+		}
 		case 'maintenance': {
 			const activeDomains = (map||[]).map(e => e.key);
 			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));

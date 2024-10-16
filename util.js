@@ -5,6 +5,12 @@ dotenv.config({ path: '.env' });
 
 import QRCode from 'qrcode';
 
+export const metaMapMapping = {
+	'images':  process.env.REWRITE_MAP_NAME,
+	'css': null, //TODO
+	'translation': null, //TODO
+};
+
 export const calculateRemainingHours = (recalculate_after_start, recalculate_after) => {
 	const recalculateAfterHours = recalculate_after;
 	const recalculateStartDate = new Date(recalculate_after_start);
@@ -46,7 +52,7 @@ export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS||'')
 	.split(',')
 	.map(x => x.trim());
 
-const fMap = {
+export const fMap = {
 	[process.env.HOSTS_MAP_NAME]: {
 		fname: 'Backends',
 		description: 'Backend IP mappings for domains',
@@ -64,7 +70,7 @@ const fMap = {
 		fname: 'Protection Settings',
 		description: 'Customise protection settings on a per-domain basis',
 		columnNames: [
-			'Domain/Path',
+			'Domain',
 			'Difficulty',
 			'POW Type',
 			'Expiry',
@@ -125,11 +131,28 @@ const fMap = {
 		description: 'Redirect one domain to another, stripping path',
 		columnNames: ['Domain', 'Redirect to'],
 	},
-  // [process.env.BACKENDS_MAP_NAME]: {
-  // fname: 'Domain Backend Mappings',
-  // description: 'Which internal server haproxy uses for domains',
-  // columnNames: ['Domain', 'Server Name'],
-  // },
+
+	'images': {
+		name: 'images',
+		fname: 'Images',
+		description: 'Custom image shown on edge pages',
+		columnNames: ['Domain', 'Image', 'Image URL'],
+		columnKeys: ['image', 'value'],
+	},
+
+	'css': {
+		name: 'css',
+		fname: 'CSS',
+		description: 'Custom CSS for edge pages',
+		columnNames: ['Domain', 'Custom CSS'],
+	},
+
+	'translation': {
+		name: 'translation',
+		fname: 'Translation',
+		description: 'Custom text/translations for edge pages',
+		columnNames: ['Domain', 'Translation JSON'],
+	},
 };
 
 export function makeArrayIfSingle(obj) {

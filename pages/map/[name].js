@@ -5,6 +5,7 @@ import MapRow from '../../components/MapRow.js';
 import MapFormFields from '../../components/MapFormFields.js'; // Import the new component
 import BackButton from '../../components/BackButton.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
+import InfoAlert from '../../components/InfoAlert.js';
 import SearchFilter from '../../components/SearchFilter.js';
 import * as API from '../../api.js';
 
@@ -12,19 +13,31 @@ import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
 countries.registerLocale(enCountries);
 
+//TODO: move
+const mapAlerts = {
+	ddos: <>Select which domains or domain+paths have an interstitial bot-check page enabled. Recommended for the best protection and/or if you are frequently targeted by attacks.</>,
+	ddos_config: <>Set the parameters of the bot check for a domain or domain+path.</>,
+	blockedasn: <>Block entire networks containing multiple netblocks. Visit <a target='_blank' rel='noreferrer' href='https://bgp.tools'>bgp.tools</a> to search ASNs, or find the ASN of a particular IP address or netblock.</>,
+	maintenance: <>Display a page letting your visitors know your site is undergoing maintenance or downtime.</>,
+	images: <>Choose a custom remote URL for images displayed on edge pages e.g. bot-check, maintenance, etc.</>,
+	blockedcc: <>Blocked countries based on geoip data. Uses <a target='_blank' rel='noreferrer' href='https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes'>ISO 3166-1 alpha-2 country codes</a>.</>,
+	redirect: <>Redirects redirect all requests from a domain to another domain or a domain+path e.g. &quot;www.example.com&quot; -&gt; &quot;example.com&quot; or &quot;example.com/something&quot;.</>,
+	rewrite: <>Rewrites redirect a specific path to another path e.g. &quot;example.com/blog&quot; -&gt; &quot;example.com/new-blog&quot;.</>,
+};
+
 const MapPage = (props) => {
 	const router = useRouter();
 	const { name: mapName } = router.query;
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 	const [filter, setFilter] = useState('');
-	const changedMap = state.mapInfo?.name !== mapName;
+	const [currentMap, _setCurrentMap] = useState(mapName);
 
 	useEffect(() => {
-		if (!state.map || changedMap) {
+		if (!state.map || (currentMap !== mapName)) {
 			API.getMap(mapName, dispatch, setError, router);
 		}
-	}, [state.map, mapName, router, changedMap]);
+	}, [state.map, mapName, router]);
 
 	const [editValue, setEditValue] = useState({});
 
@@ -37,7 +50,7 @@ const MapPage = (props) => {
 
 	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state || {};
 
-	if (state.map == null || changedMap) {
+	if (state.map == null) {
 		return (
 			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
@@ -52,6 +65,7 @@ const MapPage = (props) => {
 
 	async function addToMap(e) {
 		e.preventDefault();
+		console.log(editValue);
 		await API.addToMap(mapInfo.name, {
 			_csrf: csrf,
 			...editValue,
@@ -96,6 +110,10 @@ const MapPage = (props) => {
 			</Head>
 
 			<h5 className='fw-bold'>{mapInfo.fname}:</h5>
+
+			<InfoAlert>
+				{mapAlerts[mapInfo.name]}
+			</InfoAlert>
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 

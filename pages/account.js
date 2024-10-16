@@ -36,18 +36,29 @@ export default function Account(props) {
 
 				{/* Global overide */}
 				<div className='list-group-item d-flex align-items-center'>
-					<div className='ms-2 me-auto d-flex align-items-center gap-2'>
-						<span className='fw-bold'>
-							Global Override
-						</span>
-					</div>
-					<form onSubmit={toggleGlobal} action='/forms/global/toggle' method='post' className='me-2'>
-						<input type='hidden' name='_csrf' value={csrf} />
-						<input className='btn btn-sm btn-primary' type='submit' value='Toggle' />
-					</form>
-					<div className={`badge rounded-pill bg-${globalAcl?'success':'dark'}`}>
-						{globalAcl?'ON':'OFF'}
-					</div>
+				    <div className='ms-2 me-auto d-flex align-items-center gap-2'>
+				        <span className='fw-bold'>
+				            Global Override
+				        </span>
+				    </div>
+				    <form onSubmit={toggleGlobal} action='/forms/global/toggle' method='post' className='me-2 d-flex align-items-center'>
+				        <input type='hidden' name='_csrf' value={csrf} />
+				        <div className='form-check form-switch'>
+				            <input
+				                className='form-check-input'
+				                type='checkbox'
+				                role='switch'
+				                id='globalSwitch'
+				                name='globalToggle'
+				                checked={globalAcl}
+				                onChange={toggleGlobal}
+				            />
+				            <label className='form-check-label' htmlFor='globalSwitch'></label>
+				        </div>
+				    </form>
+				    <div className={`badge rounded-pill bg-${globalAcl ? 'success' : 'dark'}`}>
+				        {globalAcl ? 'ON' : 'OFF'}
+				    </div>
 				</div>
 
 				{/* Downs ips */}

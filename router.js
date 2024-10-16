@@ -18,6 +18,7 @@ import * as certsController from './controllers/certs.js';
 import * as dnsController from './controllers/dns.js';
 import * as domainsController from './controllers/domains.js';
 import * as billingController from './controllers/billing.js';
+import * as statsController from './controllers/stats.js';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -238,6 +239,10 @@ export default function router(server, app) {
 			process.env.DDOS_CONFIG_MAP_NAME,
 			process.env.HOSTS_MAP_NAME,
 			process.env.REWRITE_MAP_NAME,
+			//TODO: move these names to a const, refactor, in fmap, controllers, etc
+			'images',
+			// 'css',
+			// 'translation',
 		],
 		mapNamesOrString = mapNames.join('|');
 
@@ -295,6 +300,23 @@ export default function router(server, app) {
 		checkSession,
 		csrfMiddleware,
 		billingController.billingJson,
+	);
+	server.get(
+		'/stats',
+		useSession,
+		fetchSession,
+		checkSession,
+		checkOnboarding,
+		csrfMiddleware,
+		statsController.statsPage.bind(null, app),
+	);
+	server.get(
+		'/stats.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		statsController.statsJson,
 	);
 	server.get(
 		`/map/:name(${mapNamesOrString})`,
