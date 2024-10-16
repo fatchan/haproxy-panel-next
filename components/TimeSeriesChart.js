@@ -36,6 +36,10 @@ const colors = {
 	502: '#c62828',
 	503: '#e53935',
 	504: '#b71c1c',
+	Challenged: 'yellow',
+	Passed: 'green',
+	'Incoming Traffic': 'pink',
+	'Outgoing Traffic': 'orange',
 };
 
 const simpleStringToColor = str => {
@@ -54,7 +58,7 @@ const simpleStringToColor = str => {
 	return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };
 
-const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel }) => {
+const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter }) => {
 	const sortedSeriesKeys = Object.keys(data[0])
 		.filter(key => key !== 'time')
 		.sort((a, b) => a - b);
@@ -64,14 +68,26 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 			<p style={{ color: 'var(--bs-body-color)' }}>{title}</p>
 			<ResponsiveContainer width='100%' height={400}>
 				<AreaChart isAnimationActive={false} key={chartKey} data={data}>
-					<XAxis label={xLabel?{value:xLabel}:''} dataKey='time' stroke='var(--bs-body-color)' />
-					<YAxis label={yLabel?{value:yLabel, angle:-90,offset:15,position:'insideLeft'}:''} type='number' stroke='var(--bs-body-color)' />
+					<XAxis
+						label={xLabel?{value:xLabel}:''}
+						dataKey='time'
+						stroke='var(--bs-body-color)'
+						tick={{ fontSize:'12' }}
+					/>
+					<YAxis
+						label={yLabel ? { value: yLabel, angle: -90, offset: 15, position: 'insideLeft' } : ''}
+						type='number'
+						stroke='var(--bs-body-color)'
+						tickFormatter={formatter||null}
+						tick={{ fontSize:'12', textAnchor: 'end' }}
+					/>
 					<Tooltip
 						contentStyle={{
 							background: 'var(--bs-body-bg)',
 							border: '1px solid var(--bs-border-color-translucent)'
 						}}
 						animationEasing='ease'
+						formatter={formatter||null}
 					/>
 					<CartesianGrid strokeDasharray='3 3' stroke='var(--bs-border-color-translucent)' />
 					{sortedSeriesKeys.map(series => (

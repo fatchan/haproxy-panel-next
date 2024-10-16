@@ -20,7 +20,7 @@ export default function Stats(props) {
 		return () => clearInterval(intervalId);
 	}, []);
 
-	const { statusChartData, hostnameChartData } = state || {};
+	const { statusChartData, hostnameChartData, trafficChartData, botcheckChartData } = state || {};
 
 	return (
 		<>
@@ -30,7 +30,7 @@ export default function Stats(props) {
 			</Head>
 
 			<h5 className='fw-bold'>
-				Stats (🚧 Under Construction):
+				Statistics:
 			</h5>
 
 			{!hostnameChartData && <div className='d-flex flex-column'>
@@ -41,9 +41,51 @@ export default function Stats(props) {
 					</div>
 				</div>
 			</div>}
-			{statusChartData && <TimeSeriesChart yLabel={'req/s'} data={statusChartData} title={'Response Code Breakdown'} stack={true} />}
-			{hostnameChartData && <TimeSeriesChart yLabel={'req/s'} data={hostnameChartData} title={'Hostname Breakdown'} fill={false} />}
-
+			<div className='container'>
+				<div className='row'>
+					{statusChartData && (
+						<div className='col-xl-6 col-lg-12 mb-4'>
+							<TimeSeriesChart
+								yLabel={'req/s'}
+								data={statusChartData}
+								title={'Response Code Breakdown'}
+								stack={true}
+							/>
+						</div>
+					)}
+					{hostnameChartData && (
+						<div className='col-xl-6 col-lg-12 mb-4'>
+							<TimeSeriesChart
+								yLabel={'req/s'}
+								data={hostnameChartData}
+								title={'Hostname Breakdown'}
+								fill={false}
+							/>
+						</div>
+					)}
+					{trafficChartData && (
+						<div className='col-xl-6 col-lg-12 mb-4'>
+							<TimeSeriesChart
+								yLabel={'mbps'}
+								data={trafficChartData}
+								title={'Frontend Traffic'}
+								fill={false}
+								formatter={v => (v / 1000000).toFixed(1) + ' mbps'}
+							/>
+						</div>
+					)}
+					{botcheckChartData && (
+						<div className='col-xl-6 col-lg-12 mb-4'>
+							<TimeSeriesChart
+								yLabel={'req/s'}
+								data={botcheckChartData}
+								title={'Bot Checking'}
+								fill={false}
+							/>
+						</div>
+					)}
+				</div>
+			</div>
 		</>
 	);
 };

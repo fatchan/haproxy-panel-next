@@ -61,7 +61,7 @@ const sections = [
 	},
 	{
 		links: [
-			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up' },
+			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up', badge: 'beta' },
 		],
 	},
 	{
@@ -91,6 +91,7 @@ const MenuLinks = ({ router }) => {
 					>
 						<i className={`${section.links[0].icon} pe-none me-2`} width='16' height='16' />
 						{section.links[0].label}
+						{section.links[0].badge && <small class="alert alert-warning text-uppercase p-0 px-1 ms-2" style={{ fontSize: 10 }} role="alert">{section.links[0].badge}</small>}
 					</Link>
 				</li>
 			</ul>
@@ -118,6 +119,7 @@ const MenuLinks = ({ router }) => {
 									<i className={`${link.icon} pe-none me-2`} width='16' height='16' />
 									{link.label}
 									{link.disabled && <div><small>(coming soon)</small></div>}
+									{link.badge && <div class="alert alert-warning" role="alert"><small>{link.badge}</small></div>}
 								</Link>
 							</li>
 						))}
