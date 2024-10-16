@@ -1,15 +1,20 @@
 export async function statsFetch(query, start, end) {
 	const response = await fetch(`${process.env.STATS_BASE_URL}/loki/api/v1/query_range?query=${encodeURIComponent(query)}&start=${start}&end=${end}`);
-	const data = await response.json();
-	return data.data.result;
+	try {
+		const data = await response.json();
+		return data.data.result;
+	} catch(e) {
+		console.warn(e);
+		return null;
+	}
 }
 
-export function processStatusChartData(result, defaultSeries='Traffic') {
+export function processStatusChartData(result=[]) {
 	const timeSeriesData = {};
 	result.forEach(item => {
 		item.values.forEach(value => {
 			const timestamp = new Date(value[0] * 1000).toLocaleTimeString();
-			const status = item.metric.status || defaultSeries || 'unknown';
+			const status = item.metric.status || 'unknown';
 			const count = value[1] < 1 ? parseFloat(value[1]).toFixed(1) : Math.round(value[1]);
 			if (!timeSeriesData[timestamp]) {
 				timeSeriesData[timestamp] = { time: timestamp };
@@ -20,7 +25,7 @@ export function processStatusChartData(result, defaultSeries='Traffic') {
 	return Object.values(timeSeriesData);
 }
 
-export function processHostnameChartData(result) {
+export function processHostnameChartData(result=[]) {
 	const timeSeriesData = {};
 	result.forEach(item => {
 		item.values.forEach(value => {
@@ -37,9 +42,8 @@ export function processHostnameChartData(result) {
 	return Object.values(timeSeriesData);
 }
 
-export function processTrafficChartData(incomingData, outgoingData) {
+export function processTrafficChartData(incomingData=[], outgoingData=[]) {
 	const timeSeriesData = {};
-
 	incomingData.forEach(item => {
 		item.values.forEach(value => {
 			const timestamp = new Date(value[0] * 1000).toLocaleTimeString();
@@ -67,7 +71,7 @@ export function processTrafficChartData(incomingData, outgoingData) {
 	return Object.values(timeSeriesData);
 }
 
-export function processBotcheckChartData(challengeData, passedData) {
+export function processBotcheckChartData(challengeData=[], passedData=[]) {
 	const timeSeriesData = {};
 
 	challengeData.forEach(item => {

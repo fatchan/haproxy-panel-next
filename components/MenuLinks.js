@@ -55,8 +55,8 @@ const sections = [
 		icon: 'bi-brush',
 		links: [
 			{ href: '/map/images', label: 'Images', icon: 'bi-card-image' },
-			{ href: '/map/css', label: 'CSS', icon: 'bi-filetype-css', disabled: true },
-			{ href: '/map/translation', label: 'Custom Translations', icon: 'bi-translate', disabled: true },
+			{ href: '/map/css', label: 'CSS', icon: 'bi-filetype-css', disabled: true, badge: 'coming soon' },
+			{ href: '/map/translation', label: 'Custom Translations', icon: 'bi-translate', disabled: true, badge: 'coming soon' },
 		],
 	},
 	{
@@ -91,7 +91,7 @@ const MenuLinks = ({ router }) => {
 					>
 						<i className={`${section.links[0].icon} pe-none me-2`} width='16' height='16' />
 						{section.links[0].label}
-						{section.links[0].badge && <small class="alert alert-warning text-uppercase p-0 px-1 ms-2" style={{ fontSize: 10 }} role="alert">{section.links[0].badge}</small>}
+						{section.links[0].badge && <small className='alert alert-warning text-uppercase p-0 px-1 ms-2' style={{ fontSize: 10 }} role='alert'>{section.links[0].badge}</small>}
 					</Link>
 				</li>
 			</ul>
@@ -118,8 +118,7 @@ const MenuLinks = ({ router }) => {
 								>
 									<i className={`${link.icon} pe-none me-2`} width='16' height='16' />
 									{link.label}
-									{link.disabled && <div><small>(coming soon)</small></div>}
-									{link.badge && <div class="alert alert-warning" role="alert"><small>{link.badge}</small></div>}
+									{link.badge && <small className='alert alert-warning text-uppercase p-0 px-1 ms-2' style={{ fontSize: 10 }} role='alert'>{link.badge}</small>}
 								</Link>
 							</li>
 						))}

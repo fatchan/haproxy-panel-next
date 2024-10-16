@@ -14,14 +14,13 @@ async function statsData(_req, res, _next) {
 	const botcheckPassedQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | req =~ \`POST .*\` | server = \`<lua.bot-check>\` | status = \`302\` [2m])) or vector(0)`;
 
 	const [statusChartData, hostnameChartData, incomingTrafficData, outgoingTrafficData, challengeData, passedData] = await Promise.all([
-		statsFetch(statusQuery, startTime, endTime).then(processStatusChartData),
-		statsFetch(hostnameQuery, startTime, endTime).then(processHostnameChartData),
-		statsFetch(incomingTrafficQuery, startTime, endTime),
-		statsFetch(outgoingTrafficQuery, startTime, endTime),
-		statsFetch(botcheckChallengeQuery, startTime, endTime),
-		statsFetch(botcheckPassedQuery, startTime, endTime),
+		statsFetch(statusQuery, startTime, endTime).then(processStatusChartData).catch(() => []),
+		statsFetch(hostnameQuery, startTime, endTime).then(processHostnameChartData).catch(() => []),
+		statsFetch(incomingTrafficQuery, startTime, endTime).catch(() => []),
+		statsFetch(outgoingTrafficQuery, startTime, endTime).catch(() => []),
+		statsFetch(botcheckChallengeQuery, startTime, endTime).catch(() => []),
+		statsFetch(botcheckPassedQuery, startTime, endTime).catch(() => []),
 	]);
-
 	const trafficChartData = processTrafficChartData(incomingTrafficData, outgoingTrafficData);
 	const botcheckChartData = processBotcheckChartData(challengeData, passedData);
 
