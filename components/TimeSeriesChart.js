@@ -59,9 +59,13 @@ const simpleStringToColor = str => {
 };
 
 const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter }) => {
-	const sortedSeriesKeys = Object.keys(data[0])
-		.filter(key => key !== 'time')
-		.sort((a, b) => a - b);
+	const seriesKeys = Object.entries(data)
+		.reduce((acc, en) => {
+			Object.keys(en[1]).filter(x => x !== 'time').forEach(x => acc.add(x));
+			return acc;
+		}, new Set([]));
+	const sortedSeriesKeys = [...seriesKeys]
+		.sort((a, b) => a.toString().localeCompare(b.toString()));
 	const chartKey = useMemo(() => JSON.stringify(data), [data]); //slow?
 	return (
 		<div className='rounded-border p-3' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
