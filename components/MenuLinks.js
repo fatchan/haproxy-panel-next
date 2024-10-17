@@ -102,6 +102,12 @@ const MenuLinks = ({ router }) => {
 				>
 					<i className={`${section.icon} pe-2`} width='16' height='16' />
 					{section.name}
+					{<i
+						className={`bi-chevron-down ms-auto transition ${openSections[section.name] ? 'rotate' : ''}`}
+						width='16'
+						height='16'
+						style={{ transition: 'transform 0.3s ease', transform: openSections[section.name] ? 'rotate(180deg)' : 'rotate(0deg)' }}
+					/>}
 				</button>
 				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length*60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
 					<ul className='nav nav-pills mb-auto'>
