@@ -11,12 +11,25 @@ export default function DashboardHome(props) {
 	const [error, setError] = useState();
 
 	const { globalAcl, csrf, user } = state || {};
-	const domainCount = user.domains?.length || 0; // Assuming user.domains contains an array of domains
+	const domainCount = user.domains?.length || 0;
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
 		await API.globalToggle({ _csrf: csrf }, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
+	}
+
+	if (!state.user || state.user.domains == null) {
+		return (
+			<div className='d-flex flex-column'>
+				{error && <ErrorAlert error={error} />}
+				<div className='text-center mb-4'>
+					<div className='spinner-border mt-5' role='status'>
+						<span className='visually-hidden'>Loading...</span>
+					</div>
+				</div>
+			</div>
+		);
 	}
 
 	return (
@@ -30,6 +43,7 @@ export default function DashboardHome(props) {
 			<h5 className='fw-bold'>Dashboard Home:</h5>
 
 			<div className='container col-sm-12 col-xl-8 mx-auto'>
+
 				{/* Global Override Card */}
 				<div className='card mb-4'>
 					<div className='card-body d-flex align-items-center'>
@@ -90,6 +104,11 @@ export default function DashboardHome(props) {
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-file-earmark-lock fs-2'></i>
 								<h5 className='card-title'>HTTPS Certificates</h5>
+								<p className='card-text'>
+									<small className='alert alert-info text-uppercase p-0 px-1 ms-2' style={{ fontSize: 12 }} role='alert'>
+										{user.numCerts} Certs
+									</small>
+								</p>
 							</div>
 						</Link>
 					</div>
@@ -126,6 +145,7 @@ export default function DashboardHome(props) {
 							</div>
 						</Link>
 					</div>
+
 				</div>
 			</div>
 		</>
