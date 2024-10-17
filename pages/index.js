@@ -22,9 +22,9 @@ export default function Index() {
 			</Link>
 			<span className='d-flex'>
 				<div className='me-2'>
-					<Link href='/account' className='btn btn-sm btn-primary'>
+					<Link href='/dashboard' className='btn btn-sm btn-primary'>
 						<i className='bi-person-square pe-none me-2' width='16' height='16' />
-							Account
+							Dashboard
 					</Link>
 				</div>
 				<div>

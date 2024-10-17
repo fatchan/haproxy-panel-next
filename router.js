@@ -248,7 +248,7 @@ export default function router(server, app) {
 
 	//authed pages
 	server.get(
-		'/account',
+		'/dashboard',
 		useSession,
 		fetchSession,
 		checkSession,

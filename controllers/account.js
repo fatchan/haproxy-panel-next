@@ -85,13 +85,13 @@ export async function onboardingData(req, res, _next) {
 }
 
 /**
- * GET /account
+ * GET /dashboard
  * account page html
  */
 export async function accountPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
-	return app.render(req, res, '/account');
+	return app.render(req, res, '/dashboard');
 }
 
 /**
@@ -158,7 +158,7 @@ export async function globalToggle(req, res, next) {
 	} catch (e) {
 		return next(e);
 	}
-	return dynamicResponse(req, res, 302, { redirect: '/account' });
+	return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
 }
 
 /**

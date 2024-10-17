@@ -8,10 +8,10 @@ import { withRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Router from 'next/router';
 
-const sections = [
+export const sections = [
 	{
 		links: [
-			{ href: '/account', label: 'Dashboard Home', icon: 'bi-house' },
+			{ href: '/dashboard', label: 'Dashboard Home', icon: 'bi-house' },
 		],
 	},
 	{

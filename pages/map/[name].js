@@ -154,7 +154,7 @@ const MapPage = (props) => {
 			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
 			{/* Back Button */}
-			<BackButton to='/account' />
+			<BackButton to='/dashboard' />
 		</>
 	);
 };

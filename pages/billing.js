@@ -227,7 +227,7 @@ export default function Billing(props) {
 			/>}
 
 			{/* Back to account */}
-			<BackButton to='/account' />
+			<BackButton to='/dashboard' />
 		</>
 	);
 }

@@ -345,7 +345,7 @@ export async function dnsRecordUpdate(req, res) {
 */
 export async function downPage(app, req, res) {
 	if (!res.locals.user.username === 'admin') {
-		return dynamicResponse(req, res, 302, { redirect: '/account' });
+		return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
 	}
 	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
 	res.locals.data = {
