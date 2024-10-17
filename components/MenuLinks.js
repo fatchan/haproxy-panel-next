@@ -153,7 +153,7 @@ const MenuLinks = ({ router }) => {
 
 	const bottomLinks = (
 		<>
-			<hr />
+			<hr className='mt-auto' />
 			{renderSection(sections[sections.length-1])}
 			<ul className='nav nav-pills flex-column'>
 				<li className='nav-item user-select-none'>
