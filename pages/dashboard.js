@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
@@ -11,13 +11,17 @@ export default function DashboardHome(props) {
 	const [error, setError] = useState();
 
 	const { globalAcl, csrf, user } = state || {};
-	const domainCount = user.domains?.length || 0;
+	const domainCount = user?.domains?.length || 0;
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
 		await API.globalToggle({ _csrf: csrf }, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 	}
+
+	useEffect(() => {
+		API.getAccount(dispatch, setError, router);
+	}, []);
 
 	if (!state.user || state.user.domains == null) {
 		return (
