@@ -10,11 +10,15 @@ export default function PaymentModal({
 	regenerateInvoice,
 	closeModal,
 	loading,
+	clientName,
 }) {
 	const isPaid = selectedInvoice?.paymentData?.paid === true;
 	const transactions = selectedInvoice?.paymentData?.transactions || [];
 	const [expandedTxs, setExpandedTxs] = useState({});
 	const [remainingHours, setRemainingHours] = useState(true);
+	const invoiceDate = new Date(selectedInvoice?.date);
+	const dueDate = new Date(invoiceDate);
+	dueDate.setDate(invoiceDate.getDate() + 7);
 
 	const handleToggleTx = (index) => {
 		setExpandedTxs((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -52,23 +56,38 @@ export default function PaymentModal({
 								<span className='spinner-border mx-auto' role='status' />
 							</div>
 							: <>
-								<p><strong>Invoice ID:</strong> {selectedInvoice._id}</p>
-								<p><strong>Description:</strong> {selectedInvoice.description}</p>
-								<p><strong>Date Due:</strong> {new Date(selectedInvoice.date).toLocaleString()}</p>
-								<p><strong>Total:</strong> ${selectedInvoice.amount / 100}</p>
+								<div className='row'>
+									<div className='col-md-6 col-12'>
+										<div className='fw-bold fs-5 mb-2'>Invoice Details:</div>
+										<p><strong>Invoice ID:</strong> {selectedInvoice._id}</p>
+										<p><strong>Invoice Date:</strong> {invoiceDate.toLocaleString()}</p>
+										<p><strong>Due Date:</strong> {dueDate.toLocaleString()}</p>
+										<p><strong>Description:</strong> {selectedInvoice.description}</p>
+										<p><strong>Total Amount Due:</strong> ${selectedInvoice.amount / 100}</p>
+										<p><strong>Crypto:</strong> {paymentInfo.display_name}</p>
+										<p><strong>Fiat:</strong> USD</p>
+										<p><strong>Exchange Rate:</strong> {paymentInfo.exchange_rate}</p>
+									</div>
+									<div className='col-md-6 col-12'>
+										<div className='fw-bold fs-5 mb-2 mt-3 mt-md-0'>Bill To:</div>
+										<p><strong>Client Name:</strong> {clientName}</p>
+
+										<div className='fw-bold fs-5 mb-2 mt-4 mt-md-0'>Bill From:</div>
+										<p><strong>Business Name:</strong> {process.env.NEXT_PUBLIC_BUSINESS_NAME}</p>
+										<p><strong>Address:</strong> {process.env.NEXT_PUBLIC_BUSINESS_ADDRESS}</p>
+										<p><strong>Phone:</strong> {process.env.NEXT_PUBLIC_BUSINESS_PHONE}</p>
+										<p><strong>Email:</strong> {process.env.NEXT_PUBLIC_BUSINESS_EMAIL}</p>
+									</div>
+								</div>
 
 								{/* Show payment details if the invoice is not fully paid */}
 								{(!isPaid && paymentInfo) && (
 									<>
-										<p><strong>Crypto:</strong> {paymentInfo.display_name}</p>
-										<p><strong>Fiat:</strong> USD</p>
-										<p><strong>Exchange Rate:</strong> {paymentInfo.exchange_rate}</p>
 										<hr />
 										<p><strong>Wallet Address:</strong> <code>{paymentInfo.wallet}</code></p>
 										<p><strong>Amount To Pay:</strong> <code>{paymentInfo.amount - (selectedInvoice?.paymentData?.balance_crypto || 0)}</code></p>
 									</>
 								)}
-
 								{/* Show QR code text only if the invoice is not fully paid and not expired */}
 								{!isPaid && qrCodeText && remainingHours > 0 && <img className='mb-3 d-block mx-auto' src={qrCodeText} />}
 

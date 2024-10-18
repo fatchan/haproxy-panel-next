@@ -95,7 +95,7 @@ export default function Billing(props) {
 		);
 	}
 
-	const { invoices, csrf } = state;
+	const { invoices, csrf, user } = state;
 
 	function openInvoice(invoice, previousCrypto) {
 		setLoading(true);
@@ -224,6 +224,7 @@ export default function Billing(props) {
 				regenerateInvoice={openInvoice}
 				closeModal={closeModal}
 				loading={loading}
+				clientName={user.username}
 			/>}
 
 			{/* Back to account */}
