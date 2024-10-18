@@ -50,6 +50,7 @@ export default function Stats(props) {
 								data={statusChartData}
 								title={'Response Code Breakdown'}
 								stack={true}
+								formatter={v => Number(v)}
 							/>
 						</div>
 					)}
@@ -60,6 +61,7 @@ export default function Stats(props) {
 								data={hostnameChartData}
 								title={'Hostname Breakdown'}
 								fill={false}
+								formatter={v => Number(v)}
 							/>
 						</div>
 					)}
@@ -81,6 +83,7 @@ export default function Stats(props) {
 								data={botcheckChartData}
 								title={'Bot Checking'}
 								fill={false}
+								formatter={v => Number(v)}
 							/>
 						</div>
 					)}

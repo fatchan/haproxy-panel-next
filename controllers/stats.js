@@ -5,13 +5,14 @@ import { statsFetch, processStatusChartData, processHostnameChartData, processTr
 async function statsData(_req, res, _next) {
 	const regexPattern = res.locals.user.domains.map(domain => domain.replace(/\./g, '\\\\.')).join('|');
 	const endTime = Math.floor(Date.now() / 1000);
-	const startTime = Math.floor((Date.now() - 3600000) / 1000); // 1 hour for now
-	const statusQuery = `sum by(status) (rate({job="haproxy", hh=~"${regexPattern}"} | json | status != \`\` | __error__ != \`JSONParserErr\` [2m]))`;
-	const hostnameQuery = `sum by(hh) (rate({job="haproxy", hh=~"${regexPattern}"} | json | __error__ != \`JSONParserErr\` | status != \`-1\` [2m])) or vector(0)`;
-	const outgoingTrafficQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | unwrap bytes [2m])) *8 or vector(0)`;
-	const incomingTrafficQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | unwrap bs [2m])) *8 or vector(0)`;
-	const botcheckChallengeQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | server = \`<lua.bot-check>\` | status = \`403\` [2m])) or vector(0)`;
-	const botcheckPassedQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | req =~ \`POST .*\` | server = \`<lua.bot-check>\` | status = \`302\` [2m])) or vector(0)`;
+	const startTime = Math.floor((Date.now() - 10800000) / 1000); // 3 hours
+	const granularity = '1m';
+	const statusQuery = `sum by(status) (rate({job="haproxy", hh=~"${regexPattern}"} | json | status != \`\` | __error__ != \`JSONParserErr\` [${granularity}]))`;
+	const hostnameQuery = `sum by(hh) (rate({job="haproxy", hh=~"${regexPattern}"} | json | __error__ != \`JSONParserErr\` | status != \`-1\` [${granularity}])) or vector(0)`;
+	const outgoingTrafficQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | unwrap bytes [${granularity}])) *8 or vector(0)`;
+	const incomingTrafficQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | unwrap bs [${granularity}])) *8 or vector(0)`;
+	const botcheckChallengeQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | server = \`<lua.bot-check>\` | status = \`403\` [${granularity}])) or vector(0)`;
+	const botcheckPassedQuery = `sum(rate({job="haproxy", hh=~"${regexPattern}"} | json | req =~ \`POST .*\` | server = \`<lua.bot-check>\` | status = \`302\` [${granularity}])) or vector(0)`;
 
 	const [statusChartData, hostnameChartData, incomingTrafficData, outgoingTrafficData, challengeData, passedData] = await Promise.all([
 		statsFetch(statusQuery, startTime, endTime).then(processStatusChartData).catch(() => []),
