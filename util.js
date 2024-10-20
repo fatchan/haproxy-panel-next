@@ -147,6 +147,7 @@ export const fMap = {
 		fname: 'CSS',
 		description: 'Custom CSS for edge pages',
 		columnNames: ['Domain', 'Custom CSS'],
+		columnKeys: ['c']
 	},
 
 	'translation': {

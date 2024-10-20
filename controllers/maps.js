@@ -85,9 +85,25 @@ export async function mapData(req, res, next) {
 		case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
 		case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
 			map = map.map(a => {
-				a.value = JSON.parse(a.value);
+				try {
+					a.value = JSON.parse(a.value);
+				} catch(e) {
+					console.warn('Failed to parse map value', a.value);
+					return undefined;
+				}
 				return a;
-			});
+			}).filter(x => x);
+			/* falls through */
+		case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
+			map = map.map(a => {
+				try {
+					a.value = decodeURIComponent(a.value);
+				} catch(e) {
+					console.warn('Failed to parse map value', a.value);
+					return undefined;
+				}
+				return a;
+			}).filter(x => x);
 			/* falls through */
 		case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
 		case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
@@ -231,7 +247,8 @@ export async function deleteMapForm(req, res, next) {
 		|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
 		|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
 		|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
+		|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
@@ -301,12 +318,18 @@ export async function patchMapForm(req, res, next) {
 			|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
 			|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
 			|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
+			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
 			const { hostname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
 				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 			}
+		}
+
+		if (req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME
+			&& (!req.body || !req.body.value || typeof req.body.value !== 'string')) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 		}
 
 		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
@@ -458,6 +481,10 @@ export async function patchMapForm(req, res, next) {
 					cex: parseInt(req.body.cex || 21600, 10),
 					cip: req.body.cip === true ? true : false,
 				});
+				break;
+			case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
+				value = encodeURIComponent(req.body.value);
+				console.log('value', value);
 				break;
 			default:
 				return dynamicResponse(req, res, 400, { error: 'Invalid map' });
