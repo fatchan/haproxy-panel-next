@@ -15,7 +15,7 @@ async function main() {
 }
 
 function getLokiDomains() {
-	return fetch(`${process.env.LOKI_HOST}loki/api/v1/label/hh/values`, {
+	return fetch(`${process.env.LOKI_BASE_URL}/loki/api/v1/label/hh/values`, {
 		withCredentials: true,
 		credentials: 'include',
 		headers: {
@@ -27,7 +27,7 @@ function getLokiDomains() {
 }
 
 function deleteLokiLabel(value, label='hh') {
-	return fetch(`${process.env.LOKI_HOST}loki/api/v1/delete?query={${label}="${encodeURIComponent(value)}"}&start=1970-01-01T00:00:00.000Z`, {
+	return fetch(`${process.env.LOKI_BASE_URL}/loki/api/v1/delete?query={${label}="${encodeURIComponent(value)}"}&start=1970-01-01T00:00:00.000Z`, {
 		method: 'POST',
 		withCredentials: true,
 		credentials: 'include',
