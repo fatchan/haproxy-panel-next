@@ -1,15 +1,7 @@
 import express from 'express';
-import session from 'express-session';
-import MongoStore from 'connect-mongo';
 import csrf from 'csurf';
-import OpenAPIClientAxios from 'openapi-client-axios';
-import fetch from 'node-fetch';
-import FormData from 'form-data';
 import ShkeeperManager from './billing/shkeeper.js';
-import * as db from './db.js';
-import { dynamicResponse } from './util.js';
 import definition from './specification_openapiv3.js';
-import update from './update.js';
 import agent from './agent.js';
 
 import * as accountController from './controllers/account.js';
@@ -22,23 +14,21 @@ import * as statsController from './controllers/stats.js';
 import * as templateController from './controllers/templates.js';
 
 import {
-    useSession,
-    fetchSession,
-    checkSession,
-    checkOnboarding,
-    adminCheck
+	useSession,
+	fetchSession,
+	checkSession,
+	checkOnboarding,
+	adminCheck
 } from './lib/middleware/session.js';
 import {
-	useHaproxy
+	getHaproxy
 } from './lib/middleware/haproxy.js';
-
-const dev = process.env.NODE_ENV !== 'production';
 
 export default function router(server, app) {
 	const shkeeperManager = new ShkeeperManager();
 	const csrfMiddleware = csrf();
 	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
-	const haproxyMiddleware = useHaproxy(server, app, clusterUrls, agent, definition);
+	const haproxyMiddleware = getHaproxy(server, app, clusterUrls, agent, definition);
 
 	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, _next) => {

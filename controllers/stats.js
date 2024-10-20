@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
-import { statsFetch, processStatusChartData, processHostnameChartData, processTrafficChartData, processBotcheckChartData } from '../stats/lib.js';
+import { statsFetch, processStatusChartData, processHostnameChartData, processTrafficChartData, processBotcheckChartData } from '../lib/stats.js';
 
 async function statsData(_req, res, _next) {
 	const regexPattern = res.locals.user.domains.map(domain => domain.replace(/\./g, '\\\\.')).join('|');

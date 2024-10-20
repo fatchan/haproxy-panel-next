@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
 	AreaChart,
 	Area,
@@ -8,6 +10,8 @@ import {
 	ResponsiveContainer,
 	Legend,
 } from 'recharts';
+
+import CustomTooltip from './CustomTooltip.js';
 
 import { useMemo } from 'react';
 
@@ -59,14 +63,26 @@ const simpleStringToColor = str => {
 };
 
 const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter }) => {
-	const seriesKeys = Object.entries(data)
+	const seriesKeys = [...Object.entries(data)
 		.reduce((acc, en) => {
 			Object.keys(en[1]).filter(x => x !== 'time').forEach(x => acc.add(x));
 			return acc;
-		}, new Set([]));
-	const sortedSeriesKeys = [...seriesKeys]
-		.sort((a, b) => a.toString().localeCompare(b.toString()));
+		}, new Set([]))];
 	const chartKey = useMemo(() => JSON.stringify(data), [data]); //slow?
+
+	const [activeSeries, setActiveSeries] = useState(new Set(seriesKeys));
+
+	const toggleSeries = (seriesKey) => {
+		setActiveSeries((prevActive) => {
+			const newActive = new Set(prevActive);
+			if (newActive.has(seriesKey)) {
+				newActive.delete(seriesKey);
+			} else {
+				newActive.add(seriesKey);
+			}
+			return newActive;
+		});
+	};
 	return (
 		<div className='rounded-border p-3' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
 			<p style={{ color: 'var(--bs-body-color)' }}>{title}</p>
@@ -86,26 +102,45 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 						tick={{ fontSize:'12', textAnchor: 'end' }}
 					/>
 					<Tooltip
-						contentStyle={{
-							background: 'var(--bs-body-bg)',
-							border: '1px solid var(--bs-border-color-translucent)'
-						}}
 						animationEasing='ease'
 						formatter={formatter||null}
+						content={<CustomTooltip />}
 					/>
 					<CartesianGrid strokeDasharray='3 3' stroke='var(--bs-border-color-translucent)' />
-					{sortedSeriesKeys.map(series => (
-						<Area
-							isAnimationActive={false}
-							key={series}
-							type='linear'
-							dataKey={series}
-							stroke={colors[series] || simpleStringToColor(series)}
-							fill={fill ? (colors[series] || simpleStringToColor(series)) : '#ffffff20'}
-							stackId={stack ? 'a' : undefined}
-						/>
+					{seriesKeys.map(series => (
+						activeSeries.has(series) && (
+							<Area
+								isAnimationActive={false}
+								key={series}
+								type='linear'
+								dataKey={series}
+								stroke={colors[series] || simpleStringToColor(series)}
+								fill={fill ? (colors[series] || simpleStringToColor(series)) : '#ffffff20'}
+								stackId={stack ? 'a' : undefined}
+							/>
+						)
 					))}
-					<Legend />
+					<Legend
+						payload={seriesKeys.map(x => ({
+							value: x,
+							type: 'line',
+							color: !activeSeries.has(x) ? '#444' : (colors[x] || simpleStringToColor(x)),
+						}))}
+						formatter={(value) => {
+						    const isActive = activeSeries.has(value);
+						    return (
+						        <span
+						            style={{
+						                cursor: 'pointer',
+						                color: isActive ? undefined : '#444',
+						            }}
+						            onClick={() => toggleSeries(value)}
+						        >
+						            {value}
+						        </span>
+						    );
+						}}
+					/>
 				</AreaChart>
 			</ResponsiveContainer>
 		</div>
