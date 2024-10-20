@@ -19,184 +19,26 @@ import * as dnsController from './controllers/dns.js';
 import * as domainsController from './controllers/domains.js';
 import * as billingController from './controllers/billing.js';
 import * as statsController from './controllers/stats.js';
+import * as templateController from './controllers/templates.js';
+
+import {
+    useSession,
+    fetchSession,
+    checkSession,
+    checkOnboarding,
+    adminCheck
+} from './lib/middleware/session.js';
+import {
+	useHaproxy
+} from './lib/middleware/haproxy.js';
 
 const dev = process.env.NODE_ENV !== 'production';
 
 export default function router(server, app) {
 	const shkeeperManager = new ShkeeperManager();
-	const sessionStore = session({
-		secret: process.env.COOKIE_SECRET,
-		store: MongoStore.create({ mongoUrl: process.env.DB_URL }),
-		resave: false,
-		saveUninitialized: false,
-		rolling: true,
-		cookie: {
-			httpOnly: true,
-			secure: !dev, //TODO: check https
-			sameSite: 'strict',
-			maxAge: 1000 * 60 * 60 * 24 * 30, //month
-		},
-	});
-
-	const useSession = (req, res, next) => {
-		sessionStore(req, res, next);
-	};
-
-	const fetchSession = async (req, res, next) => {
-		if (req.session.user) {
-			const account = await db.db().collection('accounts')
-				.findOne({ _id: req.session.user });
-			if (account) {
-				const numCerts = await db.db().collection('certs')
-					.countDocuments({ username: account._id });
-				res.locals.user = {
-					username: account._id,
-					domains: account.domains,
-					onboarding: account.onboarding,
-					allowedTemplates: account.allowedTemplates,
-					numCerts,
-				};
-				return next();
-			}
-			req.session.destroy();
-		}
-		next();
-	};
-
-	const checkSession = (req, res, next) => {
-		if (!res.locals.user) {
-			return dynamicResponse(req, res, 302, { redirect: '/login' });
-		}
-		next();
-	};
-
-	const checkOnboarding = (req, res, next) => {
-		if (res.locals.user && res.locals.user.onboarding === false) {
-			return dynamicResponse(req, res, 302, { redirect: '/onboarding' });
-		}
-		next();
-	};
-
 	const csrfMiddleware = csrf();
-
 	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
-
-	//dataplaneapi middleware
-	const useHaproxy = (req, res, next) => {
-		try {
-			res.locals.fMap = server.locals.fMap;
-			res.locals.mapValueNames = server.locals.mapValueNames;
-			const firstClusterURL = clusterUrls[0];
-
-			//NOTE: all servers in cluster must have same credentials for now
-			const base64Auth = Buffer.from(
-				`${firstClusterURL.username}:${firstClusterURL.password}`,
-			).toString('base64');
-			const api = new OpenAPIClientAxios.default({
-				//definition: `${firstClusterURL.origin}/v3/specification_openapiv3`,
-				definition,
-				axiosConfigDefaults: {
-					httpsAgent: agent,
-					headers: {
-						'authorization': `Basic ${base64Auth}`,
-					},
-				},
-			});
-			const apiInstance = api.initSync();
-			apiInstance.defaults.baseURL = `${firstClusterURL.origin}/v3`;
-			res.locals.dataPlane = apiInstance;
-			async function dataPlaneRetry(operationId, ...args) {
-				let retryCnt = 0;
-				console.log('dataplaneRetry', retryCnt, 'operation:', operationId);
-				function run() {
-					return apiInstance[operationId](...args).catch(function (err) {
-						console.warn('dataplaneRetry error', retryCnt, 'error:', err);
-						if (
-							operationId === 'getRuntimeMapEntry' && err && err.response &&
-							err.response.data && err.response.data.code === 404
-						) {
-							return null;
-						}
-						++retryCnt;
-						console.error(
-							'dataPlaneRetry retry',
-							retryCnt,
-							' after error',
-							err,
-						);
-						console.trace();
-						apiInstance.defaults.baseURL = `${clusterUrls[retryCnt].origin}/v3`;
-						if (retryCnt > clusterUrls.length - 1) {
-							console.error(
-								'Max retries exceeded in dataPlaneRetry',
-								err.message,
-							);
-							throw err;
-						}
-						return run();
-					});
-				}
-				return run();
-			}
-			res.locals.dataPlaneRetry = dataPlaneRetry;
-
-			res.locals.dataPlaneAll = async (
-				operationId,
-				parameters,
-				data,
-				config,
-				all = false,
-				blocking = true,
-			) => {
-				const promiseResults = await Promise[blocking ? 'all' : 'any'](
-					clusterUrls.map(async (clusterUrl) => {
-						const singleApi = new OpenAPIClientAxios.default({
-							definition,
-							axiosConfigDefaults: {
-								httpsAgent: agent,
-								headers: { 'authorization': `Basic ${base64Auth}` },
-							},
-						});
-						const singleApiInstance = singleApi.initSync();
-						singleApiInstance.defaults.baseURL = `${clusterUrl.origin}/v3`;
-						console.time(`dataplaneAll ${clusterUrl.origin} ${operationId}`);
-						let singleRes;
-						try {
-							singleRes = await singleApiInstance[operationId](parameters, data, {
-								...config,
-								baseUrl: `${clusterUrl.origin}/v3`,
-							});
-						} catch(e) {
-							return e;
-						}
-						console.timeEnd(`dataplaneAll ${clusterUrl.origin} ${operationId}`);
-						return singleRes;
-					}),
-				);
-				console.log('dataplaneAll return, blocking:', blocking);
-				return (all && blocking) ? promiseResults.map((p) => p.data) : promiseResults[0]; //TODO: better desync handling
-			};
-			res.locals.postFileAll = async (path, options, file, fdOptions) => {
-				//used  for stuff that dataplaneapi with axios seems to struggle with e.g. multipart body
-				const promiseResults = await Promise.all(
-					clusterUrls.map((clusterUrl) => {
-						const fd = new FormData(); //must resonctruct each time, or get a socket hang up
-						fd.append('file_upload', file, fdOptions);
-						return fetch(`${clusterUrl.origin}${path}`, {
-							...options,
-							body: fd,
-							agent,
-						}).then((resp) => resp.json());
-					}),
-				);
-				return promiseResults[0]; //TODO: better desync handling
-			};
-			next();
-		} catch (e) {
-			console.error(e);
-			return dynamicResponse(req, res, 500, { error: e });
-		}
-	};
+	const haproxyMiddleware = useHaproxy(server, app, clusterUrls, agent, definition);
 
 	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, _next) => {
@@ -253,7 +95,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.accountPage.bind(null, app),
 	);
@@ -262,7 +104,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.onboardingPage.bind(null, app),
 	);
@@ -272,7 +114,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.accountJson,
 	);
@@ -281,7 +123,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.onboardingJson,
 	);
@@ -324,7 +166,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		mapsController.mapPage.bind(null, app),
 	);
@@ -334,7 +176,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		mapsController.mapJson,
 	);
@@ -416,7 +258,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		certsController.certsPage.bind(null, app),
 	);
@@ -426,7 +268,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		certsController.certsJson,
 	);
@@ -437,7 +279,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.globalToggle,
 	);
@@ -446,7 +288,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		mapsController.patchMapForm,
 	);
@@ -455,7 +297,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		mapsController.deleteMapForm,
 	);
@@ -480,7 +322,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		domainsController.addDomain,
 	);
@@ -489,7 +331,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		domainsController.deleteDomain,
 	);
@@ -498,7 +340,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		certsController.addCert,
 	);
@@ -507,7 +349,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		certsController.uploadCert,
 	);
@@ -516,7 +358,7 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		useHaproxy,
+		haproxyMiddleware,
 		csrfMiddleware,
 		certsController.deleteCert,
 	);
@@ -527,82 +369,6 @@ export default function router(server, app) {
 		checkSession,
 		csrfMiddleware,
 		certsController.verifyUserCSR,
-	);
-	clusterRouter.post(
-		'/template',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		async (req, res, _next) => {
-			if (res.locals.user.username !== 'admin') {
-				return dynamicResponse(req, res, 403, { error: 'No permission' });
-			}
-			if (!Array.isArray(req.body.templates) || req.body.templates.length === 0) {
-				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
-			}
-			const { type, template, data } = req.body.templates[0];
-			if (!type || !template || !data) { //good enough for admin only route
-				return dynamicResponse(req, res, 403, { error: 'Invalid input' });
-			}
-			const templateNames = req.body.templates.map(x => x.template);
-			for (const rec of req.body.templates) {
-				//upsert all the templates
-				await db.db().collection('templates').updateOne({
-					type: rec.type,
-					template: rec.template,
-				}, {
-					$set: {
-						type: rec.type,
-						template: rec.template,
-						data: rec.data,
-					},
-				}, { upsert: true });
-			}
-			//delete any no longer existing templates
-			await db.db().collection('templates').deleteMany({
-				type: type,
-				template: { $nin: templateNames }
-			});
-			return res.json({ ok: true });
-		},
-	);
-	clusterRouter.post(
-		'/update',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		async (req, res, _next) => {
-			if (res.locals.user.username !== 'admin') {
-				return dynamicResponse(req, res, 403, { error: 'No permission' });
-			}
-			await update();
-			return res.json({ ok: true });
-		},
-	);
-	clusterRouter.post(
-		'/down',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		async (req, res, _next) => {
-			if (res.locals.user.username !== 'admin') {
-				return dynamicResponse(req, res, 403, { error: 'No permission' });
-			}
-			const ips = req.body.ips.filter((x) => x && x.length > 0);
-			if (ips.length === 0) {
-				await db.db().collection('down').updateOne({ _id: 'down' }, {
-					$set: { ips: [] },
-				}, { upsert: true });
-			} else {
-				await db.db().collection('down').updateOne({ _id: 'down' }, {
-					$addToSet: { ips: { '$each': ips } },
-				}, { upsert: true });
-			}
-			return res.json({ ok: true });
-		},
 	);
 	clusterRouter.get(
 		'/csrf',
@@ -615,7 +381,36 @@ export default function router(server, app) {
 		},
 	);
 
-	//wip billing
+	// admin template stuff
+	clusterRouter.post(
+		'/template',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		adminCheck,
+		templateController.upsertTemplates
+	);
+	clusterRouter.post(
+		'/update',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		adminCheck,
+		templateController.update
+	);
+	clusterRouter.post(
+		'/down',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		adminCheck,
+		templateController.updateDownIPs
+	);
+
+	// billing
 	clusterRouter.post(
 		'/billing/payment_request',
 		useSession,
