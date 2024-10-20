@@ -55,7 +55,7 @@ export const sections = [
 		icon: 'bi-brush',
 		links: [
 			{ href: '/map/images', label: 'Images', icon: 'bi-card-image' },
-			{ href: '/map/css', label: 'CSS', icon: 'bi-filetype-css', disabled: true, badge: 'coming soon' },
+			{ href: '/map/css', label: 'CSS', icon: 'bi-filetype-css' },
 			{ href: '/map/translation', label: 'Custom Translations', icon: 'bi-translate', disabled: true, badge: 'coming soon' },
 		],
 	},

@@ -16,7 +16,7 @@ const continentMap = {
 
 export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 
-	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.HOSTS_MAP_NAME })
+	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
 		.then(res => res.data)
 		.then(res => {
 			return res.map(e => {
@@ -32,7 +32,7 @@ export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 	if (existingEntry) {
 		//theres already another backend with this IP, check domtoacc mapping
 		const backendMapEntry = await dataPlaneRetry('getRuntimeMapEntry', {
-			map: process.env.DOMTOACC_MAP_NAME,
+			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			id: existingEntry.domain,
 		})
 			.then(res => res.data);
@@ -82,23 +82,23 @@ export async function mapData(req, res, next) {
 	}
 
 	switch (req.params.name) {
-		case process.env.DDOS_MAP_NAME:
-		case process.env.DDOS_CONFIG_MAP_NAME:
+		case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
+		case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
 			map = map.map(a => {
 				a.value = JSON.parse(a.value);
 				return a;
 			});
 			/* falls through */
-		case process.env.REWRITE_MAP_NAME:
-		case process.env.REDIRECT_MAP_NAME:
-		case 'images':
+		case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
+		case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
+		case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
 			map = map.filter(a => {
 				const { pathname } = url.parse(`https://${a.key}`);
-				const isImages = req.params.name === 'images';
+				const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
 				const isPowIconPath = pathname === '/.basedflare/pow-icon';
 				return isImages ? isPowIconPath : !isPowIconPath;
 			});
-			if (req.params.name === 'images') {
+			if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 				map = map.map(a => {
 					return {
 						...a,
@@ -116,23 +116,23 @@ export async function mapData(req, res, next) {
 			}
 			showValues = true;
 			/* falls through */
-		case process.env.BACKENDS_MAP_NAME:
-		case process.env.HOSTS_MAP_NAME:
+		case process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME:
+		case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
 			if (process.env.CUSTOM_BACKENDS_ENABLED) {
 				showValues = true;
 			}
 			/* falls through */
-		case process.env.MAINTENANCE_MAP_NAME:
+		case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
 				const { hostname } = url.parse(`https://${a.key}`);
 				return res.locals.user.domains.includes(hostname);
 			});
 			break;
-		case process.env.BLOCKED_IP_MAP_NAME:
-		case process.env.BLOCKED_ASN_MAP_NAME:
-		case process.env.BLOCKED_CC_MAP_NAME:
-		case process.env.BLOCKED_CN_MAP_NAME:
-		case process.env.WHITELIST_MAP_NAME:
+		case process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME:
+		case process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME:
+		case process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME:
+		case process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME:
+		case process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME:
 			map = map
 				.filter(a => {
 					return a.value && a.value.split(':').includes(res.locals.user.username);
@@ -180,11 +180,11 @@ export async function deleteMapForm(req, res, next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid note' });
 	}
 	const mapName = metaMapMapping[req.params.name] || req.params.name;
-	if (req.params.name === process.env.BLOCKED_IP_MAP_NAME
-		|| req.params.name === process.env.BLOCKED_ASN_MAP_NAME
-		|| req.params.name === process.env.BLOCKED_CC_MAP_NAME
-		|| req.params.name === process.env.BLOCKED_CN_MAP_NAME
-		|| req.params.name === process.env.WHITELIST_MAP_NAME) {
+	if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
 		let value;
 		const existingEntries = await res.locals
 			.dataPlaneRetry('showRuntimeMap', {
@@ -225,29 +225,29 @@ export async function deleteMapForm(req, res, next) {
 				return next(e);
 			}
 		}
-	} else if (req.params.name === process.env.HOSTS_MAP_NAME
-		|| req.params.name === process.env.DDOS_MAP_NAME
-		|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
-		|| req.params.name === process.env.MAINTENANCE_MAP_NAME
-		|| req.params.name === process.env.REDIRECT_MAP_NAME
-		|| req.params.name === process.env.REWRITE_MAP_NAME
-		|| req.params.name === 'images') {
+	} else if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
+		|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 		const { hostname } = url.parse(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
 			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 		}
 		//TODO: handle for other image types and make dynamic for e.g. css, translations map(s)
-		if (req.params.name === 'images') {
+		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			//tood: handle for images other than bot-check
 			req.body.key = `${hostname}/.basedflare/pow-icon`;
 		}
 		try {
-			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
+			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
 				const backendEntries = await res.locals
 					.dataPlaneRetry('showRuntimeMap', {
-						map: process.env.BACKENDS_MAP_NAME,
+						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					})
 					.then((res) => res.data);
 				const matchingBackends = backendEntries
@@ -262,7 +262,7 @@ export async function deleteMapForm(req, res, next) {
 							}, null, null, false, true),
 						res.locals
 							.dataPlaneAll('deleteRuntimeMapEntry', {
-								map: process.env.BACKENDS_MAP_NAME,
+								map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 								id: mb.key, //'example.com'
 							}, null, null, false, true)
 					]);
@@ -295,13 +295,13 @@ export async function patchMapForm(req, res, next) {
 		const mapName = metaMapMapping[req.params.name] || req.params.name;
 
 		//validate key is domain
-		if (req.params.name === process.env.DDOS_MAP_NAME
-			|| req.params.name === process.env.DDOS_CONFIG_MAP_NAME
-			|| req.params.name === process.env.HOSTS_MAP_NAME
-			|| req.params.name === process.env.MAINTENANCE_MAP_NAME
-			|| req.params.name === process.env.REDIRECT_MAP_NAME
-			|| req.params.name === process.env.REWRITE_MAP_NAME
-			|| req.params.name === 'images') {
+		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			const { hostname } = url.parse(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
@@ -309,7 +309,7 @@ export async function patchMapForm(req, res, next) {
 			}
 		}
 
-		if (req.params.name === 'images') {
+		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			//TODO: update once more image types are available, refactor mapping to reuse logic in delete map endpoint
 			if (req.body.image !== 'bot-check') {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -319,8 +319,8 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate key is valid ip address
-		if (req.params.name === process.env.BLOCKED_IP_MAP_NAME
-			|| req.params.name === process.env.WHITELIST_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
 			let parsedIp, parsedSubnet;
 			try {
 				parsedIp = parse(req.body.key);
@@ -336,7 +336,7 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate key is ASN
-		if (req.params.name === process.env.BLOCKED_ASN_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME) {
 			if (!/^\d+$/.test(req.body.key)) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid ASN' });
 			}
@@ -344,7 +344,7 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate key is country code
-		if (req.params.name === process.env.BLOCKED_CC_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME) {
 			if (!countryMap[req.body.key]) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid country code' });
 			}
@@ -352,7 +352,7 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate key is country code
-		if (req.params.name === process.env.BLOCKED_CN_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME) {
 			if (!continentMap[req.body.key]) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid continent code' });
 			}
@@ -360,9 +360,9 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate value is url (roughly)
-		if (req.params.name === process.env.REWRITE_MAP_NAME
-			|| req.params.name === process.env.REDIRECT_MAP_NAME
-			|| req.params.name === 'images') {
+		if (req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
+			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			try {
 				new URL(`http://${req.body.value}`);
 			} catch {
@@ -371,7 +371,7 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate ddos_config
-		if (req.params.name === process.env.DDOS_CONFIG_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME) {
 			const { pd, cex } = req.body;
 			if ((pd && (isNaN(pd) || parseInt(pd, 10) !== +pd || pd < 8))
 				|| (cex && (isNaN(cex) || parseInt(cex, 10) !== +cex))) {
@@ -380,11 +380,11 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate ddos
-		if (req.params.name === process.env.DDOS_MAP_NAME
+		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
 			&& (!req.body.m || !['0', '1', '2'].includes(req.body.m.toString()))) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 		}
-		if (req.params.name === process.env.DDOS_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
 			const { m } = req.body; //t, v, etc
 			if (m && (isNaN(m) || parseInt(m, 10) !== +m || m < 0)) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -392,7 +392,7 @@ export async function patchMapForm(req, res, next) {
 		}
 
 		//validate value is IP:port
-		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
+		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 			let parsedValue;
 			try {
 				parsedValue = url.parse(`https://${req.body.value}`);
@@ -408,23 +408,23 @@ export async function patchMapForm(req, res, next) {
 
 		let value;
 		switch (req.params.name) {
-			case process.env.REWRITE_MAP_NAME:
-			case process.env.REDIRECT_MAP_NAME:
-			case 'images':
+			case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
+			case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
+			case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
 				value = req.body.value;
 				break;
-			case process.env.HOSTS_MAP_NAME:
+			case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
 				if (process.env.CUSTOM_BACKENDS_ENABLED) {
 					value = req.body.value;
 				} else {
 					value = 0;
 				}
 				break;
-			case process.env.BLOCKED_IP_MAP_NAME:
-			case process.env.BLOCKED_ASN_MAP_NAME:
-			case process.env.BLOCKED_CC_MAP_NAME:
-			case process.env.BLOCKED_CN_MAP_NAME:
-			case process.env.WHITELIST_MAP_NAME: {
+			case process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME:
+			case process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME:
+			case process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME:
+			case process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME:
+			case process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME: {
 				const existingEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: req.params.name,
@@ -442,16 +442,16 @@ export async function patchMapForm(req, res, next) {
 				}
 				break;
 			}
-			case process.env.MAINTENANCE_MAP_NAME:
+			case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
 				value = res.locals.user.username;
 				break;
-			case process.env.DDOS_MAP_NAME:
+			case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
 				value = JSON.stringify({
 					m: parseInt(req.body.m || 1, 10),
 					t: req.body.t === true ? true : false,
 				});
 				break;
-			case process.env.DDOS_CONFIG_MAP_NAME:
+			case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
 				value = JSON.stringify({
 					pd: parseInt(req.body.pd || 24, 10),
 					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
@@ -465,7 +465,7 @@ export async function patchMapForm(req, res, next) {
 
 		try {
 
-			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.HOSTS_MAP_NAME) {
+			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				const { hostname: address, port } = new URL(`http://${value}`);
 				const backendAllowed = await backendIpAllowed(res.locals.dataPlaneRetry, res.locals.user.username, address);
 				if (!backendAllowed) {
@@ -473,7 +473,7 @@ export async function patchMapForm(req, res, next) {
 				}
 				const backendMapEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: process.env.BACKENDS_MAP_NAME,
+						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					})
 					.then(res => res.data)
@@ -527,14 +527,14 @@ export async function patchMapForm(req, res, next) {
 					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
 					const fullBackendMap = await res.locals
 						.dataPlaneRetry('showRuntimeMap', {
-							map: process.env.BACKENDS_MAP_NAME
+							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
 						})
 						.then(res => res.data);
 					const fullBackendMapEntry = fullBackendMap
 						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
-							map: process.env.BACKENDS_MAP_NAME,
+							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 							id: req.body.key,
 						}, {
 							value: `${fullBackendMapEntry.value},websrv${freeSlotId}`,
@@ -542,7 +542,7 @@ export async function patchMapForm(req, res, next) {
 				} else {
 					await res.locals
 						.dataPlaneAll('addPayloadRuntimeMap', {
-							name: process.env.BACKENDS_MAP_NAME,
+							name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						}, [{
 							key: req.body.key,
 							value: `websrv${freeSlotId}`,
@@ -550,7 +550,7 @@ export async function patchMapForm(req, res, next) {
 				}
 			}
 
-			const existingEntry = mapName === process.env.HOSTS_MAP_NAME
+			const existingEntry = mapName === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
 				? null
 				: (await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {

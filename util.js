@@ -6,9 +6,11 @@ dotenv.config({ path: '.env' });
 import QRCode from 'qrcode';
 
 export const metaMapMapping = {
-	'images':  process.env.REWRITE_MAP_NAME,
-	'css': null, //TODO
-	'translation': null, //TODO
+	[process.env.NEXT_PUBLIC_IMAGES_MAP_NAME]:  process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+
+	//Note: May not be necessary, these use rela maps not meta maps
+	// 'css': null,
+	// 'translation': null,
 };
 
 export const calculateRemainingHours = (recalculate_after_start, recalculate_after) => {
@@ -53,20 +55,20 @@ export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS||'')
 	.map(x => x.trim());
 
 export const fMap = {
-	[process.env.HOSTS_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_HOSTS_MAP_NAME]: {
 		fname: 'Backends',
 		description: 'Backend IP mappings for domains',
 		columnNames: ['Domain', 'Backend'],
 	},
 
-	[process.env.DDOS_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_DDOS_MAP_NAME]: {
 		fname: 'Protection Rules',
 		description: 'Set protection modes on domains and/or paths',
 		columnNames: ['Domain/Path', 'Mode', 'Tor Exits Only'],
 		columnKeys: ['m', 't'],
 	},
 
-	[process.env.DDOS_CONFIG_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME]: {
 		fname: 'Protection Settings',
 		description: 'Customise protection settings on a per-domain basis',
 		columnNames: [
@@ -79,60 +81,60 @@ export const fMap = {
 		columnKeys: ['pd', 'pt', 'cex', 'cip'],
 	},
 
-	[process.env.BLOCKED_IP_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME]: {
 		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',
 		columnNames: ['IP/Subnet', 'Note'],
 		showAllColumns: true,
 	},
 
-	[process.env.BLOCKED_ASN_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME]: {
 		fname: 'ASN Blacklist',
 		description: 'ASNs that are outright blocked',
 		columnNames: ['AS Number', 'Note'],
 		showAllColumns: true,
 	},
 
-	[process.env.BLOCKED_CC_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME]: {
 		fname: 'Country Blacklist',
 		description: 'Countries that are outright blocked',
 		columnNames: ['Country Code', 'Note'],
 		showAllColumns: true,
 	},
 
-	[process.env.BLOCKED_CN_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME]: {
 		fname: 'Continent Blacklist',
 		description: 'Continents that are outright blocked',
 		columnNames: ['Continent Code', 'Note'],
 		showAllColumns: true,
 	},
 
-	[process.env.WHITELIST_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME]: {
 		fname: 'IP Whitelist',
 		description: 'IPs/subnets that bypass protection rules',
 		columnNames: ['IP/Subnet', 'Note'],
 		showAllColumns: true,
 	},
 
-	[process.env.MAINTENANCE_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME]: {
 		fname: 'Maintenance Mode',
 		description: 'Disable proxying and show maintenance page for selected domains',
 		columnNames: ['Domain', ''],
 	},
 
-	[process.env.REWRITE_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_REWRITE_MAP_NAME]: {
 		fname: 'Rewrites',
 		description: 'Rewrite domain to a different domain and/or path',
 		columnNames: ['Domain', 'Rewrite to'],
 	},
 
-	[process.env.REDIRECT_MAP_NAME]: {
+	[process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME]: {
 		fname: 'Redirects',
 		description: 'Redirect one domain to another, stripping path',
 		columnNames: ['Domain', 'Redirect to'],
 	},
 
-	'images': {
+	[process.env.NEXT_PUBLIC_IMAGES_MAP_NAME]: {
 		name: 'images',
 		fname: 'Images',
 		description: 'Custom image shown on edge pages',
@@ -140,7 +142,7 @@ export const fMap = {
 		columnKeys: ['image', 'value'],
 	},
 
-	'css': {
+	[process.env.NEXT_PUBLIC_CSS_MAP_NAME]: {
 		name: 'css',
 		fname: 'CSS',
 		description: 'Custom CSS for edge pages',

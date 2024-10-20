@@ -117,7 +117,7 @@ export async function addDomain(req, res, next) {
 			});
 		await res.locals
 			.dataPlaneAll('addPayloadRuntimeMap', {
-				name: process.env.DOMTOACC_MAP_NAME,
+				name: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			}, [{
 				key: domain,
 				value: res.locals.user.username,
@@ -164,13 +164,13 @@ export async function deleteDomain(req, res) {
 
 	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
 	const [existingHost, existingMaintenance, existingRewrite, existingDdos] = await Promise.all([
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.HOSTS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.MAINTENANCE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.REWRITE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_REWRITE_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.DDOS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_DDOS_MAP_NAME })
 			.then(res => res.data).then(map => map.some(e => {
 				const { hostname } = url.parse(`https://${e.key}`);
 				return hostname === domain;
@@ -185,7 +185,7 @@ export async function deleteDomain(req, res) {
 		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
 	await res.locals
 		.dataPlaneAll('deleteRuntimeMapEntry', {
-			map: process.env.DOMTOACC_MAP_NAME,
+			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			id: domain,
 		}, null, null, false, false);
 	await redis.del(`dns:${domain}.`);
