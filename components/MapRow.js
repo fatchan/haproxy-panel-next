@@ -99,7 +99,7 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 						</td>
 					)}
 					{typeof value === 'string' && showValues === true && (
-						<td>
+						<td className='overflow-hidden text-truncate' style={{ maxWidth: 500 }}>
 							{mapValueNames[editValue.value] || editValue.value}
 						</td>
 					)}
