@@ -62,7 +62,7 @@ const simpleStringToColor = str => {
 	return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };
 
-const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter }) => {
+const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter, allowVerticalLegend = false }) => {
 	const seriesKeys = [...Object.entries(data)
 		.reduce((acc, en) => {
 			Object.keys(en[1]).filter(x => x !== 'time').forEach(x => acc.add(x));
@@ -83,11 +83,12 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 			return newActive;
 		});
 	};
+
 	return (
 		<div className='rounded-border p-3' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
 			<p style={{ color: 'var(--bs-body-color)' }}>{title}</p>
 			<ResponsiveContainer width='100%' height={400}>
-				<AreaChart isAnimationActive={false} key={chartKey} data={data}>
+				<AreaChart syncId='a' isAnimationActive={false} key={chartKey} data={data}>
 					<XAxis
 						label={xLabel?{value:xLabel}:''}
 						dataKey='time'
@@ -120,27 +121,49 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 							/>
 						)
 					))}
-					<Legend
-						payload={seriesKeys.map(x => ({
-							value: x,
-							type: 'line',
-							color: !activeSeries.has(x) ? '#444' : (colors[x] || simpleStringToColor(x)),
-						}))}
-						formatter={(value) => {
-						    const isActive = activeSeries.has(value);
-						    return (
-						        <span
-						            style={{
-						                cursor: 'pointer',
-						                color: isActive ? undefined : '#444',
-						            }}
-						            onClick={() => toggleSeries(value)}
-						        >
-						            {value}
-						        </span>
-						    );
-						}}
-					/>
+					{(allowVerticalLegend && seriesKeys.length > 5)
+						? (<Legend
+							payload={seriesKeys.map(x => ({
+								value: x,
+								type: 'line',
+								color: activeSeries.has(x) ? (colors[x] || simpleStringToColor(x)) : '#444',
+							}))}
+							content={({ payload }) => (
+								<div style={{ maxHeight: '100px', overflowY: 'auto' }}>
+									{payload.map(({ value, color }) => (
+										<div key={value} style={{ cursor: 'pointer' }} onClick={() => toggleSeries(value)}>
+											<svg width='14' height='12' style={{ marginRight: '5px' }}>
+												<line x1='0' y1='6' x2='14' y2='6' stroke={color} strokeWidth='2' />
+												<circle cx='7' cy='6' r='3' fill={color} />
+												<circle cx='7' cy='6' r='1' fill='var(--bs-body-bg)' />
+											</svg>
+											<span style={{ color }}>{value}</span>
+										</div>
+									))}
+								</div>
+							)}
+
+						/>) : (<Legend
+							payload={seriesKeys.map(x => ({
+								value: x,
+								type: 'line',
+								color: !activeSeries.has(x) ? '#444' : (colors[x] || simpleStringToColor(x)),
+							}))}
+							formatter={(value) => {
+								const isActive = activeSeries.has(value);
+								return (
+									<span
+										style={{
+											cursor: 'pointer',
+											color: isActive ? undefined : '#444',
+										}}
+										onClick={() => toggleSeries(value)}
+									>
+										{value}
+									</span>
+								);
+							}}
+						/>)}
 				</AreaChart>
 			</ResponsiveContainer>
 		</div>

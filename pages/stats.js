@@ -62,6 +62,7 @@ export default function Stats(props) {
 								title={'Hostname Breakdown'}
 								fill={false}
 								formatter={v => Number(v)}
+								allowVerticalLegend={true}
 							/>
 						</div>
 					)}
