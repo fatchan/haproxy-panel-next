@@ -95,26 +95,28 @@ export async function mapData(req, res, next) {
 			}).filter(x => x);
 			/* falls through */
 		case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
-			map = map.map(a => {
-				try {
-					a.value = decodeURIComponent(a.value);
-				} catch(e) {
-					console.warn('Failed to parse map value', a.value);
-					return undefined;
-				}
-				return a;
-			}).filter(x => x);
+			if (req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
+				 map = map.map(a => {
+					try {
+						a.value = decodeURIComponent(a.value);
+					} catch(e) {
+						console.warn('Failed to parse map value', a.value);
+						return undefined;
+					}
+					return a;
+				}).filter(x => x);
+			}
 			/* falls through */
 		case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
 		case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
 		case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
+			const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
 			map = map.filter(a => {
 				const { pathname } = url.parse(`https://${a.key}`);
-				const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
 				const isPowIconPath = pathname === '/.basedflare/pow-icon';
 				return isImages ? isPowIconPath : !isPowIconPath;
 			});
-			if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
+			if (isImages) {
 				map = map.map(a => {
 					return {
 						...a,
@@ -161,7 +163,6 @@ export async function mapData(req, res, next) {
 		default:
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 	}
-
 	return {
 		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'Proof-of-work+Captcha' },
 		mapInfo,
