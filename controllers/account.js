@@ -178,7 +178,7 @@ export async function login(req, res) {
 	const passwordMatch = await bcrypt.compare(password, account.passwordHash);
 	if (passwordMatch === true) {
 		req.session.user = account._id;
-		return dynamicResponse(req, res, 302, { redirect: '/account' });
+		return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
 	}
 	return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 }
@@ -259,6 +259,6 @@ export async function updateOnboarding(req, res) {
 				onboarding: parseInt(step, 10),
 			}
 		});
-	return dynamicResponse(req, res, 302, { redirect: '/account' });
+	return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
 };
 

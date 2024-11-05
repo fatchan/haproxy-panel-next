@@ -23,7 +23,7 @@ export default function Index() {
 			<span className='d-flex'>
 				<div className='me-2'>
 					<Link href='/dashboard' className='btn btn-sm btn-primary'>
-						<i className='bi-person-square pe-none me-2' width='16' height='16' />
+						<i className='bi-house pe-none me-2' width='16' height='16' />
 							Dashboard
 					</Link>
 				</div>
