@@ -166,6 +166,12 @@ export async function globalToggle(req, res, next) {
  * login
  */
 export async function login(req, res) {
+
+	if (!username || typeof username !== 'string' || username.length === 0 || !/^[a-zA-Z0-9]+$/.test(username)
+		|| !password || typeof password !== 'string' || password.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+	}
+
 	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
 	const account = await db.db().collection('accounts').findOne({ _id: username });
@@ -194,6 +200,7 @@ export async function register(req, res) {
 	}
 
 	const username = req.body.username.toLowerCase();
+	const email = req.body.email;
 	const password = req.body.password;
 	const rPassword = req.body.repeat_password;
 
@@ -218,6 +225,7 @@ export async function register(req, res) {
 	await db.db().collection('accounts')
 		.insertOne({
 			_id: username,
+			email,
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],

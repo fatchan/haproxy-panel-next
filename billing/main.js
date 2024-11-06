@@ -1,0 +1,10 @@
+import generateInvoices from './generate.js';
+import * as db from '../db.js';
+import dotenv from 'dotenv';
+await dotenv.config({ path: '.env' });
+
+(async () => {
+	await db.connect();
+	generateInvoices();
+	setInterval(generateInvoices, 3600000);
+})();

@@ -22,6 +22,7 @@ export default function Register() {
 		await API.register({
 			username: e.target.username.value,
 			password: e.target.password.value,
+			email: e.target.email.value,
 			repeat_password: e.target.repeat_password.value,
 		}, null, setError, router);
 	}
@@ -43,6 +44,11 @@ export default function Register() {
 					<div className='mb-2'>
 						<label className='form-label w-100'>Username
 							<input className='form-control' type='text' name='username' maxLength='50' required='required'/>
+						</label>
+					</div>
+					<div className='mb-2'>
+						<label className='form-label w-100'>Email
+							<input className='form-control' type='email' name='email' maxLength='200' required='required'/>
 						</label>
 					</div>
 					<div className='mb-2'>

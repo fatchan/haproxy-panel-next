@@ -47,7 +47,7 @@ export default function Billing(props) {
 	}, [paymentInfo]);
 
 	useEffect(() => {
-		if (!state.invoices) {
+		if (!state || !state.invoices) {
 			updateBilling();
 		}
 	}, []);

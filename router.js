@@ -25,6 +25,7 @@ import {
 } from './lib/middleware/haproxy.js';
 
 export default function router(server, app) {
+
 	const shkeeperManager = new ShkeeperManager();
 	const csrfMiddleware = csrf();
 	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
