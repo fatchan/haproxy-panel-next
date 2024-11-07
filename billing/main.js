@@ -1,4 +1,4 @@
-import generateInvoices from './generate.js';
+import generateInvoices from '../lib/billing/generate.js';
 import * as db from '../db.js';
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
