@@ -58,7 +58,7 @@ export default function Login() {
 					<input className='btn btn-primary w-100' type='submit' value='Login'/>
 				</form>
 				<span className='fs-xs'>Don&apos;t have an account? <Link href='/register'>Register here</Link>.</span>
-				<span className='fs-xs'><Link href='/changepassword'>Forgot your password?</Link></span>
+				<span className='fs-xs'><Link href='/requestchangepassword'>Forgot your password?</Link></span>
 			</span>
 
 		</>

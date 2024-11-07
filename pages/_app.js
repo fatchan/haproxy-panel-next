@@ -7,7 +7,7 @@ import Router from 'next/router';
 import '@fontsource/inter';
 import './global.css';
 
-const loadRoutes = ['/login', '/register', '/changepassword', '/'];
+const loadRoutes = ['/login', '/register', '/changepassword', '/requestchangepassword', '/'];
 NProgress.configure({ showSpinner: false });
 Router.events.on('routeChangeStart', (url) => loadRoutes.includes(url) && NProgress.start());
 Router.events.on('routeChangeComplete', (url) => loadRoutes.includes(url) && NProgress.done());

@@ -1,8 +1,10 @@
 import bcrypt from 'bcrypt';
 import * as db from '../db.js';
 import { extractMap, dynamicResponse } from '../util.js';
+import sendEmail from '../lib/email/send.js';
 import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
+import { randomBytes } from 'node:crypto';
 await dotenv.config({ path: '.env' });
 
 const localNSResolver = new Resolver();
@@ -167,13 +169,14 @@ export async function globalToggle(req, res, next) {
  */
 export async function login(req, res) {
 
+	const username = req.body.username.toLowerCase();
+	const password = req.body.password;
+
 	if (!username || typeof username !== 'string' || username.length === 0 || !/^[a-zA-Z0-9]+$/.test(username)
 		|| !password || typeof password !== 'string' || password.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
 	}
 
-	const username = req.body.username.toLowerCase();
-	const password = req.body.password;
 	const account = await db.db().collection('accounts').findOne({ _id: username });
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
@@ -270,3 +273,68 @@ export async function updateOnboarding(req, res) {
 	return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
 };
 
+/**
+ * POST /forms/requestchangepassword
+ * Verify password reset token and set new password
+ */
+export async function requestPasswordChange(req, res) {
+	const email = req.body.email;
+
+	if (!email || typeof email !== 'string' || email.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid email address' });
+	}
+
+	const account = await db.db().collection('accounts').findOne({ email: email.toLowerCase() });
+	if (account) {
+		const token = randomBytes(32).toString('hex'); //random token
+		const expirationTime = Date.now() + 3600000; // 1 hour from now
+		await db.db().collection('verifications').insertOne({
+			accountId: account._id,
+			token,
+			date: new Date(),
+			type: 'change_password'
+		});
+		const resetLink = `${process.env.FRONTEND_URL}/changepassword?token=${token}`;
+		const emailBody = `To reset your password, please click the link below:\n\n${resetLink}\n\nIf you didn't request this, please ignore this email.`;
+		await sendEmail(email, 'Password Reset Request', emailBody);
+	}
+
+	return dynamicResponse(req, res, 200, { message: 'Check your inbox for instructions to reset your password.' });
+}
+
+/**
+ * POST /forms/changepassword
+ * Verify password reset token and set new password
+ */
+export async function changePassword(req, res) {
+	const { token, password, repeat_password: rPassword } = req.body;
+
+	if (!token || typeof token !== 'string' || token.length === 0
+		|| !password || typeof password !== 'string' || password.length === 0
+		|| !rPassword || typeof rPassword !== 'string' || rPassword.length === 0) {
+		//todo: length limits, make jschan input validator LGPL lib and use here
+		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+	}
+
+	if (password !== rPassword) {
+		return dynamicResponse(req, res, 400, { error: 'Passwords do not match' });
+	}
+
+	const resetToken = await db.db().collection('verifications').findOneAndDelete({
+		token,
+		type: 'change_password'
+	});
+
+	if (!resetToken.value) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid or expired token' });
+	}
+
+	const passwordHash = await bcrypt.hash(password, 12);
+
+	await db.db().collection('accounts').updateOne(
+		{ _id: resetToken.value.accountId }, //username stored in the reset token
+		{ $set: { passwordHash } }
+	);
+
+	return dynamicResponse(req, res, 200, { message: 'Password reset successfully' });
+}

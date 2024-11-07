@@ -1,6 +1,6 @@
 import express from 'express';
 import csrf from 'csurf';
-import ShkeeperManager from './billing/shkeeper.js';
+import ShkeeperManager from './lib/billing/shkeeper.js';
 import definition from './specification_openapiv3.js';
 import agent from './agent.js';
 
@@ -57,6 +57,16 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		accountController.register,
+	);
+	server.post(
+		'/forms/requestchangepassword',
+		useSession,
+		accountController.requestPasswordChange,
+	);
+	server.post(
+		'/forms/changepassword',
+		useSession,
+		accountController.changePassword,
 	);
 
 	const mapNames = [

@@ -16,6 +16,12 @@ export async function updateOnboarding(body, dispatch, errorCallback, router) {
 export async function login(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/login', 'POST', body, dispatch, errorCallback, router);
 }
+export async function requestchangepassword(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/requestchangepassword', 'POST', body, dispatch, errorCallback, router);
+}
+export async function changepassword(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/changepassword', 'POST', body, dispatch, errorCallback, router);
+}
 export async function register(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/register', 'POST', body, dispatch, errorCallback, router);
 }
