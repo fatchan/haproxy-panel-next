@@ -3,7 +3,7 @@ import Link from 'next/link';
 import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
-export default withRouter(function Layout({ children, router }) {
+export default withRouter(function Layout({ children, router, user }) {
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
 	const fullWidth = ['/stats', '/dashboard'].includes(router.pathname);
 	return (
@@ -33,9 +33,12 @@ export default withRouter(function Layout({ children, router }) {
 								</Link>
 								<hr />
 							</span>}
+							{user && user.emailVerified === false && <div className='alert alert-warning' role='alert'>
+								<i className='bi-envelope-exclamation pe-2' width='16' height='16' />
+								Please check your email inbox and click the link to verify your email.
+							</div>}
 							{children}
 						</main>
-
 						<footer className='mt-auto text-center text-muted small'>
 							<hr />
 							<a className='pb-3 fs-xs' href='https://gitgud.io/fatchan/haproxy-panel-next/'>source</a>
