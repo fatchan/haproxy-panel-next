@@ -102,6 +102,15 @@ export default function router(server, app) {
 		checkOnboarding,
 		haproxyMiddleware,
 		csrfMiddleware,
+		accountController.dashboardPage.bind(null, app),
+	);
+	server.get(
+		'/account',
+		useSession,
+		fetchSession,
+		checkSession,
+		checkOnboarding,
+		csrfMiddleware,
 		accountController.accountPage.bind(null, app),
 	);
 	server.get(

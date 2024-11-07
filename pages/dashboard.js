@@ -12,6 +12,7 @@ export default function DashboardHome(props) {
 
 	const { globalAcl, csrf, user } = state || {};
 	const domainCount = user?.domains?.length || 0;
+	const isAdmin = user && user.username === 'admin';
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
@@ -49,7 +50,7 @@ export default function DashboardHome(props) {
 			<div className='container col-sm-12 col-xl-8 mx-auto'>
 
 				{/* Global Override Card */}
-				<div className='card mb-4'>
+				{isAdmin && <div className='card mb-4'>
 					<div className='card-body d-flex align-items-center'>
 						<div className='ms-2 me-auto d-flex align-items-center gap-2'>
 							<span className='fw-bold'>Global Override</span>
@@ -73,7 +74,7 @@ export default function DashboardHome(props) {
 							{globalAcl ? 'ON' : 'OFF'}
 						</div>
 					</div>
-				</div>
+				</div>}
 
 				{/* Grid layout for links */}
 				<div className='row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 text-center'>
@@ -117,16 +118,6 @@ export default function DashboardHome(props) {
 						</Link>
 					</div>
 
-					{/* Billing */}
-					<div className='col'>
-						<Link href='/billing' className='card text-decoration-none bg-light'>
-							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
-								<i className='bi bi-credit-card fs-2'></i>
-								<h5 className='card-title'>Billing</h5>
-							</div>
-						</Link>
-					</div>
-
 					{/* Statistics Card */}
 					<div className='col'>
 						<Link href='/stats' className='card text-decoration-none bg-light'>
@@ -140,15 +131,35 @@ export default function DashboardHome(props) {
 						</Link>
 					</div>
 
-					{/* Downed IPs */}
+					{/* Account */}
 					<div className='col'>
+						<Link href='/account' className='card text-decoration-none bg-light'>
+							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
+								<i className='bi bi-person fs-2'></i>
+								<h5 className='card-title'>Account</h5>
+							</div>
+						</Link>
+					</div>
+
+					{/* Billing */}
+					<div className='col'>
+						<Link href='/billing' className='card text-decoration-none bg-light'>
+							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
+								<i className='bi bi-credit-card fs-2'></i>
+								<h5 className='card-title'>Billing</h5>
+							</div>
+						</Link>
+					</div>
+
+					{/* Downed IPs */}
+					{isAdmin && <div className='col'>
 						<Link href='/down' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-arrow-down-square fs-2'></i>
 								<h5 className='card-title'>Downed IPs</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 				</div>
 			</div>

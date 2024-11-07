@@ -87,10 +87,20 @@ export async function onboardingData(req, res, _next) {
 }
 
 /**
- * GET /dashboard
+ * GET /account
  * account page html
  */
 export async function accountPage(app, req, res, next) {
+	const data = await accountData(req, res, next);
+	res.locals.data = { ...data, user: res.locals.user };
+	return app.render(req, res, '/account');
+}
+
+/**
+ * GET /dashboard
+ * account page html
+ */
+export async function dashboardPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, '/dashboard');
