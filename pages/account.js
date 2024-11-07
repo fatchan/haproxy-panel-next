@@ -9,7 +9,7 @@ export default function AccountPage(props) {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-	const { user, csrf } = state || {};
+	const { user } = state || {};
 
 	useEffect(() => {
 		API.getAccount(dispatch, setError, router);
