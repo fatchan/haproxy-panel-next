@@ -25,7 +25,7 @@ export default function ChangePassword() {
 			repeat_password: e.target.repeat_password.value,
 			token,
 		}, () => {
-			router.push('/login?newpassword=1');
+			router.push('/login?change_password=1');
 		}, setError, router);
 	}
 

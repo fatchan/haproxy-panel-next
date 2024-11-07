@@ -10,12 +10,15 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import * as API from '../api.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import InfoAlert from '../components/InfoAlert.js';
 import { useState } from 'react';
 
 export default function Login() {
 
 	const router = useRouter();
 	const [error, setError] = useState();
+
+	const { verify_email, change_password } = router.query || {};
 
 	async function login(e) {
 		e.preventDefault();
@@ -38,6 +41,9 @@ export default function Login() {
 					<ResolvedImage src='/favicon.ico' width='24' height='24' alt=' ' />
 					<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
 				</Link>
+				{/*todo: refactor*/}
+				{verify_email && <InfoAlert>Email verified successfully, you may now login</InfoAlert>}
+				{change_password && <InfoAlert>Password updated successfully, you may now login</InfoAlert>}
 				<form className='mb-3' onSubmit={login} action='/forms/login' method='POST'>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Username

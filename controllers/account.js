@@ -181,6 +181,9 @@ export async function login(req, res) {
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 	}
+	// if (account.emailVerified !== true) {
+	// 	return dynamicResponse(req, res, 400, { error: 'Check your inbox to verify your email first' });
+	// }
 	if (account.inactive === true) {
 		return dynamicResponse(req, res, 403, { error: 'Your account has been suspended for inactivity, please contact support.' });
 	}
@@ -229,6 +232,7 @@ export async function register(req, res) {
 		.insertOne({
 			_id: username,
 			email,
+			emailVerified: false,
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
@@ -237,7 +241,18 @@ export async function register(req, res) {
 			maxDomains: 5,
 		});
 
-	return dynamicResponse(req, res, 302, { redirect: '/login' });
+	const token = randomBytes(32).toString('hex');
+	await db.db().collection('verifications').insertOne({
+		accountId: username,
+		token,
+		date: new Date(),
+		type: 'verify_email'
+	});
+	const verifyLink = `${process.env.FRONTEND_URL}/verifyemail?token=${token}`;
+	const emailBody = `To verify your email and complete registration, please click the link below:\n\n${verifyLink}\n\nIf you didn't request this, please ignore this email.`;
+	await sendEmail(email, 'Complete Your Registration', emailBody);
+
+	return dynamicResponse(req, res, 200, { message: 'Check your email inbox and follow the instructions to complete registration' });
 
 };
 
@@ -287,7 +302,6 @@ export async function requestPasswordChange(req, res) {
 	const account = await db.db().collection('accounts').findOne({ email: email.toLowerCase() });
 	if (account) {
 		const token = randomBytes(32).toString('hex'); //random token
-		const expirationTime = Date.now() + 3600000; // 1 hour from now
 		await db.db().collection('verifications').insertOne({
 			accountId: account._id,
 			token,
@@ -325,16 +339,52 @@ export async function changePassword(req, res) {
 		type: 'change_password'
 	});
 
-	if (!resetToken.value) {
+	if (!resetToken || !resetToken.value) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid or expired token' });
 	}
 
 	const passwordHash = await bcrypt.hash(password, 12);
 
 	await db.db().collection('accounts').updateOne(
-		{ _id: resetToken.value.accountId }, //username stored in the reset token
-		{ $set: { passwordHash } }
+		{
+			_id: resetToken.value.accountId
+		},
+		{
+			$set: {
+				passwordHash,
+				emailVerified: true //also sets email to verified in case of missed/broken account verification email
+			}
+		}
 	);
 
 	return dynamicResponse(req, res, 200, { message: 'Password reset successfully' });
+}
+
+/**
+ * POST /forms/verifyemail
+ * Verify email after registration
+ */
+export async function verifyEmail(req, res) {
+	const { token } = req.body;
+
+	if (!token || typeof token !== 'string' || token.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+	}
+
+	const verifyToken = await db.db().collection('verifications').findOneAndDelete({
+		token,
+		type: 'verify_email' //todo: put consts in lib
+	});
+
+	if (!verifyToken || !verifyToken.value) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid or expired token' });
+	}
+
+	await db.db().collection('accounts').updateOne(
+		{ _id: verifyToken.value.accountId }, //username stored in the reset token
+		{ $set: { emailVerified: true } }
+	);
+
+	return dynamicResponse(req, res, 302, { redirect: '/login' });
+
 }

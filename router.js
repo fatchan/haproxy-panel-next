@@ -68,6 +68,11 @@ export default function router(server, app) {
 		useSession,
 		accountController.changePassword,
 	);
+	server.post(
+		'/forms/verifyemail',
+		useSession,
+		accountController.verifyEmail,
+	);
 
 	const mapNames = [
 			process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,

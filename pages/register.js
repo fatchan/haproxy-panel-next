@@ -10,12 +10,14 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import * as API from '../api.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import InfoAlert from '../components/InfoAlert.js';
 import { useState } from 'react';
 
 export default function Register() {
 
 	const router = useRouter();
 	const [error, setError] = useState();
+	const [state, dispatch] = useState();
 
 	async function register(e) {
 		e.preventDefault();
@@ -24,7 +26,7 @@ export default function Register() {
 			password: e.target.password.value,
 			email: e.target.email.value,
 			repeat_password: e.target.repeat_password.value,
-		}, null, setError, router);
+		}, dispatch, setError, router);
 	}
 
 	return (
@@ -40,6 +42,7 @@ export default function Register() {
 					<ResolvedImage src='/favicon.ico' width='24' height='24' alt=' ' />
 					<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
 				</Link>
+				<div>{state && <InfoAlert>{state.message}</InfoAlert>}</div>
 				<form className='mb-3' onSubmit={register} action='/forms/register' method='POST'>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Username

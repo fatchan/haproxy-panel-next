@@ -4,7 +4,7 @@ import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 
 export default withRouter(function Layout({ children, router }) {
-	const noSidebar = ['/tos', '/login', '/register', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
+	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
 	const fullWidth = ['/stats', '/dashboard'].includes(router.pathname);
 	return (
 		<>

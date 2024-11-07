@@ -22,6 +22,9 @@ export async function requestchangepassword(body, dispatch, errorCallback, route
 export async function changepassword(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/changepassword', 'POST', body, dispatch, errorCallback, router);
 }
+export async function verifyemail(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/verifyemail', 'POST', body, dispatch, errorCallback, router);
+}
 export async function register(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/register', 'POST', body, dispatch, errorCallback, router);
 }
