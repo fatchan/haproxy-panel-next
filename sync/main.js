@@ -101,6 +101,7 @@ const MAPS_TO_SYNC = new Set([
 	'redirect.map',
 	'rewrite.map',
 	'whitelist.map',
+	'css.map'
 ]);
 
 const mapCountsEqual = (obj1, obj2) => Object
