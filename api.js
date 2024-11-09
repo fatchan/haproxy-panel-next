@@ -106,8 +106,9 @@ export async function deleteFromMap(mapName, body, dispatch, errorCallback, rout
 }
 
 // Stats
-export async function getStats(dispatch, errorCallback, router) {
-	return ApiCall('/stats.json', 'GET', null, dispatch, errorCallback, router);
+export async function getStats(body, dispatch, errorCallback, router) {
+	const queryString = new URLSearchParams(body);
+	return ApiCall(`/stats.json?${queryString.toString()}`, 'GET', null, dispatch, errorCallback, router);
 }
 
 // Global toggle
