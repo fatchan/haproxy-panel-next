@@ -395,6 +395,6 @@ export async function verifyEmail(req, res) {
 		{ $set: { emailVerified: true } }
 	);
 
-	return dynamicResponse(req, res, 302, { redirect: '/login' });
+	return dynamicResponse(req, res, 302, { redirect: '/login?verify_email=1' });
 
 }

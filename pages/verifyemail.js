@@ -20,9 +20,7 @@ export default function VerifyEmil() {
 	async function verifyEmail() {
 		await API.verifyemail({
 			token,
-		}, () => {
-			router.push('/login?verify_email=1');
-		}, setError, router);
+		}, null, setError, router);
 	}
 
 	useEffect(() => {
@@ -43,7 +41,7 @@ export default function VerifyEmil() {
 					<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
 				</Link>
 				<div className='d-flex flex-column'>
-					{false
+					{error
 						? <ErrorAlert error={error} />
 						: <span>
 							Verifying email...
