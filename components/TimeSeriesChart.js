@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/router';
 
 import {
 	AreaChart,
@@ -12,8 +13,7 @@ import {
 } from 'recharts';
 
 import CustomTooltip from './CustomTooltip.js';
-
-import { useMemo } from 'react';
+import * as API from '../api.js';
 
 const colors = {
 	'-1': '#ffffff',
@@ -54,7 +54,7 @@ const simpleStringToColor = str => {
 	let r = (color >> 16) & 0xff;
 	let g = (color >> 8) & 0xff;
 	let b = color & 0xff;
-    //mix with middle grey color to make less saturated
+	//mix with middle grey color to make less saturated
 	const blendFactor = 0.6;
 	r = Math.floor(r * blendFactor + 127 * (1 - blendFactor));
 	g = Math.floor(g * blendFactor + 127 * (1 - blendFactor));
@@ -62,30 +62,61 @@ const simpleStringToColor = str => {
 	return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };
 
-const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLabel, formatter, allowVerticalLegend = false }) => {
-	const seriesKeys = [...Object.entries(data)
-		.reduce((acc, en) => {
-			Object.keys(en[1]).filter(x => x !== 'time').forEach(x => acc.add(x));
-			return acc;
-		}, new Set([]))];
+const TimeSeriesChart = ({ _data = {}, queryOptions, title, stack = false, fill = true, yLabel, xLabel, formatter, allowVerticalLegend = false }) => {
+
+	const router = useRouter();
+	const [data, dispatch] = useState(_data);
+	const [loading, setLoading] = useState(false);
+	const [_error, setError] = useState();
+
+	const seriesKeys = useMemo(() => {
+		return [...Object.entries(data)
+			.reduce((acc, en) => {
+				Object.keys(en[1]).filter(x => x !== 'time').forEach(x => acc.add(x));
+				return acc;
+			}, new Set([]))];
+	}, [data]);
 	const chartKey = useMemo(() => JSON.stringify(data), [data]); //slow?
 
-	const [activeSeries, setActiveSeries] = useState(new Set(seriesKeys));
+	const [disabledSeries, setDisabledSeries] = useState(new Set());
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				await API.getStats(queryOptions, res => {
+					dispatch(res.data);
+				}, setError, router);
+			} finally {
+				setLoading(false);
+			}
+		};
+		let intervalId;
+		const handler = setTimeout(() => { //debouncing
+			fetchData();
+			intervalId = setInterval(fetchData, 60000);
+		}, 1000);
+		return () => {
+			clearTimeout(handler);
+			clearInterval(intervalId);
+		};
+	}, [queryOptions.startTime, queryOptions.endTime, queryOptions.type, queryOptions.granularity]);
 
 	const toggleSeries = (seriesKey) => {
-		setActiveSeries((prevActive) => {
-			const newActive = new Set(prevActive);
-			if (newActive.has(seriesKey)) {
-				newActive.delete(seriesKey);
+		setDisabledSeries((prevDisabled) => {
+			const newDisabled = new Set(prevDisabled);
+			if (newDisabled.has(seriesKey)) {
+				newDisabled.delete(seriesKey);
 			} else {
-				newActive.add(seriesKey);
+				newDisabled.add(seriesKey);
 			}
-			return newActive;
+			return newDisabled;
 		});
 	};
 
-	return (
+	return (<>
 		<div className='rounded-border p-3' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
+			{loading && <div className='loading-border'></div>}
 			<p style={{ color: 'var(--bs-body-color)' }}>{title}</p>
 			<ResponsiveContainer width='100%' height={400}>
 				<AreaChart syncId='a' isAnimationActive={false} key={chartKey} data={data}>
@@ -109,7 +140,7 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 					/>
 					<CartesianGrid strokeDasharray='3 3' stroke='var(--bs-border-color-translucent)' />
 					{seriesKeys.map(series => (
-						activeSeries.has(series) && (
+						!disabledSeries.has(series) && (
 							<Area
 								isAnimationActive={false}
 								key={series}
@@ -126,7 +157,7 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 							payload={seriesKeys.map(x => ({
 								value: x,
 								type: 'line',
-								color: activeSeries.has(x) ? (colors[x] || simpleStringToColor(x)) : '#444',
+								color: !disabledSeries.has(x) ? (colors[x] || simpleStringToColor(x)) : '#444',
 							}))}
 							content={({ payload }) => (
 								<div style={{ maxHeight: '100px', overflowY: 'auto' }}>
@@ -147,10 +178,10 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 							payload={seriesKeys.map(x => ({
 								value: x,
 								type: 'line',
-								color: !activeSeries.has(x) ? '#444' : (colors[x] || simpleStringToColor(x)),
+								color: disabledSeries.has(x) ? '#444' : (colors[x] || simpleStringToColor(x)),
 							}))}
 							formatter={(value) => {
-								const isActive = activeSeries.has(value);
+								const isActive = !disabledSeries.has(value);
 								return (
 									<span
 										style={{
@@ -167,7 +198,7 @@ const TimeSeriesChart = ({ data, title, stack = false, fill = true, yLabel, xLab
 				</AreaChart>
 			</ResponsiveContainer>
 		</div>
-	);
+	</>);
 };
 
 export default TimeSeriesChart;

@@ -1,48 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import ErrorAlert from '../components/ErrorAlert.js';
 import TimeSeriesChart from '../components/TimeSeriesChart.js';
-import * as API from '../api.js';
 import { useRouter } from 'next/router';
 
-export default function Stats(props) {
+function formatLocalDateTime(date) { //avoid ISOstring weirdness w/ timezone
+	const d = date.toLocaleString('en-CA', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	}).replace(', ', 'T');
+	return d;
+}
+
+export default function Stats() {
+
 	const router = useRouter();
-	const [state, dispatch] = useState(props);
-	const [error, setError] = useState();
 	const [granularity, setGranularity] = useState('1m');
 	const [startTime, setStartTime] = useState(null);
 	const [endTime, setEndTime] = useState(null);
 
-	const fetchData = async () => {
-		await API.getStats({ granularity, startTime, endTime }, dispatch, setError, router);
+	const updateQueryString = () => {
+		router.push(
+			{
+				pathname: router.pathname,
+				query: {
+					granularity,
+					startTime,
+					endTime,
+				},
+			},
+			undefined,
+			{
+				shallow: true
+			},
+		);
 	};
 
-	// const updateQueryString = () => {
-	// 	router.push(
-	// 		{
-	// 			pathname: router.pathname,
-	// 			query: { granularity, startTime, endTime },
-	// 		},
-	// 		undefined,
-	// 		{ shallow: true }
-	// 	);
-	// };
-
 	useEffect(() => {
-		const handler = setTimeout(() => { //debouncing
-			fetchData();
-			// updateQueryString();
-			const intervalId = setInterval(fetchData, 60000);
-
-			return () => clearInterval(intervalId);
-		}, 1000);
-		return () => {
-			clearTimeout(handler);
-		};
+		updateQueryString();
 	}, [granularity, startTime, endTime]);
-
-	const { statusChartData, hostnameChartData, trafficChartData, botcheckChartData } = state || {};
-
+	console.log('startTime', startTime, formatLocalDateTime(new Date(new Date().setHours(new Date().getHours() - 3))));
 	return (
 		<>
 			<Head>
@@ -77,8 +77,16 @@ export default function Stats(props) {
 					<input
 						type='datetime-local'
 						id='startTime'
-						value={startTime}
-						onChange={e => setStartTime(e.target.value)}
+						value={startTime || formatLocalDateTime(new Date(new Date().setHours(new Date().getHours() - 3)))}
+						onChange={e => {
+							const newStartTime = e.target.value;
+							setStartTime(newStartTime);
+
+							if (!endTime) {
+								const newEndTime = formatLocalDateTime(new Date(new Date(newStartTime).getTime() + 3 * 60 * 60 * 1000));
+								setEndTime(newEndTime);
+							}
+						}}
 						className='form-control'
 					/>
 				</div>
@@ -87,70 +95,65 @@ export default function Stats(props) {
 					<input
 						type='datetime-local'
 						id='endTime'
-						value={endTime}
-						onChange={e => setEndTime(e.target.value)}
+						value={endTime || formatLocalDateTime(new Date())}
+						onChange={e => {
+							const newEndTime = e.target.value;
+							setEndTime(newEndTime);
+
+							if (!startTime) {
+								const newStartTime = formatLocalDateTime(new Date(new Date(newEndTime).getTime() - 3 * 60 * 60 * 1000));
+								setStartTime(newStartTime);
+							}
+						}}
 						className='form-control'
 					/>
 				</div>
+
 			</div>
 
-			{!hostnameChartData && (
-				<div className='d-flex flex-column'>
-					{error && <ErrorAlert error={error} />}
-					<div className='text-center mb-4'>
-						<div className='spinner-border mt-5' role='status'>
-							<span className='visually-hidden'>Loading...</span>
-						</div>
-					</div>
-				</div>
-			)}
-
 			<div className='row'>
-				{statusChartData && (
-					<div className='col-xl-6 col-lg-12 mb-4'>
-						<TimeSeriesChart
-							yLabel={'req/s'}
-							data={statusChartData}
-							title={'Response Code Breakdown'}
-							stack={true}
-							formatter={v => Number(v)}
-						/>
-					</div>
-				)}
-				{hostnameChartData && (
-					<div className='col-xl-6 col-lg-12 mb-4'>
-						<TimeSeriesChart
-							yLabel={'req/s'}
-							data={hostnameChartData}
-							title={'Hostname Breakdown'}
-							fill={false}
-							formatter={v => Number(v)}
-							allowVerticalLegend={true}
-						/>
-					</div>
-				)}
-				{trafficChartData && (
-					<div className='col-xl-6 col-lg-12 mb-4'>
-						<TimeSeriesChart
-							yLabel={'mbps'}
-							data={trafficChartData}
-							title={'Frontend Traffic'}
-							fill={false}
-							formatter={v => (v / 1000000).toFixed(1) + ' mbps'}
-						/>
-					</div>
-				)}
-				{botcheckChartData && (
-					<div className='col-xl-6 col-lg-12 mb-4'>
-						<TimeSeriesChart
-							yLabel={'req/s'}
-							data={botcheckChartData}
-							title={'Bot Checking'}
-							fill={false}
-							formatter={v => Number(v)}
-						/>
-					</div>
-				)}
+
+				<div className='col-xl-6 col-lg-12 mb-4 overflow-hidden'>
+					<TimeSeriesChart
+						yLabel={'req/s'}
+						queryOptions={{ granularity, startTime, endTime, type: 'status' }}
+						title='Response Code Breakdown'
+						stack={true}
+						formatter={v => Number(v)}
+					/>
+				</div>
+
+				<div className='col-xl-6 col-lg-12 mb-4 overflow-hidden'>
+					<TimeSeriesChart
+						yLabel={'req/s'}
+						queryOptions={{ granularity, startTime, endTime, type: 'hostname' }}
+						title='Hostname Breakdown'
+						fill={false}
+						formatter={v => Number(v)}
+						allowVerticalLegend={true}
+					/>
+				</div>
+
+				<div className='col-xl-6 col-lg-12 mb-4 overflow-hidden'>
+					<TimeSeriesChart
+						yLabel={'mbps'}
+						queryOptions={{ granularity, startTime, endTime, type: 'traffic' }}
+						title='Frontend Traffic'
+						fill={false}
+						formatter={v => (v / 1000000).toFixed(1) + ' mbps'}
+					/>
+				</div>
+
+				<div className='col-xl-6 col-lg-12 mb-4 overflow-hidden'>
+					<TimeSeriesChart
+						yLabel={'req/s'}
+						queryOptions={{ granularity, startTime, endTime, type: 'botcheck' }}
+						title='Bot Checking'
+						fill={false}
+						formatter={v => Number(v)}
+					/>
+				</div>
+
 			</div>
 		</>
 	);
