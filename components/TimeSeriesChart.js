@@ -115,10 +115,10 @@ const TimeSeriesChart = ({ _data = {}, queryOptions, title, stack = false, fill 
 	};
 
 	return (<>
-		<div className='rounded-border p-3' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
-			{loading && <div className='loading-border'></div>}
-			<p style={{ color: 'var(--bs-body-color)' }}>{title}</p>
-			<ResponsiveContainer width='100%' height={400}>
+		<div className='rounded-border overflow-hidden border rounded' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
+			<div className={`loading-border ${!loading ? 'active' : ''}`} />
+			<p className='ps-2 mt-1' style={{ color: 'var(--bs-body-color)' }}>{title}</p>
+			<ResponsiveContainer width='100%' height={400} className='p-1'>
 				<AreaChart syncId='a' isAnimationActive={false} key={chartKey} data={data}>
 					<XAxis
 						label={xLabel?{value:xLabel}:''}

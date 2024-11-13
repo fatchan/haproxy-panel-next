@@ -111,7 +111,7 @@ export default function Stats() {
 
 			</div>
 
-			<div className='row'>
+			<div className='row my-2'>
 
 				<div className='col-xl-6 col-lg-12 mb-4 overflow-hidden'>
 					<TimeSeriesChart
