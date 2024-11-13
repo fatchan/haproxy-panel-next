@@ -61,6 +61,11 @@ export const sections = [
 	},
 	{
 		links: [
+			{ href: '/cache', label: 'Cache Purge', icon: 'bi-trash' },
+		],
+	},
+	{
+		links: [
 			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up', badge: 'beta' },
 		],
 	},

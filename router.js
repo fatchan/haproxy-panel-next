@@ -12,6 +12,7 @@ import * as domainsController from './controllers/domains.js';
 import * as billingController from './controllers/billing.js';
 import * as statsController from './controllers/stats.js';
 import * as templateController from './controllers/templates.js';
+import * as cacheController from './controllers/cache.js';
 
 import {
 	useSession,
@@ -103,6 +104,16 @@ export default function router(server, app) {
 		haproxyMiddleware,
 		csrfMiddleware,
 		accountController.dashboardPage.bind(null, app),
+	);
+	server.get(
+		'/cache',
+		useSession,
+		fetchSession,
+		checkSession,
+		checkOnboarding,
+		haproxyMiddleware,
+		csrfMiddleware,
+		cacheController.cachePage.bind(null, app),
 	);
 	server.get(
 		'/account',
@@ -288,6 +299,15 @@ export default function router(server, app) {
 	);
 
 	const clusterRouter = express.Router({ caseSensitive: true });
+	clusterRouter.post(
+		'/cache/purge',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		cacheController.purgeURL,
+	);
 	clusterRouter.post(
 		'/global/toggle',
 		useSession,

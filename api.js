@@ -116,6 +116,11 @@ export async function globalToggle(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Cache
+export async function cachePurge(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/cache/purge', 'POST', body, dispatch, errorCallback, router);
+}
+
 function buildOptions(route, method, body) {
 
 	// Convert method uppercase
