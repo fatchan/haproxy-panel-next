@@ -131,6 +131,16 @@ export default function DashboardHome(props) {
 						</Link>
 					</div>
 
+					{/* Cache Card */}
+					<div className='col'>
+						<Link href='/cache' className='card text-decoration-none bg-light'>
+							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
+								<i className='bi bi-trash fs-2'></i>
+								<h5 className='card-title'>Cache Purge</h5>
+							</div>
+						</Link>
+					</div>
+
 					{/* Account */}
 					<div className='col'>
 						<Link href='/account' className='card text-decoration-none bg-light'>
