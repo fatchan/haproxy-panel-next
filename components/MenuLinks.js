@@ -66,7 +66,12 @@ export const sections = [
 	},
 	{
 		links: [
-			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up', badge: 'beta' },
+			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up' },
+		],
+	},
+	{
+		links: [
+			{ href: '/apikeys', label: 'Api Keys', icon: 'bi-key', badge: 'coming soon', disabled: true },
 		],
 	},
 	{
