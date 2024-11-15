@@ -114,6 +114,15 @@ export default function router(server, app) {
 		accountController.accountPage.bind(null, app),
 	);
 	server.get(
+		'/csr',
+		useSession,
+		fetchSession,
+		checkSession,
+		checkOnboarding,
+		csrfMiddleware,
+		certsController.csrPage.bind(null, app),
+	);
+	server.get(
 		'/onboarding',
 		useSession,
 		fetchSession,

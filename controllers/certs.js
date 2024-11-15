@@ -44,6 +44,18 @@ export async function certsPage(app, req, res) {
 };
 
 /**
+ * GET /csr
+ * csr page
+ */
+export async function csrPage(app, req, res) {
+	res.locals.data = {
+		csrf: req.csrfToken(),
+		user: res.locals.user,
+	};
+	return app.render(req, res, '/csr');
+};
+
+/**
  * GET /certs.json
  * certs json data
  */
