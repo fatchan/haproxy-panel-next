@@ -224,8 +224,8 @@ export default function Certs(props) {
 				<form onSubmit={addCert} action='/forms/cert/add' method='post'>
 					<input type='hidden' name='_csrf' value={csrf} />
 					<div className='mb-2'>
-						<label className='form-label w-100'>Subject
-							<input className='form-control' type='text' name='subject' placeholder='domain.com' required />
+						<label className='form-label w-100'>Subject (e.g., yourdomain.com)
+							<input className='form-control' type='text' name='subject' placeholder='yourdomain.com' required />
 						</label>
 					</div>
 					<div className='mb-2'>
@@ -233,7 +233,7 @@ export default function Certs(props) {
 							<textarea
 								className='form-control'
 								name='altnames'
-								placeholder={'www.domain.com\r\ntest.example.com\r\netc...'}
+								placeholder={'www.yourdomain.com\r\ndev.yourdomain.com\r\netc...'}
 								rows={4}
 								required />
 						</label>

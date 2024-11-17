@@ -11,12 +11,23 @@ export default function Csr(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const [mainDomain, setMainDomain] = useState('');
+	const [altNames, setAltNames] = useState('');
+	const [opensslCommand, setOpensslCommand] = useState('');
 
 	useEffect(() => {
 		if (!state.user) {
 			API.getAccount(dispatch, setError, router);
 		}
 	}, [state.user, state.maps, router]);
+
+	useEffect(() => {
+		// Generate OpenSSL command when inputs change
+		const altNamesArray = altNames.split('\n').filter(name => name.trim() !== '');
+		const altNamesFormatted = altNamesArray.map(name => `DNS:${name.trim()}`).join(',');
+		const command = `openssl req -newkey rsa:4096 -new -nodes -subj "/CN=${mainDomain}/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\\nsubjectAltName=${altNamesFormatted ? `DNS:${mainDomain},${altNamesFormatted}` : `DNS:${mainDomain}`}"))`;
+		setOpensslCommand(command);
+	}, [mainDomain, altNames]);
 
 	async function verifyCSR(e) {
 		e.preventDefault();
@@ -57,14 +68,40 @@ export default function Csr(props) {
 
 			<div className='list-group'>
 				<div className='list-group-item'>
-					<p>
-						To generate a certificate signing request for your domain and/or subdomain(s):
-						<div>
-							<code>
-								{'openssl req -newkey rsa:4096 -new -nodes -subj "/CN='}<strong>yourdomain.com</strong>{'/OU=OrganisationUnit/O=Organisation/L=Locality/ST=St/C=Co" -sha256 -extensions v3_req -reqexts SAN -keyout origin.key -out origin.csr -config <(cat /etc/ssl/openssl.cnf \<\(printf "[SAN]\\nsubjectAltName=DNS:'}<strong>yourdomain.com</strong>{',DNS:'}<strong>www.yourdomain.com</strong>{'"))'}
-							</code>
-						</div>
-					</p>
+					<p>To generate a certificate signing request for your domain and/or subdomain(s), fill out the details below:</p>
+					<div className='mb-2'>
+						<label className='form-label w-100'>Subject (e.g., yourdomain.com):
+							<input
+								type='text'
+								className='form-control'
+								placeholder='yourdomain.com'
+								value={mainDomain}
+								onChange={e => setMainDomain(e.target.value)}
+								required
+							/>
+						</label>
+					</div>
+					<div className='mb-2'>
+						<label className='form-label w-100'>Altname(s):
+							<textarea
+								className='form-control'
+								placeholder={'www.yourdomain.com\r\ndev.yourdomain.com\r\netc...'}
+								rows={4}
+								value={altNames}
+								onChange={e => setAltNames(e.target.value)}
+							/>
+						</label>
+					</div>
+					<div className='mb-2'>
+						<label className='form-label w-100'>Run the generated OpenSSL command to get your origin cert files:
+							<textarea
+								className='form-control'
+								value={opensslCommand}
+								readOnly
+								rows={4}
+							/>
+						</label>
+					</div>
 				</div>
 
 				{/* Verify CSR form */}
@@ -105,7 +142,6 @@ export default function Csr(props) {
 
 			{error && <span className='mx-2'><ErrorAlert error={error} /></span>}
 
-			{/* back to account */}
 			<BackButton to='/dashboard' />
 
 		</>
@@ -116,4 +152,3 @@ export default function Csr(props) {
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
 	return { props: res.locals.data };
 }
-
