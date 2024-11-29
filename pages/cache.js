@@ -74,7 +74,7 @@ export default function Cache(props) {
 						<input type='hidden' name='_csrf' value={csrf} />
 						<div className='d-flex gap-3'>
 							<select
-								className='form-control'
+								className='form-select'
 								name='domain'
 								required
 							>
