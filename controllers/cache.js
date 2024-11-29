@@ -23,7 +23,7 @@ export async function purgeURL(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const ban = req.body.ban != null;
+	const ban = req.body.ban === true;
 
 	try {
 		const url = new URL(req.body.url);
