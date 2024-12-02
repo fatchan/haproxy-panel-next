@@ -6,6 +6,7 @@ import ErrorAlert from '../../../../components/ErrorAlert.js';
 import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
+import InfoAlert from '../../../../components/InfoAlert.js';
 countries.registerLocale(enCountries);
 import * as API from '../../../../api.js';
 
@@ -150,10 +151,10 @@ const DnsEditRecordPage = (props) => {
 				{recordSet && Array.isArray(recordSet) && recordSet[0].t === true && <div className='alert alert-warning' role='alert'>
 					This is a template record. Changes will be overwritten when the linked template is updated.
 				</div>}
-				{newRecord && zone === '@' && <div className='alert alert-info' role='info'>
-					The &quot;@&quot; symbol indicates that this is a record for the root domain i.e &quot;{domain}&quot;. You can change the name to create other subdomains e.g. &quot;www&quot;.
-				</div>}
-				<div className='card text-bg-dark col p-3 border-0 shadow-sm'>
+				{newRecord && zone === '@' && <InfoAlert>
+					The &quot;@&quot; symbol denotes that this record is for the root domain i.e &quot;{domain}&quot;. You can change the name to create other subdomains e.g. &quot;www&quot;.
+				</InfoAlert>}
+				<div className='list-group list-group-item card text-bg-dark col p-3 shadow-sm'>
 					<div className='row mb-3'>
 						<div className='col'>
 							<label className='w-100'>
@@ -276,6 +277,7 @@ const DnsEditRecordPage = (props) => {
 							</div>
 						</div>
 					</div>}
+					<hr className='mb-2 mt-3' />
 					{!type.includes('_template') && <div className='col'>
 						<div className='row'>
 							<div className='col'>
@@ -376,9 +378,9 @@ const DnsEditRecordPage = (props) => {
 								default:
 									break;
 							}
-							return (<>
-								<div className='row' key={`row1_${i}`}>
-									{supportsHealth && <div className='col-sm-4 col-md-2'>
+							return (<div className='d-grid gap-2' key={`row1_${i}`}>
+								<div className='row'>
+									{supportsHealth && <div className='col-sm-4 col-md-3'>
 										ID:
 										<input
 											className='form-control'
@@ -416,87 +418,8 @@ const DnsEditRecordPage = (props) => {
 									</div>
 								</div>
 								{typeFields}
-								{supportsHealth && <div className='row' key={`row2_${i}`}>
-									<div className='col-sm-12 col-md-2 align-self-end mb-2'>
-										<div className='form-check form-switch'>
-											<input
-												className='form-check-input'
-												type='checkbox'
-												name={`health_${i}`}
-												value='1'
-												id='flexCheckDefault'
-												checked={rec.h === true}
-												onChange={(e) =>{
-													recordSet[i].h = e.target.checked;
-													setRecordSet([...recordSet]);
-												}}
-											/>
-											<label className='form-check-label' htmlFor='flexCheckDefault'>
-												Health Check
-											</label>
-										</div>
-									</div>
-									<div className='col-sm-12  col-md'>
-										<label className='w-100'>
-											Fallback IDs
-											<Select
-												theme={(theme) => ({
-													...theme,
-													borderRadius: 5,
-												})}
-												isDisabled={!rec.h}
-												//required
-												isMulti
-												closeMenuOnSelect={false}
-												options={recordSet.filter(x => x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
-												getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
-												defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
-												classNamePrefix='select'
-												name={`fallbacks_${i}`}
-												className='basic-multi-select'
-											/>
-										</label>
-									</div>
-									<div className='col-sm-12 col-md-3'>
-										<label className='w-100'>
-											Fallback Selector
-											<select
-												className='form-select'
-												name={`sel_${i}`}
-												defaultValue={rec.sel}
-												disabled={!rec.h}
-												required
-											>
-												<option value='0'>None</option>
-												<option value='1'>First alive fallback</option>
-												<option value='2'>Random alive fallback</option>
-												<option value='3'>All alive fallbacks</option>
-											</select>
-										</label>
-									</div>
-									<div className='col-sm-12 col-md-3'>
-										<label className='w-100'>
-											Backup Selector
-											<select
-												className='form-select'
-												name={`bsel_${i}`}
-												defaultValue={rec.bsel}
-												disabled={!rec.h}
-												required
-											>
-												<option value='0'>None</option>
-												<option value='1'>First healthy record</option>
-												<option value='2'>Random healthy record</option>
-												<option value='3'>All healthy records</option>
-												<option value='4'>First fallback (ignores health)</option>
-												<option value='5'>Random fallback (ignores health)</option>
-												<option value='6'>All fallbacks (ignores health)</option>
-											</select>
-										</label>
-									</div>
-								</div>}
 								{supportsGeo && <div className='row' key={`row3_${i}`}>
-									<div className='col-sm-12 col-md-2'>
+									<div className='col-sm-12 col-md-3'>
 										<label className='w-100'>
 											Geo Key
 											<select
@@ -559,8 +482,89 @@ const DnsEditRecordPage = (props) => {
 										</label>
 									</div>
 								</div>}
+								{supportsHealth && <div className='row' key={`row2_${i}`}>
+									<div className='col-sm-12 col-md-3'>
+										<label className='form-check-label mb-2 pb-1' htmlFor={`health_${i}`}>
+											Health Check
+											<div className='form-check form-switch'>
+												<input
+													className='form-check-input'
+													type='checkbox'
+													name={`health_${i}`}
+													value='1'
+													id={`health_${i}`}
+													checked={rec.h === true}
+													onChange={(e) =>{
+														recordSet[i].h = e.target.checked;
+														setRecordSet([...recordSet]);
+													}}
+												/>
+											</div>
+										</label>
+									</div>
+									{rec.h === true && <>
+										<div className='col-sm-12 col-md-3'>
+											<label className='w-100'>
+												When unhealthy:
+												<select
+													className='form-select'
+													name={`sel_${i}`}
+													defaultValue={rec.sel}
+													disabled={!rec.h}
+													required
+												>
+													<option value='0'>None</option>
+													<option value='1'>Use first alive fallback</option>
+													<option value='2'>Use random alive fallback</option>
+													<option value='3'>Use all alive fallbacks</option>
+												</select>
+											</label>
+										</div>
+										<div className='col-sm-12  col-md'>
+											<label className='w-100'>
+												Fallbacks (ordered):
+												<Select
+													theme={(theme) => ({
+														...theme,
+														borderRadius: 5,
+													})}
+													isDisabled={!rec.h}
+													//required
+													isMulti
+													closeMenuOnSelect={false}
+													options={recordSet.filter(x => x.id && x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
+													getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
+													defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
+													classNamePrefix='select'
+													name={`fallbacks_${i}`}
+													className='basic-multi-select'
+												/>
+											</label>
+										</div>
+										<div className='col-sm-12 col-md-3'>
+											<label className='w-100'>
+												Last resort:
+												<select
+													className='form-select'
+													name={`bsel_${i}`}
+													defaultValue={rec.bsel}
+													disabled={!rec.h}
+													required
+												>
+													<option value='0'>None</option>
+													<option value='1'>Use first healthy record</option>
+													<option value='2'>Use random healthy record</option>
+													<option value='3'>Use all healthy records</option>
+													<option value='4'>Use first fallback (ignores health)</option>
+													<option value='5'>Use random fallback (ignores health)</option>
+													<option value='6'>Use all fallbacks (ignores health)</option>
+												</select>
+											</label>
+										</div>
+									</>}
+								</div>}
 								{i < recordSet.length-1 && <hr className='mb-2 mt-3' />}
-							</>);
+							</div>);
 						})}
 						<div className='row mt-2'>
 							<div className='col-auto ms-auto'>
