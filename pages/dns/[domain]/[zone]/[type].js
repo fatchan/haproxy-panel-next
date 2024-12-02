@@ -47,6 +47,7 @@ const DnsEditRecordPage = (props) => {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
+	const { csrf, user } = state;
 	const { domain, zone: routerZone, type: routerType } = router.query;
 	const newRecord = router.asPath === `/dns/${domain}/new`;
 	const [recordSet, setRecordSet] = useState();
@@ -118,11 +119,17 @@ const DnsEditRecordPage = (props) => {
 
 	async function addUpdateRecord(e) {
 		e.preventDefault();
-		console.log(fromEntries([...new FormData(e.target).entries()]));
-		await API.addUpdateDnsRecord(domain, zone, type, fromEntries([...new FormData(e.target).entries()]), dispatch, setError, router);
+		const fullDomain = `${zone}.${domain}`;
+		if (newRecord //if its a new record
+			&& zone !== '@' //and its not the apex
+			&& user && !user.domains.includes(fullDomain) //and the subdomain isnt already added
+			&& type && type.endsWith('_template')) { //and they are adding a template record
+			API.addDomain({ _csrf: csrf, domain: fullDomain }, () => {}, () => {}, null); //Note: ignore if fail
+		}
+		const recordBody = fromEntries([...new FormData(e.target).entries()]);
+		await API.addUpdateDnsRecord(domain, zone, type, recordBody, dispatch, setError, router);
 	}
 
-	const { csrf, user } = state;
 	const supportsGeo = ['a', 'aaaa'].includes(type) && recordSelection === 'geo';
 	const supportsHealth = ['a', 'aaaa'].includes(type);
 
@@ -277,8 +284,8 @@ const DnsEditRecordPage = (props) => {
 							</div>
 						</div>
 					</div>}
-					<hr className='mb-2 mt-3' />
 					{!type.includes('_template') && <div className='col'>
+						<hr className='mb-2 mt-3' />
 						<div className='row'>
 							<div className='col'>
 								Records:

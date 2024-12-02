@@ -179,7 +179,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	if (contentType.startsWith('application/json;')) {
 		response = await response.json();
 		if (response.redirect) {
-			if (router.asPath === response.redirect) {
+			if (!router || router.asPath === response.redirect) {
 				return;
 			}
 			return router.push(response.redirect, null, { scroll: false });
