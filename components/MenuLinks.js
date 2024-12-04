@@ -80,7 +80,7 @@ export const sections = [
 		links: [
 			{ href: '/kb/firewall', label: 'Firewall', icon: 'bi-bricks' },
 			{ href: '/kb/https', label: 'HTTPS & CSRs ', icon: 'bi-file-earmark-lock' },
-			{ href: '/kb/debug', label: '/.basedflare/ URLs', icon: 'bi-bug' },
+			{ href: '/kb/debug', label: 'Debug URLs', icon: 'bi-bug' },
 		],
 	}
 ];
@@ -200,7 +200,7 @@ const MenuLinks = ({ router }) => {
 		<>
 			<Link href='/' className='d-flex align-items-center mb-3 mb-md-0 text-body text-decoration-none'>
 				<ResolvedImage src='/favicon.ico' width='32' height='32' alt=' ' />
-				<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
+				<span className='mx-2 fs-4 text-decoration-none'>{process.env.NEXT_PUBLIC_APP_NAME}</span>
 			</Link>
 			<hr />
 			{sections.slice(0, -1).map(renderSection)}

@@ -12,13 +12,13 @@ import Link from 'next/link';
 export default function Index() {
 	return (<>
 		<Head>
-			<title>BasedFlare</title>
+			<title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
 		</Head>
 
 		<span className='d-flex flex-column align-items-center mt-5 pt-5'>
 			<Link href='#!' className='d-flex mb-3 text-decoration-none align-items-center'>
 				<ResolvedImage src='/favicon.ico' width='24' height='24' alt=' ' />
-				<span className='mx-2 fs-4 text-decoration-none'>BasedFlare</span>
+				<span className='mx-2 fs-4 text-decoration-none'>{process.env.NEXT_PUBLIC_APP_NAME}</span>
 			</Link>
 			<span className='d-flex'>
 				<div className='me-2'>

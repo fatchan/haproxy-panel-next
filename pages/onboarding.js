@@ -132,7 +132,7 @@ export default function Onboarding(props) {
 					</strong>
 					{!domainAdded && <>
 						<span className='d-block text-body-secondary mt-3'>
-							<p>Add your first domain (i.e. <code>example.com</code>) that you want to protect with BasedFlare.</p>
+							<p>Add your first domain (i.e. <code>example.com</code>) that you want to protect.</p>
 							<p>You can add other domains and/or subdomains later from the &quot;domains&quot; page.</p>
 						</span>
 						<form className='mb-3' onSubmit={addDomain} action='/forms/domain/add' method='post'>
@@ -224,7 +224,7 @@ export default function Onboarding(props) {
 					{!backendAdded && <>
 						<span className='d-block text-body-secondary mt-3'>
 							<p>Enter the backend server IP address and port in ip:port format, e.g. <code>12.34.56.78:443</code>.</p>
-							<p>This is the &quot;origin&quot; that you want BasedFlare to proxy traffic to.</p>
+							<p>This is the &quot;origin&quot; that you want to proxy traffic to.</p>
 						</span>
 						<form onSubmit={addToMap} className='mb-3' action='/forms/map/hosts/add' method='post'>
 							<input type='hidden' name='_csrf' value={csrf} />
@@ -264,8 +264,8 @@ export default function Onboarding(props) {
 					</strong>
 					{!certAdded && <>
 						<span className='d-block text-body-secondary mt-3'>
-							<p>BasedFlare will generate a HTTPS certificate for you using <a href='https://letsencrypt.org/' rel='noreferrer' target='_blank'>Let&apos;s Encrypt</a>.</p>
-							<p>This certificate will be automatically installed on the BasedFlare edge and visitors will be connected securely.</p>
+							<p>The backend will trigger a call to <a href='https://letsencrypt.org/' rel='noreferrer' target='_blank'>Let&apos;s Encrypt</a> to issue a HTTPS certificate.</p>
+							<p>This certificate will be automatically installed on the edge and visitors will be connected securely.</p>
 							<p>Certificates last 90 days and will automatically renew when they have less than 30 days remaining.</p>
 							<p>You can manage certificates later from the &quot;HTTPS Certificates&quot; page.</p>
 						</span>
@@ -296,8 +296,8 @@ export default function Onboarding(props) {
 						8. Get your HTTPS CSR signed
 					</strong>
 					<span className='d-block text-body-secondary mt-3'>
-						<p>Finally, generate a certificate signing request for your origin server(s) and have BasedFlare sign it.</p>
-						<p>This allows BasedFlare servers to verify the connection to your backend and prevents trivial MITM attacks and other weaknesses that are possible with e.g self-signed certificates in CloudFlare&apos;s &quot;flexible&quot; or &quot;full&quot; ssl mode.</p>
+						<p>Finally, generate a certificate signing request for your origin server(s) and have sign it.</p>
+						<p>This allows the edge servers to verify the connection to your backend and prevents trivial MITM attacks and other weaknesses that are possible with e.g self-signed certificates in CloudFlare&apos;s &quot;flexible&quot; or &quot;full&quot; ssl mode.</p>
 						<ol className='text-break'>
 							<li>Generate the private key and certificate signing request for your domains on your origin server:
 								<p>

@@ -1,4 +1,4 @@
-# BasedFlare Control Panel
+# Control Panel
 
 Work in progress. Not recommended for production deployment. No instructions or help provided whatsoever.
 

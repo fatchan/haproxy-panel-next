@@ -1,5 +1,12 @@
+# build, deps, etc
 node_modules
 .next/
 out/
-.env
+public/*
+
+# ca file(s)
 ca/
+
+# envs/configs
+.env
+instance-config.js

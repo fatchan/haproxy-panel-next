@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
+import { footerLinks } from '../instance-config.js';
 
 export default withRouter(function Layout({ children, router, user }) {
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
@@ -41,11 +42,14 @@ export default withRouter(function Layout({ children, router, user }) {
 						</main>
 						<footer className='mt-auto text-center text-muted small'>
 							<hr />
-							<a className='pb-3 fs-xs' href='https://gitgud.io/fatchan/haproxy-panel-next/'>source</a>
-							{' '}&bull;{' '}
-							<a className='pb-3 fs-xs' target='_blank' rel='noreferrer' href='https://basedstatus.online'>status</a>
-							{' '}&bull;{' '}
-							<a className='pb-3 fs-xs' target='_blank' rel='noreferrer' href='https://basedflare.com'>basedflare.com</a>
+							{footerLinks.map((link, index) => (
+								<span key={index}>
+									<a href={link.href} target='_blank' rel='noreferrer'>
+										{link.name}
+									</a>
+									{index !== footerLinks.length - 1 && <span>{' '}&bull;{' '}</span>}
+								</span>
+							))}
 						</footer>
 
 					</div>

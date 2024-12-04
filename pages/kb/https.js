@@ -17,7 +17,7 @@ export default function KnowledgebaseIndex() {
 			<hr />
 
 			<p>
-				When setting up HTTPS for your website, especially when using services like BasedFlare, it&apos;s essential to generate a certificate signing request (CSR) and private key, and have that CSR signed. This article will guide you through how to do so using OpenSSL.
+				When setting up HTTPS for your website, it&apos;s essential to generate a certificate signing request (CSR) and private key, and have that CSR signed. This article will guide you through how to do so using OpenSSL.
 			</p>
 
 			<hr />
@@ -53,7 +53,7 @@ export default function KnowledgebaseIndex() {
 
 			<h5 className='fw-bold'>Verification</h5>
 			<p>
-				With the contents of the origin.csr created earlier, complete the <Link href='/csr'>CSR verification form</Link> in the BasedFlare panel. This will sign the request and return your certificate, provided you have permission for the domains i.e. they are your domains in your account. The generated CSR will be verified by BasedFlare and will be used to ensure that each reverse proxy connects only to an origin with a certificate signed by the BasedFlare CA. This process ensures secure backend connections. It&apos;s important to note that self-signed or invalid certificates won&apos;t work.
+				With the contents of the origin.csr created earlier, complete the <Link href='/csr'>CSR verification form</Link> in the control panel. This will sign the request and return your certificate, provided you have permission for the domains i.e. they are your domains in your account. The generated CSR will be verified and used to ensure that each reverse proxy connects only to an origin with a certificate signed by a trusted private CA. This process ensures secure backend connections. It&apos;s important to note that self-signed or invalid certificates won&apos;t work.
 			</p>
 
 			<hr />

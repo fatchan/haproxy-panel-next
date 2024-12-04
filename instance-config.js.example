@@ -1,0 +1,34 @@
+export const footerLinks = [
+	{ href: 'https://gitgud.io/fatchan/haproxy-panel-next/', name: 'source' },
+];
+
+export const soaTemplate = [
+	{
+		'ttl': 86400,
+		'ns': 'ns1.yourdomain.net.',
+		'MBox': 'root.yourdomain.com.',
+		'refresh': 7200,
+		'retry': 3600,
+		'expire': 3600,
+		'minttl': 180,
+		't': true
+	}
+];
+
+export const nsTemplate = [
+	{
+		'ttl': 86400,
+		'host': 'ns1.yourdomain.net.',
+		't': true
+	},
+	{
+		'ttl': 86400,
+		'host': 'ns2.yourdomain.com.',
+		't': true
+	},
+	{
+		'ttl': 86400,
+		'host': 'ns3.yourdomain.org.',
+		't': true
+	}
+];

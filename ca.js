@@ -13,19 +13,19 @@ const CAAttrs = [
 	},
 	{
 		shortName: 'ST',
-		value: 'BASEDFLARE',
+		value: process.env.CA_ATTR_STATE || 'XX',
 	},
 	{
 		name: 'localityName',
-		value: 'BASEDFLARE',
+		value: process.env.CA_ATTR_LOCALITY || 'XX',
 	},
 	{
 		name: 'organizationName',
-		value: 'BASEDFLARE',
+		value: process.env.CA_ATTR_ORGANISATION || 'XX',
 	},
 	{
 		shortName: 'OU',
-		value: 'BASEDFLARE',
+		value: process.env.CA_ATTR_ORGANISATIONAL_UNIT || 'XX',
 	},
 ];
 

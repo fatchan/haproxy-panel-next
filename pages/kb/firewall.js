@@ -11,13 +11,13 @@ export default function KnowledgebaseIndex() {
 			</Head>
 
 			<h4 className='fw-bold'>
-				Whitelisting BasedFlare IPs in UFW firewall and Nginx:
+				Whitelisting IPs in UFW firewall and Nginx:
 			</h4>
 
 			<hr />
 
 			<p>
-				This article walks you through using a bash script to whitelist BasedFlare IP addresses fetched from a DNS lookup for both UFW firewall and Nginx web server. It is recommended to implement this or a similar system to ensure that only BasedFlare IP addresses can make requests to your backend. This provides some protection against internet scanning and other techniques being used to uncover and directly attack your backend servers.
+				This article walks you through using a bash script to whitelist IP addresses fetched from a DNS lookup for both UFW firewall and Nginx web server. It is recommended to implement this or a similar system to ensure that only edge server IP addresses can make requests to your backend. This provides some protection against internet scanning and other techniques being used to uncover and directly attack your backend servers.
 			</p>
 
 			<hr />
@@ -34,7 +34,7 @@ export default function KnowledgebaseIndex() {
 				Here&apos;s a breakdown of the main operations performed by the script:
 			</p>
 			<ul>
-				<li>Queries the IP addresses of Basedflare nodes through DNS.</li>
+				<li>Queries the IP addresses of edge nodes through DNS.</li>
 				<li>Removes any UFW rule for IPs that are no longer in the DNS.</li>
 				<li>Adds UFW rules for the fetched IPs.</li>
 				<li>Generates Nginx snippets for accepting <code>X-Forwarded-For</code> headers (for visitor IP passthrough) and denying traffic from non-whitelisted IPs.</li>
