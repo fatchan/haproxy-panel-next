@@ -12,7 +12,7 @@ import { pathToFileURL } from 'node:url';
 const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;
 
 isMain && await db.connect();
-import { nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from './templates.js';
+import { getNsTemplate, getSoaTemplate, aTemplate, aaaaTemplate } from './templates.js';
 isMain && update();
 
 async function processKey(domainKey) {
@@ -48,12 +48,12 @@ async function processKey(domainKey) {
 			}
 			if (records['ns'] && records['ns'][0]['t'] === true) {
 				const locked = records['ns']['l'] === true;
-				records['ns'] = JSON.parse(JSON.stringify(nsTemplate()));
+				records['ns'] = JSON.parse(JSON.stringify(getNsTemplate()));
 				records['ns'].forEach(r => r['l'] = locked);
 			}
 			if (records['soa'] && records['soa']['t'] === true) {
 				const locked = records['soa']['l'] === true;
-				records['soa'] = JSON.parse(JSON.stringify(soaTemplate()))[0];
+				records['soa'] = JSON.parse(JSON.stringify(getSoaTemplate()))[0];
 				records['soa']['l'] = locked;
 				records['soa'].MBox = `root.${domain}.`;
 			}

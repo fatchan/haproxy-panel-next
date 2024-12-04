@@ -3,7 +3,7 @@ import url from 'node:url';
 import { dynamicResponse } from '../util.js';
 import * as redis from '../redis.js';
 import psl from 'psl';
-import { nsTemplate, soaTemplate } from '../templates.js';
+import { getNsTemplate, getSoaTemplate } from '../templates.js';
 
 /**
  * GET /domains
@@ -123,12 +123,12 @@ export async function addDomain(req, res, next) {
 				value: res.locals.user.username,
 			}], null, false, false);
 		if (domain.split('.').length < 3 //naive
-			&& soaTemplate && nsTemplate) {
-			const soaRecords = JSON.parse(JSON.stringify(soaTemplate()));
+			&& getSoaTemplate && getNsTemplate) {
+			const soaRecords = JSON.parse(JSON.stringify(getSoaTemplate()));
 			soaRecords[0].MBox = `root.${domain}.`;
 			soaRecords[0].l = true;
 			soaRecords[0].t = true;
-			const nsRecords = JSON.parse(JSON.stringify(nsTemplate()));
+			const nsRecords = JSON.parse(JSON.stringify(getNsTemplate()));
 			nsRecords.forEach(r => {
 				r.l = true;
 				r.t = true;

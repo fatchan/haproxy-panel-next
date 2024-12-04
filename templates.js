@@ -1,5 +1,5 @@
 import * as db from './db.js';
-import instanceConfig from './instance-config.js';
+import { soaTemplate, nsTemplate } from './instance-config.js';
 
 export function aTemplate(template) {
 	return db.db().collection('templates').findOne({
@@ -53,9 +53,9 @@ export async function getAllTemplateIps(type, allowedTemplates) {
 		: [];
 }
 
-export const soaTemplate = () => Object.seal(Object.freeze(Object.preventExtensions(instanceConfig.soaTemplate)));
+export const getSoaTemplate = () => Object.seal(Object.freeze(Object.preventExtensions(soaTemplate)));
 
-export const nsTemplate = () => Object.seal(Object.freeze(Object.preventExtensions(instanceConfig.nsTemplate)));
+export const getNsTemplate = () => Object.seal(Object.freeze(Object.preventExtensions(nsTemplate)));
 
 // Trim trailing . from ns hosts and map to array of just hosts
-export const trimmedNsHosts = nsTemplate().map(nsRec => nsRec.host.substring(0, nsRec.host.length-1));
+export const trimmedNsHosts = getNsTemplate().map(nsRec => nsRec.host.substring(0, nsRec.host.length-1));

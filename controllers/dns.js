@@ -3,7 +3,7 @@ import * as redis from '../redis.js';
 import { parse } from 'ip6addr';
 import { isIPv4, isIPv6 } from 'node:net';
 import { dynamicResponse } from '../util.js';
-import { getAllTemplateIps, nsTemplate, soaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
+import { getAllTemplateIps, getNsTemplate, getSoaTemplate, aTemplate, aaaaTemplate } from '../templates.js';
 
 /**
 * GET /dns/:domain
@@ -159,12 +159,12 @@ export async function dnsRecordUpdate(req, res) {
 				break;
 			}
 			case type === 'ns_template':
-				records = JSON.parse(JSON.stringify(nsTemplate()));
+				records = JSON.parse(JSON.stringify(getNsTemplate()));
 				template = true;
 				type = 'ns';
 				break;
 			case type === 'soa_template':
-				records = JSON.parse(JSON.stringify(soaTemplate()));
+				records = JSON.parse(JSON.stringify(getSoaTemplate()));
 				records[0].MBox = `root.${req.params.domain}.`;
 				template = true;
 				type = 'soa';
