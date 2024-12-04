@@ -28,7 +28,8 @@ export async function purgeURL(req, res, _next) {
 	try {
 		const url = new URL(req.body.url);
 
-		if (!res.locals.user.domains.includes(url.hostname)) {
+		if (!res.locals.user.domains.includes(url.hostname)
+			&& res.locals.user.username !== 'admin') { //TODO: acting/impersonating mode
 			return dynamicResponse(req, res, 403, { error: 'Domain not authorized' });
 		}
 	} catch (error) {
