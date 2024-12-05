@@ -113,7 +113,7 @@ export async function mapData(req, res, next) {
 			const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
 			map = map.filter(a => {
 				const { pathname } = url.parse(`https://${a.key}`);
-				const isPowIconPath = pathname === `/${process.env.DOT_PATH}/pow-icon`;
+				const isPowIconPath = pathname === `/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 				return isImages ? isPowIconPath : !isPowIconPath;
 			});
 			if (isImages) {
@@ -258,7 +258,7 @@ export async function deleteMapForm(req, res, next) {
 		//TODO: handle for other image types and make dynamic for e.g. css, translations map(s)
 		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			//tood: handle for images other than bot-check
-			req.body.key = `${hostname}/${process.env.DOT_PATH}/pow-icon`;
+			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 		}
 		try {
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
@@ -339,7 +339,7 @@ export async function patchMapForm(req, res, next) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			const { hostname } = url.parse(`https://${req.body.key}`);
-			req.body.key = `${hostname}/${process.env.DOT_PATH}/pow-icon`;
+			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 		}
 
 		//validate key is valid ip address
