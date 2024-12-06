@@ -40,7 +40,15 @@ export default function Onboarding(props) {
 		};
 	}, []);
 
-	if (state.user == null || !state.txtRecords || state.txtRecords.length === 0) {
+	const { user, maps, csrf, txtRecords, hasBackend, nameserversPropagated } = state;
+
+	const memoizedTxtRecords = useMemo(() => {
+		return (txtRecords||[])
+			.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
+			.map(r => <li suppressHydrationWarning key={r}>{r}</li>);
+	}, [txtRecords]);
+
+	if (user == null || !txtRecords || txtRecords.length === 0) {
 		return (
 			<div className='d-flex flex-column'>
 				{error && <ErrorAlert error={error} />}
@@ -53,7 +61,6 @@ export default function Onboarding(props) {
 		);
 	}
 
-	const { user, maps, csrf, txtRecords, hasBackend, nameserversPropagated } = state;
 	const domainAdded = user.domains && user.domains.length > 0;
 	const backendMap = maps && maps.find(m => m.name === 'hosts');
 	const backendAdded = backendMap && backendMap.count > 0 && hasBackend === true;
@@ -157,9 +164,7 @@ export default function Onboarding(props) {
 					</strong>
 					<span className='d-block text-body-secondary mt-3'>
 						<ul>
-							{txtRecords
-								.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
-								.map(r => <li suppressHydrationWarning key={r}>{r}</li>)}
+							{memoizedTxtRecords}
 						</ul>
 					</span>
 					<span className='d-block text-body-secondary mt-3'>
