@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -46,7 +46,7 @@ export default function Onboarding(props) {
 		return (txtRecords||[])
 			.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
 			.map(r => <li suppressHydrationWarning key={r}>{r}</li>);
-	}, [txtRecords]);
+	}, [txtRecords?.length]);
 
 	if (user == null || !txtRecords || txtRecords.length === 0) {
 		return (
