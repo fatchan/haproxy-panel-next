@@ -112,7 +112,7 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 							) : (
 								<span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>
 							);
-						} else if (displayValue) {
+						} else if (displayValue != null) {
 							displayValue = mapValueNames[displayValue.toString()] || displayValue.toString();
 						}
 
