@@ -63,6 +63,17 @@ export async function deleteDomain(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/domain/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Streams
+export async function getStreams(dispatch, errorCallback, router) {
+	return ApiCall('/streams.json', 'GET', null, dispatch, errorCallback, router);
+}
+export async function addStream(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/stream/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+export async function deleteStream(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/stream/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
 // Dns
 export async function getDnsDomain(domain, dispatch, errorCallback, router) {
 	return ApiCall(`/dns/${domain}.json`, 'GET', null, dispatch, errorCallback, router);

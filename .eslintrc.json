@@ -1,16 +1,28 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["node_modules/", "specification_openapiv3.js"],
+  "parserOptions": {
+    "tsconfigRootDir": "__dirname"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "specification_openapiv3.js"
+  ],
   "rules": {
     "brace-style": [
       "error",
       "1tbs",
-      { "allowSingleLine": true }
+      {
+        "allowSingleLine": true
+      }
     ],
     "indent": [
       "error",
       "tab",
-      { "SwitchCase": 1, "ignoreComments": true, "MemberExpression": 1 }
+      {
+        "SwitchCase": 1,
+        "ignoreComments": true,
+        "MemberExpression": 1
+      }
     ],
     "linebreak-style": [
       "error",
@@ -28,12 +40,21 @@
       "error",
       "always"
     ],
-    "curly": ["error"],
-    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "curly": [
+      "error"
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
     "no-template-curly-in-string": [
       "error"
     ],
-    "no-trailing-spaces": ["error"],
+    "no-trailing-spaces": [
+      "error"
+    ],
     "no-unused-vars": [
       "error",
       {

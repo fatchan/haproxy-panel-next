@@ -13,6 +13,7 @@ import * as billingController from './controllers/billing.js';
 import * as statsController from './controllers/stats.js';
 import * as templateController from './controllers/templates.js';
 import * as cacheController from './controllers/cache.js';
+import * as streamsController from './controllers/stream.js';
 
 import {
 	useSession,
@@ -90,7 +91,7 @@ export default function router(server, app) {
 			process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
 			process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
 			process.env.NEXT_PUBLIC_CSS_MAP_NAME,
-			// 'translation',
+		// 'translation',
 		],
 		mapNamesOrString = mapNames.join('|');
 
@@ -229,6 +230,22 @@ export default function router(server, app) {
 		checkSession,
 		csrfMiddleware,
 		domainsController.domainsJson,
+	);
+	server.get(
+		'/streams',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		streamsController.streamsPage.bind(null, app),
+	);
+	server.get(
+		'/streams.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		streamsController.streamsJson,
 	);
 	server.get(
 		'/dns/:domain([a-zA-Z0-9-\.]+)/new',
@@ -379,6 +396,24 @@ export default function router(server, app) {
 		domainsController.deleteDomain,
 	);
 	clusterRouter.post(
+		'/stream/add',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		streamsController.addStream,
+	);
+	clusterRouter.post(
+		'/stream/delete',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		streamsController.deleteStream,
+	);
+	clusterRouter.post(
 		'/cert/add',
 		useSession,
 		fetchSession,
@@ -463,6 +498,7 @@ export default function router(server, app) {
 		billingController.createPaymentRequest,
 	);
 	server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
+	server.post('/forms/stream/admissions-webhook', (req, res, _next) => streamsController.admissionsWebhook(req, res));
 
 	server.use('/forms', clusterRouter);
 }
