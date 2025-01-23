@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
 import { dynamicResponse } from '../util.js';
 import * as db from '../db.js';
+import * as redis from '../redis.js';
 
-const generateStreamKey = (length = 64) => {
+const generateStreamKey = (length = 32) => {
 	const bytes = crypto.randomBytes(length / 2); // Each byte is represented by 2 hex characters
 	return bytes.toString('hex');
 };
@@ -21,8 +22,6 @@ const validateSignature = (payload, signature) => {
  */
 export async function admissionsWebhook(req, res) {
 	//NOTE: follows response format for ovenmedia engine
-	console.log(req.body);
-
 	const signature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
@@ -94,8 +93,9 @@ export async function admissionsWebhook(req, res) {
 export async function listApps(req, res, _next) {
 
 	//todo: make ovenmedia api a middleware i.e useOvenMedia
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
 
-	return dynamicResponse(req, res, 200, {});
+	return dynamicResponse(req, res, 200, { streams });
 
 }
 
@@ -116,15 +116,17 @@ export async function concludeStream(req, res, _next) {
  * domains page
  */
 export async function streamsPage(app, req, res) {
-	const streams = await db.db().collection('streams')
+	const streamKeys = await db.db().collection('streams')
 		.find({
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
 		.toArray();
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
 	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
 		streams: streams || [],
+		streamKeys: streamKeys || [],
 	};
 	return app.render(req, res, '/streams');
 };
@@ -136,15 +138,18 @@ export async function streamsPage(app, req, res) {
  * stream keys json data
  */
 export async function streamsJson(req, res) {
-	const streams = await db.db().collection('streams')
+	const streamKeys = await db.db().collection('streams')
 		.find({
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
 		.toArray();
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
 		streams: streams || [],
+		streamKeys: streamKeys || [],
+
 	});
 };
 
@@ -190,48 +195,3 @@ export async function deleteStream(req, res, _next) {
 	return dynamicResponse(req, res, 200, {});
 
 };
-
-/**
- * POST /domain/delete
- * delete domain
- */
-// export async function deleteDomain(req, res) {
-
-// 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0
-// 		|| !res.locals.user.domains.includes(req.body.domain)) {
-// 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-// 	}
-
-// 	const domain = req.body.domain.toLowerCase();
-
-// 	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
-// 	const [existingHost, existingMaintenance, existingRewrite, existingDdos] = await Promise.all([
-// 		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
-// 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-// 		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME })
-// 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-// 		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_REWRITE_MAP_NAME })
-// 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-// 		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_DDOS_MAP_NAME })
-// 			.then(res => res.data).then(map => map.some(e => {
-// 				const { hostname } = url.parse(`https://${e.key}`);
-// 				return hostname === domain;
-// 			}))
-// 	]);
-
-// 	if (existingHost || existingMaintenance || existingRewrite || existingDdos) {
-// 		return dynamicResponse(req, res, 400, { error: 'Cannot remove domain while still in use. Remove it from backends/maintenance/rewrites/protection first.' });
-// 	}
-
-// 	await db.db().collection('accounts')
-// 		.updateOne({ _id: res.locals.user.username }, { $pull: { domains: domain } });
-// 	await res.locals
-// 		.dataPlaneAll('deleteRuntimeMapEntry', {
-// 			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
-// 			id: domain,
-// 		}, null, null, false, false);
-// 	await redis.del(`dns:${domain}.`);
-
-// 	return dynamicResponse(req, res, 302, { redirect: '/domains' });
-
-// };

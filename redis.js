@@ -62,3 +62,21 @@ export function del(keyOrKeys) {
 		return client.del(keyOrKeys);
 	}
 }
+
+export function getKeysPattern(pattern) {
+	return new Promise((resolve, reject) => {
+		const stream = client.scanStream({
+			match: pattern
+		});
+		let allKeys = [];
+		stream.on('data', (keys) => {
+			allKeys = allKeys.concat(keys);
+		});
+		stream.on('end', async () => {
+			resolve(allKeys);
+		});
+		stream.on('error', (err) => {
+			reject(err);
+		});
+	});
+}

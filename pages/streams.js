@@ -32,7 +32,7 @@ export default function Streams(props) {
 		);
 	}
 
-	const { csrf, streams } = state;
+	const { csrf, streamKeys, streams } = state;
 
 	async function addStream(e) {
 		e.preventDefault();
@@ -48,7 +48,23 @@ export default function Streams(props) {
 		await API.getStreams(dispatch, setError, router);
 	}
 
-	const streamTable = streams
+	const streamsTable = streams
+		// .sort((a, b) => a.localeCompare(b))
+		.filter(s => (!filter || filter.length === 0) || (s && s.includes(filter)))
+		.map(s => (
+			<tr key={`stream_${s}`} className='align-middle'>
+				<td className='text-left' style={{ width: 0 }}>
+					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s)}>
+						<i className='bi-trash-fill pe-none' width='16' height='16' />
+					</a>
+				</td>
+				<td>
+					{s.substring(s.indexOf(':')+1)}
+				</td>
+			</tr>
+		));
+
+	const streamKeysTable = streamKeys
 		// .sort((a, b) => a.localeCompare(b))
 		.filter(s => (!filter || filter.length === 0) || (s.appName && s.appName.includes(filter)))
 		.map(s => (
@@ -74,11 +90,33 @@ export default function Streams(props) {
 				<title>Stream Keys</title>
 			</Head>
 
+			<SearchFilter filter={filter} setFilter={setFilter} />
+
+			<h5 className='fw-bold'>
+				Live Streams:
+			</h5>
+
+			{/* Streams table */}
+			<div className='table-responsive round-border mb-2'>
+				<table className='table text-nowrap'>
+					<tbody>
+
+						<tr className='align-middle'>
+							<th />
+							<th>
+								Name
+							</th>
+						</tr>
+
+						{streamsTable}
+
+					</tbody>
+				</table>
+			</div>
+
 			<h5 className='fw-bold'>
 				Stream Keys:
 			</h5>
-
-			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Streams table */}
 			<div className='table-responsive round-border'>
@@ -95,7 +133,7 @@ export default function Streams(props) {
 							</th>
 						</tr>
 
-						{streamTable}
+						{streamKeysTable}
 
 						{/* Add new stream form */}
 						<tr className='align-middle'>
@@ -125,5 +163,5 @@ export default function Streams(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: res.locals.data };
+	return { props: JSON.parse(JSON.stringify(res.locals.data)) };
 }
