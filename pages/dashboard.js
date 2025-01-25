@@ -124,9 +124,6 @@ export default function DashboardHome(props) {
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-graph-up fs-2'></i>
 								<h5 className='card-title'>Statistics</h5>
-								<small className='alert alert-warning text-uppercase p-0 px-1 ms-2' style={{ fontSize: 12 }} role='alert'>
-									beta
-								</small>
 							</div>
 						</Link>
 					</div>

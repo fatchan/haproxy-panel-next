@@ -75,6 +75,11 @@ export const sections = [
 		],
 	},
 	{
+		links: [
+			{ href: '/streams', label: 'Live Streaming', icon: 'bi-cast' },
+		],
+	},
+	{
 		name: 'Knowledge Base',
 		icon: 'bi-book-half',
 		links: [
@@ -119,7 +124,7 @@ const MenuLinks = ({ router }) => {
 						style={{ transition: 'transform 0.3s ease', transform: openSections[section.name] ? 'rotate(180deg)' : 'rotate(0deg)' }}
 					/>}
 				</button>
-				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length*60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
+				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length * 60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
 					<ul className='nav nav-pills mb-auto'>
 						{section.links.map((link, linkIndex) => (
 							<li className='nav-item w-100' key={`${section.name}_${linkIndex}`}>
@@ -170,7 +175,7 @@ const MenuLinks = ({ router }) => {
 	const bottomLinks = (
 		<>
 			<hr className='mt-auto' />
-			{renderSection(sections[sections.length-1])}
+			{renderSection(sections[sections.length - 1])}
 			<ul className='nav nav-pills flex-column'>
 				<li className='nav-item user-select-none'>
 					<Link href='/onboarding' className={path === '/onboarding' ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
