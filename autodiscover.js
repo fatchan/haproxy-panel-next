@@ -23,7 +23,9 @@ class AutodiscoverService {
 			const response = await fetch(`${process.env.AUTODISCOVER_HOST}/v1/autodiscover`, fetchOptions);
 			const json = await response.json();
 			console.log('Autodiscovered %d hosts', json.length);
-			this.#autodiscoveredHosts = json.map(h => new URL(`https://${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}@${h.hostname}:2001/`));
+			this.#autodiscoveredHosts = json
+				.filter(x => x.tags.includes('haproxy'))
+				.map(h => new URL(`https://${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}@${h.hostname}:2001/`));
 		} catch (error) {
 			console.error('Autodiscover failed:', error);
 		}
