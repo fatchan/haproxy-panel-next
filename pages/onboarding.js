@@ -301,8 +301,8 @@ export default function Onboarding(props) {
 						8. Get your HTTPS CSR signed
 					</strong>
 					<span className='d-block text-body-secondary mt-3'>
-						<p>Finally, generate a certificate signing request for your origin server(s) and have sign it.</p>
-						<p>This allows the edge servers to verify the connection to your backend and prevents trivial MITM attacks and other weaknesses that are possible with e.g self-signed certificates in CloudFlare&apos;s &quot;flexible&quot; or &quot;full&quot; ssl mode.</p>
+						<p>Finally, generate a certificate signing request for your origin server(s) and have it signed by the {process.env.NEXT_PUBLIC_APP_NAME} certificate authority.</p>
+						<p>This allows the edge servers to verify their connection to your backend, protecting against simple man-in-the-middle attacks and other vulnerabilities that can occur with self-signed certificates, insecure connections, or so-called &apos;flexible&apos; SSL modes.</p>
 						<ol className='text-break'>
 							<li>Generate the private key and certificate signing request for your domains on your origin server:
 								<p>
@@ -316,6 +316,7 @@ export default function Onboarding(props) {
 							<li>Copy the contents of <code>origin.csr</code> into the box below. After submitting the form, save the output to <code>origin.crt</code></li>
 							<li>You can then setup <code>origin.key</code> and <code>origin.crt</code>, as the key and certificate respectively, in your origin web server.</li>
 						</ol>
+						<p>See the <Link href='/kb/https' passHref target='_blank'>HTTPS & CSRs knowledgebase article</Link> for more information.</p>
 					</span>
 					<form onSubmit={verifyCSR} className='mb-3' action='/forms/csr/verify' method='post'>
 						<input type='hidden' name='_csrf' value={csrf} />

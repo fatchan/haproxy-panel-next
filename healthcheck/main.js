@@ -41,11 +41,10 @@ async function main() {
 		await scanKeys('dns:*');
 	} catch(e) {
 		console.error(e);
-		setTimeout(main, 60000);
+		setTimeout(main, 120000);
 		return;
 	}
-	const elapsed = Date.now() - start;
-	setTimeout(main, 30000-elapsed);
+	setTimeout(main, 60000);
 }
 
 main();

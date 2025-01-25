@@ -38,7 +38,7 @@ async function doCheck(domainKey, hkey, record) {
 		return record;
 	}
 	//await new Promise(res => setTimeout(res, Math.floor(Math.random()*1000)));
-	const lock = await redlock.acquire([`lock:${record.ip}`], 30000);
+	const lock = await redlock.acquire([`lock:${record.ip}`], 60000);
 	try {
 		let recordHealth;
 		if (downedIps.includes(record.ip)) {
@@ -53,7 +53,7 @@ async function doCheck(domainKey, hkey, record) {
 				const signal = controller.signal;
 				setTimeout(() => {
 					controller.abort();
-				}, 10000);
+				}, 15000);
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
 				const hostHeader = domainKey.substring(4, domainKey.length-1);
 				await fetch(`https://${host}/${process.env.DOT_PATH}/cgi/trace`, {
@@ -100,7 +100,7 @@ async function processKey(domainKey) {
 	try {
 		const domainHashKeys = await redis.client.hkeys(domainKey);
 		domainHashKeys.forEach(async (hkey) => {
-			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 30000);
+			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 60000);
 			try {
 				const records = await redis.hget(domainKey, hkey);
 				const allIps = (records['a']||[]).concat((records['a']||[]));

@@ -97,7 +97,7 @@ export default function Certs(props) {
 	const clusterOnlyCertList = clusterOnlyCerts.map((c, i) => {
 		const approxSubject = getApproxSubject(c.storage_name);
 		return (
-			<tr id={c.storage_name} key={'clusterOnlyCertList'+i} className='align-middle'>
+			<tr id={c.storage_name} key={`clusterOnlyCertList${i}_${c.storage_name}_${approxSubject}`} className='align-middle'>
 				<td className='col-1 text-center'>
 					<a className='btn btn-sm btn-danger' onClick={() => deleteCert(csrf, approxSubject, c.storage_name)}>
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
@@ -128,7 +128,7 @@ export default function Certs(props) {
 			const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
 			const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);
 			return (
-				<tr id={d.storageName} key={'certList'+i} className='align-middle'>
+				<tr id={d.storageName} key={`certList_${i}_${d.storageName}`} className='align-middle'>
 					<td className='text-left' style={{width:0}}>
 						{inCluster
 							? <a className='btn btn-sm btn-danger' onClick={() => deleteCert(csrf, (d.subject || d._id), d.storageName)}>
