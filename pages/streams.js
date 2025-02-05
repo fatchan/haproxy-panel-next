@@ -76,7 +76,13 @@ function Streams(props) {
 					</a>
 				</td>
 				<td>
+					{s._id}
+				</td>
+				<td>
 					{s.appName}
+				</td>
+				<td suppressHydrationWarning={true}>
+					{new Date(s.dateCreated).toLocaleString()}
 				</td>
 				<td>
 					{s.streamKey}
@@ -105,7 +111,7 @@ function Streams(props) {
 						<tr className='align-middle'>
 							<th />
 							<th>
-								Name
+								Key Name
 							</th>
 						</tr>
 
@@ -114,6 +120,8 @@ function Streams(props) {
 					</tbody>
 				</table>
 			</div>
+
+			<hr />
 
 			<h5 className='fw-bold'>
 				Stream Keys:
@@ -127,7 +135,13 @@ function Streams(props) {
 						<tr className='align-middle'>
 							<th />
 							<th>
-								Name
+								Key ID
+							</th>
+							<th>
+								Key Name
+							</th>
+							<th>
+								Date Created
 							</th>
 							<th>
 								Stream Key
@@ -138,7 +152,7 @@ function Streams(props) {
 
 						{/* Add new stream form */}
 						<tr className='align-middle'>
-							<td className='col-1 text-center' colSpan='4'>
+							<td className='col-1 text-center' colSpan='5'>
 								<form className='d-flex' onSubmit={addStream} action='/forms/stream/add' method='post'>
 									<input type='hidden' name='_csrf' value={csrf} />
 									<button className='btn btn-sm btn-success' type='submit'>
@@ -164,7 +178,7 @@ function Streams(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(Streams);

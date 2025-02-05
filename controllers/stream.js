@@ -38,9 +38,9 @@ export async function admissionsWebhook(req, res) {
 
 	const regex = /^\/app\/([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)$/;
 	const match = parsedUrl.pathname.match(regex);
-	let userName, appName, streamKey;
+	let streamKeyId, appName, streamKey;
 	if (match) {
-		userName = match[1];
+		streamKeyId = match[1];
 		appName = match[2];
 		streamKey = parsedUrl.searchParams.get('key');
 	} else {
@@ -57,7 +57,7 @@ export async function admissionsWebhook(req, res) {
 	}
 
 	const streamData = await db.db().collection('streams').findOne({
-		userName,
+		_id: streamKeyId,
 		appName,
 		streamKey,
 	});
@@ -120,7 +120,7 @@ export async function streamsPage(app, req, res) {
 		.find({
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
-		.toArray();
+i		.toArray();
 	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
 	res.locals.data = {
 		user: res.locals.user,
@@ -169,6 +169,7 @@ export async function addStream(req, res, _next) {
 		.insertOne({
 			userName: res.locals.user.username,
 			appName: req.body.appName,
+			dateCreated: new Date(),
 			streamKey,
 		});
 
