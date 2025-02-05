@@ -71,7 +71,7 @@ export const sections = [
 	},
 	{
 		links: [
-			{ href: '/apikeys', label: 'Api Keys', icon: 'bi-key', badge: 'coming soon', disabled: true },
+			{ href: '/apikeys', label: 'Api Keys', icon: 'bi-key' },
 		],
 	},
 	{

@@ -74,6 +74,17 @@ export async function deleteStream(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/stream/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 
+// Apikeys
+export async function getApiKeys(dispatch, errorCallback, router) {
+	return ApiCall('/apikeys.json', 'GET', null, dispatch, errorCallback, router);
+}
+export async function addApiKey(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/apikey/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+export async function deleteApiKey(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/apikey/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+
 // Dns
 export async function getDnsDomain(domain, dispatch, errorCallback, router) {
 	return ApiCall(`/dns/${domain}.json`, 'GET', null, dispatch, errorCallback, router);

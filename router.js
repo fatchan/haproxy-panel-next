@@ -14,6 +14,7 @@ import * as statsController from './controllers/stats.js';
 import * as templateController from './controllers/templates.js';
 import * as cacheController from './controllers/cache.js';
 import * as streamsController from './controllers/stream.js';
+import * as apikeysController from './controllers/apikeys.js';
 
 import {
 	useSession,
@@ -248,6 +249,22 @@ export default function router(server, app) {
 		streamsController.streamsJson,
 	);
 	server.get(
+		'/apikeys',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		apikeysController.apiKeysPage.bind(null, app),
+	);
+	server.get(
+		'/apikeys.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		apikeysController.apiKeysJson,
+	);
+		server.get(
 		'/dns/:domain([a-zA-Z0-9-\.]+)/new',
 		useSession,
 		fetchSession,
@@ -412,6 +429,24 @@ export default function router(server, app) {
 		haproxyMiddleware,
 		csrfMiddleware,
 		streamsController.deleteStream,
+	);
+	clusterRouter.post(
+		'/apikey/add',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		apikeysController.addApiKey,
+	);
+	clusterRouter.post(
+		'/apikey/delete',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		apikeysController.deleteApiKey,
 	);
 	clusterRouter.post(
 		'/cert/add',
