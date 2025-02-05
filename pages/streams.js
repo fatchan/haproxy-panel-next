@@ -5,8 +5,9 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
+import withAuth from '../components/withAuth.js';
 
-export default function Streams(props) {
+function Streams(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -59,7 +60,7 @@ export default function Streams(props) {
 					</a>
 				</td>
 				<td>
-					{s.substring(s.indexOf(':')+1)}
+					{s.substring(s.indexOf(':') + 1)}
 				</td>
 			</tr>
 		));
@@ -163,5 +164,7 @@ export default function Streams(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data)) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
+
+export default withAuth(Streams);

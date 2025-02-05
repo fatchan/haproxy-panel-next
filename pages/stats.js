@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import TimeSeriesChart from '../components/TimeSeriesChart.js';
 import { useRouter } from 'next/router';
+import withAuth from '../components/withAuth.js';
 
 function formatLocalDateTime(date) { //avoid ISOstring weirdness w/ timezone
 	const d = date.toLocaleString('en-CA', {
@@ -15,7 +16,7 @@ function formatLocalDateTime(date) { //avoid ISOstring weirdness w/ timezone
 	return d;
 }
 
-export default function Stats() {
+function Stats() {
 
 	const router = useRouter();
 	const [granularity, setGranularity] = useState('1m');
@@ -159,6 +160,8 @@ export default function Stats() {
 	);
 };
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 };
+
+export default withAuth(Stats);

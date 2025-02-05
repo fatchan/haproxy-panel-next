@@ -3,8 +3,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as API from '../api.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import withAuth from '../components/withAuth.js';
 
-export default function AccountPage(props) {
+function AccountPage(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
@@ -57,7 +58,7 @@ export default function AccountPage(props) {
 					<div className='card-body'>
 						<h6 className='card-title'>Subscription</h6>
 						<span className='card-text'>Plan: {user.billing.description}</span>
-						<p className='card-text'>Price: ${(user.billing.price/100).toFixed(2)} per month</p>
+						<p className='card-text'>Price: ${(user.billing.price / 100).toFixed(2)} per month</p>
 					</div>
 				</div>
 
@@ -76,5 +77,7 @@ export default function AccountPage(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: res.locals.data };
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
+
+export default withAuth(AccountPage);

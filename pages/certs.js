@@ -6,8 +6,9 @@ import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { getApproxSubject } from '../util.js';
 import { useRouter } from 'next/router';
+import withAuth from '../components/BackButton.js';
 
-export default function Certs(props) {
+function Certs(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -59,7 +60,7 @@ export default function Certs(props) {
 				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
-		} catch(err) {
+		} catch (err) {
 			console.warn(err);
 			await new Promise(res => setTimeout(res, 10000));
 		}
@@ -83,7 +84,7 @@ export default function Certs(props) {
 				_csrf: csrf,
 				domain: domain
 			}, dispatch, setError, router);
-		} catch(err) {
+		} catch (err) {
 			console.warn(err);
 			await new Promise(res => setTimeout(res, 10000));
 		}
@@ -122,14 +123,14 @@ export default function Certs(props) {
 	const certList = dbCerts
 		.filter(d => d.subject.includes(filter) || d.altnames.some(an => an.includes(filter)))
 		.map((d, i) => {
-		//TODO: refactor, to component
+			//TODO: refactor, to component
 			let creation = new Date(d.date);
-			const expiry = creation.setDate(creation.getDate()+90);
+			const expiry = creation.setDate(creation.getDate() + 90);
 			const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
 			const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);
 			return (
 				<tr id={d.storageName} key={`certList_${i}_${d.storageName}`} className='align-middle'>
-					<td className='text-left' style={{width:0}}>
+					<td className='text-left' style={{ width: 0 }}>
 						{inCluster
 							? <a className='btn btn-sm btn-danger' onClick={() => deleteCert(csrf, (d.subject || d._id), d.storageName)}>
 								<i className='bi-trash-fill pe-none' width='16' height='16' />
@@ -150,7 +151,7 @@ export default function Certs(props) {
 					<td>
 						<textarea
 							className='w-100'
-							style={{border:'none'}}
+							style={{ border: 'none' }}
 							readOnly
 							cols={20}
 							rows={Math.min(3, d.altnames.length)}
@@ -188,7 +189,7 @@ export default function Certs(props) {
 						<tbody>
 
 							<tr className='align-middle'>
-								<th style={{width:0}} />
+								<th style={{ width: 0 }} />
 								<th>
 									Subject
 								</th>
@@ -240,7 +241,7 @@ export default function Certs(props) {
 					</div>
 					<div className='mb-3'>
 						<label className='form-label w-100'>Email (Optional, for expiry notices)
-							<input className='form-control' type='email' name='email' placeholder='email@example.com'  />
+							<input className='form-control' type='email' name='email' placeholder='email@example.com' />
 						</label>
 					</div>
 					<button className='btn btn-sm btn-success' type='submit'>
@@ -260,6 +261,8 @@ export default function Certs(props) {
 
 };
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 };
+
+export default withAuth(Certs);

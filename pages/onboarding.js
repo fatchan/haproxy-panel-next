@@ -5,8 +5,9 @@ import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import NProgress from 'nprogress';
+import withAuth from '../components/withAuth.js';
 
-export default function Onboarding(props) {
+function Onboarding(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -43,8 +44,8 @@ export default function Onboarding(props) {
 	const { user, maps, csrf, txtRecords, hasBackend, nameserversPropagated } = state;
 
 	const memoizedTxtRecords = useMemo(() => {
-		return (txtRecords||[])
-			.reduceRight((p,v,i,a)=>(v=i?~~(Math.random()*(i+1)):i, v-i?[a[v],a[i]]=[a[i],a[v]]:0, a),[])
+		return (txtRecords || [])
+			.reduceRight((p, v, i, a) => (v = i ? ~~(Math.random() * (i + 1)) : i, v - i ? [a[v], a[i]] = [a[i], a[v]] : 0, a), [])
 			.map(r => <li suppressHydrationWarning key={r}>{r}</li>);
 	}, [txtRecords?.length]);
 
@@ -150,7 +151,7 @@ export default function Onboarding(props) {
 						</form>
 					</>}
 					{domainAdded && (<div><strong>
-						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }} width='1em' height='1em' />
 						Domain added successfully
 					</strong></div>)}
 				</span>
@@ -171,7 +172,7 @@ export default function Onboarding(props) {
 						<p>This is usually done through your domain registrar. Using at least 2 nameservers is recommended for redundancy.</p>
 					</span>
 					{nameserversPropagated && (<div><strong>
-						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }} width='1em' height='1em' />
 						Nameservers configured successfully
 					</strong></div>)}
 				</span>
@@ -214,7 +215,7 @@ export default function Onboarding(props) {
 						{loading['nameservers'] && <div className='spinner-border ms-2' role='status' style={{ width: 15, height: 15 }} />}
 					</span>
 					{nameserversPropagated && (<div><strong>
-						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }} width='1em' height='1em' />
 						Nameserver changes propagated successfully
 					</strong></div>)}
 				</span>
@@ -238,7 +239,7 @@ export default function Onboarding(props) {
 								disabled={backendAdded}
 								required>
 								<option value=''>select domain</option>
-								{(user.domains||[]).map((d, i) => (<option key={'option'+i} value={d}>{d}</option>))}
+								{(user.domains || []).map((d, i) => (<option key={'option' + i} value={d}>{d}</option>))}
 							</select>
 							{
 								(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED) &&
@@ -255,7 +256,7 @@ export default function Onboarding(props) {
 						</form>
 					</>}
 					{backendAdded === true && (<div><strong>
-						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }} width='1em' height='1em' />
 						Backend server successfully added
 					</strong></div>)}
 				</span>
@@ -288,7 +289,7 @@ export default function Onboarding(props) {
 						</form>
 					</>}
 					{certAdded && (<div><strong>
-						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }}  width='1em' height='1em' />
+						<i className='bi-check-circle-fill me-2' style={{ color: 'green' }} width='1em' height='1em' />
 						HTTPS Certificate successfully generated
 					</strong></div>)}
 				</span>
@@ -354,6 +355,8 @@ export default function Onboarding(props) {
 	</>);
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 };
+
+export default withAuth(Onboarding);

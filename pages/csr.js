@@ -4,9 +4,10 @@ import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
+import withAuth from '../components/withAuth.js';
 import NProgress from 'nprogress';
 
-export default function Csr(props) {
+function Csr(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -150,5 +151,7 @@ export default function Csr(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
+
+export default withAuth(Csr);

@@ -7,8 +7,9 @@ import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import { wildcardMatches } from '../util.js';
+import withAuth from '../components/withAuth.js';
 
-export default function Domains(props) {
+function Domains(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -59,19 +60,19 @@ export default function Domains(props) {
 			const domainCert = certs.find(c => c.subject === d || c.altnames.includes(d));
 			const wildcardCert = certs.find(c => {
 				return ((c.subject.startsWith('*') && wildcardMatches(d, c.subject))
-				|| c.altnames.some(an => an.startsWith('*') && wildcardMatches(d, an)));
+					|| c.altnames.some(an => an.startsWith('*') && wildcardMatches(d, an)));
 			});
 			const isSubdomain = d.split('.').length > 2;
 			let daysRemaining;
 			if (domainCert || wildcardCert) {
 				const certDate = (domainCert || wildcardCert).date;
 				const creation = new Date(certDate);
-				const expiry = creation.setDate(creation.getDate()+90);
+				const expiry = creation.setDate(creation.getDate() + 90);
 				daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
 			}
 			const tableRow = (
 				<tr key={i} className='align-middle'>
-					<td className='text-left' style={{width:0}}>
+					<td className='text-left' style={{ width: 0 }}>
 						<a className='btn btn-sm btn-danger' onClick={() => {
 							if (window.confirm(`Are you sure you want to delete "${d}"?`)) {
 								deleteDomain(csrf, d);
@@ -86,18 +87,18 @@ export default function Domains(props) {
 					<td>
 						{d}
 						{(domainCert || wildcardCert) && <a target='_blank' rel='noreferrer' href={`https://${d}`}>
-							<i className='bi-box-arrow-up-right pe-none ms-1' width='12' height='12' style={{fontSize: '0.8rem'}} />
+							<i className='bi-box-arrow-up-right pe-none ms-1' width='12' height='12' style={{ fontSize: '0.8rem' }} />
 						</a>}
 					</td>
 					<td>
 						{(domainCert || wildcardCert)
-							? <Link href={`/certs#${(domainCert||wildcardCert).storageName}`} className='text-success'>
+							? <Link href={`/certs#${(domainCert || wildcardCert).storageName}`} className='text-success'>
 								<i className={`${wildcardCert ? 'bi-asterisk' : 'bi-lock-fill'} pe-none me-2`} width='16' height='16' />
-								{(domainCert||wildcardCert).storageName}
+								{(domainCert || wildcardCert).storageName}
 								{wildcardCert ? <small>{' '}(Wildcard)</small> : ''}
 							</Link>
 							: <span>
-							No Certificate
+								No Certificate
 							</span>}
 					</td>
 					<td suppressHydrationWarning={true}>
@@ -127,7 +128,7 @@ export default function Domains(props) {
 					<tbody>
 
 						{domainList && domainList.length > 0 && <tr className='align-middle'>
-							<th/>
+							<th />
 							<th>
 								Domain
 							</th>
@@ -174,6 +175,8 @@ export default function Domains(props) {
 
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
+
+export default withAuth(Domains);

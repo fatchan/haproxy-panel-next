@@ -5,8 +5,9 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import NProgress from 'nprogress';
+import withAuth from '../components/withAuth.js';
 
-export default function Down(props) {
+function Down(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -90,7 +91,8 @@ export default function Down(props) {
 
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: res.locals.data };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
 
+export default withAuth(Down);

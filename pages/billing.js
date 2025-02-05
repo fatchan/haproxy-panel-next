@@ -7,6 +7,7 @@ import { allowedCryptos } from '../util.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import { calculateRemainingHours } from '../util.js';
+import withAuth from '../components/withAuth.js';
 
 const statusColors = {
 	'cancelled': 'secondary',
@@ -18,7 +19,7 @@ const statusColors = {
 	'expired': 'secondary'
 };
 
-export default function Billing(props) {
+function Billing(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props || {});
 	const [error, setError] = useState();
@@ -234,5 +235,7 @@ export default function Billing(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data)) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
 }
+
+export default withAuth(Billing);
