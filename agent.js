@@ -25,5 +25,6 @@ if (process.env.CUSTOM_CA_PATH) {
 	agentOptions.ca = fs.readFileSync(process.env.CUSTOM_CA_PATH);
 }
 
-export default new https.Agent(agentOptions);
+const agent = new https.Agent(agentOptions);
+export default agent;
 

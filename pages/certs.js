@@ -6,9 +6,9 @@ import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { getApproxSubject } from '../util.js';
 import { useRouter } from 'next/router';
-import withAuth from '../components/BackButton.js';
+import withAuth from '../components/withAuth.js';
 
-function Certs(props) {
+const Certs = (props) => {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -262,7 +262,7 @@ function Certs(props) {
 };
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 };
 
 export default withAuth(Certs);

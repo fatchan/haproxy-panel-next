@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-const withAuth = (WrappedComponent) => {
+function withAuth(WrappedComponent) {
 	return function WithAuth(props) {
 		const router = useRouter();
 		const { user } = props;

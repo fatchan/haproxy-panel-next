@@ -1,3 +1,8 @@
+import Image from 'next/image';
+let ResolvedImage = Image;
+if ('default' in ResolvedImage) {
+	ResolvedImage = ResolvedImage.default;
+}
 import { useEffect, useState } from 'react';
 import RemainingTime from './RemainingTime.js';
 import { calculateRemainingHours } from '../util.js';
@@ -88,8 +93,9 @@ export default function PaymentModal({
 										<p><strong>Amount To Pay:</strong> <code>{paymentInfo.amount - (selectedInvoice?.paymentData?.balance_crypto || 0)}</code></p>
 									</>
 								)}
+
 								{/* Show QR code text only if the invoice is not fully paid and not expired */}
-								{!isPaid && qrCodeText && remainingHours > 0 && <img className='mb-3 d-block mx-auto' src={qrCodeText} />}
+								{!isPaid && qrCodeText && remainingHours > 0 && <ResolvedImage className='mb-3 d-block mx-auto' src={qrCodeText} alt='payment QR' />}
 
 								{isPaid ? (
 									<>

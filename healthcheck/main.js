@@ -36,7 +36,6 @@ function scanKeys(pattern) {
 }
 
 async function main() {
-	const start = Date.now();
 	try {
 		await scanKeys('dns:*');
 	} catch(e) {
