@@ -38,9 +38,9 @@ export async function admissionsWebhook(req, res) {
 
 	const regex = /^\/app\/([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)$/;
 	const match = parsedUrl.pathname.match(regex);
-	let streamKeyId, appName, streamKey;
+	let streamsId, appName, streamKey;
 	if (match) {
-		streamKeyId = match[1];
+		streamsId = match[1];
 		appName = match[2];
 		streamKey = parsedUrl.searchParams.get('key');
 	} else {
@@ -56,8 +56,23 @@ export async function admissionsWebhook(req, res) {
 		});
 	}
 
+	const streamsIdAccount = await db.db().collection('accounts').findOne({
+		streamsId,
+	}, {
+		projection: {
+			_id: 1,
+		}
+	});
+
+	if (!streamsIdAccount) {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Invalid stream account id'
+		});
+	}
+
 	const streamData = await db.db().collection('streams').findOne({
-		_id: streamKeyId,
+		userName: streamsIdAccount._id,
 		appName,
 		streamKey,
 	});
@@ -93,7 +108,7 @@ export async function admissionsWebhook(req, res) {
 export async function listApps(req, res, _next) {
 
 	//todo: make ovenmedia api a middleware i.e useOvenMedia
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}:*`);
 
 	return dynamicResponse(req, res, 200, { streams });
 
@@ -120,7 +135,7 @@ export async function streamsPage(app, req, res) {
 		.find({
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
-i		.toArray();
+		.toArray();
 	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
 	res.locals.data = {
 		user: res.locals.user,

@@ -241,6 +241,7 @@ export async function register(req, res) {
 	await db.db().collection('accounts')
 		.insertOne({
 			_id: username,
+			streamsId: ObjectId(),
 			email,
 			emailVerified: false,
 			displayName: req.body.username,
