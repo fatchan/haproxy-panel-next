@@ -3,6 +3,7 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
+import SuccessAlert from '../components/SuccessAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import withAuth from '../components/withAuth.js';
@@ -33,7 +34,7 @@ function Streams(props) {
 		);
 	}
 
-	const { csrf, streamKeys, streams } = state;
+	const { csrf, streamKeys, streams, user } = state;
 
 	async function addStream(e) {
 		e.preventDefault();
@@ -126,6 +127,10 @@ function Streams(props) {
 			<h5 className='fw-bold'>
 				Stream Keys:
 			</h5>
+
+			<SuccessAlert>
+				Stream destination URL should be in the format: <div><code>rtmp://{process.env.NEXT_PUBLIC_ORIGIN_URL}/app/{user.streamsId}:{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
+			</SuccessAlert>
 
 			{/* Streams table */}
 			<div className='table-responsive round-border'>
