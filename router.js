@@ -422,6 +422,15 @@ export default function router(server, app) {
 		streamsController.addStream,
 	);
 	clusterRouter.post(
+		'/stream/conclude',
+		useSession,
+		fetchSession,
+		checkSession,
+		haproxyMiddleware,
+		csrfMiddleware,
+		streamsController.concludeStream,
+	);
+	clusterRouter.post(
 		'/stream/delete',
 		useSession,
 		fetchSession,

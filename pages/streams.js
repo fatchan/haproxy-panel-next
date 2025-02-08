@@ -51,9 +51,15 @@ function Streams(props) {
 		e.target.reset();
 	}
 
-	async function deleteStream(csrf, appName) {
+	async function concludeStream(csrf, appName) {
 		setError(null);
-		await API.deleteStream({ _csrf: csrf, appName }, dispatch, setError, router);
+		await API.concludeStream({ _csrf: csrf, appName }, dispatch, setError, router);
+		await API.getStreams(dispatch, setError, router);
+	}
+
+	async function deleteStream(csrf, id) {
+		setError(null);
+		await API.deleteStream({ _csrf: csrf, id }, dispatch, setError, router);
 		await API.getStreams(dispatch, setError, router);
 	}
 
@@ -63,7 +69,7 @@ function Streams(props) {
 		.map(s => (
 			<tr key={`stream_${s}`} className='align-middle'>
 				<td className='text-left' style={{ width: 0 }}>
-					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s)}>
+					<a className='btn btn-sm btn-danger' onClick={() => concludeStream(csrf, s)}>
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
 					</a>
 				</td>
@@ -105,7 +111,7 @@ function Streams(props) {
 		.map(s => (
 			<tr key={`stream_${s.appName}`} className='align-middle'>
 				<td className='text-left' style={{ width: 0 }}>
-					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s.appName)}>
+					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s._id)}>
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
 					</a>
 				</td>
