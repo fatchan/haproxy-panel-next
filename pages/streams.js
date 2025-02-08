@@ -15,13 +15,33 @@ import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import withAuth from '../components/withAuth.js';
 
+const SecretString = ({ text }) => {
+	const [isVisible, setIsVisible] = useState(false);
+
+	const toggleVisibility = () => {
+		setIsVisible((prev) => !prev);
+	};
+
+	return (
+		<div className='d-flex align-items-center'>
+			<CopyButton text={text} />
+			<button onClick={toggleVisibility} className='btn btn-light me-2'>
+				<i className={`bi mr-2 bi-${isVisible ? 'eye-fill' : 'eye-slash-fill'}`} />
+			</button>
+			<span className='me-2'>
+				<code>{isVisible ? text : '*'.repeat(text.length)}</code>
+			</span>
+		</div>
+	);
+};
+
 function Streams(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 	const [filter, setFilter] = useState('');
-	const [continent, setContinent] = useState(props?.user?.cc||'global');
+	const [continent, setContinent] = useState(props?.user?.cc || 'global');
 
 	useEffect(() => {
 		if (!state.user || !state.user.domains || state.streams == null) {
@@ -78,7 +98,7 @@ function Streams(props) {
 					<a
 						target='_blank'
 						rel='noreferrer'
-						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-${user.cc}.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
+						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-${continent}.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
 					>
 						<ResolvedImage
 							src={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/${s}/thumb.jpg`}
@@ -123,7 +143,7 @@ function Streams(props) {
 					{new Date(s.dateCreated).toLocaleString()}
 				</td>
 				<td>
-					{s.streamKey}
+					<SecretString text={s.streamKey} />
 				</td>
 			</tr>
 		));
@@ -139,7 +159,9 @@ function Streams(props) {
 
 			<div className='input-group mb-3'>
 				<span className='input-group-text'>Region</span>
-  			<select className='form-select' value={continent} onChange={e => setContinent(e.target.value)}>
+  			<select className='form-select' value={continent} onChange={e => {
+  				setContinent(e.target.value);
+ 			}}>
 					<option value='NA'>North America</option>
 					<option value='EU'>Europe</option>
 					<option value='OC'>Oceania</option>

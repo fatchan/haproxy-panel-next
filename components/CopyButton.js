@@ -14,7 +14,7 @@ const CopyButton = ({ text }) => {
 	return (
 		<button
 			onClick={handleCopy}
-			className='btn btn-outline-primary d-flex align-items-center me-2'
+			className='btn btn-primary d-flex align-items-center me-2'
 			aria-label='Copy to clipboard'
 		>
 			<i className='bi bi-clipboard mr-2' />
