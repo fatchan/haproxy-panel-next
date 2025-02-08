@@ -71,7 +71,7 @@ function Streams(props) {
 					<a
 						target='_blank'
 						rel='noreferrer'
-						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-na.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
+						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-${user.cc}.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
 					>
 						<ResolvedImage
 							src={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/${s}/thumb.jpg`}
