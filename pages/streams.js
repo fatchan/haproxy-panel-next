@@ -21,6 +21,7 @@ function Streams(props) {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 	const [filter, setFilter] = useState('');
+	const [continent, setContinent] = useState(props?.user?.cc||'global');
 
 	useEffect(() => {
 		if (!state.user || !state.user.domains || state.streams == null) {
@@ -92,13 +93,13 @@ function Streams(props) {
 				</td>
 				<td>
 					<div className='d-flex align-items-center'>
-						<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}/>
+						<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}/>
 						<a
 							target='_blank'
 							rel='noreferrer'
-							href={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}
+							href={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
 						>
-							{`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}
+							{`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
 						</a>
 					</div>
 				</td>
@@ -136,6 +137,32 @@ function Streams(props) {
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
+			<div className='input-group mb-3'>
+				<span className='input-group-text'>Region</span>
+  			<select className='form-select' value={continent} onChange={e => setContinent(e.target.value)}>
+					<option value='NA'>North America</option>
+					<option value='EU'>Europe</option>
+					<option value='OC'>Oceania</option>
+					<option value='AS'>Asia</option>
+					<option value='SA'>South America</option>
+					<option value='AF'>Africa</option>
+					<option value='global'>Global</option>
+				</select>
+			</div>
+
+			<InfoAlert>
+				Stream input URL format:
+				<div><code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
+			</InfoAlert>
+
+			<SuccessAlert>
+				Stream output URL format:
+				<div>Low Latency HLS:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/app/{user.streamsId}+{'<Stream Key Name>'}/llhls.m3u8</code></div>
+				<div>HLS (Not recommended):{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/hls/app/{user.streamsId}+{'<Stream Key Name>'}/ts:playlist.m3u8</code></div>
+				<div>Thumbnails:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/thumb/app/{user.streamsId}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code></div>
+				{continent === 'global' && <div className='text-danger fw-bold'>Note: these are global URLs and will redirect to a regional endpoint. Streaming will only work from regional endpoints, not the global URL.</div>}
+			</SuccessAlert>
+
 			<h5 className='fw-bold'>
 				Live Streams:
 			</h5>
@@ -169,19 +196,6 @@ function Streams(props) {
 			<h5 className='fw-bold'>
 				Stream Keys:
 			</h5>
-
-			<InfoAlert>
-				Stream input URL format:
-				<div><code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
-			</InfoAlert>
-
-			<SuccessAlert>
-				Stream output URL format:
-				<div>Low Latency HLS:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}/llhls.m3u8</code></div>
-				<div>HLS (Not recommended):{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/hls/app/{user.streamsId}+{'<Stream Key Name>'}/ts:playlist.m3u8</code></div>
-				<div>Thumbnails:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/app/{user.streamsId}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code></div>
-				<div>Note: this is a global URL and will redirect to a regional endpoint. Streaming will only work from regional endpoints, not the global URL.</div>
-			</SuccessAlert>
 
 			{/* Streams table */}
 			<div className='table-responsive round-border'>
