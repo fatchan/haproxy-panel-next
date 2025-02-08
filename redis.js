@@ -13,10 +13,17 @@ export const client = new Redis({
 });
 
 export const lockClient = new Redis({
-	host: process.env.REDIS_HOST || '127.0.0.1',
-	port: process.env.REDIS_PORT || 6379,
-	password: process.env.REDIS_PASS || '',
+	host: process.env.REDIS_HOST2 || '127.0.0.1',
+	port: process.env.REDIS_PORT2 || 6379,
+	password: process.env.REDIS_PASS2 || '',
 	db: 1,
+});
+
+export const omeClient = new Redis({
+	host: process.env.REDIS_HOST3 || '127.0.0.1',
+	port: process.env.REDIS_PORT3 || 6379,
+	password: process.env.REDIS_PASS3 || '',
+	db: 0,
 });
 
 export function close() {
@@ -65,7 +72,7 @@ export function del(keyOrKeys) {
 
 export function getKeysPattern(pattern) {
 	return new Promise((resolve, reject) => {
-		const stream = client.scanStream({
+		const stream = omeClient.scanStream({
 			match: pattern
 		});
 		let allKeys = [];

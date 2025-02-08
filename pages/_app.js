@@ -6,6 +6,7 @@ import NProgress from 'nprogress';
 import Router from 'next/router';
 import '@fontsource/inter';
 import './global.css';
+import { Toaster } from 'react-hot-toast';
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/requestchangepassword', '/'];
 NProgress.configure({ showSpinner: false });
@@ -16,6 +17,7 @@ Router.events.on('routeChangeError', () => NProgress.done());
 export default function App({ Component, pageProps }) {
 	return (
 		<Layout {...pageProps}>
+			<Toaster />
 			<Component {...pageProps} />
 		</Layout>
 	);

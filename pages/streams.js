@@ -1,9 +1,16 @@
+import Image from 'next/image';
+let ResolvedImage = Image;
+if ('default' in ResolvedImage) {
+	ResolvedImage = ResolvedImage.default;
+}
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import SuccessAlert from '../components/SuccessAlert.js';
+import InfoAlert from '../components/InfoAlert.js';
+import CopyButton from '../components/CopyButton.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import withAuth from '../components/withAuth.js';
@@ -61,7 +68,33 @@ function Streams(props) {
 					</a>
 				</td>
 				<td>
-					{s.substring(s.indexOf(':') + 1)}
+					<a
+						target='_blank'
+						rel='noreferrer'
+						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-na.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
+					>
+						<ResolvedImage
+							src={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/${s}/thumb.jpg`}
+							width={160}
+							height={90}
+							unoptimized
+						/>
+					</a>
+				</td>
+				<td>
+					{s.substring(s.indexOf('+') + 1)}
+				</td>
+				<td>
+					<div className='d-flex align-items-center'>
+						<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}/>
+						<a
+							target='_blank'
+							rel='noreferrer'
+							href={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}
+						>
+							{`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}
+						</a>
+					</div>
 				</td>
 			</tr>
 		));
@@ -75,9 +108,6 @@ function Streams(props) {
 					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s.appName)}>
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
 					</a>
-				</td>
-				<td>
-					{s._id}
 				</td>
 				<td>
 					{s.appName}
@@ -112,7 +142,13 @@ function Streams(props) {
 						<tr className='align-middle'>
 							<th />
 							<th>
+								Thumbnail
+							</th>
+							<th>
 								Key Name
+							</th>
+							<th>
+								Playlist Link
 							</th>
 						</tr>
 
@@ -128,8 +164,17 @@ function Streams(props) {
 				Stream Keys:
 			</h5>
 
+			<InfoAlert>
+				Stream input URL format:
+				<div><code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
+			</InfoAlert>
+
 			<SuccessAlert>
-				Stream destination URL should be in the format: <div><code>rtmp://{process.env.NEXT_PUBLIC_ORIGIN_URL}/app/{user.streamsId}:{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
+				Stream output URL format:
+				<div>Low Latency HLS:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}/llhls.m3u8</code></div>
+				<div>HLS (Not recommended):{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/hls/app/{user.streamsId}+{'<Stream Key Name>'}/ts:playlist.m3u8</code></div>
+				<div>Thumbnails:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/app/{user.streamsId}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code></div>
+				<div>Note: this is a global URL and will redirect to a regional endpoint. Streaming will only work from regional endpoints, not the global URL.</div>
 			</SuccessAlert>
 
 			{/* Streams table */}
@@ -139,9 +184,6 @@ function Streams(props) {
 
 						<tr className='align-middle'>
 							<th />
-							<th>
-								Key ID
-							</th>
 							<th>
 								Key Name
 							</th>

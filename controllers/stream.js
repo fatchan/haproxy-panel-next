@@ -25,18 +25,21 @@ export async function admissionsWebhook(req, res) {
 	const signature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	if (!validateSignature(payload, signature)) {
-		return res.status(403).json({ error: 'Invalid signature' });
-	}
-
 	console.log('payload:', payload);
+
+	if (!validateSignature(payload, signature)) {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Invalid stream url'
+		});
+	}
 
 	const { request } = payload;
 	const { url: streamUrl, direction, status } = request;
 
 	const parsedUrl = new URL(streamUrl);
 
-	const regex = /^\/app\/([a-zA-Z0-9-_]+):([a-zA-Z0-9-_]+)$/;
+	const regex = /^\/app\/([a-zA-Z0-9-_]+)\+([a-zA-Z0-9-_]+)$/;
 	const match = parsedUrl.pathname.match(regex);
 	let streamsId, appName, streamKey;
 	if (match) {
@@ -72,7 +75,7 @@ export async function admissionsWebhook(req, res) {
 	}
 
 	const streamData = await db.db().collection('streams').findOne({
-		userName: streamsIdAccount._id,
+		userName: streamsIdAccount._id.toString(),
 		appName,
 		streamKey,
 	});
@@ -93,11 +96,12 @@ export async function admissionsWebhook(req, res) {
 				reason: 'Invalid stream key'
 			});
 		}
-	} else if (status === 'closing') {
-		return res.status(200).json({});
 	}
 
-	return res.status(400).json({ error: 'Invalid status' });
+	return res.status(200).json({
+		allowed: 'true',
+		reason: 'Closing'
+	});
 
 };
 
@@ -108,7 +112,7 @@ export async function admissionsWebhook(req, res) {
 export async function listApps(req, res, _next) {
 
 	//todo: make ovenmedia api a middleware i.e useOvenMedia
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}:*`);
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
 
 	return dynamicResponse(req, res, 200, { streams });
 
@@ -136,7 +140,7 @@ export async function streamsPage(app, req, res) {
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
 		.toArray();
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
 	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
@@ -158,7 +162,7 @@ export async function streamsJson(req, res) {
 			userName: res.locals.user.username,
 		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
 		.toArray();
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.username}:*`);
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.streammsId}+*`);
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
