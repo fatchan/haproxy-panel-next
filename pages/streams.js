@@ -62,7 +62,7 @@ function Streams(props) {
 		);
 	}
 
-	const { csrf, streamKeys, streams, user } = state;
+	const { csrf, streamKeys, streams, streamWebhooks, user } = state;
 
 	async function addStream(e) {
 		e.preventDefault();
@@ -83,6 +83,22 @@ function Streams(props) {
 	async function deleteStream(csrf, id) {
 		setError(null);
 		await API.deleteStream({ _csrf: csrf, id }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
+	}
+
+	async function addStreamWebhook(e) {
+		e.preventDefault();
+		setError(null);
+		await API.addStreamWebhook({ _csrf: csrf, url: e.target.url.value }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
+		e.target.reset();
+	}
+
+	async function deleteStreamWebhook(csrf, id) {
+		setError(null);
+		await API.deleteStreamWebhook({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
@@ -147,6 +163,28 @@ function Streams(props) {
 				</td>
 				<td>
 					<SecretString text={s.streamKey} />
+				</td>
+			</tr>
+		));
+
+	const webhooksTable = streamWebhooks
+		// .sort((a, b) => a.localeCompare(b))
+		.filter(w => (!filter || filter.length === 0) || (w.url && w.url.includes(filter)))
+		.map(w => (
+			<tr key={`stream_${w.url}`} className='align-middle'>
+				<td className='text-left' style={{ width: 0 }}>
+					<a className='btn btn-sm btn-danger' onClick={() => deleteStreamWebhook(csrf, w._id)}>
+						<i className='bi-trash-fill pe-none' width='16' height='16' />
+					</a>
+				</td>
+				<td>
+					{w.url}
+				</td>
+				<td suppressHydrationWarning={true}>
+					{new Date(w.dateCreated).toLocaleString()}
+				</td>
+				<td>
+					<SecretString text={w.signingSecret} />
 				</td>
 			</tr>
 		));
@@ -251,6 +289,49 @@ function Streams(props) {
 										<i className='bi-plus-lg pe-none' width='16' height='16' />
 									</button>
 									<input className='form-control ms-3' type='text' name='appName' placeholder='key name' required />
+								</form>
+							</td>
+						</tr>
+
+					</tbody>
+				</table>
+			</div>
+
+			<hr />
+
+			<h5 className='fw-bold'>
+				Webhooks:
+			</h5>
+
+			{/* Webhooks table */}
+			<div className='table-responsive round-border'>
+				<table className='table text-nowrap'>
+					<tbody>
+
+						<tr className='align-middle'>
+							<th />
+							<th>
+								URL
+							</th>
+							<th>
+								Date Created
+							</th>
+							<th>
+								Signing Secret
+							</th>
+						</tr>
+
+						{webhooksTable}
+
+						{/* Add new webhook form */}
+						<tr className='align-middle'>
+							<td className='col-1 text-center' colSpan='4'>
+								<form className='d-flex' onSubmit={addStreamWebhook} action='/forms/stream/webhook/add' method='post'>
+									<input type='hidden' name='_csrf' value={csrf} />
+									<button className='btn btn-sm btn-success' type='submit'>
+										<i className='bi-plus-lg pe-none' width='16' height='16' />
+									</button>
+									<input className='form-control ms-3' type='text' name='url' placeholder='https://example.com/my-webhook' required />
 								</form>
 							</td>
 						</tr>

@@ -443,6 +443,25 @@ export default function router(server, app) {
 		useOvenMedia,
 		streamsController.deleteStream,
 	);
+	
+	clusterRouter.post(
+		'/stream/webhook/add',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		useOvenMedia,
+		streamsController.addStreamWebhook,
+	);
+	clusterRouter.post(
+		'/stream/webhook/delete',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		useOvenMedia,
+		streamsController.deleteStreamWebhook,
+	);
 	clusterRouter.post(
 		'/apikey/add',
 		useSession,

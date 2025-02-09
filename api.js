@@ -76,6 +76,12 @@ export async function concludeStream(body, dispatch, errorCallback, router) {
 export async function deleteStream(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/stream/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
+export async function addStreamWebhook(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/stream/webhook/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
+export async function deleteStreamWebhook(body, dispatch, errorCallback, router) {
+	return ApiCall('/forms/stream/webhook/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 
 // Apikeys
 export async function getApiKeys(dispatch, errorCallback, router) {

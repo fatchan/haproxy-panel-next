@@ -7,7 +7,7 @@ const edgeDomains = process.env.OME_EDGE_HOSTNAMES.split(',').map(x => x.trim())
 const appNameRegex = /^\/app\/([a-zA-Z0-9-_]+)\+([a-zA-Z0-9-_]+)$/;
 const omeAuthHeader = Buffer.from(process.env.OME_API_SECRET).toString('base64');
 
-const generateStreamKey = (length = 32) => {
+const generateRandomString = (length = 32) => {
 	const bytes = crypto.randomBytes(length / 2); // Each byte is represented by 2 hex characters
 	return bytes.toString('hex');
 };
@@ -85,8 +85,10 @@ export async function admissionsWebhook(req, res) {
 		});
 	}
 
+	const streamsIdUsername = streamsIdAccount._id.toString();
+
 	const streamData = await db.db().collection('streams').findOne({
-		userName: streamsIdAccount._id.toString(),
+		userName: streamsIdUsername,
 		appName,
 		streamKey,
 	});
@@ -98,7 +100,29 @@ export async function admissionsWebhook(req, res) {
 	if (status === 'opening') {
 		// console.log('status is opening', parsedUrl);
 		if (isAllowed) {
-			console.log('ALLOWING', streamUrl);
+
+			const streamsIdWebhooks = await db.db().collection('streamwebhooks')
+				.find({
+					username: streamsIdUsername,
+				});
+
+			Promise.all(streamsIdWebhooks.map(async wh => {
+				const webhookBody = payload.request;
+				const jsonBody = JSON.stringify(webhookBody);
+				const signature = crypto.createHmac('sha256', wh.signingSecret)
+					.update(jsonBody)
+					.digest('hex');
+				return fetch(wh.url, {
+					method: 'POST',
+					redirect: 'manual', //Dont follow user link redirects
+					body: webhookBody,
+					headers: {
+						'Content-Type': 'application/json',
+						'x-bf-signature': signature
+					},
+				});
+			})); //Note: async
+
 			return res.status(200).json({
 				allowed: true,
 				new_url: parsedUrl,
@@ -172,40 +196,54 @@ export async function concludeStream(req, res, _next) {
  * domains page
  */
 export async function streamsPage(app, req, res) {
-	const streamKeys = await db.db().collection('streams')
-		.find({
-			userName: res.locals.user.username,
-		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
-		.toArray();
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
+	//TODO: streamsData() func  refactor
+	const [streamKeys, streamWebhooks, streams] = await Promise.all([
+		db.db().collection('streams')
+			.find({
+				userName: res.locals.user.username,
+			}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
+			.toArray(),
+		db.db().collection('streamwebhooks')
+			.find({
+				username: res.locals.user.username
+			})
+			.toArray(),
+		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
+	]);
 	res.locals.data = {
 		user: res.locals.user,
 		csrf: req.csrfToken(),
 		streams: streams || [],
 		streamKeys: streamKeys || [],
+		streamWebhooks: streamWebhooks || [],
 	};
 	return app.render(req, res, '/streams');
 };
-
-//TODO: separate page and stream keys json, tab/sub pages/etc?
 
 /**
  * GET /streams.json
  * stream keys json data
  */
 export async function streamsJson(req, res) {
-	const streamKeys = await db.db().collection('streams')
-		.find({
-			userName: res.locals.user.username,
-		}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
-		.toArray();
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.streammsId}+*`);
+	const [streamKeys, streamWebhooks, streams] = await Promise.all([
+		db.db().collection('streams')
+			.find({
+				userName: res.locals.user.username,
+			}) //TODO: should we project away stream keys here (and elsewhere) and only return from the add api?
+			.toArray(),
+		db.db().collection('streamwebhooks')
+			.find({
+				username: res.locals.user.username
+			})
+			.toArray(),
+		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
+	]);
 	return res.json({
 		csrf: req.csrfToken(),
 		user: res.locals.user,
 		streams: streams || [],
 		streamKeys: streamKeys || [],
-
+		streamWebhooks: streamWebhooks || [],
 	});
 };
 
@@ -219,7 +257,7 @@ export async function addStream(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const streamKey = generateStreamKey();
+	const streamKey = generateRandomString();
 
 	db.db().collection('streams')
 		.insertOne({
@@ -256,5 +294,57 @@ export async function deleteStream(req, res, _next) {
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, deletedStream.value.appName);
 
 	return dynamicResponse(req, res, 200, {});
+
+};
+
+/**
+ * POST /stream/webhook
+ * Set the callback URL and (re)generates the signing secret
+ */
+export async function addStreamWebhook(req, res, _next) {
+
+	if (!req.body.url || typeof req.body.url !== 'string' || req.body.url.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	try {
+		new URL(req.body.url); //Not perfect
+	} catch (e) {
+		console.warn('Bad URL for generateStreamWebhook, url:', req.body.url, 'Error:', e);
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const webhookSecret = generateRandomString(64);
+
+	//TODO: support multiple, else we would just attach to account
+	db.db().collection('streamwebhooks')
+		.insertOne({
+			username: res.locals.user.username,
+			dateCreated: new Date(),
+			url: req.body.url,
+			signingSecret: webhookSecret,
+		});
+
+	return dynamicResponse(req, res, 200, { });
+
+};
+
+/**
+ * POST /stream/webhook/delete
+ * add stream key
+ */
+export async function deleteStreamWebhook(req, res, _next) {
+
+	if (!req.body.id || typeof req.body.id !== 'string' || req.body.id.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	db.db().collection('streamwebhooks')
+		.deleteOne({
+			username: res.locals.user.username,
+			_id: ObjectId(req.body.id),
+		});
+
+	return dynamicResponse(req, res, 200, { });
 
 };
