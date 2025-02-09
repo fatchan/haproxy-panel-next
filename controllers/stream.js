@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { dynamicResponse } from '../util.js';
 import * as db from '../db.js';
 import * as redis from '../redis.js';
+import { ObjectId } from 'mongodb';
 const edgeDomains = process.env.OME_EDGE_HOSTNAMES.split(',').map(x => x.trim());
 const appNameRegex = /^\/app\/([a-zA-Z0-9-_]+)\+([a-zA-Z0-9-_]+)$/;
 const omeAuthHeader = Buffer.from(process.env.OME_API_SECRET).toString('base64');
@@ -158,12 +159,7 @@ export async function concludeStream(req, res, _next) {
 
 	// console.log(match, streamsId, appName);
 
-	edgeDomains.forEach(d => fetch(`https://${d}/api/v1/vhosts/default/apps/app/streams/${res.locals.user.streamsId}+${appName}:concludeHlsLive`, {
-		method: 'POST',
-		headers: {
-			'Authorization': `Basic ${omeAuthHeader}`,
-		}
-	}));
+	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
 
 	return dynamicResponse(req, res, 200, {});
 
@@ -245,11 +241,17 @@ export async function deleteStream(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	db.db().collection('streams')
-		.deleteOne({
+	const deletedStream = await db.db().collection('streams')
+		.findOneAndDelete({
 			userName: res.locals.user.username,
 			_id: ObjectId(req.body.id),
 		});
+
+	if (!deletedStream?.value) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	res.locals.ovenMediaConclude(res.locals.user.streamsId, deletedStream.value.appName);
 
 	return dynamicResponse(req, res, 200, {});
 

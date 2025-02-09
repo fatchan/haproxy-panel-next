@@ -26,7 +26,9 @@ import {
 import {
 	getHaproxy
 } from './lib/middleware/haproxy.js';
-
+import {
+	useOvenMedia
+} from './lib/middleware/oven.js';
 export default function router(server, app) {
 
 	const shkeeperManager = new ShkeeperManager();
@@ -238,6 +240,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
+		useOvenMedia,
 		streamsController.streamsPage.bind(null, app),
 	);
 	server.get(
@@ -246,6 +249,7 @@ export default function router(server, app) {
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
+		useOvenMedia,
 		streamsController.streamsJson,
 	);
 	server.get(
@@ -417,8 +421,8 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
 		csrfMiddleware,
+		useOvenMedia,
 		streamsController.addStream,
 	);
 	clusterRouter.post(
@@ -426,8 +430,8 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
 		csrfMiddleware,
+		useOvenMedia,
 		streamsController.concludeStream,
 	);
 	clusterRouter.post(
@@ -435,8 +439,8 @@ export default function router(server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
 		csrfMiddleware,
+		useOvenMedia,
 		streamsController.deleteStream,
 	);
 	clusterRouter.post(

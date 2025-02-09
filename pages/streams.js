@@ -67,21 +67,24 @@ function Streams(props) {
 	async function addStream(e) {
 		e.preventDefault();
 		setError(null);
-		await API.addStream({ _csrf: csrf, appName: e.target.appName.value }, dispatch, setError, router);
-		await API.getStreams(dispatch, setError, router);
+		await API.addStream({ _csrf: csrf, appName: e.target.appName.value }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
 		e.target.reset();
 	}
 
 	async function concludeStream(csrf, appName) {
 		setError(null);
-		await API.concludeStream({ _csrf: csrf, appName }, dispatch, setError, router);
-		await API.getStreams(dispatch, setError, router);
+		await API.concludeStream({ _csrf: csrf, appName }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
 	}
 
 	async function deleteStream(csrf, id) {
 		setError(null);
-		await API.deleteStream({ _csrf: csrf, id }, dispatch, setError, router);
-		await API.getStreams(dispatch, setError, router);
+		await API.deleteStream({ _csrf: csrf, id }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
 	}
 
 	const streamsTable = streams
