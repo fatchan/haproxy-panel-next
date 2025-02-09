@@ -121,43 +121,45 @@ export async function admissionsWebhook(req, res) {
 };
 
 /**
- * GET /stream/apps
- * stream list (asks oven media engine then filters)
- */
-export async function listApps(req, res, _next) {
-
-	//todo: make ovenmedia api a middleware i.e useOvenMedia
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
-
-	return dynamicResponse(req, res, 200, { streams });
-
-}
-
-/**
  * POST /stream/conclude
  * force end a stream
  */
 export async function concludeStream(req, res, _next) {
 
-	if (!req.body.appName || typeof req.body.appName !== 'string' || req.body.appName.length === 0) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
+	let appName;
+	if (req.body.appName) {
+		if (typeof req.body.appName !== 'string' || req.body.appName.length === 0) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
+		const match = `/${req.body.appName}`.match(appNameRegex);
+		let streamsId;
+		if (match) {
+			streamsId = match[1];
+			appName = match[2];
+		} else {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
 
-	const match = `/${req.body.appName}`.match(appNameRegex);
-	let streamsId, appName;
-	if (match) {
-		streamsId = match[1];
-		appName = match[2];
+		if (streamsId !== res.locals.user.streamsId) {
+			// cant end another bf users streams
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
+	} else if (req.body.id) {
+		if (typeof req.body.id !== 'string' || req.body.id.length === 0) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
+		const concludingStream = await db.db().collection('streams')
+			.findOne({
+				userName: res.locals.user.username,
+				_id: ObjectId(req.body.id),
+			});
+		if (!concludingStream?.value) {
+			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+		}
+		appName = concludingStream?.value?.appName;
 	} else {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
-
-	if (streamsId !== res.locals.user.streamsId) {
-		// cant end another bf users streams
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
-
-	// console.log(match, streamsId, appName);
 
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
 
