@@ -566,6 +566,7 @@ export default function router(server, app) {
 	);
 	server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
 	server.post('/forms/stream/admissions-webhook', (req, res, _next) => streamsController.admissionsWebhook(req, res));
+	server.post('/forms/stream/alert-webhook', (req, res, _next) => streamsController.alertWebhook(req, res));
 
 	server.use('/forms', clusterRouter);
 }

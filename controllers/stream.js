@@ -71,6 +71,10 @@ export async function alertWebhook(req, res) {
 		appName,
 	});
 
+	if (!streamData) {
+		return console.warn('Alert webhook received for missing stream', { streamsId, streamsIdUsername, appName });
+	}
+
 	const streamsIdWebhooks = await db.db().collection('streamwebhooks')
 		.find({
 			username: streamsIdUsername,
@@ -174,52 +178,45 @@ export async function admissionsWebhook(req, res) {
 
 	const isAllowed = streamData != null;
 
-	if (status === 'opening') {
-		// console.log('status is opening', parsedUrl);
-		if (isAllowed) {
+	// console.log('status is opening', parsedUrl);
+	if (isAllowed) {
 
-			const streamsIdWebhooks = await db.db().collection('streamwebhooks')
-				.find({
-					username: streamsIdUsername,
-					type: 'admissions',
-				})
-				.toArray();
+		const streamsIdWebhooks = await db.db().collection('streamwebhooks')
+			.find({
+				username: streamsIdUsername,
+				type: 'admissions',
+			})
+			.toArray();
 
-			Promise.all(streamsIdWebhooks.map(async wh => {
-				const webhookBody = payload.request;
-				const jsonBody = JSON.stringify(webhookBody);
-				const signature = crypto.createHmac('sha256', wh.signingSecret)
-					.update(jsonBody)
-					.digest('hex');
-				return fetch(wh.url, {
-					method: 'POST',
-					redirect: 'manual', //Dont follow user link redirects
-					body: webhookBody,
-					headers: {
-						'Content-Type': 'application/json',
-						'x-bf-signature': signature
-					},
-				});
-			})); //Note: async
-
-			return res.status(200).json({
-				allowed: true,
-				new_url: parsedUrl,
-				lifetime: 0, // 0 means infinity
-				reason: 'authorized'
+		Promise.all(streamsIdWebhooks.map(async wh => {
+			const webhookBody = payload.request;
+			const jsonBody = JSON.stringify(webhookBody);
+			const signature = crypto.createHmac('sha256', wh.signingSecret)
+				.update(jsonBody)
+				.digest('hex');
+			return fetch(wh.url, {
+				method: 'POST',
+				redirect: 'manual', //Dont follow user link redirects
+				body: webhookBody,
+				headers: {
+					'Content-Type': 'application/json',
+					'x-bf-signature': signature
+				},
 			});
-		} else {
-			return res.status(200).json({
-				allowed: false,
-				reason: 'Invalid stream key'
-			});
-		}
+		})); //Note: async
+
+		return res.status(200).json({
+			allowed: true,
+			new_url: parsedUrl,
+			lifetime: 0, // 0 means infinity
+			reason: 'authorized'
+		});
+	} else {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Invalid stream key'
+		});
 	}
-
-	return res.status(200).json({
-		allowed: 'true',
-		reason: 'Closing'
-	});
 
 };
 
