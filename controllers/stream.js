@@ -3,9 +3,7 @@ import { dynamicResponse } from '../util.js';
 import * as db from '../db.js';
 import * as redis from '../redis.js';
 import { ObjectId } from 'mongodb';
-const edgeDomains = process.env.OME_EDGE_HOSTNAMES.split(',').map(x => x.trim());
 const appNameRegex = /^\/app\/([a-zA-Z0-9-_]+)\+([a-zA-Z0-9-_]+)$/;
-const omeAuthHeader = Buffer.from(process.env.OME_API_SECRET).toString('base64');
 
 const generateRandomString = (length = 32) => {
 	const bytes = crypto.randomBytes(length / 2); // Each byte is represented by 2 hex characters
@@ -21,6 +19,85 @@ const validateSignature = (payload, signature) => {
 };
 
 /**
+ * POST /stream/alert-webhook
+ * oven media engine admissionswebhook handler
+ */
+export async function alertWebhook(req, res) {
+	//NOTE: follows response format for ovenmedia engine
+	const signature = req.headers['x-ome-signature'];
+	const payload = req.body;
+
+	console.log('alertWebhook payload:', payload);
+
+	if (!validateSignature(payload, signature)) {
+		return res.status(401).json({});
+	}
+
+	// reply early with blank json
+	res.status(200).json({});
+
+	const { sourceUri } = payload;
+
+	const sourceAppString = sourceUri.replace(/^#default#/, '/');
+
+	const match = sourceAppString.match(appNameRegex);
+	let streamsId, appName;
+	if (match) {
+		streamsId = match[1];
+		appName = match[2];
+	} else {
+		return console.warn('Invalid sourceAppString in alertWebhook:', sourceAppString);
+	}
+
+	const streamsIdAccount = await db.db().collection('accounts').findOne({
+		streamsId,
+	}, {
+		projection: {
+			_id: 1,
+		}
+	});
+
+	if (!streamsIdAccount) {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Invalid stream account id'
+		});
+	}
+
+	const streamsIdUsername = streamsIdAccount._id.toString();
+
+	const streamData = await db.db().collection('streams').findOne({
+		userName: streamsIdUsername,
+		appName,
+	});
+
+	const streamsIdWebhooks = await db.db().collection('streamwebhooks')
+		.find({
+			username: streamsIdUsername,
+			type: 'alert',
+		})
+		.toArray();
+
+	Promise.all(streamsIdWebhooks.map(async wh => {
+		const webhookBody = payload.request;
+		const jsonBody = JSON.stringify(webhookBody);
+		const signature = crypto.createHmac('sha256', wh.signingSecret)
+			.update(jsonBody)
+			.digest('hex');
+		return fetch(wh.url, {
+			method: 'POST',
+			redirect: 'manual', //Dont follow user link redirects
+			body: webhookBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'x-bf-signature': signature
+			},
+		});
+	})); //Note: async
+
+};
+
+/**
  * POST /stream/admissions-webhook
  * oven media engine admissionswebhook handler
  */
@@ -29,7 +106,7 @@ export async function admissionsWebhook(req, res) {
 	const signature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	console.log('OME payload:', payload);
+	console.log('admissionsWebhook payload:', payload);
 
 	if (!validateSignature(payload, signature)) {
 		return res.status(200).json({
@@ -104,7 +181,9 @@ export async function admissionsWebhook(req, res) {
 			const streamsIdWebhooks = await db.db().collection('streamwebhooks')
 				.find({
 					username: streamsIdUsername,
-				});
+					type: 'admissions',
+				})
+				.toArray();
 
 			Promise.all(streamsIdWebhooks.map(async wh => {
 				const webhookBody = payload.request;
@@ -257,6 +336,16 @@ export async function addStream(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+	const existingStream = await db.db().collection('streams')
+		.findOne({
+			userName: res.locals.user.username,
+			appName: req.body.appName,
+		});
+
+	if (existingStream) {
+		return dynamicResponse(req, res, 409, { error: 'Stream key with this name already exists' });
+	}
+
 	const streamKey = generateRandomString();
 
 	db.db().collection('streams')
@@ -307,6 +396,10 @@ export async function addStreamWebhook(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+	if (!req.body.type || typeof req.body.type !== 'string' || !['alert', 'admissions'].includes(req.body.type)) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
 	try {
 		new URL(req.body.url); //Not perfect
 	} catch (e) {
@@ -322,6 +415,7 @@ export async function addStreamWebhook(req, res, _next) {
 			username: res.locals.user.username,
 			dateCreated: new Date(),
 			url: req.body.url,
+			type: req.body.type,
 			signingSecret: webhookSecret,
 		});
 

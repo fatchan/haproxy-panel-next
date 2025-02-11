@@ -90,7 +90,7 @@ function Streams(props) {
 	async function addStreamWebhook(e) {
 		e.preventDefault();
 		setError(null);
-		await API.addStreamWebhook({ _csrf: csrf, url: e.target.url.value }, () => {
+		await API.addStreamWebhook({ _csrf: csrf, url: e.target.url.value, type: e.target.type.value }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 		e.target.reset();
@@ -182,6 +182,9 @@ function Streams(props) {
 				</td>
 				<td suppressHydrationWarning={true}>
 					{new Date(w.dateCreated).toLocaleString()}
+				</td>
+				<td>
+					{w.type}
 				</td>
 				<td>
 					<SecretString text={w.signingSecret} />
@@ -317,6 +320,9 @@ function Streams(props) {
 								Date Created
 							</th>
 							<th>
+								Type
+							</th>
+							<th>
 								Signing Secret
 							</th>
 						</tr>
@@ -331,6 +337,14 @@ function Streams(props) {
 									<button className='btn btn-sm btn-success' type='submit'>
 										<i className='bi-plus-lg pe-none' width='16' height='16' />
 									</button>
+									<select
+										className='form-select ms-3'
+										name='type'
+										required
+									>
+										<option value='admissions'>Admissions webhook</option>
+										<option value='alert'>Alert webhook</option>
+									</select>
 									<input className='form-control ms-3' type='text' name='url' placeholder='https://example.com/my-webhook' required />
 								</form>
 							</td>
