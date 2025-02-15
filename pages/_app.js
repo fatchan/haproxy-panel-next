@@ -17,7 +17,15 @@ Router.events.on('routeChangeError', () => NProgress.done());
 export default function App({ Component, pageProps }) {
 	return (
 		<Layout {...pageProps}>
-			<Toaster />
+			<Toaster
+				toastOptions={{
+					duration: 120000,
+					style: {
+						background: 'var(--bs-body-bg)',
+						color: 'var(--bs-body-color)'
+					}
+				}}
+			/>
 			<Component {...pageProps} />
 		</Layout>
 	);
