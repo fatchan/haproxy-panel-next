@@ -139,6 +139,26 @@ function DashboardHome(props) {
 						</Link>
 					</div>
 
+					{/* Streams Card */}
+					<div className='col'>
+						<Link href='/streams' className='card text-decoration-none bg-light'>
+							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
+								<i className='bi bi-cast fs-2'></i>
+								<h5 className='card-title'>Live Streaming</h5>
+							</div>
+						</Link>
+					</div>
+
+					{/* API keys Card */}
+					<div className='col'>
+						<Link href='/apikeys' className='card text-decoration-none bg-light'>
+							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
+								<i className='bi bi-key fs-2'></i>
+								<h5 className='card-title'>API Keys</h5>
+							</div>
+						</Link>
+					</div>
+
 					{/* Account */}
 					<div className='col'>
 						<Link href='/account' className='card text-decoration-none bg-light'>
