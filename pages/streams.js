@@ -206,12 +206,12 @@ function Streams(props) {
   			<select className='form-select' value={continent} onChange={e => {
   				setContinent(e.target.value);
  			}}>
-					<option value='NA'>North America</option>
-					<option value='EU'>Europe</option>
-					<option value='OC'>Oceania</option>
-					<option value='AS'>Asia</option>
-					<option value='SA'>South America</option>
-					<option value='AF'>Africa</option>
+					<option value='na'>North America</option>
+					<option value='eu'>Europe</option>
+					<option value='oc'>Oceania</option>
+					<option value='as'>Asia</option>
+					<option value='sa'>South America</option>
+					<option value='af'>Africa</option>
 					<option value='global'>Global</option>
 				</select>
 			</div>

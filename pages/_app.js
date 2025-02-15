@@ -19,7 +19,6 @@ export default function App({ Component, pageProps }) {
 		<Layout {...pageProps}>
 			<Toaster
 				toastOptions={{
-					duration: 120000,
 					style: {
 						background: 'var(--bs-body-bg)',
 						color: 'var(--bs-body-color)'
