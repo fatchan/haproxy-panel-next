@@ -31,7 +31,7 @@ app.prepare()
 
 		const server = express();
 		server.set('query parser', 'simple');
-		server.use(bodyParser.json({ extended: false })); // for parsing application/json
+		server.use(bodyParser.json({ strict: true })); // for parsing application/json
 		server.use(bodyParser.urlencoded({ extended: false })); // for parsing application/x-www-form-urlencoded
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
