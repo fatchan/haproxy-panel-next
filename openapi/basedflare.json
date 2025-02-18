@@ -1,0 +1,256 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Basedflare API",
+    "description": "API for Basedflare control panel",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://cp.basedflare.com",
+      "description": "Production"
+    },
+    {
+      "url": "https://cp.basedflare.net",
+      "description": "Backup"
+    },
+    {
+      "url": "http://127.0.0.1:3000",
+      "description": "Development (local server)"
+    }
+  ],
+  "paths": {
+    "/streams.json": {
+      "get": {
+        "summary": "Get streams information",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "streams": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Streams"
+                      }
+                    },
+                    "streamKeys": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StreamKey"
+                      }
+                    },
+                    "streamWebhooks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StreamWebhook"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forms/streams/add": {
+      "post": {
+        "summary": "Add a new streamer and return the stream key",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource created"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CSRFToken": {
+        "type": "string"
+      },
+      "SessionUser": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin"
+          },
+          "streamsId": {
+            "type": "string",
+            "example": "651436708957"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "example.org",
+              "www.example.org",
+              "basedflare.com"
+            ]
+          },
+          "onboarding": {
+            "type": "boolean",
+            "example": true
+          },
+          "allowedTemplates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "basic",
+              "nocogent"
+            ]
+          },
+          "numCerts": {
+            "type": "integer",
+            "example": 34
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "example": true
+          },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "example": "Enterprise plan"
+              },
+              "price": {
+                "type": "number",
+                "format": "float",
+                "example": 100
+              }
+            }
+          },
+          "maxDomains": {
+            "type": "integer",
+            "example": 5
+          },
+          "cc": {
+            "type": "string",
+            "example": "oc"
+          }
+        }
+      },
+      "Streams": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "app/651436708957+nigger"
+        ]
+      },
+      "StreamKey": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "67a822f4518bc836547c9b1a"
+          },
+          "userName": {
+            "type": "string",
+            "example": "admin"
+          },
+          "appName": {
+            "type": "string",
+            "example": "jimmyjohn123"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-02-09T03:37:24.814Z"
+          },
+          "streamKey": {
+            "type": "string",
+            "example": "072246f8b80cc716041290112d4a19ec"
+          }
+        }
+      },
+      "StreamWebhook": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "67b43b574a296966663bf4ec"
+          },
+          "username": {
+            "type": "string",
+            "example": "admin"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-02-18T07:48:39.729Z"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/api/v1/stream-start-stop"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "admissions",
+              "alert"
+            ],
+            "example": "admissions"
+          },
+          "signingSecret": {
+            "type": "string",
+            "example": "988f4cc158015f60b8a02c2200dca32b27062522e76024ceb8303cd41d23352e"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Bearer token for API authentication. Use 'Bearer {token}'"
+      }
+    }
+  }
+}

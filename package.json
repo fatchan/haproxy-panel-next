@@ -49,7 +49,8 @@
     "react-select": "^5.8.3",
     "recharts": "^2.14.1",
     "redlock": "^5.0.0-beta.2",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "eslint": "8.15.0",

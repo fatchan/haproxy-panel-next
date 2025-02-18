@@ -1,8 +1,10 @@
 import express from 'express';
 import csrf from 'csurf';
 import ShkeeperManager from './lib/billing/shkeeper.js';
-import definition from './specification_openapiv3.js';
+import definition from './openapi/haproxy.js';
 import agent from './agent.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './openapi/basedflare.json' assert { type: 'json' };
 
 import * as accountController from './controllers/account.js';
 import * as mapsController from './controllers/maps.js';
@@ -35,6 +37,9 @@ export default function router(server, app) {
 	const csrfMiddleware = csrf();
 	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
 	const haproxyMiddleware = getHaproxy(server, app, clusterUrls, agent, definition);
+
+	server.use('/api-docs', swaggerUi.serve);
+	server.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, _next) => {
