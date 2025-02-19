@@ -73,9 +73,9 @@ function Streams(props) {
 		e.target.reset();
 	}
 
-	async function concludeStream(csrf, appName) {
+	async function concludeStream(csrf, id) {
 		setError(null);
-		await API.concludeStream({ _csrf: csrf, appName }, () => {
+		await API.concludeStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
@@ -106,44 +106,48 @@ function Streams(props) {
 	const streamsTable = streams
 		// .sort((a, b) => a.localeCompare(b))
 		.filter(s => (!filter || filter.length === 0) || (s && s.includes(filter)))
-		.map(s => (
-			<tr key={`stream_${s}`} className='align-middle'>
-				<td className='text-left' style={{ width: 0 }}>
-					<a className='btn btn-sm btn-danger' onClick={() => concludeStream(csrf, s)}>
-						<i className='bi-trash-fill pe-none' width='16' height='16' />
-					</a>
-				</td>
-				<td>
-					<a
-						target='_blank'
-						rel='noreferrer'
-						href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-${continent}.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
-					>
-						<ResolvedImage
-							src={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/${s}/thumb.jpg`}
-							width={160}
-							height={90}
-							unoptimized
-						/>
-					</a>
-				</td>
-				<td>
-					{s.substring(s.indexOf('+') + 1)}
-				</td>
-				<td>
-					<div className='d-flex align-items-center'>
-						<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}/>
+		.map(s => {
+			const streamName = s.substring(s.indexOf('+') + 1);
+			const streamNameKeyId = streamKeys.find(s => s.appName === streamName)._id;
+			return (
+				<tr key={`stream_${s}`} className='align-middle'>
+					<td className='text-left' style={{ width: 0 }}>
+						<a className='btn btn-sm btn-danger' onClick={() => concludeStream(csrf, streamNameKeyId)}>
+							<i className='bi-trash-fill pe-none' width='16' height='16' />
+						</a>
+					</td>
+					<td>
 						<a
 							target='_blank'
 							rel='noreferrer'
-							href={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
+							href={`https://demo.ovenplayer.com/#%7B%22playerOption%22%3A%7B%22autoStart%22%3Atrue%2C%22autoFallback%22%3Atrue%2C%22mute%22%3Afalse%2C%22sources%22%3A%5B%7B%22type%22%3A%22ll-hls%22%2C%22file%22%3A%22https%3A%2F%2Fstream-${continent}.bfcdn.host%2F${encodeURI(s)}%2Fllhls.m3u8%22%7D%5D%2C%22doubleTapToSeek%22%3Afalse%7D%2C%22demoOption%22%3A%7B%22autoReload%22%3Atrue%2C%22autoReloadInterval%22%3A2000%7D%7D`}
 						>
-							{`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
+							<ResolvedImage
+								src={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/${s}/thumb.jpg`}
+								width={160}
+								height={90}
+								unoptimized
+							/>
 						</a>
-					</div>
-				</td>
-			</tr>
-		));
+					</td>
+					<td>
+						{streamName}
+					</td>
+					<td>
+						<div className='d-flex align-items-center'>
+							<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}/>
+							<a
+								target='_blank'
+								rel='noreferrer'
+								href={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
+							>
+								{`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/${s}/llhls.m3u8`}
+							</a>
+						</div>
+					</td>
+				</tr>
+			);
+		});
 
 	const streamKeysTable = streamKeys
 		// .sort((a, b) => a.localeCompare(b))

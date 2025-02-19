@@ -4,6 +4,7 @@ import ShkeeperManager from './lib/billing/shkeeper.js';
 import definition from './openapi/haproxy.js';
 import agent from './agent.js';
 import swaggerUi from 'swagger-ui-express';
+import swaggerCss from './lib/swagger/css.js';
 import swaggerDocument from './openapi/basedflare.json' assert { type: 'json' };
 
 import * as accountController from './controllers/account.js';
@@ -31,6 +32,7 @@ import {
 import {
 	useOvenMedia
 } from './lib/middleware/oven.js';
+
 export default function router(server, app) {
 
 	const shkeeperManager = new ShkeeperManager();
@@ -39,7 +41,9 @@ export default function router(server, app) {
 	const haproxyMiddleware = getHaproxy(server, app, clusterUrls, agent, definition);
 
 	server.use('/api-docs', swaggerUi.serve);
-	server.get('/api-docs', swaggerUi.setup(swaggerDocument));
+	server.get('/api-docs', swaggerUi.setup(swaggerDocument, {
+	  customCss: swaggerCss,
+	}));
 
 	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, _next) => {
@@ -273,7 +277,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		apikeysController.apiKeysJson,
 	);
-		server.get(
+	server.get(
 		'/dns/:domain([a-zA-Z0-9-\.]+)/new',
 		useSession,
 		fetchSession,
@@ -378,7 +382,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		mapsController.patchMapForm,
 	);
-	clusterRouter.post(
+	clusterRouter.delete(
 		`/map/:name(${mapNamesOrString})/delete`,
 		useSession,
 		fetchSession,
@@ -387,7 +391,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		mapsController.deleteMapForm,
 	);
-	clusterRouter.post(
+	clusterRouter.delete(
 		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)/delete',
 		useSession,
 		fetchSession,
@@ -412,7 +416,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		domainsController.addDomain,
 	);
-	clusterRouter.post(
+	clusterRouter.delete(
 		'/domain/delete',
 		useSession,
 		fetchSession,
@@ -422,7 +426,7 @@ export default function router(server, app) {
 		domainsController.deleteDomain,
 	);
 	clusterRouter.post(
-		'/stream/add',
+		'/stream',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -431,7 +435,7 @@ export default function router(server, app) {
 		streamsController.addStream,
 	);
 	clusterRouter.post(
-		'/stream/conclude',
+		'/stream/:id([a-f0-9]{24})/conclude',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -439,8 +443,8 @@ export default function router(server, app) {
 		useOvenMedia,
 		streamsController.concludeStream,
 	);
-	clusterRouter.post(
-		'/stream/delete',
+	clusterRouter.delete(
+		'/stream/:id([a-f0-9]{24})',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -448,9 +452,8 @@ export default function router(server, app) {
 		useOvenMedia,
 		streamsController.deleteStream,
 	);
-	
 	clusterRouter.post(
-		'/stream/webhook/add',
+		'/stream/webhook',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -458,8 +461,8 @@ export default function router(server, app) {
 		useOvenMedia,
 		streamsController.addStreamWebhook,
 	);
-	clusterRouter.post(
-		'/stream/webhook/delete',
+	clusterRouter.delete(
+		'/stream/webhook/:id([a-f0-9]{24})',
 		useSession,
 		fetchSession,
 		checkSession,
@@ -476,7 +479,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		apikeysController.addApiKey,
 	);
-	clusterRouter.post(
+	clusterRouter.delete(
 		'/apikey/delete',
 		useSession,
 		fetchSession,
@@ -503,7 +506,7 @@ export default function router(server, app) {
 		csrfMiddleware,
 		certsController.uploadCert,
 	);
-	clusterRouter.post(
+	clusterRouter.delete(
 		'/cert/delete',
 		useSession,
 		fetchSession,

@@ -120,7 +120,7 @@ export async function admissionsWebhook(req, res) {
 	}
 
 	const { request } = payload;
-	const { url: streamUrl, direction, status } = request;
+	const { url: streamUrl, direction } = request;
 
 	const parsedUrl = new URL(streamUrl);
 	if (parsedUrl.pathname.startsWith('//')) {
@@ -221,45 +221,26 @@ export async function admissionsWebhook(req, res) {
 };
 
 /**
- * POST /stream/conclude
+ * POST /stream/:id/conclude
  * force end a stream
  */
 export async function concludeStream(req, res, _next) {
 
-	let appName;
-	if (req.body.appName) {
-		if (typeof req.body.appName !== 'string' || req.body.appName.length === 0) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
-		const match = `/${req.body.appName}`.match(appNameRegex);
-		let streamsId;
-		if (match) {
-			streamsId = match[1];
-			appName = match[2];
-		} else {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
-
-		if (streamsId !== res.locals.user.streamsId) {
-			// cant end another bf users streams
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
-	} else if (req.body.id) {
-		if (typeof req.body.id !== 'string' || req.body.id.length === 0) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
-		const concludingStream = await db.db().collection('streams')
-			.findOne({
-				userName: res.locals.user.username,
-				_id: ObjectId(req.body.id),
-			});
-		if (!concludingStream?.value) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
-		appName = concludingStream?.value?.appName;
-	} else {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	if (req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input1' });
 	}
+
+	const concludingStream = await db.db().collection('streams')
+		.findOne({
+			userName: res.locals.user.username,
+			_id: ObjectId(req.params.id),
+		});
+	console.log(concludingStream);
+	if (!concludingStream) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input2' });
+	}
+
+	const appName = concludingStream?.appName;
 
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
 
@@ -329,7 +310,7 @@ export async function streamsJson(req, res) {
  */
 export async function addStream(req, res, _next) {
 
-	if (!req.body.appName || typeof req.body.appName !== 'string' || req.body.appName.length === 0) {
+	if (!req.body.appName || typeof req.body.appName !== 'string' || req.body.appName.length === 0 || !/[a-zA-Z0-9-_]+/.test(req.body.appName)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
@@ -358,20 +339,22 @@ export async function addStream(req, res, _next) {
 };
 
 /**
- * POST /stream/delete
+ * DELETE /stream/:id
  * delete stream key
  */
 export async function deleteStream(req, res, _next) {
 
-	if (!req.body.id || typeof req.body.id !== 'string' || req.body.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	const deletedStream = await db.db().collection('streams')
 		.findOneAndDelete({
 			userName: res.locals.user.username,
-			_id: ObjectId(req.body.id),
+			_id: ObjectId(req.params.id),
 		});
+
+	console.log(deletedStream);
 
 	if (!deletedStream?.value) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -406,7 +389,6 @@ export async function addStreamWebhook(req, res, _next) {
 
 	const webhookSecret = generateRandomString(64);
 
-	//TODO: support multiple, else we would just attach to account
 	db.db().collection('streamwebhooks')
 		.insertOne({
 			username: res.locals.user.username,
@@ -421,19 +403,19 @@ export async function addStreamWebhook(req, res, _next) {
 };
 
 /**
- * POST /stream/webhook/delete
+ * POST /stream/webhook/:id
  * add stream key
  */
 export async function deleteStreamWebhook(req, res, _next) {
 
-	if (!req.body.id || typeof req.body.id !== 'string' || req.body.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	db.db().collection('streamwebhooks')
 		.deleteOne({
 			username: res.locals.user.username,
-			_id: ObjectId(req.body.id),
+			_id: ObjectId(req.params.id),
 		});
 
 	return dynamicResponse(req, res, 200, { });

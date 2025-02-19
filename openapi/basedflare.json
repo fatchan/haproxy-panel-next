@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Basedflare API",
     "description": "API for Basedflare control panel",
@@ -53,6 +53,9 @@
                       "items": {
                         "$ref": "#/components/schemas/StreamWebhook"
                       }
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/SessionUser"
                     }
                   }
                 }
@@ -62,7 +65,7 @@
         }
       }
     },
-    "/forms/streams/add": {
+    "/forms/stream/add": {
       "post": {
         "summary": "Add a new streamer and return the stream key",
         "security": [
@@ -77,11 +80,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "value": {
-                    "type": "integer"
+                  "appName": {
+                    "type": "string",
+                    "example": "jimmyjohn123",
+                    "description": "Name of the streamer"
                   }
                 }
               }
@@ -89,8 +91,201 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Resource created"
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "streamKey": {
+                      "type": "string",
+                      "example": "f6a4f78ce72cb20c36c76c5509a4b052"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "description": "Conflict (appName already exists)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Stream key with this name already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forms/stream/{id}/conclude": {
+      "post": {
+        "summary": "Conclude a stream (Streamer can restart stream)",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stream key id",
+            "schema": {
+              "type": "string",
+              "example": "67a822f4518bc836547c9b1a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/forms/stream/{id}": {
+      "delete": {
+        "summary": "Conclude a stream and delete the stream key",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stream key id",
+            "schema": {
+              "type": "string",
+              "example": "67a822f4518bc836547c9b1a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/forms/stream/webhook": {
+      "post": {
+        "summary": "Create a stream webhook",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://example.com/api/v1/webhook-endpoint"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "admissions",
+                      "alert"
+                    ],
+                    "example": "admissions"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/forms/stream/webhook/{id}": {
+      "delete": {
+        "summary": "Delete a stream webhook",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stream webhook id",
+            "schema": {
+              "type": "string",
+              "example": "67a822f4518bc836547c9b1a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           }
         }
       }
@@ -102,6 +297,7 @@
         "type": "string"
       },
       "SessionUser": {
+        "description": "additional session data returned from most endpoints",
         "type": "object",
         "properties": {
           "username": {
@@ -138,7 +334,9 @@
             },
             "example": [
               "basic",
-              "nocogent"
+              "nocogent",
+              "anycast",
+              "cn2"
             ]
           },
           "numCerts": {
@@ -179,7 +377,7 @@
           "type": "string"
         },
         "example": [
-          "app/651436708957+nigger"
+          "app/651436708957+jimmyjohn123"
         ]
       },
       "StreamKey": {
@@ -227,7 +425,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "example": "https://example.com/api/v1/stream-start-stop"
+            "example": "https://example.com/api/v1/webhook-endpoint"
           },
           "type": {
             "type": "string",
@@ -240,6 +438,24 @@
           "signingSecret": {
             "type": "string",
             "example": "988f4cc158015f60b8a02c2200dca32b27062522e76024ceb8303cd41d23352e"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid input"
+                }
+              }
+            }
           }
         }
       }

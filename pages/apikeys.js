@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import InfoAlert from '../components/InfoAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
@@ -108,11 +109,13 @@ function ApiKeys(props) {
 				<title>API Keys</title>
 			</Head>
 
-			<SearchFilter filter={filter} setFilter={setFilter} />
-
 			<h5 className='fw-bold'>
 				API Keys:
 			</h5>
+
+			<InfoAlert><a href='/api-docs' target='_blank' rel='noreferrer'>API Documentation</a></InfoAlert>
+
+			<SearchFilter filter={filter} setFilter={setFilter} />
 
 			{/* Api keys table */}
 			<div className='table-responsive round-border mb-2'>

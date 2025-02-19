@@ -46,7 +46,7 @@ export async function addCluster(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/cluster/add', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteCluster(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cluster/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/cluster/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 export async function changeCluster(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/cluster', 'POST', body, dispatch, errorCallback, router, 0.5);
@@ -60,7 +60,7 @@ export async function addDomain(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/domain/add', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteDomain(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/domain/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/domain/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 
 // Streams
@@ -68,19 +68,19 @@ export async function getStreams(dispatch, errorCallback, router) {
 	return ApiCall('/streams.json', 'GET', null, dispatch, errorCallback, router);
 }
 export async function addStream(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/stream', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function concludeStream(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/conclude', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall(`/forms/stream/${body.id}/conclude`, 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteStream(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall(`/forms/stream/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 export async function addStreamWebhook(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/webhook/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/stream/webhook', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteStreamWebhook(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/webhook/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall(`/forms/stream/webhook/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 
 // Apikeys
@@ -91,7 +91,7 @@ export async function addApiKey(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/apikey/add', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteApiKey(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/apikey/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/apikey/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 
 // Dns
@@ -105,7 +105,7 @@ export async function addUpdateDnsRecord(domain, zone, type, body, dispatch, err
 	return ApiCall(`/forms/dns/${domain}/${zone}/${type}`, 'POST', body, dispatch, errorCallback, router);
 }
 export async function deleteDnsRecord(domain, zone, type, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/dns/${domain}/${zone}/${type}/delete`, 'POST', body, dispatch, errorCallback, router);
+	return ApiCall(`/forms/dns/${domain}/${zone}/${type}/delete`, 'DELETE', body, dispatch, errorCallback, router);
 }
 
 // Certs
@@ -116,10 +116,10 @@ export async function addCert(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/cert/add', 'POST', body, dispatch, errorCallback, router, 0.5);
 }
 export async function deleteCert(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cert/delete', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/cert/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 export async function uploadCert(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cert/upload', 'POST', body, dispatch, errorCallback, router, 0.5);
+	return ApiCall('/forms/cert/upload', 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }
 export async function verifyCSR(body, dispatch, errorCallback, router) {
 	return ApiCall('/forms/csr/verify', 'POST', body, dispatch, errorCallback, router, 0.5);
@@ -133,7 +133,7 @@ export async function addToMap(mapName, body, dispatch, errorCallback, router, p
 	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, progress || 0.5);
 }
 export async function deleteFromMap(mapName, body, dispatch, errorCallback, router, progress) {
-	return ApiCall(`/forms/map/${mapName}/delete`, 'POST', body, dispatch, errorCallback, router, progress || 0.5);
+	return ApiCall(`/forms/map/${mapName}/delete`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5);
 }
 
 // Stats
