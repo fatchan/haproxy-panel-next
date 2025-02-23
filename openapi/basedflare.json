@@ -65,7 +65,7 @@
         }
       }
     },
-    "/forms/stream/add": {
+    "/forms/stream": {
       "post": {
         "summary": "Add a new streamer and return the stream key",
         "security": [
