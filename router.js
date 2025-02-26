@@ -36,7 +36,15 @@ import {
 export default function router(server, app) {
 
 	const shkeeperManager = new ShkeeperManager();
-	const csrfMiddleware = csrf();
+	const csrfHandler = csrf();
+	const csrfMiddleware = (req, res, next) => {
+		if (res.locals.isApiKey === true) {
+			req.csrfToken = () => ''; // Api keys dont require this
+			next();
+		} else {
+			csrfHandler(req, res, next);
+		}
+	};
 	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
 	const haproxyMiddleware = getHaproxy(server, app, clusterUrls, agent, definition);
 

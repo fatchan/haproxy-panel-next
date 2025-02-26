@@ -40,7 +40,9 @@ const templateOptions = [
 	{ value: 'a_template:basic', label: 'A (Standard)' },
 	{ value: 'aaaa_template:basic', label: 'AAAA (Standard)' },
 	{ value: 'a_template:nocogent', label: 'A (No Cogent)' },
-	{ value: 'aaaa_template:nocogent', label: 'AAAA (No Cogent)' }
+	{ value: 'aaaa_template:nocogent', label: 'AAAA (No Cogent)' },
+	{ value: 'a_template:nogiga', label: 'A (No Giga)' },
+	{ value: 'aaaa_template:nogiga', label: 'AAAA (No Giga)' }
 ];
 
 const DnsEditRecordPage = (props) => {
