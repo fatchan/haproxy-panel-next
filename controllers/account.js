@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import * as db from '../db.js';
+import { ObjectId } from 'mongodb';
 import { extractMap, dynamicResponse } from '../util.js';
 import sendEmail from '../lib/email/send.js';
 import { Resolver } from 'node:dns/promises';
