@@ -31,6 +31,12 @@ export function close() {
 	lockClient.quit();
 }
 
+//set value with expiry
+export function setex(key, expiry, value) {
+	client.set(key, value)
+		.then(() => client.expire(key, expiry));
+}
+
 //get a value with key
 export function get(key) {
 	return client.get(key).then(res => { return JSON.parse(res); });

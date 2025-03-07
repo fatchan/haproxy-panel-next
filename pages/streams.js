@@ -73,9 +73,9 @@ function Streams(props) {
 		e.target.reset();
 	}
 
-	async function concludeStream(csrf, id) {
+	async function toggleStream(csrf, id) {
 		setError(null);
-		await API.concludeStream({ _csrf: csrf, id }, () => {
+		await API.toggleStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
@@ -108,13 +108,24 @@ function Streams(props) {
 		.filter(s => (!filter || filter.length === 0) || (s && s.includes(filter)))
 		.map(s => {
 			const streamName = s.substring(s.indexOf('+') + 1);
-			const streamNameKeyId = streamKeys.find(s => s.appName === streamName)._id;
+			const streamKey = streamKeys.find(s => s.appName === streamName);
+			const streamNameKeyId = streamKey._id;
 			return (
 				<tr key={`stream_${s}`} className='align-middle'>
 					<td className='text-left' style={{ width: 0 }}>
-						<a className='btn btn-sm btn-danger' onClick={() => concludeStream(csrf, streamNameKeyId)}>
-							<i className='bi-trash-fill pe-none' width='16' height='16' />
-						</a>
+					    <div className='form-check form-switch'>
+					        <input
+					            className='form-check-input'
+					            type='checkbox'
+					            id={`switch-${streamNameKeyId}`}
+					            checked={streamKey.enabled}
+					            disabled={!streamKey.enabled}
+					            onChange={() => toggleStream(csrf, streamNameKeyId)}
+					        />
+					        <label className='form-check-label text-sm' htmlFor={`switch-${streamNameKeyId}`}>
+					            {streamKey.enabled ? <span className='green'>Live</span> : <span className='red'>Ending...</span>}
+					        </label>
+					    </div>
 					</td>
 					<td>
 						<a
@@ -158,6 +169,13 @@ function Streams(props) {
 					<a className='btn btn-sm btn-danger' onClick={() => deleteStream(csrf, s._id)}>
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
 					</a>
+				</td>
+				<td style={{ width: 0 }}>
+			        <input
+			            type='checkbox'
+			            checked={s.enabled}
+			            disabled={true}
+			        />
 				</td>
 				<td>
 					{s.appName}
@@ -274,6 +292,9 @@ function Streams(props) {
 
 						<tr className='align-middle'>
 							<th />
+							<th>
+								Enabled
+							</th>
 							<th>
 								Key Name
 							</th>

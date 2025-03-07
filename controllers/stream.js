@@ -119,8 +119,8 @@ export async function admissionsWebhook(req, res) {
 		});
 	}
 
-	const { request } = payload;
-	const { url: streamUrl, direction } = request;
+	const { request, client } = payload;
+	const { url: streamUrl, direction, status } = request;
 
 	const parsedUrl = new URL(streamUrl);
 	if (parsedUrl.pathname.startsWith('//')) {
@@ -178,8 +178,38 @@ export async function admissionsWebhook(req, res) {
 
 	const isAllowed = streamData != null;
 
+	const isBlocked = await redis.get(`stream_ban:${client.real_ip}`);
+	console.log('stream_ban', client.real_ip,  isBlocked);
+	if (isBlocked != null) {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'IP temporarily banned (stream concluded)'
+		});
+	}
+
 	// console.log('status is opening', parsedUrl);
 	if (isAllowed) {
+
+		console.log('streamData.enabled?', streamData.enabled);
+		if (streamData.enabled !== true && status === 'closing') {
+			//The stream was concluded, so ban their IP for 5 minutes
+			await redis.setex(`stream_ban:${client.real_ip}`, 300, '1');
+			await db.db().collection('streams').updateOne(
+				{
+					userName: streamsIdUsername,
+					appName,
+				},
+				[{
+					$set: {
+						enabled: true // enable after stream ends
+					}
+				}]
+			);
+			return res.status(200).json({
+				allowed: false,
+				reason: 'Stream key disabled'
+			});
+		}
 
 		const streamsIdWebhooks = await db.db().collection('streamwebhooks')
 			.find({
@@ -221,31 +251,39 @@ export async function admissionsWebhook(req, res) {
 };
 
 /**
- * POST /stream/:id/conclude
- * force end a stream
+ * POST /stream/:id/toggle
+ * toggle the enabled state of a stream
  */
-export async function concludeStream(req, res, _next) {
-
-	if (req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input1' });
+export async function toggleStream(req, res, _next) {
+	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const concludingStream = await db.db().collection('streams')
-		.findOne({
+	const result = await db.db().collection('streams').findOneAndUpdate(
+		{
 			userName: res.locals.user.username,
 			_id: ObjectId(req.params.id),
-		});
-	console.log(concludingStream);
-	if (!concludingStream) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input2' });
+		},
+		[{
+			$set: {
+				enabled: { '$not': '$enabled' } // Invert the enabled flag
+			}
+		}],
+		{
+			returnDocument: 'after' // Return the updated document
+		}
+	);
+
+	if (!result.value) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const appName = concludingStream?.appName;
+	const appName = result.value.appName;
 
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
+	res.locals.ovenMediaDelete(res.locals.user.streamsId, appName);
 
-	return dynamicResponse(req, res, 200, {});
-
+	return dynamicResponse(req, res, 200, { enabled: result.value.enabled });
 }
 
 /**
@@ -331,6 +369,7 @@ export async function addStream(req, res, _next) {
 			userName: res.locals.user.username,
 			appName: req.body.appName,
 			dateCreated: new Date(),
+			enabled: true,
 			streamKey,
 		});
 
@@ -354,13 +393,14 @@ export async function deleteStream(req, res, _next) {
 			_id: ObjectId(req.params.id),
 		});
 
-	console.log(deletedStream);
+	console.log('deletedStream', deletedStream);
 
 	if (!deletedStream?.value) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, deletedStream.value.appName);
+	res.locals.ovenMediaDelete(res.locals.user.streamsId, deletedStream.value.appName);
 
 	return dynamicResponse(req, res, 200, {});
 

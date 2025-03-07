@@ -129,9 +129,9 @@
         }
       }
     },
-    "/forms/stream/{id}/conclude": {
+    "/forms/stream/{id}/toggle": {
       "post": {
-        "summary": "Conclude a stream (Streamer can restart stream)",
+        "summary": "Toggle a stream key (Toggling off concludes active stream)",
         "security": [
           {
             "api_key": []
@@ -168,7 +168,7 @@
     },
     "/forms/stream/{id}": {
       "delete": {
-        "summary": "Conclude a stream and delete the stream key",
+        "summary": "Delete stream key (concludes active stream)",
         "security": [
           {
             "api_key": []
