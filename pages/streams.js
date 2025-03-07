@@ -49,6 +49,17 @@ function Streams(props) {
 		}
 	}, []);
 
+	const anyDisabled = state?.streamKeys?.some(x => !x.enabled) || false;
+	useEffect(() => {
+		let interval;
+		if (anyDisabled && (state?.streams?.length||0) > 0) {
+			interval = setInterval(() => {
+				API.getStreams(dispatch, setError, router);
+			}, 3000);
+		}
+		return () => clearInterval(interval);
+	}, [anyDisabled]);
+
 	if (!state.user || state.user.domains == null || state.streams == null) {
 		return (
 			<div className='d-flex flex-column'>
@@ -103,6 +114,8 @@ function Streams(props) {
 		}, setError, router);
 	}
 
+	let activeStreamIds = [];
+
 	const streamsTable = streams
 		// .sort((a, b) => a.localeCompare(b))
 		.filter(s => (!filter || filter.length === 0) || (s && s.includes(filter)))
@@ -110,22 +123,19 @@ function Streams(props) {
 			const streamName = s.substring(s.indexOf('+') + 1);
 			const streamKey = streamKeys.find(s => s.appName === streamName);
 			const streamNameKeyId = streamKey._id;
+			activeStreamIds.push(streamNameKeyId);
 			return (
 				<tr key={`stream_${s}`} className='align-middle'>
 					<td className='text-left' style={{ width: 0 }}>
-					    <div className='form-check form-switch'>
-					        <input
-					            className='form-check-input'
-					            type='checkbox'
-					            id={`switch-${streamNameKeyId}`}
-					            checked={streamKey.enabled}
-					            disabled={!streamKey.enabled}
-					            onChange={() => toggleStream(csrf, streamNameKeyId)}
-					        />
-					        <label className='form-check-label text-sm' htmlFor={`switch-${streamNameKeyId}`}>
-					            {streamKey.enabled ? <span className='green'>Live</span> : <span className='red'>Ending...</span>}
-					        </label>
-					    </div>
+					    <a
+					        className='btn btn-sm btn-danger'
+					        onClick={() => toggleStream(csrf, streamNameKeyId)}
+					        title={streamKey.enabled ? 'End Stream' : ''}
+					        disabled={!streamKey.enabled}
+					    >
+					        <i className='bi-stop-fill pe-none' width='16' height='16' />
+					        {!streamKey.enabled && <span className='ms-1'>Ending...</span>}
+					    </a>
 					</td>
 					<td>
 						<a
@@ -170,12 +180,20 @@ function Streams(props) {
 						<i className='bi-trash-fill pe-none' width='16' height='16' />
 					</a>
 				</td>
-				<td style={{ width: 0 }}>
-			        <input
-			            type='checkbox'
-			            checked={s.enabled}
-			            disabled={true}
-			        />
+				<td className='text-left' style={{ width: 0 }}>
+				    <div className='form-check form-switch'>
+				        <input
+				            className='form-check-input'
+				            type='checkbox'
+				            id={`switch-${s._id}`}
+				            checked={s.enabled}
+				            disabled={!s.enabled && activeStreamIds.includes(s._id)}
+				            onChange={() => toggleStream(csrf, s._id)}
+				        />
+				        <label className='form-check-label text-sm' htmlFor={`switch-${s._id}`}>
+				            {s.enabled ? <span className='green'>Enabled</span> : <span className='red'>Disabled</span>}
+				        </label>
+				    </div>
 				</td>
 				<td>
 					{s.appName}
@@ -293,7 +311,7 @@ function Streams(props) {
 						<tr className='align-middle'>
 							<th />
 							<th>
-								Enabled
+								Status
 							</th>
 							<th>
 								Key Name

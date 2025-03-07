@@ -191,20 +191,22 @@ export async function admissionsWebhook(req, res) {
 	if (isAllowed) {
 
 		console.log('streamData.enabled?', streamData.enabled);
-		if (streamData.enabled !== true && status === 'closing') {
-			//The stream was concluded, so ban their IP for 5 minutes
-			await redis.setex(`stream_ban:${client.real_ip}`, 300, '1');
-			await db.db().collection('streams').updateOne(
-				{
-					userName: streamsIdUsername,
-					appName,
-				},
-				[{
-					$set: {
-						enabled: true // enable after stream ends
-					}
-				}]
-			);
+		if (streamData.enabled !== true) {
+			if (status === 'closing') {
+				//The stream key is/was disabled, so ban their IP for 2 minutes
+				await redis.setex(`stream_ban:${client.real_ip}`, 120, '1');
+				await db.db().collection('streams').updateOne(
+					{
+						userName: streamsIdUsername,
+						appName,
+					},
+					[{
+						$set: {
+							enabled: true // enable after stream ends
+						}
+					}]
+				);
+			}
 			return res.status(200).json({
 				allowed: false,
 				reason: 'Stream key disabled'
