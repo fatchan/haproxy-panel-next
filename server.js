@@ -63,7 +63,7 @@ app.prepare()
 
 		const gracefulStop = () => {
 			console.log('SIGINT SIGNAL RECEIVED');
-			db.client.close();
+			db.client().close();
 			redis.close();
 			process.exit(0);
 		};
