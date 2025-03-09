@@ -481,6 +481,7 @@ export async function patchMapForm(req, res, next) {
 					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
 					cex: parseInt(req.body.cex || 21600, 10),
 					cip: req.body.cip === true ? true : false,
+					js: req.body.js !== true ? false : true, //inverted to help w existing default
 				});
 				break;
 			case process.env.NEXT_PUBLIC_CSS_MAP_NAME:

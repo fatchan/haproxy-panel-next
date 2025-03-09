@@ -164,6 +164,19 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							<label className='form-check-label'>Lock cookie to IP</label>
 						</div>
 					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.js !== false } : { defaultChecked: editValue.js !== false })}
+								onChange={(e) => handleFieldChange && handleFieldChange('js', e.target.checked ? true : false)}
+								name='js'
+							/>
+							<label className='form-check-label'>Show NoJS</label>
+						</div>
+					</td>
+
 				</>
 			);
 			break;

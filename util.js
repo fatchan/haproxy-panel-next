@@ -76,9 +76,10 @@ export const fMap = {
 			'Difficulty',
 			'POW Type',
 			'Expiry',
-			'Lock cookie to IP',
+			'Per-IP Cookie',
+			'Show NoJS'
 		],
-		columnKeys: ['pd', 'pt', 'cex', 'cip'],
+		columnKeys: ['pd', 'pt', 'cex', 'cip', 'js'],
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME]: {
