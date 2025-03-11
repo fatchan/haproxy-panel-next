@@ -188,6 +188,10 @@ export async function login(req, res) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
 	}
 
+	if (password.length > 100) {
+		return dynamicResponse(req, res, 400, { error: 'Password must be 100 characters or less' });
+	}
+
 	const account = await db.db().collection('accounts').findOne({ _id: username });
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
@@ -226,6 +230,10 @@ export async function register(req, res) {
 		|| !rPassword || typeof rPassword !== 'string' || rPassword.length === 0) {
 		//todo: length limits, make jschan input validator LGPL lib and use here
 		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+	}
+
+	if (password.length > 100 || rPassword.length > 100) {
+		return dynamicResponse(req, res, 400, { error: 'Password must be 100 characters or less' });
 	}
 
 	if (password !== rPassword) {
@@ -340,6 +348,10 @@ export async function changePassword(req, res) {
 		|| !rPassword || typeof rPassword !== 'string' || rPassword.length === 0) {
 		//todo: length limits, make jschan input validator LGPL lib and use here
 		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+	}
+
+	if (password.length > 100 || rPassword.length > 100) {
+		return dynamicResponse(req, res, 400, { error: 'Password must be 100 characters or less' });
 	}
 
 	if (password !== rPassword) {

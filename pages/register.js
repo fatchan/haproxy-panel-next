@@ -56,12 +56,12 @@ export default function Register() {
 					</div>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Password
-							<input className='form-control' type='password' name='password' maxLength='100' required='required'/>
+							<input className='form-control' type='password' name='password' required='required'/>
 						</label>
 					</div>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Repeat Password
-							<input className='form-control' type='password' name='repeat_password' maxLength='100' required='required'/>
+							<input className='form-control' type='password' name='repeat_password' required='required'/>
 						</label>
 					</div>
 					<div className='mb-3'>

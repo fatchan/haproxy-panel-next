@@ -45,12 +45,12 @@ export default function ChangePassword() {
 				<form className='mb-3' onSubmit={changepassword} action='/forms/changepassword' method='POST'>
 					<div className='mb-2'>
 						<label className='form-label'>New Password
-							<input className='form-control' type='password' name='password' maxLength='50' required='required'/>
+							<input className='form-control' type='password' name='password' required='required'/>
 						</label>
 					</div>
 					<div className='mb-2'>
 						<label className='form-label'>Repeat New Password
-							<input className='form-control' type='password' name='repeat_password' maxLength='50' required='required'/>
+							<input className='form-control' type='password' name='repeat_password' required='required'/>
 						</label>
 					</div>
 					<input className='btn btn-primary w-100' type='submit' value='Confirm'/>
