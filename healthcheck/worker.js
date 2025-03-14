@@ -87,7 +87,7 @@ async function doCheck(domainKey, hkey, record) {
 			record.u = false;
 		}
 	} catch(e) {
-		console.error(e);
+		console.error('Healthcheck error', domain, hkey, e.message || e);
 	} finally {
 		await lock.release();
 		return record;
@@ -101,7 +101,7 @@ async function processKey(domainKey) {
 			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 60000);
 			try {
 				const records = await redis.hget(domainKey, hkey);
-				const allIps = (records['a']||[]).concat((records['a']||[]));
+				const allIps = (records['a']||[]).concat((records['aaaa']||[]));
 				if (allIps.length > 0) {
 					const updatedA = await Promise.all((records['a']||[]).map(async r => doCheck(domainKey, hkey, r)));
 					const updatedAAAA = await Promise.all((records['aaaa']||[]).map(async r => doCheck(domainKey, hkey, r)));

@@ -29,6 +29,7 @@ export const omeClient = new Redis({
 export function close() {
 	client.quit();
 	lockClient.quit();
+	omeClient.quit();
 }
 
 //set value with expiry
