@@ -382,7 +382,7 @@ function Streams(props) {
 
 						{/* Add new webhook form */}
 						<tr className='align-middle'>
-							<td className='col-1 text-center' colSpan='4'>
+							<td className='text-center' colSpan='5'>
 								<form className='d-flex' onSubmit={addStreamWebhook} action='/forms/stream/webhook/add' method='post'>
 									<input type='hidden' name='_csrf' value={csrf} />
 									<button className='btn btn-sm btn-success' type='submit'>
