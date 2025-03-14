@@ -86,10 +86,8 @@ async function doCheck(domainKey, hkey, record) {
 		} else if (recordHealth === '0') {
 			record.u = false;
 		}
-		return record; //no change required, or no cache and failed fetch
 	} catch(e) {
 		console.error(e);
-		return record;
 	} finally {
 		await lock.release();
 		return record;
