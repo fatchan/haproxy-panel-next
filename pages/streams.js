@@ -85,6 +85,13 @@ function Streams(props) {
 		e.target.reset();
 	}
 
+	async function concludeStream(csrf, id) {
+		setError(null);
+		await API.concludeStream({ _csrf: csrf, id }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
+	}
+
 	async function toggleStream(csrf, id) {
 		setError(null);
 		await API.toggleStream({ _csrf: csrf, id }, () => {
@@ -130,7 +137,7 @@ function Streams(props) {
 					<td className='text-left' style={{ width: 0 }}>
 					    <a
 					        className='btn btn-sm btn-danger'
-					        onClick={() => toggleStream(csrf, streamNameKeyId)}
+					        onClick={() => concludeStream(csrf, streamNameKeyId)}
 					        title={streamKey.enabled ? 'End Stream' : ''}
 					        disabled={!streamKey.enabled}
 					    >
