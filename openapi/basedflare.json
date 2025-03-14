@@ -129,9 +129,46 @@
         }
       }
     },
+    "/forms/stream/{id}/conclude": {
+      "post": {
+        "summary": "Conclude a stream. Immediately stops playback, disconnects the streamer and prevents reconnect for 2 minutes.",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stream key id",
+            "schema": {
+              "type": "string",
+              "example": "67a822f4518bc836547c9b1a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/forms/stream/{id}/toggle": {
       "post": {
-        "summary": "Toggle a stream key (Toggling off concludes active stream)",
+        "summary": "Toggle a stream key. Disabling concludes the stream for this key if live. Disabled keys won't be able to start streaming.",
         "security": [
           {
             "api_key": []
@@ -168,7 +205,7 @@
     },
     "/forms/stream/{id}": {
       "delete": {
-        "summary": "Delete stream key (concludes active stream)",
+        "summary": "Delete stream key. Deleting concludes the stream for this key if live.",
         "security": [
           {
             "api_key": []
@@ -390,6 +427,14 @@
           "userName": {
             "type": "string",
             "example": "admin"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": "true"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": "false"
           },
           "appName": {
             "type": "string",

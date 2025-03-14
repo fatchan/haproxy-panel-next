@@ -123,14 +123,12 @@ export async function admissionsWebhook(req, res) {
 	const { url: streamUrl, direction, status } = request;
 
 	const parsedUrl = new URL(streamUrl);
-	if (parsedUrl.pathname.startsWith('//')) {
-		// Strip double leading slashes from e.g. restream in case of bad url
-		parsedUrl.pathname = parsedUrl.pathname.substring(1);
+	if (/^\/{2,}/.test(parsedUrl.pathname)) {
+	    // replace multiple leading slashes e.g. bad urls from restream services
+	    parsedUrl.pathname = parsedUrl.pathname.replace(/^\/+/, '/');
 	}
-	// console.log('parsedUrl', parsedUrl);
 
 	const match = parsedUrl.pathname.match(appNameRegex);
-	// console.log('match', match);
 	let streamsId, appName, streamKey;
 	if (match) {
 		streamsId = match[1];
@@ -157,8 +155,6 @@ export async function admissionsWebhook(req, res) {
 		}
 	});
 
-	// console.log('streamsIdAccount', streamsIdAccount);
-
 	if (!streamsIdAccount) {
 		return res.status(200).json({
 			allowed: false,
@@ -174,8 +170,6 @@ export async function admissionsWebhook(req, res) {
 		streamKey,
 	});
 
-	// console.log('streamData', streamData);
-
 	const isAllowed = streamData != null;
 
 	const isBlocked = await redis.get(`stream_ban:${client.real_ip}`);
@@ -187,70 +181,110 @@ export async function admissionsWebhook(req, res) {
 		});
 	}
 
-	// console.log('status is opening', parsedUrl);
-	if (isAllowed) {
-
-		console.log('streamData.enabled?', streamData.enabled);
-		if (streamData.enabled !== true) {
-			if (status === 'closing') {
-				//The stream key is/was disabled, so ban their IP for 2 minutes
-				await redis.setex(`stream_ban:${client.real_ip}`, 120, '1');
-				await db.db().collection('streams').updateOne(
-					{
-						userName: streamsIdUsername,
-						appName,
-					},
-					[{
-						$set: {
-							enabled: true // enable after stream ends
-						}
-					}]
-				);
-			}
-			return res.status(200).json({
-				allowed: false,
-				reason: 'Stream key disabled'
-			});
-		}
-
-		const streamsIdWebhooks = await db.db().collection('streamwebhooks')
-			.find({
-				username: streamsIdUsername,
-				type: 'admissions',
-			})
-			.toArray();
-
-		Promise.all(streamsIdWebhooks.map(async wh => {
-			const webhookBody = payload.request;
-			const jsonBody = JSON.stringify(webhookBody);
-			const signature = crypto.createHmac('sha256', wh.signingSecret)
-				.update(jsonBody)
-				.digest('hex');
-			return fetch(wh.url, {
-				method: 'POST',
-				redirect: 'manual', //Dont follow user link redirects
-				body: webhookBody,
-				headers: {
-					'Content-Type': 'application/json',
-					'x-bf-signature': signature
-				},
-			});
-		})); //Note: async
-
-		return res.status(200).json({
-			allowed: true,
-			new_url: parsedUrl,
-			lifetime: 0, // 0 means infinity
-			reason: 'authorized'
-		});
-	} else {
+	if (isAllowed === false) {
 		return res.status(200).json({
 			allowed: false,
 			reason: 'Invalid stream key'
 		});
 	}
 
+	console.log('streamData.enabled', streamData.enabled);
+	console.log('streamData.concluding', streamData.concluding);
+	if (streamData.enabled !== true) {
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Stream key disabled'
+		});
+	}
+	if (streamData.concluding !== true) {
+		if (status === 'closing') {
+			//The stream was concluded, so ban their IP for 2 minutes
+			await redis.setex(`stream_ban:${client.real_ip}`, 120, '1');
+			await db.db().collection('streams').updateOne(
+				{
+					userName: streamsIdUsername,
+					appName,
+				},
+				[{
+					$set: {
+						concluding: false // disable concluding flag after disconnect/reconnect ban
+					}
+				}]
+			);
+		}
+		return res.status(200).json({
+			allowed: false,
+			reason: 'Stream force concluded'
+		});
+	}
+
+	const streamsIdWebhooks = await db.db().collection('streamwebhooks')
+		.find({
+			username: streamsIdUsername,
+			type: 'admissions',
+		})
+		.toArray();
+
+	Promise.all(streamsIdWebhooks.map(async wh => {
+		const webhookBody = payload.request;
+		const jsonBody = JSON.stringify(webhookBody);
+		const signature = crypto.createHmac('sha256', wh.signingSecret)
+			.update(jsonBody)
+			.digest('hex');
+		return fetch(wh.url, {
+			method: 'POST',
+			redirect: 'manual', //Dont follow user link redirects
+			body: webhookBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'x-bf-signature': signature
+			},
+		});
+	})); //Note: async
+
+	return res.status(200).json({
+		allowed: true,
+		new_url: parsedUrl,
+		lifetime: 0, // 0 means infinity
+		reason: 'authorized'
+	});
+
 };
+
+/**
+ * POST /stream/:id/conclude
+ * Forcefully end a live stream
+ */
+export async function concludeStream(req, res, _next) {
+	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const result = await db.db().collection('streams').findOneAndUpdate(
+		{
+			userName: res.locals.user.username,
+			_id: ObjectId(req.params.id),
+		},
+		[{
+			$set: {
+				concluding: true
+			}
+		}],
+		{
+			returnDocument: 'after'
+		}
+	);
+
+	if (!result.value) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const appName = result.value.appName;
+	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
+	res.locals.ovenMediaDelete(res.locals.user.streamsId, appName);
+
+	return dynamicResponse(req, res, 200, {});
+}
 
 /**
  * POST /stream/:id/toggle
@@ -268,7 +302,8 @@ export async function toggleStream(req, res, _next) {
 		},
 		[{
 			$set: {
-				enabled: { '$not': '$enabled' } // Invert the enabled flag
+				enabled: { '$not': '$enabled' }, // Invert the enabled flag
+				concluding: { $cond: [{ $eq: ['$enabled', true] }, true, false] } // Set concluding to true if enabled was true
 			}
 		}],
 		{
@@ -280,12 +315,15 @@ export async function toggleStream(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const appName = result.value.appName;
+	const enabled = result.value.enabled;
 
-	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
-	res.locals.ovenMediaDelete(res.locals.user.streamsId, appName);
+	if (!enabled) {
+		const appName = result.value.appName;
+		res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
+		res.locals.ovenMediaDelete(res.locals.user.streamsId, appName);
+	}
 
-	return dynamicResponse(req, res, 200, { enabled: result.value.enabled });
+	return dynamicResponse(req, res, 200, { enabled });
 }
 
 /**
@@ -372,6 +410,7 @@ export async function addStream(req, res, _next) {
 			appName: req.body.appName,
 			dateCreated: new Date(),
 			enabled: true,
+			concluding: false,
 			streamKey,
 		});
 

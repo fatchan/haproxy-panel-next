@@ -443,6 +443,15 @@ export default function router(server, app) {
 		streamsController.addStream,
 	);
 	clusterRouter.post(
+		'/stream/:id([a-f0-9]{24})/conclude',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		useOvenMedia,
+		streamsController.concludeStream,
+	);
+	clusterRouter.post(
 		'/stream/:id([a-f0-9]{24})/toggle',
 		useSession,
 		fetchSession,

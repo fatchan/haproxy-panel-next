@@ -49,16 +49,17 @@ function Streams(props) {
 		}
 	}, []);
 
-	const anyDisabled = state?.streamKeys?.some(x => !x.enabled) || false;
+	//Note: after concluding we call getstreams which should trigger this
+	const anyConcluding = state?.streamKeys?.some(x => !x.enabled) || false;
 	useEffect(() => {
 		let interval;
-		if (anyDisabled && (state?.streams?.length||0) > 0) {
+		if (anyConcluding && (state?.streams?.length||0) > 0) {
 			interval = setInterval(() => {
 				API.getStreams(dispatch, setError, router);
 			}, 3000);
 		}
 		return () => clearInterval(interval);
-	}, [anyDisabled]);
+	}, [anyConcluding]);
 
 	if (!state.user || state.user.domains == null || state.streams == null) {
 		return (
