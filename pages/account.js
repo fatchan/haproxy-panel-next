@@ -71,6 +71,14 @@ function AccountPage(props) {
 					</div>
 				</div>
 
+				<div className='card mb-4'>
+					<div className='card-body'>
+						<h6 className='card-title'>Streams ID</h6>
+						<p className='card-text'>
+							<strong>{user.streamsId}</strong>
+						</p>
+					</div>
+				</div>
 			</div>
 		</>
 	);

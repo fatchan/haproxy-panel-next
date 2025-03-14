@@ -8,7 +8,6 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
-import SuccessAlert from '../components/SuccessAlert.js';
 import InfoAlert from '../components/InfoAlert.js';
 import CopyButton from '../components/CopyButton.js';
 import * as API from '../api.js';
@@ -74,7 +73,7 @@ function Streams(props) {
 		);
 	}
 
-	const { csrf, streamKeys, streams, streamWebhooks, user } = state;
+	const { csrf, streamKeys, streams, streamWebhooks } = state;
 
 	async function addStream(e) {
 		e.preventDefault();
@@ -249,6 +248,8 @@ function Streams(props) {
 
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
+			<InfoAlert><a href='/kb/streaming' target='_blank' rel='noreferrer'>Documentation</a></InfoAlert>
+
 			<div className='input-group mb-3'>
 				<span className='input-group-text'>Region</span>
   			<select className='form-select' value={continent} onChange={e => {
@@ -263,19 +264,6 @@ function Streams(props) {
 					<option value='global'>Global</option>
 				</select>
 			</div>
-
-			<InfoAlert>
-				Stream input URL format:
-				<div><code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{user.streamsId}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code></div>
-			</InfoAlert>
-
-			<SuccessAlert>
-				Stream output URL format:
-				<div>Low Latency HLS:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/app/{user.streamsId}+{'<Stream Key Name>'}/llhls.m3u8</code></div>
-				<div>HLS (Not recommended):{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/hls/app/{user.streamsId}+{'<Stream Key Name>'}/ts:playlist.m3u8</code></div>
-				<div>Thumbnails:{' '}<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', `-${continent}`)}/thumb/app/{user.streamsId}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code></div>
-				{continent === 'global' && <div className='text-danger fw-bold'>Note: these are global URLs and will redirect to a regional endpoint. Streaming will only work from regional endpoints, not the global URL.</div>}
-			</SuccessAlert>
 
 			<h5 className='fw-bold'>
 				Live Streams:

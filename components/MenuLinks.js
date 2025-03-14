@@ -86,6 +86,7 @@ export const sections = [
 			{ href: '/kb/firewall', label: 'Firewall', icon: 'bi-bricks' },
 			{ href: '/kb/https', label: 'HTTPS & CSRs ', icon: 'bi-file-earmark-lock' },
 			{ href: '/kb/debug', label: 'Debug URLs', icon: 'bi-bug' },
+			{ href: '/kb/streaming', label: 'Live Streaming', icon: 'bi-cast' },
 		],
 	}
 ];
@@ -187,6 +188,12 @@ const MenuLinks = ({ router }) => {
 					<Link href='/billing' className={path.startsWith('/billing') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
 						<i className='bi-wallet2 pe-none me-2' width='16' height='16' />
 						Billing
+					</Link>
+				</li>
+				<li className='nav-item'>
+					<Link href='/account' className={path.startsWith('/account') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+						<i className='bi-person pe-none me-2' width='16' height='16' />
+						Account
 					</Link>
 				</li>
 				<li className='nav-item'>
