@@ -12,6 +12,8 @@ import * as redis from '../redis.js';
 import redlock from '../redlock.js';
 import Queue from 'bull';
 import https from 'https';
+import tls from 'tls';
+import net from 'net';
 const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
@@ -32,6 +34,44 @@ const ignoredErrorCodes = [
 
 let downedIps = [];
 
+//backup for raw handshake check
+function checkTLSHandshake(ip, port, domain) {
+	return new Promise((resolve, reject) => {
+		const controller = new AbortController();
+		setTimeout(() => {
+			controller.abort();
+		}, 15000);
+		const socket = net.createConnection(port, ip, () => {
+			const secureSocket = new tls.TLSSocket(socket, {
+				host: domain,
+				rejectUnauthorized: false,
+				signal: controller.signal,
+			});
+			secureSocket.on('secureConnect', () => {
+				secureSocket.end();
+				resolve(true);
+			});
+
+			secureSocket.on('error', (err) => {
+				if (err.cause && err.cause.code && ignoredErrorCodes.includes(err.cause.code)) {
+					secureSocket.end();
+					resolve(true);
+				} else {
+					secureSocket.end();
+					reject(err);
+				}
+			});
+		});
+		socket.on('error', (err) => {
+			reject(err);
+		});
+		controller.signal.addEventListener('abort', () => {
+			socket.destroy();
+			reject(new Error('Connection timed out'));
+		});
+	});
+}
+
 async function doCheck(domainKey, hkey, record) {
 	if (!record || record.h !== true) {
 		record.u = true;
@@ -48,6 +88,7 @@ async function doCheck(domainKey, hkey, record) {
 			recordHealth = await redis.get(`health:${record.ip}`);
 		}
 		if (recordHealth === null) {
+			const hostHeader = domainKey.substring(4, domainKey.length-1);
 			try {
 				const controller = new AbortController();
 				const signal = controller.signal;
@@ -55,7 +96,6 @@ async function doCheck(domainKey, hkey, record) {
 					controller.abort();
 				}, 15000);
 				const host = isIPv4(record.ip) ? record.ip : `[${record.ip}]`;
-				const hostHeader = domainKey.substring(4, domainKey.length-1);
 				await fetch(`https://${host}/${process.env.DOT_PATH}/cgi/trace`, {
 					method: 'HEAD',
 					redirect: 'manual',
@@ -71,8 +111,14 @@ async function doCheck(domainKey, hkey, record) {
 					recordHealth = '1';
 				} else {
 					console.warn(e);
-					console.warn('health check down for', domainKey, hkey, record.ip);
-					recordHealth = '0';
+					try {
+						//should have plenty of time if abortcontroller is hit, 60s>15s
+						const backupHandshakeResponse = await checkTLSHandshake(record.ip, 443, hostHeader);
+						recordHealth = backupHandshakeResponse === true ? '1' : '0';
+					} catch(e) {
+						console.warn('health check down for', domainKey, hkey, record.ip, 'error:', e);
+						recordHealth = '0';
+					}
 				}
 			}
 			await redis.client.set(`health:${record.ip}`, recordHealth, 'EX', 30, 'NX');
