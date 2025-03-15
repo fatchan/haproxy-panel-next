@@ -6,7 +6,7 @@ dotenv.config({ path: '.env' });
 import QRCode from 'qrcode';
 
 export const metaMapMapping = {
-	[process.env.NEXT_PUBLIC_IMAGES_MAP_NAME]:  process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+	[process.env.NEXT_PUBLIC_IMAGES_MAP_NAME]: process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
 
 	//Note: May not be necessary, these use rela maps not meta maps
 	// 'css': null,
@@ -50,15 +50,16 @@ export const createQrCodeText = async (shkeeperResponse, crypto) => {
 	return qrCodeText;
 };
 
-export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS||'')
+export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS || '')
 	.split(',')
 	.map(x => x.trim());
 
 export const fMap = {
 	[process.env.NEXT_PUBLIC_HOSTS_MAP_NAME]: {
 		fname: 'Backends',
-		description: 'Backend IP mappings for domains',
-		columnNames: ['Domain', 'Backend'],
+		description: 'Backend mappings for domains',
+		columnNames: ['Domain', 'Backend', 'Geo Route'],
+		columnKeys: ['ip', 'geo'],
 	},
 
 	[process.env.NEXT_PUBLIC_DDOS_MAP_NAME]: {
@@ -172,10 +173,10 @@ export function validClustersString(string) {
 
 export function extractMap(item) {
 	const name = item.file &&
-    item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
-	if (!fMap[name]) {return null;}
+		item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
+	if (!fMap[name]) { return null; }
 	const count = item.description &&
-    item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
+		item.description.match(/(?:.+entry_cnt=(?<count>\d+)$)?/).groups.count;
 	return {
 		name,
 		count,
@@ -199,7 +200,7 @@ export function dynamicResponse(req, res, code, data) {
 
 //check if list includes domain of a wildcard
 export function wildcardAllowed(domain, allowedDomains) {
-	if (domain.includes('\\')) {throw new Error('Illegal wildcardAllowed');}
+	if (domain.includes('\\')) { throw new Error('Illegal wildcardAllowed'); }
 	const wcRegex = new RegExp(`${domain.replace(/\*\./g, '([^ ]*\\.|^)')}$`);
 	return allowedDomains.some((d) => {
 		return wcRegex.test(d);
@@ -208,7 +209,7 @@ export function wildcardAllowed(domain, allowedDomains) {
 
 //check if a domain matches a wildcard
 export function wildcardMatches(domain, wildcard) {
-	if (wildcard.includes('\\')) {throw new Error('Illegal wildcardMatches');}
+	if (wildcard.includes('\\')) { throw new Error('Illegal wildcardMatches'); }
 	const wcRegex = new RegExp(`${wildcard.replace(/\*\./g, '^.*\\.')}$`);
 	return wcRegex.test(domain);
 }

@@ -4,15 +4,7 @@ import * as db from '../db.js';
 import url from 'url';
 import countries from 'i18n-iso-countries';
 const countryMap = countries.getAlpha2Codes();
-const continentMap = {
-	'NA': 'North America',
-	'SA': 'South America',
-	'EU': 'Europe',
-	'AS': 'Asia',
-	'OC': 'Oceania',
-	'AF': 'Africa',
-	'AN': 'Antarctica',
-};
+import { continentMap } from '../lib/misc/continents.js';
 
 export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 
@@ -20,11 +12,14 @@ export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 		.then(res => res.data)
 		.then(res => {
 			return res.map(e => {
-				const [splitIp, _] = e.value.split(':'); //TODO: handle ipv6 backend (not supported yet anyway)
-				const parsedIp = parse(splitIp).toString({ zeroElide: false, zeroPad:false }); // prevent bypass with compressed addresses
+				//TODO: handle ipv6 backend (not supported yet anyway)
+				const [ipAndPort, geo] = e.value.split(';');
+				const [splitIp, _] = ipAndPort.split(':');
+				const parsedIp = parse(splitIp).toString({ zeroElide: false, zeroPad: false }); // prevent bypass with compressed addresses
 				return {
 					ip: parsedIp, //parsed ip
 					domain: e.key, //domain
+					geo: geo, //geo routing region (cn)
 				};
 			});
 		});
@@ -87,26 +82,26 @@ export async function mapData(req, res, next) {
 			map = map.map(a => {
 				try {
 					a.value = JSON.parse(a.value);
-				} catch(e) {
+				} catch (e) {
 					console.warn('Failed to parse map value', a.value);
 					return undefined;
 				}
 				return a;
 			}).filter(x => x);
-			/* falls through */
+		/* falls through */
 		case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
 			if (req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
-				 map = map.map(a => {
+				map = map.map(a => {
 					try {
 						a.value = decodeURIComponent(a.value);
-					} catch(e) {
+					} catch (e) {
 						console.warn('Failed to parse map value', a.value);
 						return undefined;
 					}
 					return a;
 				}).filter(x => x);
 			}
-			/* falls through */
+		/* falls through */
 		case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
 		case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
 		case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
@@ -133,13 +128,26 @@ export async function mapData(req, res, next) {
 				};
 			}
 			showValues = true;
-			/* falls through */
+		/* falls through */
 		case process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME:
 		case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
 			if (process.env.CUSTOM_BACKENDS_ENABLED) {
 				showValues = true;
 			}
-			/* falls through */
+			const isHosts = req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME;
+			if (isHosts) {
+				map = map.map(a => {
+					const [ipAndPort, geo] = a.value.split(';');
+					return {
+						...a,
+						value: {
+							ip: ipAndPort,
+							geo: geo,
+						}
+					}
+				});
+			}
+		/* falls through */
 		case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
 				const { hostname } = url.parse(`https://${a.key}`);
@@ -176,7 +184,7 @@ export async function mapData(req, res, next) {
 
 export async function mapPage(app, req, res, next) {
 	const data = await mapData(req, res, next);
-	res.locals.data = { ...data,  user: res.locals.user };
+	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, `/map/${data.name}`);
 }
 
@@ -209,7 +217,7 @@ export async function deleteMapForm(req, res, next) {
 				// id: req.body.key,
 			})
 			.then((res) => res.data)
-			.catch(() => {});
+			.catch(() => { });
 		const existingEntry = existingEntries && existingEntries
 			.find(en => en.key === req.body.key);
 		console.log('existingEntry', existingEntry);
@@ -308,7 +316,7 @@ export async function deleteMapForm(req, res, next) {
  * Add map entries of the body 'domain'
  */
 export async function patchMapForm(req, res, next) {
-	if(req.body && req.body.key && typeof req.body.key === 'string') {
+	if (req.body && req.body.key && typeof req.body.key === 'string') {
 
 		const mapName = metaMapMapping[req.params.name] || req.params.name;
 
@@ -356,7 +364,7 @@ export async function patchMapForm(req, res, next) {
 			if (!parsedIpOrSubnet) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
-			req.body.key = parsedIpOrSubnet.toString({zeroElide: false, zeroPad:false});
+			req.body.key = parsedIpOrSubnet.toString({ zeroElide: false, zeroPad: false });
 		}
 
 		//validate key is ASN
@@ -377,7 +385,7 @@ export async function patchMapForm(req, res, next) {
 
 		//validate key is country code
 		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME) {
-			if (!continentMap[req.body.key]) {
+			if (!continentMap[req.body.key] || req.body.key === 'XX') { //XX only for hosts map for now
 				return dynamicResponse(req, res, 403, { error: 'Invalid continent code' });
 			}
 			//req.body.key is a cn
@@ -417,9 +425,13 @@ export async function patchMapForm(req, res, next) {
 
 		//validate value is IP:port
 		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+			//validate key is country code
+			if (!req.body.geo || typeof req.body.geo !== 'string' || !continentMap[req.body.geo]) {
+				return dynamicResponse(req, res, 403, { error: 'Invalid backend geo route value' });
+			}
 			let parsedValue;
 			try {
-				parsedValue = url.parse(`https://${req.body.value}`);
+				parsedValue = url.parse(`https://${req.body.ip}`);
 				if (!parsedValue.host || !parsedValue.port) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
@@ -427,7 +439,7 @@ export async function patchMapForm(req, res, next) {
 			} catch {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
-			req.body.value = parsedValue.host; //host includes port
+			req.body.ip = parsedValue.host; //host includes port
 		}
 
 		let value;
@@ -439,7 +451,7 @@ export async function patchMapForm(req, res, next) {
 				break;
 			case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
 				if (process.env.CUSTOM_BACKENDS_ENABLED) {
-					value = req.body.value;
+					value = `${req.body.ip};${req.body.geo}`;
 				} else {
 					value = 0;
 				}
@@ -455,7 +467,7 @@ export async function patchMapForm(req, res, next) {
 						id: req.body.key,
 					})
 					.then((res) => res.data)
-					.catch(() => {});
+					.catch(() => { });
 				if (existingEntry && existingEntry.value) {
 					const existingSplitEntries = existingEntry.value.split(':');
 					existingSplitEntries.push(res.locals.user.username);
@@ -495,7 +507,7 @@ export async function patchMapForm(req, res, next) {
 		try {
 
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
-				const { hostname: address, port } = new URL(`http://${value}`);
+				const { hostname: address, port } = new URL(`http://${req.body.ip}`);
 				const backendAllowed = await backendIpAllowed(res.locals.dataPlaneRetry, res.locals.user.username, address);
 				if (!backendAllowed) {
 					return dynamicResponse(req, res, 403, { error: 'No permission to add a backend with that IP' });
@@ -506,7 +518,7 @@ export async function patchMapForm(req, res, next) {
 						id: req.body.key,
 					})
 					.then(res => res.data)
-					.catch(() => {});
+					.catch(() => { });
 				const freeSlotId = await res.locals
 					.dataPlaneRetry('getRuntimeServers', {
 						backend: 'servers'
@@ -516,11 +528,11 @@ export async function patchMapForm(req, res, next) {
 						if (servers.length > 0) {
 							const serverIds = servers
 								.map(s => parseInt(s.id, 10))
-								.sort((a, b) => a-b);
+								.sort((a, b) => a - b);
 							const serverNameIds = servers
 								.map(s => parseInt(s.name.substr(6), 10))
-								.sort((a, b) => a-b);
-							return Math.max(serverIds[serverIds.length-1], serverNameIds[serverNameIds.length-1])+1;
+								.sort((a, b) => a - b);
+							return Math.max(serverIds[serverIds.length - 1], serverNameIds[serverNameIds.length - 1]) + 1;
 						}
 						return 1;
 					});
@@ -566,7 +578,7 @@ export async function patchMapForm(req, res, next) {
 							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 							id: req.body.key,
 						}, {
-							value: `${fullBackendMapEntry.value},websrv${freeSlotId}`,
+							value: `${fullBackendMapEntry.value},websrv${freeSlotId};${req.body.geo}`,
 						}, null, false, false);
 				} else {
 					await res.locals
@@ -574,7 +586,7 @@ export async function patchMapForm(req, res, next) {
 							name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						}, [{
 							key: req.body.key,
-							value: `websrv${freeSlotId}`,
+							value: `websrv${freeSlotId};${req.body.geo}`,
 						}], null, false, false);
 				}
 			}
@@ -587,7 +599,7 @@ export async function patchMapForm(req, res, next) {
 						id: req.body.key,
 					})
 					.then(res => res.data)
-					.catch(() => {}));
+					.catch(() => { }));
 			if (existingEntry) {
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {

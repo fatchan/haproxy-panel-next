@@ -5,7 +5,7 @@ import definition from './openapi/haproxy.js';
 import agent from './agent.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerCss from './lib/swagger/css.js';
-import swaggerDocument from './openapi/basedflare.json' assert { type: 'json' };
+import swaggerDocument from './openapi/basedflare.json' with { type: 'json' };
 
 import * as accountController from './controllers/account.js';
 import * as mapsController from './controllers/maps.js';
@@ -50,7 +50,7 @@ export default function router(server, app) {
 
 	server.use('/api-docs', swaggerUi.serve);
 	server.get('/api-docs', swaggerUi.setup(swaggerDocument, {
-	  customCss: swaggerCss,
+		customCss: swaggerCss,
 	}));
 
 	//unauthed pages
@@ -97,22 +97,22 @@ export default function router(server, app) {
 	);
 
 	const mapNames = [
-			process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
-			process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
-			process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
-			process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
-			process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-			process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
-			process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
-			process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
-			process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
-			process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
-			process.env.NEXT_PUBLIC_CSS_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
+		process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
+		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
+		process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
+		process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
+		process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
+		process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+		process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
+		process.env.NEXT_PUBLIC_CSS_MAP_NAME,
 		// 'translation',
-		],
+	],
 		mapNamesOrString = mapNames.join('|');
 
 	//authed pages

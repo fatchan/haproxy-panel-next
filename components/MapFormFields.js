@@ -2,20 +2,9 @@ import React from 'react';
 import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
-
+import { continentMap, continentOptions } from '../lib/misc/continents.js';
 countries.registerLocale(enCountries);
-const continentMap = {
-	'NA': 'North America',
-	'SA': 'South America',
-	'EU': 'Europe',
-	'AS': 'Asia',
-	'OC': 'Oceania',
-	'AF': 'Africa',
-	'AN': 'Antarctica',
-};
-
 const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
-const continentOptions = Object.entries(continentMap).map(([value, label]) => ({ value, label }));
 
 const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel }) => {
 	let formElements;
@@ -228,7 +217,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 			break;
 		}
 		case 'images': {
-			const activeDomains = (map||[]).map(e => e.key);
+			const activeDomains = (map || []).map(e => e.key);
 			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
@@ -291,7 +280,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 			break;
 		}
 		case 'css': {
-			const activeDomains = (map||[]).map(e => e.key);
+			const activeDomains = (map || []).map(e => e.key);
 			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
@@ -342,7 +331,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 			break;
 		}
 		case 'maintenance': {
-			const activeDomains = (map||[]).map(e => e.key);
+			const activeDomains = (map || []).map(e => e.key);
 			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
@@ -508,10 +497,21 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						<input
 							className='form-control'
 							type='text'
-							{...(handleFieldChange ? { value: editValue.value || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('value', e.target.value)}
-							name='value'
+							{...(handleFieldChange ? { value: editValue.ip || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('ip', e.target.value)}
+							name='ip'
 							placeholder='backend ip:port'
+							required
+						/>
+					</td>
+					<td>
+						<Select
+							options={continentOptions}
+							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.geo) || continentOptions[0] } : { defaultValue: continentOptions[0] })}
+							onChange={(option) => handleFieldChange && handleFieldChange('geo', option.value)}
+							classNamePrefix='select'
+							className='basic-multi-select'
+							name='geo'
 							required
 						/>
 					</td>
@@ -584,7 +584,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 					<td>
 						<Select
-							options={continentOptions}
+							options={continentOptions.filter(x => x.value !== 'XX')}
 							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.key) || '' } : { defaultValue: '' })}
 							onChange={(option) => handleFieldChange && handleFieldChange('key', option.value)}
 							classNamePrefix='select'
