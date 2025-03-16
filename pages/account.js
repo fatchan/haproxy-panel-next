@@ -73,7 +73,7 @@ function AccountPage(props) {
 
 				<div className='card mb-4'>
 					<div className='card-body'>
-						<h6 className='card-title'>Streams ID</h6>
+						<h6 className='card-title'>Account Stream ID</h6>
 						<p className='card-text'>
 							<strong>{user.streamsId}</strong>
 						</p>

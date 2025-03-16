@@ -48,6 +48,12 @@ function Streams(props) {
 		}
 	}, []);
 
+	useEffect(() => {
+		if (state?.user?.cc) {
+			setContinent(state.user.cc);
+		}
+	}, [state?.user?.cc]);
+
 	//Note: after concluding we call getstreams which should trigger this
 	const anyConcluding = state?.streamKeys?.some(x => !x.enabled) || false;
 	useEffect(() => {
@@ -73,7 +79,7 @@ function Streams(props) {
 		);
 	}
 
-	const { csrf, streamKeys, streams, streamWebhooks } = state;
+	const { csrf, streamKeys, streams, streamWebhooks, user } = state;
 
 	async function addStream(e) {
 		e.preventDefault();
@@ -205,9 +211,6 @@ function Streams(props) {
 				<td>
 					{s.appName}
 				</td>
-				<td suppressHydrationWarning={true}>
-					{new Date(s.dateCreated).toLocaleString()}
-				</td>
 				<td>
 					<SecretString text={s.streamKey} />
 				</td>
@@ -227,9 +230,6 @@ function Streams(props) {
 				<td>
 					{w.url}
 				</td>
-				<td suppressHydrationWarning={true}>
-					{new Date(w.dateCreated).toLocaleString()}
-				</td>
 				<td>
 					{w.type}
 				</td>
@@ -246,12 +246,16 @@ function Streams(props) {
 				<title>Stream Keys</title>
 			</Head>
 
+			<InfoAlert>Your Account Stream ID: <code>{user.streamsId}</code>. For more information visit the <a href='/kb/streaming' target='_blank' rel='noreferrer'>Streaming Knowledgebase</a>.</InfoAlert>
+
+			<h5 className='fw-bold'>
+				Live Streams:
+			</h5>
+
 			<SearchFilter filter={filter} setFilter={setFilter} />
 
-			<InfoAlert><a href='/kb/streaming' target='_blank' rel='noreferrer'>Documentation</a></InfoAlert>
-
 			<div className='input-group mb-3'>
-				<span className='input-group-text'>Region</span>
+				<span className='input-group-text' title='The stream region used when copying link from this page'>Region</span>
   			<select className='form-select' value={continent} onChange={e => {
   				setContinent(e.target.value);
  			}}>
@@ -264,10 +268,6 @@ function Streams(props) {
 					<option value='global'>Global</option>
 				</select>
 			</div>
-
-			<h5 className='fw-bold'>
-				Live Streams:
-			</h5>
 
 			{/* Streams table */}
 			<div className='table-responsive round-border mb-2'>
@@ -313,9 +313,6 @@ function Streams(props) {
 								Key Name
 							</th>
 							<th>
-								Date Created
-							</th>
-							<th>
 								Stream Key
 							</th>
 						</tr>
@@ -354,9 +351,6 @@ function Streams(props) {
 							<th />
 							<th>
 								URL
-							</th>
-							<th>
-								Date Created
 							</th>
 							<th>
 								Type

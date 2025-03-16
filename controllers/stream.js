@@ -196,7 +196,7 @@ export async function admissionsWebhook(req, res) {
 			reason: 'Stream key disabled'
 		});
 	}
-	if (streamData.concluding !== true) {
+	if (streamData.concluding === true) {
 		if (status === 'closing') {
 			//The stream was concluded, so ban their IP for 2 minutes
 			await redis.setex(`stream_ban:${client.real_ip}`, 120, '1');

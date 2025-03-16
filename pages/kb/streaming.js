@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Link from 'next/link';
 
 export default function StreamingKnowledgebase() {
 
@@ -25,10 +26,10 @@ export default function StreamingKnowledgebase() {
 				The input URL format for streaming is as follows:
 			</p>
 			<div>
-				<code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{'<streamsId>'}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code>
+				<code>rtmp://{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME}/app/{'<Account Stream ID>'}+{'<Stream Key Name>'}?key={'<Stream Key>'}</code>
 			</div>
 			<p>
-				Replace <code>{'<Stream Key Name>'}</code> and <code>{'<Stream Key>'}</code> with your specific stream key details. This information can be found on your account page, and the specific streamer ID and app names are configured on the streams page.
+				Replace <code>{'<Account Stream ID>'}</code>, <code>{'<Stream Key Name>'}</code> and <code>{'<Stream Key>'}</code>. These are all available on the <Link href='/streams'>Live Streaming</Link> page.
 			</p>
 
 			<hr />
@@ -42,19 +43,19 @@ export default function StreamingKnowledgebase() {
 				<li>
 					<strong>Low Latency HLS:</strong>
 					<div>
-						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/app/{'<streamsId>'}+{'<Stream Key Name>'}/llhls.m3u8</code>
+						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/app/{'<Account Stream ID>'}+{'<Stream Key Name>'}/llhls.m3u8</code>
 					</div>
 				</li>
 				<li>
-					<strong>HLS (Not recommended):</strong>
+					<strong>HLS (backup/alternative for viewers with poor connections):</strong>
 					<div>
-						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/hls/app/{'<streamsId>'}+{'<Stream Key Name>'}/ts:playlist.m3u8</code>
+						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/hls/app/{'<Account Stream ID>'}+{'<Stream Key Name>'}/ts:playlist.m3u8</code>
 					</div>
 				</li>
 				<li>
 					<strong>Thumbnails:</strong>
 					<div>
-						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/app/{'<streamsId>'}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code>
+						<code>https://{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/thumb/app/{'<Account Stream ID>'}+{'<Stream Key Name>'}/thumb.{'<'}png|jpg{'>'}</code>
 					</div>
 				</li>
 			</ul>
@@ -68,7 +69,7 @@ export default function StreamingKnowledgebase() {
 				</div>
 			</p>
 
-			<small>Last Updated: March 14, 2025</small>
+			<small>Last Updated: March 16, 2025</small>
 
 		</>
 	);
