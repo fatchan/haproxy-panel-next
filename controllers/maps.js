@@ -551,6 +551,8 @@ export async function patchMapForm(req, res, next) {
 						// id: `${freeSlotId}`,
 						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',
 						// ssl_cafile: '@system-ca',
+						ssl_cafile: 'ca-certificates.crt',
+						sni: 'red.hdr(Host)',
 						ssl_reuse: 'enabled',
 						ssl: 'enabled',
 						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
