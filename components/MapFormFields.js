@@ -507,7 +507,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					<td>
 						<Select
 							options={continentOptions}
-							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.geo) || continentOptions[0] } : { defaultValue: continentOptions[0] })}
+							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.geo) || '' } : { defaultValue: '' })}
 							onChange={(option) => handleFieldChange && handleFieldChange('geo', option.value)}
 							classNamePrefix='select'
 							className='basic-multi-select'

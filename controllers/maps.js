@@ -13,7 +13,7 @@ export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 		.then(res => {
 			return res.map(e => {
 				//TODO: handle ipv6 backend (not supported yet anyway)
-				const [ipAndPort, geo] = e.value.split(';');
+				const [ipAndPort, geo] = e.value.split('|');
 				const [splitIp, _] = ipAndPort.split(':');
 				const parsedIp = parse(splitIp).toString({ zeroElide: false, zeroPad: false }); // prevent bypass with compressed addresses
 				return {
@@ -137,7 +137,7 @@ export async function mapData(req, res, next) {
 			const isHosts = req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME;
 			if (isHosts) {
 				map = map.map(a => {
-					const [ipAndPort, geo] = a.value.split(';');
+					const [ipAndPort, geo] = a.value.split('|');
 					return {
 						...a,
 						value: {
@@ -277,21 +277,22 @@ export async function deleteMapForm(req, res, next) {
 					})
 					.then((res) => res.data);
 				const matchingBackends = backendEntries
-					.filter(mb => mb.key === req.body.key);
+					.filter(mb => mb.key === req.body.key)
 				console.log('matchingBackends', matchingBackends);
 				await Promise.all(matchingBackends.map(async mb => {
-					return Promise.all([
+					const splitValue = mb.value.split(',');
+					await Promise.all(splitValue.map(bsv =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
-								name: mb.value,
-							}, null, null, false, true),
-						res.locals
-							.dataPlaneAll('deleteRuntimeMapEntry', {
-								map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-								id: mb.key, //'example.com'
+								name: bsv.substring(0, bsv.length - 3), // strip geo code
 							}, null, null, false, true)
-					]);
+					));
+					await res.locals
+						.dataPlaneAll('deleteRuntimeMapEntry', {
+							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+							id: mb.key, //'example.com'
+						}, null, null, false, true);
 				}));
 			}
 			await res.locals
@@ -451,7 +452,7 @@ export async function patchMapForm(req, res, next) {
 				break;
 			case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
 				if (process.env.CUSTOM_BACKENDS_ENABLED) {
-					value = `${req.body.ip};${req.body.geo}`;
+					value = `${req.body.ip}|${req.body.geo}`;
 				} else {
 					value = 0;
 				}
@@ -578,7 +579,7 @@ export async function patchMapForm(req, res, next) {
 							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 							id: req.body.key,
 						}, {
-							value: `${fullBackendMapEntry.value},websrv${freeSlotId};${req.body.geo}`,
+							value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
 						}, null, false, false);
 				} else {
 					await res.locals
@@ -586,7 +587,7 @@ export async function patchMapForm(req, res, next) {
 							name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						}, [{
 							key: req.body.key,
-							value: `websrv${freeSlotId};${req.body.geo}`,
+							value: `websrv${freeSlotId}|${req.body.geo}`,
 						}], null, false, false);
 				}
 			}
