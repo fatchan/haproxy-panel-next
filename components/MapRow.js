@@ -11,12 +11,12 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 	const [isEditing, setIsEditing] = useState(false);
 	const [editValue, setEditValue] = useState({
 		key,
-		...(typeof value === 'object' ? { ...value } : { value: value}),
+		...(typeof value === 'object' ? { ...value } : { value: value }),
 		...(mapNote ? { note: mapNote } : {})
 	});
 	const [originalState, setOriginalState] = useState({
 		key,
-		...(typeof value === 'object' ? { ...value } : { value: value}),
+		...(typeof value === 'object' ? { ...value } : { value: value }),
 		...(mapNote ? { note: mapNote } : {})
 	});
 
@@ -83,7 +83,9 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 						</a>
 						<a className='btn btn-sm btn-danger' onClick={() => {
 							if (name === 'hosts') {
-								confirm('If you get an error deleting a backend, please contact support');
+								if (!confirm('If you get an error deleting a backend, please contact support')) {
+									return;
+								}
 							}
 							onDeleteSubmit(csrf, editValue.key);
 						}} role='button'>
