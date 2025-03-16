@@ -506,6 +506,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 					<td>
 						<Select
+							menuPosition='fixed'
 							options={continentOptions}
 							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.geo) || '' } : { defaultValue: '' })}
 							onChange={(option) => handleFieldChange && handleFieldChange('geo', option.value)}
@@ -540,6 +541,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 					<td>
 						<Select
+							menuPosition='fixed'
 							options={countryOptions}
 							{...(handleFieldChange ? { value: countryOptions.find(option => option.value === editValue.key) || '' } : { defaultValue: '' })}
 							onChange={(option) => handleFieldChange && handleFieldChange('key', option.value)}
@@ -584,6 +586,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 					<td>
 						<Select
+							menuPosition='fixed'
 							options={continentOptions.filter(x => x.value !== 'XX')}
 							{...(handleFieldChange ? { value: continentOptions.find(option => option.value === editValue.key) || '' } : { defaultValue: '' })}
 							onChange={(option) => handleFieldChange && handleFieldChange('key', option.value)}
