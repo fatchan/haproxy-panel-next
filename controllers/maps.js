@@ -271,29 +271,32 @@ export async function deleteMapForm(req, res, next) {
 		try {
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
-				const backendEntries = await res.locals
+				const matchingBackend = await res.locals
 					.dataPlaneRetry('showRuntimeMap', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					})
-					.then((res) => res.data);
-				const matchingBackends = backendEntries
-					.filter(mb => mb.key === req.body.key)
-				console.log('matchingBackends', matchingBackends);
-				await Promise.all(matchingBackends.map(async mb => {
-					const splitValue = mb.value.split(',');
+					.then((res) => res.data)
+					.then(backends => backends.find(mb => mb.key === req.body.key));
+				console.log('matchingBackend', matchingBackend);
+				if (!matchingBackend) {
+					return dynamicResponse(req, res, 400, { error: 'Invalid backend state, please contact support' });
+				}
+				const splitValue = matchingBackend.value.split(',');
+				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map
+				await Promise.all([
 					await Promise.all(splitValue.map(bsv =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
 								name: bsv.substring(0, bsv.length - 3), // strip geo code
 							}, null, null, false, true)
-					));
-					await res.locals
+					)),
+					res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
 							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-							id: mb.key, //'example.com'
-						}, null, null, false, true);
-				}));
+							id: matchingBackend.key, // id of (possibly multi host) single row backend
+						}, null, null, false, true)
+				]);
 			}
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
@@ -552,7 +555,7 @@ export async function patchMapForm(req, res, next) {
 						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',
 						// ssl_cafile: '@system-ca',
 						ssl_cafile: 'ca-certificates.crt',
-						sni: 'red.hdr(Host)',
+						sni: 'req.hdr(Host)',
 						ssl_reuse: 'enabled',
 						ssl: 'enabled',
 						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
