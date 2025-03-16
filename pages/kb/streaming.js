@@ -66,7 +66,7 @@ export default function StreamingKnowledgebase() {
 			<h5 className='fw-bold'>Important Note</h5>
 			<p>
 				<div className='text-danger fw-bold'>
-					<p>Note: "stream-global" URLs will only redirect to a regional endpoint and will NOT work for playback. Playback will only work from regional endpoints.</p>
+					<p>Note: &quot;stream-global&quot; URLs will only redirect to a regional endpoint and will NOT work for playback. Playback will only work from regional endpoints.</p>
 					<p>The regional endpoints (based on continent) are:</p>
 					<ul>
 						{Object.keys(continentMap)

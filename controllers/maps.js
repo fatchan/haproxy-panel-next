@@ -144,7 +144,7 @@ export async function mapData(req, res, next) {
 							ip: ipAndPort,
 							geo: geo,
 						}
-					}
+					};
 				});
 			}
 		/* falls through */
