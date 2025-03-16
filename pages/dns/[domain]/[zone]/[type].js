@@ -7,19 +7,9 @@ import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
 import InfoAlert from '../../../../components/InfoAlert.js';
-countries.registerLocale(enCountries);
 import * as API from '../../../../api.js';
-
-const continentMap = {
-	'NA': 'North America',
-	'SA': 'South America',
-	'EU': 'Europe',
-	'AS': 'Asia',
-	'OC': 'Oceania',
-	'AF': 'Africa',
-	'AN': 'Antarctica',
-};
-
+import { continentMap, continentOptions } from '../../../../lib/misc/continents.js';
+countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en'))
 	.map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
@@ -126,7 +116,7 @@ const DnsEditRecordPage = (props) => {
 			&& zone !== '@' //and its not the apex
 			&& user && !user.domains.includes(fullDomain) //and the subdomain isnt already added
 			&& type && type.endsWith('_template')) { //and they are adding a template record
-			API.addDomain({ _csrf: csrf, domain: fullDomain }, () => {}, () => {}, null); //Note: ignore if fail
+			API.addDomain({ _csrf: csrf, domain: fullDomain }, () => { }, () => { }, null); //Note: ignore if fail
 		}
 		const recordBody = fromEntries([...new FormData(e.target).entries()]);
 		await API.addUpdateDnsRecord(domain, zone, type, recordBody, dispatch, setError, router);
@@ -140,14 +130,14 @@ const DnsEditRecordPage = (props) => {
 
 			<Head>
 				<title>
-					{`${domain} / Records list / ${newRecord?'New':'Edit'} record set`}
+					{`${domain} / Records list / ${newRecord ? 'New' : 'Edit'} record set`}
 				</title>
 			</Head>
 
 			{error && <ErrorAlert error={error} />}
 
 			<h5 className='fw-bold'>
-				{domain} / Records list / {newRecord?'New':'Edit'} record set:
+				{domain} / Records list / {newRecord ? 'New' : 'Edit'} record set:
 			</h5>
 
 			{/* Record editing form */}
@@ -415,7 +405,7 @@ const DnsEditRecordPage = (props) => {
 									<div className='col-auto ms-auto'>
 										<button
 											className='btn btn-sm btn-danger mt-4'
-											onClick={(e) =>{
+											onClick={(e) => {
 												e.preventDefault();
 												recordSet.splice(i, 1);
 												setRecordSet([...recordSet]);
@@ -457,7 +447,7 @@ const DnsEditRecordPage = (props) => {
 													options={countryOptions}
 													// value={(rec.geov||[]).map(x => ({ value: x, label: `${countries.getName(x, 'en')} (${x})` }))}
 													getOptionLabel={x => `${countries.getName(x.value, 'en')} (${x.value})`}
-													defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
+													defaultValue={(rec.geov || []).map(x => ({ value: x, label: x }))}
 													classNamePrefix='select'
 													key={`geov_${rec.geok}_${i}`}
 													name={`geov_${i}`}
@@ -471,18 +461,10 @@ const DnsEditRecordPage = (props) => {
 													required
 													isMulti
 													closeMenuOnSelect={false}
-													options={[
-														{ value: 'NA', label: 'North America' },
-														{ value: 'SA', label: 'South America' },
-														{ value: 'EU', label: 'Europe' },
-														{ value: 'AS', label: 'Asia' },
-														{ value: 'OC', label: 'Oceania' },
-														{ value: 'AF', label: 'Africa' },
-														{ value: 'AN', label: 'Antarctica' },
-													]}
+													options={continentOptions.filter(x => x.value !== 'XX')}
 													// value={(rec.geov||[]).map(x => ({ value: x, label: continentMap[x] }))}
 													getOptionLabel={x => `${continentMap[x.value]} (${x.value})`}
-													defaultValue={(rec.geov||[]).map(x => ({ value: x, label: x }))}
+													defaultValue={(rec.geov || []).map(x => ({ value: x, label: x }))}
 													classNamePrefix='select'
 													key={`geov_${rec.geok}_${i}`}
 													name={`geov_${i}`}
@@ -503,7 +485,7 @@ const DnsEditRecordPage = (props) => {
 													value='1'
 													id={`health_${i}`}
 													checked={rec.h === true}
-													onChange={(e) =>{
+													onChange={(e) => {
 														recordSet[i].h = e.target.checked;
 														setRecordSet([...recordSet]);
 													}}
@@ -541,9 +523,9 @@ const DnsEditRecordPage = (props) => {
 													//required
 													isMulti
 													closeMenuOnSelect={false}
-													options={recordSet.filter(x => x.id && x.id !== rec.id).map(x => ({ label: x.id, value: x.id}) )}
+													options={recordSet.filter(x => x.id && x.id !== rec.id).map(x => ({ label: x.id, value: x.id }))}
 													getOptionLabel={x => `${x.value} (${getFallbackValue(x.value)})`}
-													defaultValue={(rec.fb||[]).map(x => ({ value: x, label: x }))}
+													defaultValue={(rec.fb || []).map(x => ({ value: x, label: x }))}
 													classNamePrefix='select'
 													name={`fallbacks_${i}`}
 													className='basic-multi-select'
@@ -572,12 +554,12 @@ const DnsEditRecordPage = (props) => {
 										</div>
 									</>}
 								</div>}
-								{i < recordSet.length-1 && <hr className='mb-2 mt-3' />}
+								{i < recordSet.length - 1 && <hr className='mb-2 mt-3' />}
 							</div>);
 						})}
 						<div className='row mt-2'>
 							<div className='col-auto ms-auto'>
-								<button className='ms-auto btn btn-sm btn-success mt-2' onClick={(e) =>{
+								<button className='ms-auto btn btn-sm btn-success mt-2' onClick={(e) => {
 									e.preventDefault();
 									recordSet.push({});
 									setRecordSet([...recordSet]);
@@ -610,7 +592,7 @@ const DnsEditRecordPage = (props) => {
 
 };
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
 	return { props: res.locals.data };
 }
 
