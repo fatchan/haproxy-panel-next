@@ -553,7 +553,7 @@ export async function patchMapForm(req, res, next) {
 						// ssl_cafile: '@system-ca',
 						ssl_reuse: 'enabled',
 						ssl: 'enabled',
-						verify: 'required',
+						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
 					}, null, false, true);
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				await res.locals
