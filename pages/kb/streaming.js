@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { continentMap } from '../../lib/misc/continents.js';
 
 export default function StreamingKnowledgebase() {
 
@@ -63,20 +62,7 @@ export default function StreamingKnowledgebase() {
 
 			<hr />
 
-			<h5 className='fw-bold'>Important Note</h5>
-			<p>
-				<div className='text-danger fw-bold'>
-					<p>Note: &quot;stream-global&quot; URLs will only redirect to a regional endpoint and will NOT work for playback. Playback will only work from regional endpoints.</p>
-					<p>The regional endpoints (based on continent) are:</p>
-					<ul>
-						{Object.keys(continentMap)
-							.filter(cn => cn != 'XX')
-							.map((cn, i) => (<li key={i}>{process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME.replace('-global', cn.toLowerCase())}</li>))}
-					</ul>
-				</div>
-			</p>
-
-			<small>Last Updated: March 16, 2025</small>
+			<small>Last Updated: March 17, 2025</small>
 
 		</>
 	);
