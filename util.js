@@ -187,7 +187,8 @@ export function extractMap(item) {
 
 export function dynamicResponse(req, res, code, data) {
 	const isRedirect = code === 302;
-	if (req.headers && req.headers['content-type'] === 'application/json') {
+	if ((req.headers && req.headers['content-type'] === 'application/json')
+		|| res.locals.isApiKey) {
 		return res
 			.status(isRedirect ? 200 : code)
 			.json(data);
