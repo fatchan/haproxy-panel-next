@@ -91,7 +91,7 @@ export async function alertWebhook(req, res) {
 		return fetch(wh.url, {
 			method: 'POST',
 			redirect: 'manual', //Dont follow user link redirects
-			body: webhookBody,
+			body: jsonBody,
 			headers: {
 				'Content-Type': 'application/json',
 				'x-bf-signature': signature
@@ -234,7 +234,7 @@ export async function admissionsWebhook(req, res) {
 		return fetch(wh.url, {
 			method: 'POST',
 			redirect: 'manual', //Dont follow user link redirects
-			body: webhookBody,
+			body: jsonBody,
 			headers: {
 				'Content-Type': 'application/json',
 				'x-bf-signature': signature
