@@ -551,14 +551,15 @@ export async function patchMapForm(req, res, next) {
 						address,
 						port: parseInt(port, 10),
 						name: serverName,
-						// id: `${freeSlotId}`,
-						// ssl_cafile: '/usr/local/share/ca-certificates/dev-priv-ca/ca-cert.pem',
-						// ssl_cafile: '@system-ca',
 						ssl_cafile: 'ca-certificates.crt',
 						sni: 'req.hdr(Host)',
 						ssl_reuse: 'enabled',
 						ssl: 'enabled',
 						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
+						//
+						check: 'enabled',
+						observe: 'layer4',
+						//
 					}, null, false, true);
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
 				await res.locals
