@@ -430,10 +430,6 @@
           },
           "enabled": {
             "type": "boolean",
-            "example": "true"
-          },
-          "enabled": {
-            "type": "boolean",
             "example": "false"
           },
           "appName": {
