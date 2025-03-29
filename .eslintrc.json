@@ -5,7 +5,6 @@
   },
   "ignorePatterns": [
     "node_modules/",
-    "lib/swagger/",
     "openapi/"
   ],
   "rules": {

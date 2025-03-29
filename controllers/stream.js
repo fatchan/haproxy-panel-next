@@ -22,7 +22,7 @@ const validateSignature = (payload, signature) => {
  * POST /stream/alert-webhook
  * oven media engine admissionswebhook handler
  */
-export async function alertWebhook(req, res) {
+export async function alertWebhook (req, res) {
 	//NOTE: follows response format for ovenmedia engine
 	const signature = req.headers['x-ome-signature'];
 	const payload = req.body;
@@ -108,7 +108,7 @@ export async function alertWebhook(req, res) {
  * POST /stream/admissions-webhook
  * oven media engine admissionswebhook handler
  */
-export async function admissionsWebhook(req, res) {
+export async function admissionsWebhook (req, res) {
 	//NOTE: follows response format for ovenmedia engine
 	const signature = req.headers['x-ome-signature'];
 	const payload = req.body;
@@ -127,8 +127,8 @@ export async function admissionsWebhook(req, res) {
 
 	const parsedUrl = new URL(streamUrl);
 	if (/^\/{2,}/.test(parsedUrl.pathname)) {
-	    // replace multiple leading slashes e.g. bad urls from restream services
-	    parsedUrl.pathname = parsedUrl.pathname.replace(/^\/+/, '/');
+		// replace multiple leading slashes e.g. bad urls from restream services
+		parsedUrl.pathname = parsedUrl.pathname.replace(/^\/+/, '/');
 	}
 
 	const match = parsedUrl.pathname.match(appNameRegex);
@@ -176,7 +176,7 @@ export async function admissionsWebhook(req, res) {
 	const isAllowed = streamData != null;
 
 	const isBlocked = await redis.get(`stream_ban:${client.real_ip}`);
-	console.log('stream_ban', client.real_ip,  isBlocked);
+	console.log('stream_ban', client.real_ip, isBlocked);
 	if (isBlocked != null) {
 		return res.status(200).json({
 			allowed: false,
@@ -258,7 +258,7 @@ export async function admissionsWebhook(req, res) {
  * POST /stream/:id/conclude
  * Forcefully end a live stream
  */
-export async function concludeStream(req, res, _next) {
+export async function concludeStream (req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -293,7 +293,7 @@ export async function concludeStream(req, res, _next) {
  * POST /stream/:id/toggle
  * toggle the enabled state of a stream
  */
-export async function toggleStream(req, res, _next) {
+export async function toggleStream (req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -333,7 +333,7 @@ export async function toggleStream(req, res, _next) {
  * GET /streams
  * domains page
  */
-export async function streamsPage(app, req, res) {
+export async function streamsPage (app, req, res) {
 	//TODO: streamsData() func  refactor
 	const [streamKeys, streamWebhooks, streams] = await Promise.all([
 		db.db().collection('streams')
@@ -349,11 +349,11 @@ export async function streamsPage(app, req, res) {
 		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
 	]);
 	res.locals.data = {
-		user: res.locals.user,
-		csrf: req.csrfToken(),
 		streams: streams || [],
 		streamKeys: streamKeys || [],
 		streamWebhooks: streamWebhooks || [],
+		user: res.locals.user,
+		csrf: req.csrfToken(),
 	};
 	return app.render(req, res, '/streams');
 };
@@ -362,7 +362,7 @@ export async function streamsPage(app, req, res) {
  * GET /streams.json
  * stream keys json data
  */
-export async function streamsJson(req, res) {
+export async function streamsJson (req, res) {
 	const [streamKeys, streamWebhooks, streams] = await Promise.all([
 		db.db().collection('streams')
 			.find({
@@ -377,16 +377,16 @@ export async function streamsJson(req, res) {
 		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
 	]);
 	return res.json({
-		csrf: req.csrfToken(),
-		user: res.locals.user,
 		streams: streams || [],
 		streamKeys: streamKeys || [],
 		streamWebhooks: streamWebhooks || [],
+		csrf: req.csrfToken(),
+		user: res.locals.user,
 	});
 };
 
 /**
- * POST /stream/add
+ * POST /stream
  * add stream key
  */
 export async function addStream(req, res, _next) {
@@ -407,7 +407,7 @@ export async function addStream(req, res, _next) {
 
 	const streamKey = generateRandomString();
 
-	db.db().collection('streams')
+	const createdStreamKey = await db.db().collection('streams')
 		.insertOne({
 			userName: res.locals.user.username,
 			appName: req.body.appName,
@@ -416,8 +416,12 @@ export async function addStream(req, res, _next) {
 			concluding: false,
 			streamKey,
 		});
+	const streamKeyId = createdStreamKey && createdStreamKey.insertedId;
+	if (!streamKeyId) {
+		return dynamicResponse(req, res, 500, { error: 'Failed to create new stream key' });
+	}
 
-	return dynamicResponse(req, res, 200, { streamKey });
+	return dynamicResponse(req, res, 200, { streamKey, _id: streamKeyId });
 
 };
 
@@ -425,7 +429,7 @@ export async function addStream(req, res, _next) {
  * DELETE /stream/:id
  * delete stream key
  */
-export async function deleteStream(req, res, _next) {
+export async function deleteStream (req, res, _next) {
 
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -454,7 +458,7 @@ export async function deleteStream(req, res, _next) {
  * POST /stream/webhook
  * Set the callback URL and (re)generates the signing secret
  */
-export async function addStreamWebhook(req, res, _next) {
+export async function addStreamWebhook (req, res, _next) {
 
 	if (!req.body.url || typeof req.body.url !== 'string' || req.body.url.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -482,7 +486,7 @@ export async function addStreamWebhook(req, res, _next) {
 			signingSecret: webhookSecret,
 		});
 
-	return dynamicResponse(req, res, 200, { });
+	return dynamicResponse(req, res, 200, {});
 
 };
 
@@ -490,7 +494,7 @@ export async function addStreamWebhook(req, res, _next) {
  * POST /stream/webhook/:id
  * add stream key
  */
-export async function deleteStreamWebhook(req, res, _next) {
+export async function deleteStreamWebhook (req, res, _next) {
 
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -502,6 +506,6 @@ export async function deleteStreamWebhook(req, res, _next) {
 			_id: ObjectId(req.params.id),
 		});
 
-	return dynamicResponse(req, res, 200, { });
+	return dynamicResponse(req, res, 200, {});
 
 };

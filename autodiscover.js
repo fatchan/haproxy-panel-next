@@ -25,7 +25,7 @@ class AutodiscoverService {
 			this.#autodiscoveredHosts = json
 				.filter(x => x.tags.includes('haproxy'))
 				.map(h => new URL(`https://${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}@${h.hostname}:2001/`));
-			console.log('Autodiscovered %d hosts', this.#autodiscoveredHosts.length);				
+			console.log('Autodiscovered %d hosts', this.#autodiscoveredHosts.length);
 		} catch (error) {
 			console.error('Autodiscover failed:', error);
 		}

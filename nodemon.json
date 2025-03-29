@@ -1,0 +1,21 @@
+{
+  "watch": [
+    "server.js",
+    "controllers",
+    "lib",
+    "openapi"
+  ],
+  "ignore": [
+    ".git",
+    "node_modules",
+    ".next",
+    "out",
+    "public",
+    "ca",
+    ".env",
+    "instance-config.js",
+    "pages",
+    "components"
+  ],
+  "ext": "js.json"
+}

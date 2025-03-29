@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
     "password": "node reset.js",
     "build": "next build",
     "lint": "next lint",
@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "eslint": "8.15.0",
-    "eslint-config-next": "12.1.6"
+    "eslint-config-next": "12.1.6",
+    "nodemon": "^3.1.9"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.0",
   "info": {
     "title": "Basedflare API",
     "description": "API for Basedflare control panel",
@@ -101,6 +101,10 @@
                     "streamKey": {
                       "type": "string",
                       "example": "f6a4f78ce72cb20c36c76c5509a4b052"
+                    },
+                    "_id": {
+                      "type": "string",
+                      "example": "67a822f4518bc836547c9b1a"
                     }
                   }
                 }
@@ -120,6 +124,22 @@
                     "error": {
                       "type": "string",
                       "example": "Stream key with this name already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inserting key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Failed to create new stream key"
                     }
                   }
                 }
@@ -326,10 +346,354 @@
           }
         }
       }
+    },
+    "/yourdomain.com/your-admissions-webhook-url": {
+      "post": {
+        "summary": "Receive stream admissions webhook events. NOTE: sent to your custom URL specified in the \"Create a stream webhook\" API.",
+        "operationId": "admissionsWebhook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "Stream start": {
+                  "summary": "Opening Event",
+                  "value": {
+                    "direction": "incoming",
+                    "protocol": "RTMP",
+                    "status": "opening",
+                    "time": "2025-03-29T05:55:43.394+00:00",
+                    "url": "rtmp://ome-origin-us-1.bfcdn.host:1935/app/6755124635874905051+tester?key=xxxxxxxxxxxxxxxxxxxxxxxxx"
+                  }
+                },
+                "Stream stop": {
+                  "summary": "Closing Event",
+                  "value": {
+                    "direction": "incoming",
+                    "protocol": "RTMP",
+                    "status": "closing",
+                    "time": "2025-03-29T05:55:47.790+00:00",
+                    "url": "rtmp://ome-origin-us-1.bfcdn.host:1935/app/6755124635874905051+tester?key=xxxxxxxxxxxxxxxxxxxxxx",
+                    "new_url": "rtmp://ome-origin-us-1.bfcdn.host:1935/app/6755124635874905051+tester?key=xxxxxxxxxxxxxxxxxxxxxxx"
+                  }
+                }
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "incoming"
+                        ]
+                      },
+                      "protocol": {
+                        "type": "string",
+                        "enum": [
+                          "RTMP"
+                        ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "opening",
+                          "closing"
+                        ]
+                      },
+                      "time": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "new_url": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    },
+                    "required": [
+                      "direction",
+                      "protocol",
+                      "status",
+                      "time",
+                      "url"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/yourdomain.com/your-alert-webhook-url": {
+      "post": {
+        "summary": "Receive stream alert webhook events. NOTE: sent to your custom URL specified in the \"Create a stream webhook\" API.",
+        "operationId": "alertWebhook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "enum": [
+                                "OK"
+                              ],
+                              "example": "OK"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "The current status is good"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "enum": [
+                                "INGRESS_HAS_BFRAME"
+                              ],
+                              "example": "INGRESS_HAS_BFRAME"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "There are B-Frames in the ingress stream"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "enum": [
+                                "INGRESS_LONG_KEY_FRAME_INTERVAL"
+                              ],
+                              "example": "INGRESS_LONG_KEY_FRAME_INTERVAL"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "The ingress stream's current keyframe interval (4.1 seconds) is too long. Please use a keyframe interval of 4.0 seconds or less"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "enum": [
+                                "INGRESS_BITRATE_HIGH"
+                              ],
+                              "example": "INGRESS_BITRATE_HIGH"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "The ingress stream's current bitrate (5369946 bps) is higher than the configured bitrate (4000000 bps)"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "sourceInfo": {
+                    "type": "object",
+                    "properties": {
+                      "createdTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-03-29T05:12:12.365+00:00"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "6755124635874905051+tester"
+                      },
+                      "sourceType": {
+                        "type": "string",
+                        "example": "Rtmp"
+                      },
+                      "sourceUrl": {
+                        "type": "string",
+                        "example": "TCP://123.123.123.123:50130"
+                      },
+                      "tracks": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/StreamTrack"
+                        }
+                      }
+                    }
+                  },
+                  "sourceUri": {
+                    "type": "string",
+                    "example": "#default#app/6755124635874905051+tester"
+                  },
+                  "type": {
+                    "type": "string",
+                    "example": "INGRESS"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "StreamTrack": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 0
+          },
+          "name": {
+            "type": "string",
+            "example": "Video"
+          },
+          "type": {
+            "type": "string",
+            "example": "Video"
+          },
+          "video": {
+            "type": "object",
+            "properties": {
+              "bitrate": {
+                "type": "string",
+                "example": "4500000"
+              },
+              "bitrateAvg": {
+                "type": "string",
+                "example": "3541368"
+              },
+              "bitrateConf": {
+                "type": "string",
+                "example": "4500000"
+              },
+              "bitrateLatest": {
+                "type": "string",
+                "example": "3749610"
+              },
+              "bypass": {
+                "type": "boolean",
+                "example": false
+              },
+              "codec": {
+                "type": "string",
+                "example": "H264"
+              },
+              "deltaFramesSinceLastKeyFrame": {
+                "type": "integer",
+                "example": 1
+              },
+              "framerate": {
+                "type": "integer",
+                "example": 30
+              },
+              "framerateAvg": {
+                "type": "integer",
+                "example": 30
+              },
+              "framerateConf": {
+                "type": "integer",
+                "example": 30
+              },
+              "framerateLatest": {
+                "type": "number",
+                "example": 29.970
+              },
+              "hasBframes": {
+                "type": "boolean",
+                "example": false
+              },
+              "height": {
+                "type": "integer",
+                "example": 720
+              },
+              "keyFrameInterval": {
+                "type": "number",
+                "example": 29.731
+              },
+              "keyFrameIntervalAvg": {
+                "type": "number",
+                "example": 29.731
+              },
+              "keyFrameIntervalConf": {
+                "type": "integer",
+                "example": 0
+              },
+              "keyFrameIntervalLatest": {
+                "type": "integer",
+                "example": 30
+              },
+              "width": {
+                "type": "integer",
+                "example": 1280
+              }
+            }
+          },
+          "audio": {
+            "type": "object",
+            "properties": {
+              "bitrate": {
+                "type": "string",
+                "example": "128000"
+              },
+              "bitrateAvg": {
+                "type": "string",
+                "example": "130576"
+              },
+              "bitrateConf": {
+                "type": "string",
+                "example": "128000"
+              },
+              "bitrateLatest": {
+                "type": "string",
+                "example": "130584"
+              },
+              "bypass": {
+                "type": "boolean",
+                "example": false
+              },
+              "channel": {
+                "type": "integer",
+                "example": 2
+              },
+              "codec": {
+                "type": "string",
+                "example": "AAC"
+              },
+              "samplerate": {
+                "type": "integer",
+                "example": 48000
+              }
+            }
+          },
+          "data": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
       "CSRFToken": {
         "type": "string"
       },
