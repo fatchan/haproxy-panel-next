@@ -5,6 +5,16 @@
     "description": "API for Basedflare control panel",
     "version": "0.0.1"
   },
+  "tags": [
+    {
+      "name": "Live Streaming",
+      "description": "API for streaming endpoints"
+    },
+    {
+      "name": "Live Streaming (Forwarded Webhooks)",
+      "description": "Webhooks related to streaming that are sent TO your server"
+    }
+  ],
   "servers": [
     {
       "url": "https://cp.basedflare.com",
@@ -22,6 +32,7 @@
   "paths": {
     "/streams.json": {
       "get": {
+        "tags": ["Live Streaming"],
         "summary": "Get streams information",
         "security": [
           {
@@ -67,6 +78,7 @@
     },
     "/forms/stream": {
       "post": {
+        "tags": ["Live Streaming"],
         "summary": "Add a new streamer and return the stream key",
         "security": [
           {
@@ -151,6 +163,7 @@
     },
     "/forms/stream/{id}/conclude": {
       "post": {
+        "tags": ["Live Streaming"],
         "summary": "Conclude a stream. Immediately stops playback, disconnects the streamer and prevents reconnect for 2 minutes.",
         "security": [
           {
@@ -188,6 +201,7 @@
     },
     "/forms/stream/{id}/toggle": {
       "post": {
+        "tags": ["Live Streaming"],
         "summary": "Toggle a stream key. Disabling concludes the stream for this key if live. Disabled keys won't be able to start streaming.",
         "security": [
           {
@@ -225,6 +239,7 @@
     },
     "/forms/stream/{id}": {
       "delete": {
+        "tags": ["Live Streaming"],
         "summary": "Delete stream key. Deleting concludes the stream for this key if live.",
         "security": [
           {
@@ -262,6 +277,7 @@
     },
     "/forms/stream/webhook": {
       "post": {
+        "tags": ["Live Streaming"],
         "summary": "Create a stream webhook",
         "security": [
           {
@@ -312,6 +328,7 @@
     },
     "/forms/stream/webhook/{id}": {
       "delete": {
+        "tags": ["Live Streaming"],
         "summary": "Delete a stream webhook",
         "security": [
           {
@@ -349,8 +366,14 @@
     },
     "/yourdomain.com/your-admissions-webhook-url": {
       "post": {
+        "tags": ["Live Streaming (Forwarded Webhooks)"],
         "summary": "Receive stream admissions webhook events. NOTE: sent to your custom URL specified in the \"Create a stream webhook\" API.",
         "operationId": "admissionsWebhook",
+        "parameters": [
+          {
+            "$ref": "#/components/headers/X-BF-Signature"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -433,8 +456,14 @@
     },
     "/yourdomain.com/your-alert-webhook-url": {
       "post": {
+        "tags": ["Live Streaming (Forwarded Webhooks)"],
         "summary": "Receive stream alert webhook events. NOTE: sent to your custom URL specified in the \"Create a stream webhook\" API.",
         "operationId": "alertWebhook",
+        "parameters": [
+          {
+            "$ref": "#/components/headers/X-BF-Signature"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -558,6 +587,15 @@
     }
   },
   "components": {
+    "headers": {
+      "X-BF-Signature": {
+        "name": "X-Bf-Signature",
+        "in": "header",
+        "description": "A SHA256 HMAC signature of the payload (request body). This signature should be checked by your backend to verify the integrity and authenticity of the request.",
+        "type": "string",
+        "example": "71f453558de50865fb6feec836f4ed868542664afac639bc070304259418bc52"
+      }
+    },
     "schemas": {
       "StreamTrack": {
         "type": "object",
@@ -875,3 +913,4 @@
     }
   }
 }
+
