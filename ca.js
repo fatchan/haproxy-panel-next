@@ -103,7 +103,8 @@ export function verifyCSR(csrPem, allowedDomains, serialNumber) {
 				return !allowedDomains.includes(altName.value);
 			});
 			if (badAltNames && badAltNames.length > 0) {
-				throw new Error(`No permission for altname(s) ${badAltNames}`);
+				const badAltNamesString = badAltNames.map(x => x.value).join(', ');
+				throw new Error(`No permission for altname(s): [${badAltNamesString}]`);
 			}
 		}
 	}
