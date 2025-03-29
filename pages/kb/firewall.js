@@ -45,6 +45,10 @@ export default function KnowledgebaseIndex() {
 			<h5 className='fw-bold'>Usage Steps</h5>
 			<ol>
 				<li>
+					Update the variables at the top of the script to set the correct IP, port, and interface to be used when creating the firewall rules:
+					<pre><code>{'...\nHTTPS_PORT=\'\'\nSSH_PORT=\'\'\nPUBLIC_INTERFACE=\'\'\nPUBLIC_IP=\'\'\n...'}</code></pre>
+				</li>
+				<li>
 					Add the following line in the <code>http{}</code> block of <code>/etc/nginx/nginx.conf</code>:
 					<pre><code>{'include /etc/nginx/snippets/allowdeny.conf;'}</code></pre>
 				</li>
