@@ -24,11 +24,11 @@ const validateSignature = (payload, signature) => {
  */
 export async function alertWebhook (req, res) {
 	//NOTE: follows response format for ovenmedia engine
-	const signature = req.headers['x-ome-signature'];
+	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	if (!validateSignature(payload, signature)) {
-		// return res.status(401).json({});		
+	if (!validateSignature(payload, ovenSignature)) {
+		// return res.status(401).json({});
 		if (req.headers['x-forwarded-for'] !== process.env.TEMP_IP) {
 			return res.status(401).json({});
 		}
@@ -84,12 +84,12 @@ export async function alertWebhook (req, res) {
 		.toArray();
 
 	if (streamsIdWebhooks && streamsIdWebhooks.length > 0) {
-		console.log('alertWebhook received for:', payload.sourceUri, 'oven signature:', signature);
+		console.log('alertWebhook received for:', payload.sourceUri, 'oven signature:', ovenSignature);
 	}
 
 	Promise.all(streamsIdWebhooks.map(async wh => {
 		const jsonBody = JSON.stringify(payload); // For alerts we send it verbatim, not just the request param
-		const signature = crypto.createHmac('sha256', wh.signingSecret)
+		const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
 			.update(jsonBody)
 			.digest('hex');
 		return fetch(wh.url, {
@@ -98,7 +98,7 @@ export async function alertWebhook (req, res) {
 			body: jsonBody,
 			headers: {
 				'Content-Type': 'application/json',
-				'x-bf-signature': signature
+				'x-bf-signature': outgoingSignature
 			},
 		}).then(res => console.log(wh.url, 'response:', res.status));
 	})).catch(console.warn); //Note: async
@@ -111,10 +111,10 @@ export async function alertWebhook (req, res) {
  */
 export async function admissionsWebhook (req, res) {
 	//NOTE: follows response format for ovenmedia engine
-	const signature = req.headers['x-ome-signature'];
+	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	if (!validateSignature(payload, signature)) {
+	if (!validateSignature(payload, ovenSignature)) {
 		return res.status(200).json({
 			allowed: false,
 			reason: 'Invalid stream url'
@@ -228,13 +228,13 @@ export async function admissionsWebhook (req, res) {
 		.toArray();
 
 	if (streamsIdWebhooks && streamsIdWebhooks.length > 0) {
-		console.log('admissionsWebhook received for:', payload.url, 'oven signature:', signature);
+		console.log('admissionsWebhook received for:', payload.url, 'oven signature:', ovenSignature);
 	}
 
 	Promise.all(streamsIdWebhooks.map(async wh => {
 		const webhookBody = payload.request;
 		const jsonBody = JSON.stringify(webhookBody);
-		const signature = crypto.createHmac('sha256', wh.signingSecret)
+		const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
 			.update(jsonBody)
 			.digest('hex');
 		return fetch(wh.url, {
@@ -243,7 +243,7 @@ export async function admissionsWebhook (req, res) {
 			body: jsonBody,
 			headers: {
 				'Content-Type': 'application/json',
-				'x-bf-signature': signature
+				'x-bf-signature': outgoingSignature
 			},
 		}).then(res => console.log(wh.url, 'response:', res.status));
 	})).catch(console.warn); //Note: async
@@ -392,7 +392,7 @@ export async function streamsJson (req, res) {
  * POST /stream
  * add stream key
  */
-export async function addStream(req, res, _next) {
+export async function addStream (req, res, _next) {
 
 	if (!req.body.appName || typeof req.body.appName !== 'string' || req.body.appName.length === 0 || !/[a-zA-Z0-9-_]+/.test(req.body.appName)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
