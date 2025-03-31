@@ -389,6 +389,27 @@ export async function streamsJson (req, res) {
 };
 
 /**
+ * GET /streams/viewcounts.json
+ * stream keys json data
+ */
+export async function streamsViewcountsJson (req, res) {
+	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
+	const viewCountMap = {};
+	await Promise.all(streams.map(async (s) => {
+		const appName = s.substring(s.indexOf('+') + 1);
+		const viewCounts = await res.locals.ovenMediaGetViewerCount(res.locals.user.streamsId, appName);
+		viewCountMap[appName] = viewCounts;
+	}));
+	return res.json({
+		viewCountMap,
+		// v Not needed for now, no frontend
+		// csrf: req.csrfToken(),
+		// user: res.locals.user,
+	});
+};
+
+
+/**
  * POST /stream
  * add stream key
  */
