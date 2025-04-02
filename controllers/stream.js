@@ -228,7 +228,7 @@ export async function admissionsWebhook (req, res) {
 		.toArray();
 
 	if (streamsIdWebhooks && streamsIdWebhooks.length > 0) {
-		console.log('admissionsWebhook received for:', payload.url, 'oven signature:', ovenSignature);
+		console.log('admissionsWebhook received for:', payload.request.url, 'oven signature:', ovenSignature);
 	}
 
 	Promise.all(streamsIdWebhooks.map(async wh => {
