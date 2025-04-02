@@ -18,7 +18,7 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
-const healthCheckQueue = new Queue('healthchecks', { redis: redis.lockQueueClient });
+const healthCheckQueue = new Queue('healthchecks', { createClient: () => redis.lockQueueClient });
 
 const ignoredErrorCodes = [
 	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',

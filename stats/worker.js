@@ -9,7 +9,7 @@ dotenv.config({ path: '.env' });
 
 import * as redis from '../redis.js';
 import Queue from 'bull';
-const haproxyStatsQueue = new Queue('stats', { redis: redis.lockQueueClient });
+const haproxyStatsQueue = new Queue('stats', { createClient: () => redis.lockQueueClient });
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');
