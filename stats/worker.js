@@ -11,10 +11,10 @@ import * as redis from '../redis.js';
 import Queue from 'bull';
 const haproxyStatsQueue = new Queue('stats', {
 	redis: {
-		host: redis.lockQueueClient.host,
-		port: redis.lockQueueClient.port,
-		password: redis.lockQueueClient.password,
-		db: redis.lockQueueClient.db,
+		host: redis.lockQueueClient.options.host,
+		port: redis.lockQueueClient.options.port,
+		password: redis.lockQueueClient.options.password,
+		db: redis.lockQueueClient.options.db,
 	}
 });
 
