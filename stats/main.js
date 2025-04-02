@@ -12,8 +12,14 @@ import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
 
 import Queue from 'bull';
-
-const haproxyStatsQueue = new Queue('stats', { createClient: () => redis.lockQueueClient });
+const haproxyStatsQueue = new Queue('stats', {
+	redis: {
+		host: redis.lockQueueClient.host,
+		port: redis.lockQueueClient.port,
+		password: redis.lockQueueClient.password,
+		db: redis.lockQueueClient.db,
+	}
+});
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');

@@ -9,7 +9,14 @@ await dotenv.config({ path: '.env' });
 
 import * as redis from '../redis.js';
 import Queue from 'bull';
-const healthCheckQueue = new Queue('healthchecks', { createClient: () => redis.lockQueueClient });
+const healthCheckQueue = new Queue('healthchecks', {
+	redis: {
+		host: redis.lockQueueClient.host,
+		port: redis.lockQueueClient.port,
+		password: redis.lockQueueClient.password,
+		db: redis.lockQueueClient.db,
+	}
+});
 
 function chunkArray (array, chunkSize) {
 	const result = [];
