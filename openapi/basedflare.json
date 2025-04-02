@@ -76,6 +76,67 @@
         }
       }
     },
+    "/streams/viewcounts.json": {
+      "get": {
+        "summary": "Get view counts for streams",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with view counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "hlsViewers": {
+                        "type": "integer",
+                        "description": "Number of HLS viewers"
+                      },
+                      "llhlsViewers": {
+                        "type": "integer",
+                        "description": "Number of LL-HLS viewers"
+                      },
+                      "totalViewers": {
+                        "type": "integer",
+                        "description": "Total number of viewers"
+                      },
+                      "successfulEdgeNames": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "Names of successful edges"
+                        }
+                      }
+                    },
+                    "required": ["hlsViewers", "llhlsViewers", "totalViewers", "successfulEdgeNames"]
+                  }
+                },
+                "example": {
+                  "misterx": {
+                    "hlsViewers": 10,
+                    "llhlsViewers": 5,
+                    "totalViewers": 15,
+                    "successfulEdgeNames": ["us-1", "de-1"]
+                  },
+                  "potatoman": {
+                    "hlsViewers": 20,
+                    "llhlsViewers": 10,
+                    "totalViewers": 30,
+                    "successfulEdgeNames": ["us-1", "de-1"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/forms/stream": {
       "post": {
         "tags": ["Live Streaming"],
