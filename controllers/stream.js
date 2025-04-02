@@ -349,7 +349,7 @@ export async function streamsPage (app, req, res) {
 				username: res.locals.user.username
 			})
 			.toArray(),
-		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
+		redis.getKeysPattern(redis.omeClient, `app/${res.locals.user.streamsId}+*`)
 	]);
 	res.locals.data = {
 		streams: streams || [],
@@ -377,7 +377,7 @@ export async function streamsJson (req, res) {
 				username: res.locals.user.username
 			})
 			.toArray(),
-		redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`)
+		redis.getKeysPattern(redis.omeClient, `app/${res.locals.user.streamsId}+*`)
 	]);
 	return res.json({
 		streams: streams || [],
@@ -393,19 +393,19 @@ export async function streamsJson (req, res) {
  * stream keys json data
  */
 export async function streamsViewcountsJson (req, res) {
-	const streams = await redis.getKeysPattern(`app/${res.locals.user.streamsId}+*`);
+	const streams = await redis.getKeysPattern(redis.omeClient, `app/${res.locals.user.streamsId}+*`);
 	const viewCountMap = {};
 	await Promise.all(streams.map(async (s) => {
 		const appName = s.substring(s.indexOf('+') + 1);
 		const viewCounts = await res.locals.ovenMediaGetViewerCount(res.locals.user.streamsId, appName);
 		viewCountMap[appName] = viewCounts;
 	}));
-	return res.json({
-		viewCountMap,
+	return res.json(
+		viewCountMap
 		// v Not needed for now, no frontend
 		// csrf: req.csrfToken(),
 		// user: res.locals.user,
-	});
+	);
 };
 
 

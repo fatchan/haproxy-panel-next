@@ -7,17 +7,13 @@ process
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+import * as redis from '../redis.js';
 import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
 
 import Queue from 'bull';
 
-const haproxyStatsQueue = new Queue('stats', { redis: {
-	host: process.env.REDIS_HOST || '127.0.0.1',
-	port: process.env.REDIS_PORT || 6379,
-	password: process.env.REDIS_PASS || '',
-	db: 1,
-}});
+const haproxyStatsQueue = new Queue('stats', { redis: redis.lockQueueClient });
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');

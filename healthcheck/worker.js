@@ -18,12 +18,7 @@ const httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
-const healthCheckQueue = new Queue('healthchecks', { redis: {
-	host: process.env.REDIS_HOST || '127.0.0.1',
-	port: process.env.REDIS_PORT || 6379,
-	password: process.env.REDIS_PASS || '',
-	db: 1,
-}});
+const healthCheckQueue = new Queue('healthchecks', { redis: redis.lockQueueClient });
 
 const ignoredErrorCodes = [
 	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
@@ -35,7 +30,7 @@ const ignoredErrorCodes = [
 let downedIps = [];
 
 //backup for raw handshake check
-function checkTLSHandshake(ip, port, domain) {
+function checkTLSHandshake (ip, port, domain) {
 	return new Promise((resolve, reject) => {
 		const controller = new AbortController();
 		setTimeout(() => {
@@ -72,7 +67,7 @@ function checkTLSHandshake(ip, port, domain) {
 	});
 }
 
-async function doCheck(domainKey, hkey, record) {
+async function doCheck (domainKey, hkey, record) {
 	if (!record || record.h !== true) {
 		record.u = true;
 		return record;
@@ -88,7 +83,7 @@ async function doCheck(domainKey, hkey, record) {
 			recordHealth = await redis.get(`health:${record.ip}`);
 		}
 		if (recordHealth === null) {
-			const hostHeader = domainKey.substring(4, domainKey.length-1);
+			const hostHeader = domainKey.substring(4, domainKey.length - 1);
 			try {
 				const controller = new AbortController();
 				const signal = controller.signal;
@@ -104,7 +99,7 @@ async function doCheck(domainKey, hkey, record) {
 					signal,
 				});
 				recordHealth = '1'; //no error = we consider successful
-			} catch(e) {
+			} catch (e) {
 				if (e && e.cause && e.cause.code && ignoredErrorCodes.includes(e.cause.code)) {
 					//invalid certs don't mean the server is dead
 					console.info('health check for', domainKey, hkey, record.ip, 'ignoring error', e.cause.code);
@@ -115,7 +110,7 @@ async function doCheck(domainKey, hkey, record) {
 						//should have plenty of time if abortcontroller is hit, 60s>15s
 						const backupHandshakeResponse = await checkTLSHandshake(record.ip, 443, hostHeader);
 						recordHealth = backupHandshakeResponse === true ? '1' : '0';
-					} catch(e) {
+					} catch (e) {
 						console.warn('health check down for', domainKey, hkey, record.ip, 'error:', e);
 						recordHealth = '0';
 					}
@@ -132,7 +127,7 @@ async function doCheck(domainKey, hkey, record) {
 		} else if (recordHealth === '0') {
 			record.u = false;
 		}
-	} catch(e) {
+	} catch (e) {
 		console.error('Healthcheck error', domain, hkey, e.message || e);
 	} finally {
 		await lock.release();
@@ -140,17 +135,17 @@ async function doCheck(domainKey, hkey, record) {
 	}
 }
 
-async function processKey(domainKey) {
+async function processKey (domainKey) {
 	try {
 		const domainHashKeys = await redis.client.hkeys(domainKey);
 		domainHashKeys.forEach(async (hkey) => {
 			const lock = await redlock.acquire([`lock:${domainKey}:${hkey}`], 60000);
 			try {
 				const records = await redis.hget(domainKey, hkey);
-				const allIps = (records['a']||[]).concat((records['aaaa']||[]));
+				const allIps = (records['a'] || []).concat((records['aaaa'] || []));
 				if (allIps.length > 0) {
-					const updatedA = await Promise.all((records['a']||[]).map(async r => doCheck(domainKey, hkey, r)));
-					const updatedAAAA = await Promise.all((records['aaaa']||[]).map(async r => doCheck(domainKey, hkey, r)));
+					const updatedA = await Promise.all((records['a'] || []).map(async r => doCheck(domainKey, hkey, r)));
+					const updatedAAAA = await Promise.all((records['aaaa'] || []).map(async r => doCheck(domainKey, hkey, r)));
 					if (updatedA && updatedA.length > 0) {
 						records['a'] = updatedA;
 					}
@@ -159,24 +154,24 @@ async function processKey(domainKey) {
 					}
 					await redis.hset(domainKey, hkey, records);
 				}
-			} catch(e) {
+			} catch (e) {
 				console.error(e);
 			} finally {
 				await lock.release();
 			}
 		});
-	} catch(e) {
+	} catch (e) {
 		console.error(e);
 	}
 }
 
-async function handleJob(job, done) { //job.id, job.data
+async function handleJob (job, done) { //job.id, job.data
 	const { keys } = job.data;
 	keys.forEach(processKey);
 	done();
 }
 
-async function updateDowned() {
+async function updateDowned () {
 	try {
 		downedIps = await db.db().collection('down')
 			.findOne({
@@ -189,7 +184,7 @@ async function updateDowned() {
 	}
 }
 
-async function main() {
+async function main () {
 	await db.connect();
 	await updateDowned();
 	setInterval(() => updateDowned(), 10000);
