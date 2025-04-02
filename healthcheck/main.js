@@ -28,7 +28,7 @@ function chunkArray (array, chunkSize) {
 
 async function main () {
 	try {
-		const keys = await redis.getKeysPattern(redis.lockQueueClient, 'dns:*');
+		const keys = await redis.getKeysPattern(redis.client, 'dns:*');
 		console.log('Healthchecking', keys.length, 'keys');
 		chunkArray(keys, 20).forEach(keyArr => healthCheckQueue.add({ keys: keyArr }, { removeOnComplete: true }));
 	} catch (e) {
