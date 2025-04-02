@@ -2,7 +2,7 @@
 
 import Redlock from 'redlock';
 import * as redis from './redis.js';
-const redlock = new Redlock([redis.lockClient], {
+const redlock = new Redlock([redis.lockQueueClient], {
 	retryCount: 30,
 	retryDelay: 2000,
 	retryJitter: 1000,

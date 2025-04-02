@@ -12,7 +12,7 @@ export const client = new Redis({
 	db: 0,
 });
 
-export const lockClient = new Redis({
+export const lockQueueClient = new Redis({
 	host: process.env.REDIS_HOST2 || '127.0.0.1',
 	port: process.env.REDIS_PORT2 || 6379,
 	password: process.env.REDIS_PASS2 || '',
@@ -26,50 +26,50 @@ export const omeClient = new Redis({
 	db: 0,
 });
 
-export function close() {
+export function close () {
 	client.quit();
-	lockClient.quit();
+	lockQueueClient.quit();
 	omeClient.quit();
 }
 
 //set value with expiry
-export function setex(key, expiry, value) {
+export function setex (key, expiry, value) {
 	client.set(key, value)
 		.then(() => client.expire(key, expiry));
 }
 
 //get a value with key
-export function get(key) {
+export function get (key) {
 	return client.get(key).then(res => { return JSON.parse(res); });
 }
 
 //get a hash value
-export function hgetall(key) {
+export function hgetall (key) {
 	return client.hgetall(key).then(res => { return res; });
 }
 
 //get a hash value
-export function hget(key, hash) {
+export function hget (key, hash) {
 	return client.hget(key, hash).then(res => { return JSON.parse(res); });
 }
 
 //set a hash value
-export function hset(key, hash, value) {
+export function hset (key, hash, value) {
 	return client.hset(key, hash, JSON.stringify(value));
 }
 
 //delete a hash
-export function hdel(key, hash) {
+export function hdel (key, hash) {
 	return client.hdel(key, hash);
 }
 
 //set a value on key
-export function set(key, value) {
+export function set (key, value) {
 	return client.set(key, JSON.stringify(value));
 }
 
 //delete value with key
-export function del(keyOrKeys) {
+export function del (keyOrKeys) {
 	if (Array.isArray(keyOrKeys)) {
 		return client.del(...keyOrKeys);
 	} else {
@@ -77,13 +77,15 @@ export function del(keyOrKeys) {
 	}
 }
 
-export function getKeysPattern(pattern) {
+export function getKeysPattern (redisClient, pattern) {
 	return new Promise((resolve, reject) => {
-		const stream = omeClient.scanStream({
-			match: pattern
+		const stream = redisClient.scanStream({
+			match: pattern,
+			count: 20,
 		});
 		let allKeys = [];
 		stream.on('data', (keys) => {
+			if (!keys || keys.length === 0) { return; }
 			allKeys = allKeys.concat(keys);
 		});
 		stream.on('end', async () => {

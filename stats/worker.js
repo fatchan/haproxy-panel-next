@@ -7,13 +7,16 @@ process
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+import * as redis from '../redis.js';
 import Queue from 'bull';
-const haproxyStatsQueue = new Queue('stats', { redis: {
-	host: process.env.REDIS_HOST || '127.0.0.1',
-	port: process.env.REDIS_PORT || 6379,
-	password: process.env.REDIS_PASS || '',
-	db: 1,
-}});
+const haproxyStatsQueue = new Queue('stats', {
+	redis: {
+		host: redis.lockQueueClient.options.host,
+		port: redis.lockQueueClient.options.port,
+		password: redis.lockQueueClient.options.password,
+		db: redis.lockQueueClient.options.db,
+	}
+});
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');
@@ -27,7 +30,7 @@ import fetch from 'node-fetch';
 const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
 	, base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
 
-async function fetchStats(host, parameters) {
+async function fetchStats (host, parameters) {
 	const controller = new AbortController();
 	const signal = controller.signal;
 	setTimeout(() => {
@@ -46,7 +49,7 @@ async function fetchStats(host, parameters) {
 	return statsRes;
 };
 
-async function getFormattedStats(host) {
+async function getFormattedStats (host) {
 	const [serverStats, frontendStats] = await Promise.all([
 		fetchStats(host, { type: 'server', parent: 'servers' }),
 		fetchStats(host, { type: 'frontend', name: 'www-http-https' })
@@ -107,7 +110,7 @@ async function getFormattedStats(host) {
 	};
 };
 
-async function processHost(host) {
+async function processHost (host) {
 	try {
 		const hostname = new URL(host).hostname;
 		console.time(`Fetched stats from ${hostname}`);
@@ -158,7 +161,7 @@ async function processHost(host) {
 	}
 };
 
-async function handleJob(job, done) {
+async function handleJob (job, done) {
 	const { hosts } = job.data;
 	hosts.forEach(processHost);
 	done();

@@ -33,7 +33,7 @@ import {
 	useOvenMedia
 } from './lib/middleware/oven.js';
 
-export default function router(server, app) {
+export default function router (server, app) {
 
 	const shkeeperManager = new ShkeeperManager();
 	const csrfHandler = csrf();
@@ -268,6 +268,15 @@ export default function router(server, app) {
 		csrfMiddleware,
 		useOvenMedia,
 		streamsController.streamsJson,
+	);
+	server.get(
+		'/streams/viewcounts.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		csrfMiddleware,
+		useOvenMedia,
+		streamsController.streamsViewcountsJson,
 	);
 	server.get(
 		'/apikeys',

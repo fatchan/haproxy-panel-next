@@ -7,31 +7,33 @@ process
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+import * as redis from '../redis.js';
 import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
 
 import Queue from 'bull';
-
-const haproxyStatsQueue = new Queue('stats', { redis: {
-	host: process.env.REDIS_HOST || '127.0.0.1',
-	port: process.env.REDIS_PORT || 6379,
-	password: process.env.REDIS_PASS || '',
-	db: 1,
-}});
+const haproxyStatsQueue = new Queue('stats', {
+	redis: {
+		host: redis.lockQueueClient.options.host,
+		port: redis.lockQueueClient.options.port,
+		password: redis.lockQueueClient.options.password,
+		db: redis.lockQueueClient.options.db,
+	}
+});
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');
 	process.exit(1);
 }
 
-async function main() {
+async function main () {
 	try {
 		console.log('Collecting stats for %d nodes', autodiscoverService.urls.length);
 		autodiscoverService.urls.forEach(cu => {
 			//group to a certain amount in each array? ehh probs not
 			haproxyStatsQueue.add({ hosts: [cu] }, { removeOnComplete: true });
 		});
-	} catch(e) {
+	} catch (e) {
 		console.error(e);
 	}
 }
