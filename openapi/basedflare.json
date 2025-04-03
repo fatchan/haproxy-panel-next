@@ -78,6 +78,7 @@
     },
     "/streams/viewcounts.json": {
       "get": {
+        "tags": ["Live Streaming"],
         "summary": "Get view counts for streams",
         "security": [
           {
