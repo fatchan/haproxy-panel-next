@@ -50,6 +50,9 @@ export async function alertWebhook (req, res) {
 		return console.warn('Invalid sourceAppString in alertWebhook:', sourceAppString);
 	}
 
+	// Trigger before account check because this isn't controlled by the cp
+	res.locals.ovenMediaStartAsync(streamsId, appName);
+
 	const streamsIdAccount = await db.db().collection('accounts').findOne({
 		streamsId,
 	}, {
