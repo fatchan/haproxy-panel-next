@@ -128,7 +128,7 @@ async function processHost (host) {
 					return new Point(e[0])
 						.tag('type', 'frontend')
 						.tag('hostname', hostname)
-						.floatField('value', e[1])
+						.floatField('value', e?.[1] || 0)
 						.timestamp(now);
 				});
 			points = points.concat(statPoints);
@@ -142,7 +142,7 @@ async function processHost (host) {
 							.tag('hostname', hostname)
 							.tag('server_name', ss.name)
 							.tag('server_address', ss.stats['Address'])
-							.floatField('value', e[1])
+							.floatField('value', e?.[1] || 0)
 							.timestamp(now);
 					});
 				points = points.concat(statPoints);

@@ -557,8 +557,8 @@ export async function patchMapForm(req, res, next) {
 						ssl: 'enabled',
 						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
 						//
-						check: 'enabled',
-						observe: 'layer4',
+						// check: 'enabled',
+						// observe: 'layer4',
 						//
 					}, null, false, true);
 				console.log('added runtime server', req.body.key, runtimeServerResp.data);
