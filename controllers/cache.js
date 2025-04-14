@@ -36,7 +36,7 @@ export async function purgeURL(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid URL format' });
 	}
 
-	await res.locals.purgeURL(req.body.url, ban);
+	res.locals.purgeURL(req.body.url, ban);
 
 	return dynamicResponse(req, res, 200, {});
 
