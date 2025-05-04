@@ -6,7 +6,27 @@ import countries from 'i18n-iso-countries';
 const countryMap = countries.getAlpha2Codes();
 import { continentMap } from '../lib/misc/continents.js';
 
-export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
+const ProtectionModes = {
+	NONE: '0',
+	POW_SUSPICIOUS_ONLY: '1',
+	CAPTCHA_SUSPICIOUS_ONLY: '2',
+	POW_ALL: '3',
+	POW_ALL_CAPTCHA_SUSPICIOUS_ONLY: '4',
+	CAPTCHA_ALL: '5',
+};
+
+const mapValueNames = {
+	[ProtectionModes.NONE]: 'None',
+	[ProtectionModes.POW_SUSPICIOUS_ONLY]: 'PoW (Suspicious Only)',
+	[ProtectionModes.CAPTCHA_SUSPICIOUS_ONLY]: 'Captcha (Suspicious Only)',
+	[ProtectionModes.POW_ALL]: 'PoW (All)',
+	[ProtectionModes.POW_ALL_CAPTCHA_SUSPICIOUS_ONLY]: 'PoW (All) + Captcha (Suspicious Only)',
+	[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
+};
+
+const protectionModeSet = new Set(Object.values(ProtectionModes));
+
+export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 
 	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
 		.then(res => res.data)
@@ -44,7 +64,7 @@ export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
  * GET /maps/:name
  * Show map filtering to users domains
  */
-export async function mapData(req, res, next) {
+export async function mapData (req, res, next) {
 	let map,
 		mapInfo,
 		showValues = false,
@@ -172,7 +192,7 @@ export async function mapData(req, res, next) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 	}
 	return {
-		mapValueNames: { '0': 'None', '1': 'Proof-of-work', '2': 'Proof-of-work+Captcha' },
+		mapValueNames,
 		mapInfo,
 		map,
 		csrf: req.csrfToken(),
@@ -182,13 +202,13 @@ export async function mapData(req, res, next) {
 	};
 }
 
-export async function mapPage(app, req, res, next) {
+export async function mapPage (app, req, res, next) {
 	const data = await mapData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, `/map/${data.name}`);
 }
 
-export async function mapJson(req, res, next) {
+export async function mapJson (req, res, next) {
 	const data = await mapData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
@@ -197,7 +217,7 @@ export async function mapJson(req, res, next) {
  * POST /maps/:name/delete
  * Delete the map entries of the body 'domain'
  */
-export async function deleteMapForm(req, res, next) {
+export async function deleteMapForm (req, res, next) {
 	if (!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
@@ -319,7 +339,7 @@ export async function deleteMapForm(req, res, next) {
  * POST /maps/:name/add
  * Add map entries of the body 'domain'
  */
-export async function patchMapForm(req, res, next) {
+export async function patchMapForm (req, res, next) {
 	if (req.body && req.body.key && typeof req.body.key === 'string') {
 
 		const mapName = metaMapMapping[req.params.name] || req.params.name;
@@ -417,7 +437,7 @@ export async function patchMapForm(req, res, next) {
 
 		//validate ddos
 		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
-			&& (!req.body.m || !['0', '1', '2'].includes(req.body.m.toString()))) {
+			&& (!req.body.m || !protectionModeSet.has(req.body.m.toString()))) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 		}
 		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
