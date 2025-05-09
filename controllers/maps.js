@@ -47,7 +47,7 @@ export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 	if (existingEntry) {
 		//theres already another backend with this IP, check domtoacc mapping
 		const backendMapEntry = await dataPlaneRetry('getRuntimeMapEntry', {
-			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
+			parent_name: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			id: existingEntry.domain,
 		})
 			.then(res => res.data);
@@ -248,7 +248,7 @@ export async function deleteMapForm (req, res, next) {
 					//if value still exists, other user has whitelisted, so replace withg updated value
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
-							map: req.params.name,
+							parent_name: req.params.name,
 							id: req.body.key,
 						}, {
 							value: value,
@@ -257,7 +257,7 @@ export async function deleteMapForm (req, res, next) {
 					//else we were the last/only one, so remove
 					await res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
-							map: req.params.name,
+							parent_name: req.params.name,
 							id: req.body.key,
 						}, null, null, false, false);
 				}
@@ -300,20 +300,20 @@ export async function deleteMapForm (req, res, next) {
 					await Promise.all(splitValue.map(bsv =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
-								backend: 'servers',
+								parent_name: 'servers',
 								name: bsv.substring(0, bsv.length - 3), // strip geo code
 							}, null, null, false, true)
 					)),
 					res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
-							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+							parent_name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 							id: matchingBackend.key, // id of (possibly multi host) single row backend
 						}, null, null, false, true)
 				]);
 			}
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
-					map: mapName, //'ddos'
+					parent_name: mapName, //'ddos'
 					id: req.body.key, //'example.com'
 				}, null, null, false, false);
 		} catch (e) {
@@ -480,7 +480,7 @@ export async function patchMapForm (req, res, next) {
 			case process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME: {
 				const existingEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: req.params.name,
+						parent_name: req.params.name,
 						id: req.body.key,
 					})
 					.then((res) => res.data)
@@ -531,14 +531,14 @@ export async function patchMapForm (req, res, next) {
 				}
 				const backendMapEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+						parent_name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					})
 					.then(res => res.data)
 					.catch(() => { });
 				const freeSlotId = await res.locals
-					.dataPlaneRetry('getRuntimeServers', {
-						backend: 'servers'
+					.dataPlaneRetry('getAllRuntimeServer', {
+						parent_name: 'servers'
 					})
 					.then(res => res.data)
 					.then(servers => {
@@ -559,7 +559,7 @@ export async function patchMapForm (req, res, next) {
 				const serverName = `websrv${freeSlotId}`;
 				const runtimeServerResp = await res.locals
 					.dataPlaneAll('addRuntimeServer', {
-						backend: 'servers',
+						parent_name: 'servers',
 					}, {
 						address,
 						port: parseInt(port, 10),
@@ -578,7 +578,7 @@ export async function patchMapForm (req, res, next) {
 				await res.locals
 					.dataPlaneAll('replaceRuntimeServer', {
 						name: serverName,
-						backend: 'servers',
+						parent_name: 'servers',
 					}, {
 						admin_state: 'ready',
 						operational_state: 'up',
@@ -593,7 +593,7 @@ export async function patchMapForm (req, res, next) {
 						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
-							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+							parent_name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 							id: req.body.key,
 						}, {
 							value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
@@ -613,7 +613,7 @@ export async function patchMapForm (req, res, next) {
 				? null
 				: (await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: mapName,
+						parent_name: mapName,
 						id: req.body.key,
 					})
 					.then(res => res.data)
@@ -621,7 +621,7 @@ export async function patchMapForm (req, res, next) {
 			if (existingEntry) {
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
-						map: mapName,
+						parent_name: mapName,
 						id: req.body.key,
 					}, {
 						value: value,
