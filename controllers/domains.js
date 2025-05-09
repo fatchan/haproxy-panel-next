@@ -9,7 +9,7 @@ import { getNsTemplate, getSoaTemplate } from '../templates.js';
  * GET /domains
  * domains page
  */
-export async function domainsPage(app, req, res) {
+export async function domainsPage (app, req, res) {
 	const certs = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
@@ -36,7 +36,7 @@ export async function domainsPage(app, req, res) {
  * GET /domains.json
  * domains json data
  */
-export async function domainsJson(req, res) {
+export async function domainsJson (req, res) {
 	const certs = await db.db().collection('certs')
 		.find({
 			username: res.locals.user.username,
@@ -62,7 +62,7 @@ export async function domainsJson(req, res) {
  * POST /domain/add
  * add domain
  */
-export async function addDomain(req, res, next) {
+export async function addDomain (req, res, next) {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -153,7 +153,7 @@ export async function addDomain(req, res, next) {
  * POST /domain/delete
  * delete domain
  */
-export async function deleteDomain(req, res) {
+export async function deleteDomain (req, res) {
 
 	if (!req.body.domain || typeof req.body.domain !== 'string' || req.body.domain.length === 0
 		|| !res.locals.user.domains.includes(req.body.domain)) {
@@ -164,13 +164,13 @@ export async function deleteDomain(req, res) {
 
 	//TODO: make loop through each cluster? or make domains per-cluster, hmmm
 	const [existingHost, existingMaintenance, existingRewrite, existingDdos] = await Promise.all([
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_HOSTS_MAP_NAME)
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME)
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_REWRITE_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_REWRITE_MAP_NAME)
 			.then(res => res.data).then(map => map.some(e => e.key === domain)),
-		res.locals.dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_DDOS_MAP_NAME })
+		res.locals.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_DDOS_MAP_NAME)
 			.then(res => res.data).then(map => map.some(e => {
 				const { hostname } = url.parse(`https://${e.key}`);
 				return hostname === domain;
@@ -182,7 +182,7 @@ export async function deleteDomain(req, res) {
 	}
 
 	await db.db().collection('accounts')
-		.updateOne({_id: res.locals.user.username}, {$pull: {domains: domain }});
+		.updateOne({ _id: res.locals.user.username }, { $pull: { domains: domain } });
 	await res.locals
 		.dataPlaneAll('deleteRuntimeMapEntry', {
 			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,

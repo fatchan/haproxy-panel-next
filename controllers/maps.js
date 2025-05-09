@@ -28,7 +28,7 @@ const protectionModeSet = new Set(Object.values(ProtectionModes));
 
 export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 
-	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
+	const hostsMap = await dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_HOSTS_MAP_NAME)
 		.then(res => res.data)
 		.then(res => {
 			return res.map(e => {
@@ -87,9 +87,7 @@ export async function mapData (req, res, next) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
 		}
 		map = await res.locals
-			.dataPlaneRetry('showRuntimeMap', {
-				map: mapName
-			})
+			.dataPlaneRetry('showRuntimeMap', mapName)
 			.then(res => res.data);
 	} catch (e) {
 		console.error(e);
@@ -232,10 +230,7 @@ export async function deleteMapForm (req, res, next) {
 		|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
 		let value;
 		const existingEntries = await res.locals
-			.dataPlaneRetry('showRuntimeMap', {
-				map: req.params.name,
-				// id: req.body.key,
-			})
+			.dataPlaneRetry('showRuntimeMap', req.params.name)
 			.then((res) => res.data)
 			.catch(() => { });
 		const existingEntry = existingEntries && existingEntries
@@ -292,9 +287,7 @@ export async function deleteMapForm (req, res, next) {
 			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
 				const matchingBackend = await res.locals
-					.dataPlaneRetry('showRuntimeMap', {
-						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-					})
+					.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME)
 					.then((res) => res.data)
 					.then(backends => backends.find(mb => mb.key === req.body.key));
 				console.log('matchingBackend', matchingBackend);
@@ -594,9 +587,7 @@ export async function patchMapForm (req, res, next) {
 					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
 					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
 					const fullBackendMap = await res.locals
-						.dataPlaneRetry('showRuntimeMap', {
-							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
-						})
+						.dataPlaneRetry('showRuntimeMap', process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME)
 						.then(res => res.data);
 					const fullBackendMapEntry = fullBackendMap
 						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
