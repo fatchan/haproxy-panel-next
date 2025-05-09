@@ -156,7 +156,7 @@ export async function globalToggle(req, res, next) {
 		if (globalAcl === '1') {
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
-					map: 'ddos_global',
+					parent_name: 'ddos_global',
 					id: 'true'
 				}, null, null, false, false);
 		} else {

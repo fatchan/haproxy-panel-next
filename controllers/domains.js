@@ -185,7 +185,7 @@ export async function deleteDomain (req, res) {
 		.updateOne({ _id: res.locals.user.username }, { $pull: { domains: domain } });
 	await res.locals
 		.dataPlaneAll('deleteRuntimeMapEntry', {
-			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
+			parent_name: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			id: domain,
 		}, null, null, false, false);
 	await redis.del(`dns:${domain}.`);
