@@ -1,26 +1,30 @@
-# Control Panel
+# Basedflare (haproxy-protection) control panel
 
-Work in progress. Not recommended for production deployment. No instructions or help provided whatsoever.
+🚨 This project is a work-in-progress, no instructions or help is provided whatsoever.
 
-Internally uses [haproxy dataplaneapi](https://github.com/haproxytech/dataplaneapi/).
-Intended for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-protection).
-
-Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Uses haproxy runtime apis to update maps, acls, etc.
+Provides a web-based control panel to conveniently manage clusters of [basedflare](https://gitgud.io/fatchan/haproxy-protection) servers.
 
 ##### Features:
-- List/add/remove clusters (server groups).
-- List/add/remove domains for your account.
-- Control allowed hosts for a cluster.
-- Custom backend server IP and port per-domain.
-- HTTPS certificate management. Automatically generate for domain(s) and upload to cluster servers.
-- Supports local private CA. Can install root cert on all your proxies and can sign CSR's for proper origin ssl validation.
-- IP or subnet blacklist. Supports ipv4 and ipv6.
-- IP or subnet whitelist. Supports ipv4 and ipv6.
-- Redirects, rewrites url to a different domain+path.
-- Protection rules, choose bot protection mode "none" (whitelist), proof-of-work or proof-of-work+captcha. Can be domain-wide or a domain+path. Path overrides domain-wide.
-- Global override for protection mode, to enable for all domains in a cluster.
-- Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
-- Statistics page with server and backend-level breakdowns based on haproxy stats socket data. Ability to export statistics to influxdb.
+- Manage DNS & domains.
+- Manage backend server mappings
+- Supports multiple backends per domain with round-robin load balancing
+- Supports setting geo rotes to select the closest backend to the current edge
+- HTTPS certificates w/ letsencrypt (DNS challenge), and automatic renewal
+- Local private CA and page to sign CSR's for proper origin ssl validation
+- IP/subnet/ASN blacklist
+- IP/subnet whitelist
+- Redirects and rewrites url to a different domain+path
+- Manage protection modes and settings on a per-domain or domain+path basis
+- Manage "maintenance" mode, shows a maintenance page to visitors while a backend is down
+- Global override for protection mode, to quickly enable for all domains
+- Customise CSS and images for bot-check pages per domain
+- API keys and documentation
+
+##### Extra features (not specific to basedflare/haproxy-protection):
+- Ability to send BAN and PURGE requests for clearing cache if your HAProxy nodes are coupled with Varnish
+- Statistics page with server and backend-level breakdowns based on haproxy stats socket data, backed by influxdb
+- Video livestreaming integration with [ovenmediaengine](https://airensoft.gitbook.io/ovenmediaengine/)
+- Automated invoicing and crypto payment gateway integration with [shkeeper](https://github.com/vsys-host/shkeeper.io)
 
 ## License
 GNU AGPLv3, see [LICENSE](LICENSE).
