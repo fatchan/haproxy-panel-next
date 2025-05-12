@@ -34,6 +34,69 @@
     }
   ],
   "paths": {
+    "/map/blockedip.json": {
+      "get": {
+        "tags": [
+          "Edge Rules"
+        ],
+        "summary": "List all blocked IP addresses and their details",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of blocked IPs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "map": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "0x7fae1ffca490"
+                          },
+                          "key": {
+                            "type": "string",
+                            "example": "1.2.3.4"
+                          },
+                          "value": {
+                            "type": "string",
+                            "example": "admin"
+                          }
+                        }
+                      }
+                    },
+                    "mapNotes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "1.2.3.4": "example"
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "blockedip"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/SessionUser"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/forms/map/blockedip/add": {
       "post": {
         "tags": [
