@@ -256,7 +256,7 @@ export async function dnsRecordUpdate(req, res) {
 					switch(type) {
 						case 'a': {
 							if (!isIPv4(value)) {
-								return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+								return dynamicResponse(req, res, 400, { error: 'Value must be a valid IPv4 address for A records' });
 							}
 							//Prevent manually inputting IPs from templates you dont have access to
 							if (allAs.includes(value)
@@ -268,7 +268,7 @@ export async function dnsRecordUpdate(req, res) {
 						}
 						case 'aaaa': {
 							if (!isIPv6(value)) {
-								return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+								return dynamicResponse(req, res, 400, { error: 'Value must be a valid IPv6 address for AAAA records' });
 							}
 							const parsedIpv6 = parse(value).toString({ zeroElide: false, zeroPad:false });
 							if (allAAAAs.includes(parsedIpv6)
