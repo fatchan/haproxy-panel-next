@@ -14,6 +14,7 @@ const autodiscoverService = new AutodiscoverService();
 import agent from '../agent.js';
 
 const base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
+const clusterHostnames = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u).hostname);
 
 async function overwriteMap(url, mapName, entries) {
 	const controller = new AbortController();
@@ -119,7 +120,9 @@ async function main() {
 		console.time('Running sync check');
 
 		let mapTable = {};
-		await Promise.all(autodiscoverService.urls.map(async url => {
+		await Promise.all(autodiscoverService.urls
+			.filter(url => clusterHostnames.includes(url.hostname))
+			.map(async url => {
 			try {
 				const serverMapList = await listMaps(url);
 				if (!serverMapList) {
