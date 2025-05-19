@@ -7,11 +7,10 @@ import { footerLinks } from '../instance-config.js';
 import InfoAlert from './InfoAlert';
 import * as API from '../api.js';
 
-
 export default withRouter(function Layout({ children, router, user }) {
 	const [incidents, setIncidents] = useState([]);
 	useEffect(() => {
-		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e) }, router);
+		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e); }, router);
 	}, []);
 
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
@@ -48,8 +47,8 @@ export default withRouter(function Layout({ children, router, user }) {
 								<i className='bi-envelope-exclamation pe-2' width='16' height='16' />
 								Please check your email inbox and click the link to verify your email.
 							</div>}
-							{incidents && incidents.map(inc => (
-								<InfoAlert>
+							{incidents && incidents.map((inc, i) => (
+								<InfoAlert key={`incident_${i}`}>
 									<h6>{inc.title}</h6>
 									<small>{inc.description}</small>
 								</InfoAlert>
