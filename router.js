@@ -174,6 +174,13 @@ export default function router (server, app) {
 		accountController.accountJson,
 	);
 	server.get(
+		'/incidents.json',
+		useSession,
+		fetchSession,
+		checkSession,
+		accountController.incidentsJson,
+	);
+	server.get(
 		'/onboarding.json',
 		useSession,
 		fetchSession,

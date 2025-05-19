@@ -1,12 +1,22 @@
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import MenuLinks from './MenuLinks';
 import { withRouter } from 'next/router';
 import { footerLinks } from '../instance-config.js';
+import InfoAlert from './InfoAlert';
+import * as API from '../api.js';
+
 
 export default withRouter(function Layout({ children, router, user }) {
+	const [incidents, setIncidents] = useState([]);
+	useEffect(() => {
+		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e) }, router);
+	}, []);
+
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
 	const fullWidth = ['/stats', '/dashboard'].includes(router.pathname);
+
 	return (
 		<>
 
@@ -38,6 +48,12 @@ export default withRouter(function Layout({ children, router, user }) {
 								<i className='bi-envelope-exclamation pe-2' width='16' height='16' />
 								Please check your email inbox and click the link to verify your email.
 							</div>}
+							{incidents && incidents.map(inc => (
+								<InfoAlert>
+									<h6>{inc.title}</h6>
+									<small>{inc.description}</small>
+								</InfoAlert>
+							))}
 							{children}
 						</main>
 						<footer className='mt-auto text-center text-muted small'>
