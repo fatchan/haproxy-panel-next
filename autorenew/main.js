@@ -118,6 +118,9 @@ async function loop() {
 	} catch(e) {
 		console.error(e);
 		console.log('Sleeping for', 60000);
+		fetch(process.env.AUTORENEW_WARNING_ENDPOINT)
+			.then(res => console.log('sending autorenew warning, status:', res.status))
+			.catch(err => console.error(err));
 		process.exit(-1);
 		return;
 	}
