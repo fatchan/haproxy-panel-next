@@ -8,11 +8,15 @@
   "tags": [
     {
       "name": "Edge Rules",
-      "description": "API for cdn edge rules"
+      "description": "APIs for cdn edge rules"
+    },
+    {
+      "name": "Cache Purge",
+      "description": "APIs for purging cache for path, prefix, or domain"
     },
     {
       "name": "Live Streaming",
-      "description": "API for streaming endpoints"
+      "description": "APIs for streaming endpoints"
     },
     {
       "name": "Live Streaming (Forwarded Webhooks)",
@@ -34,6 +38,90 @@
     }
   ],
   "paths": {
+    "/forms/cache/purge": {
+      "post": {
+        "tags": [
+          "Cache Purge"
+        ],
+        "summary": "Purge cache for a specific URL, URL prefix, or entire domain",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The URL to purge. For domain purging, use the domain without a path.",
+                    "example": "https://yourdomain.com/folder/example.png",
+                    "examples": {
+                      "example1": {
+                        "value": "https://yourdomain.com/folder/example.png",
+                        "description": "Single URL to purge"
+                      },
+                      "example2": {
+                        "value": "https://yourdomain.com/folder/",
+                        "description": "URL prefix to purge (purges all content under this path)"
+                      },
+                      "example3": {
+                        "value": "https://yourdomain.com/",
+                        "description": "Whole domain to purge (no path included)"
+                      }
+                    }
+                  },
+                  "ban": {
+                    "type": "boolean",
+                    "description": "Indicates whether to ban the URL or prefix (true) or purge just a single url (false).",
+                    "example": false
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully initiated cache purge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Domain not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Domain not authorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/map/blockedip.json": {
       "get": {
         "tags": [
@@ -73,6 +161,10 @@
                         }
                       }
                     },
+                    "name": {
+                      "type": "string",
+                      "example": "blockedip"
+                    },
                     "mapNotes": {
                       "type": "object",
                       "additionalProperties": {
@@ -81,10 +173,6 @@
                       "example": {
                         "1.2.3.4": "example"
                       }
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "blockedip"
                     },
                     "user": {
                       "$ref": "#/components/schemas/SessionUser"
