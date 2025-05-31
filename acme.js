@@ -151,7 +151,7 @@ export async function init() {
 	});
 }
 
-export async function generate(domain, altnames, email, challengePriority=['http-01', 'dns-01']) {
+export async function generate(domain, altnames, challengePriority=['http-01', 'dns-01']) {
 	/* Create CSR */
 	const [key, csr] = await acme.crypto.createCsr({
 		commonName: domain,
@@ -160,7 +160,6 @@ export async function generate(domain, altnames, email, challengePriority=['http
 	/* Certificate */
 	const cert = await _client.auto({
 		csr,
-		email,
 		termsOfServiceAgreed: true,
 		skipChallengeVerification: true,
 		challengeCreateFn,

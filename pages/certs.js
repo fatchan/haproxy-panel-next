@@ -239,11 +239,6 @@ const Certs = (props) => {
 								required />
 						</label>
 					</div>
-					<div className='mb-3'>
-						<label className='form-label w-100'>Email (Optional, for expiry notices)
-							<input className='form-control' type='email' name='email' placeholder='email@example.com' />
-						</label>
-					</div>
 					<button className='btn btn-sm btn-success' type='submit'>
 						<i className='bi-plus-lg pe-1' width='16' height='16' />
 						New Certificate
