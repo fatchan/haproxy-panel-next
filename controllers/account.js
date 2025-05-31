@@ -138,7 +138,7 @@ export async function accountJson(req, res, next) {
  * GET /incidents.json
  * get incidents from uptime kuma
  */
-export async function incidentsJson(req, res, next) {
+export async function incidentsJson(req, res, _next) {
 	let cachedRes = await redis.lockQueueClient.get('incidents');
 	if (cachedRes) {
 		return res.json(JSON.parse(cachedRes));

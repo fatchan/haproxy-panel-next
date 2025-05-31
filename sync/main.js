@@ -123,22 +123,22 @@ async function main() {
 		await Promise.all(autodiscoverService.urls
 			.filter(url => clusterHostnames.includes(url.hostname))
 			.map(async url => {
-			try {
-				const serverMapList = await listMaps(url);
-				if (!serverMapList) {
-					return;
+				try {
+					const serverMapList = await listMaps(url);
+					if (!serverMapList) {
+						return;
+					}
+					const mapCounts = serverMapList
+						.filter(m => MAPS_TO_SYNC.has(m.storage_name))
+						.reduce((acc, m) => {
+							acc[m.storage_name] = m.size;
+							return acc;
+						}, {});
+					mapTable[url.hostname] = mapCounts;
+				} catch(e) {
+					console.warn(e);
 				}
-				const mapCounts = serverMapList
-					.filter(m => MAPS_TO_SYNC.has(m.storage_name))
-					.reduce((acc, m) => {
-						acc[m.storage_name] = m.size;
-						return acc;
-					}, {});
-				mapTable[url.hostname] = mapCounts;
-			} catch(e) {
-				console.warn(e);
-			}
-		}));
+			}));
 
 		const master = mapTable[masterHostname];
 

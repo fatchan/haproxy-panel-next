@@ -57,7 +57,6 @@ const Certs = (props) => {
 				_csrf: csrf,
 				subject: subject,
 				altnames: altnames,
-				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
 		} catch (err) {
