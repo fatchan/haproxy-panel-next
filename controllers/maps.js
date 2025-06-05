@@ -15,6 +15,13 @@ const ProtectionModes = {
 	CAPTCHA_ALL: '5',
 };
 
+const SusLevels = {
+	TOR: '1',
+	BFP: '2',
+	VPN: '3',
+	DC: '4',
+}
+
 const mapValueNames = {
 	m: {
 		[ProtectionModes.NONE]: 'None',
@@ -25,14 +32,16 @@ const mapValueNames = {
 		[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
 	},
 	l: { //beside map form fields and rows?
-		'1': '1 (Tor Exits)',
-		'2': '2 (+Fingerprints)',
-		'3': '3 (+VPNs)',
-		'4': '4 (+Datacenters)',
+		[SusLevels.TOR]: '1 (Tor Exits)',
+		[SusLevels.BFP]: '2 (+Fingerprints)',
+		[SusLevels.VPN]: '3 (+VPNs)',
+		[SusLevels.DC]: '4 (+Datacenters)',
 	}
 };
 
 const protectionModeSet = new Set(Object.values(ProtectionModes));
+const susLevelSet = new Set(Object.values(SusLevels));
+
 
 export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 
@@ -445,9 +454,13 @@ export async function patchMapForm (req, res, next) {
 		}
 
 		//validate ddos
-		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
-			&& (!req.body.m || !protectionModeSet.has(req.body.m.toString()))) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid value' });
+		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
+			if (!req.body.m || !protectionModeSet.has(req.body.m.toString())) {
+				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
+			}
+			if (!req.body.l || !susLevelSet.has(req.body.l.toString())) {
+				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
+			}
 		}
 		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
 			const { m } = req.body; //t, v, etc
@@ -517,7 +530,7 @@ export async function patchMapForm (req, res, next) {
 			case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
 				value = JSON.stringify({
 					m: parseInt(req.body.m || 1, 10),
-					t: req.body.t === true ? true : false,
+					l: parseInt(req.body.l || 1, 10),
 				});
 				break;
 			case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
