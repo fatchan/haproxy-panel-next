@@ -57,7 +57,6 @@ const Certs = (props) => {
 				_csrf: csrf,
 				subject: subject,
 				altnames: altnames,
-				email: e.target.email.value,
 			}, dispatch, setError, router);
 			e.target.reset();
 		} catch (err) {
@@ -237,11 +236,6 @@ const Certs = (props) => {
 								placeholder={'www.yourdomain.com\r\ndev.yourdomain.com\r\netc...'}
 								rows={4}
 								required />
-						</label>
-					</div>
-					<div className='mb-3'>
-						<label className='form-label w-100'>Email (Optional, for expiry notices)
-							<input className='form-control' type='email' name='email' placeholder='email@example.com' />
 						</label>
 					</div>
 					<button className='btn btn-sm btn-success' type='submit'>

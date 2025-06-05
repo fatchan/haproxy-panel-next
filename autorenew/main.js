@@ -53,9 +53,9 @@ async function postFileAll(path, options, file, fdOptions) {
 }
 
 async function updateCert(dbCert) {
-	const { subject, altnames, email } = dbCert;
-	console.log('Renew cert request:', subject, altnames, email);
-	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email, ['dns-01', 'http-01']);
+	const { subject, altnames } = dbCert;
+	console.log('Renew cert request:', subject, altnames);
+	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, ['dns-01', 'http-01']);
 	const { message, description, file, storage_name: storageName } = await postFileAll('/v3/services/haproxy/storage/ssl_certificates', {
 		method: 'POST',
 		headers: {
@@ -118,6 +118,9 @@ async function loop() {
 	} catch(e) {
 		console.error(e);
 		console.log('Sleeping for', 60000);
+		fetch(process.env.AUTORENEW_WARNING_ENDPOINT)
+			.then(res => console.log('sending autorenew warning, status:', res.status))
+			.catch(err => console.error(err));
 		process.exit(-1);
 		return;
 	}

@@ -123,14 +123,8 @@ export async function addCert(req, res, next) {
 		return dynamicResponse(req, res, 400, { error: `You don't have permission to generate a certificate with altname(s) ${req.body.altnames}` });
 	}
 
-	if (req.body.email && (typeof req.body.email !== 'string'
-		|| !/^\S+@\S+\.\S+$/.test(req.body.email))) {
-		return dynamicResponse(req, res, 400, { error: 'Invalid email' });
-	}
-
 	const subject = req.body.subject.toLowerCase();
 	const altnames = req.body.altnames.map(a => a.toLowerCase());
-	const email = req.body.email;
 
 	const existingCert = await db.db().collection('certs').findOne({ _id: subject });
 	if (existingCert) {
@@ -148,7 +142,7 @@ export async function addCert(req, res, next) {
 
 	try {
 		console.log('Add cert request:', subject, altnames);
-		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, email, ['dns-01', 'http-01']);
+		const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, ['dns-01', 'http-01']);
 		const { message, description, file, storage_name: storageName } = await res.locals.postFileAll(
 			'/v3/services/haproxy/storage/ssl_certificates',
 			{
@@ -168,7 +162,6 @@ export async function addCert(req, res, next) {
 			_id: subject,
 			subject: subject,
 			altnames: altnames,
-			email: email,
 			username: res.locals.user.username,
 			csr, key, cert, haproxyCert, // cert creation data
 			date,

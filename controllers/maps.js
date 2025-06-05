@@ -16,12 +16,20 @@ const ProtectionModes = {
 };
 
 const mapValueNames = {
-	[ProtectionModes.NONE]: 'None',
-	[ProtectionModes.POW_SUSPICIOUS_ONLY]: 'PoW (Suspicious Only)',
-	[ProtectionModes.CAPTCHA_SUSPICIOUS_ONLY]: 'Captcha (Suspicious Only)',
-	[ProtectionModes.POW_ALL]: 'PoW (All)',
-	[ProtectionModes.POW_ALL_CAPTCHA_SUSPICIOUS_ONLY]: 'PoW (All) + Captcha (Suspicious Only)',
-	[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
+	m: {
+		[ProtectionModes.NONE]: 'None',
+		[ProtectionModes.POW_SUSPICIOUS_ONLY]: 'PoW (Suspicious Only)',
+		[ProtectionModes.CAPTCHA_SUSPICIOUS_ONLY]: 'Captcha (Suspicious Only)',
+		[ProtectionModes.POW_ALL]: 'PoW (All)',
+		[ProtectionModes.POW_ALL_CAPTCHA_SUSPICIOUS_ONLY]: 'PoW (All) + Captcha (Suspicious Only)',
+		[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
+	},
+	l: { //beside map form fields and rows?
+		'1': '1 (Tor Exits)',
+		'2': '2 (+Fingerprints)',
+		'3': '3 (+VPNs)',
+		'4': '4 (+Datacenters)',
+	}
 };
 
 const protectionModeSet = new Set(Object.values(ProtectionModes));
@@ -96,6 +104,7 @@ export async function mapData (req, res, next) {
 
 	switch (req.params.name) {
 		case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
+			showValues = true;
 		case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
 			map = map.map(a => {
 				try {

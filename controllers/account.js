@@ -6,6 +6,7 @@ import sendEmail from '../lib/email/send.js';
 import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
 import { randomBytes } from 'node:crypto';
+import * as redis from '../redis.js';
 await dotenv.config({ path: '.env' });
 
 const localNSResolver = new Resolver();
@@ -17,6 +18,10 @@ googleResolver.setServers(['8.8.8.8']);
 const quad9Resolver = new Resolver();
 quad9Resolver.setServers(['9.9.9.9']);
 const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
+
+const uptimeKumaAuth = Buffer.from(
+	`:${process.env.UPTIME_KUMA_API_KEY}`,
+).toString('base64');
 
 //TODO: move to lib
 const nameserverTxtDomains = process.env.NAMESERVER_TXT_DOMAINS.split(',');
@@ -127,6 +132,28 @@ export async function onboardingPage(app, req, res, next) {
 export async function accountJson(req, res, next) {
 	const data = await accountData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
+}
+
+/**
+ * GET /incidents.json
+ * get incidents from uptime kuma
+ */
+export async function incidentsJson(req, res, _next) {
+	let cachedRes = await redis.lockQueueClient.get('incidents');
+	if (cachedRes) {
+		return res.json(JSON.parse(cachedRes));
+	}
+	const statusData = await fetch(process.env.UPTIME_KUMA_STATUS_URL, {
+		headers: {
+			'Authorization': uptimeKumaAuth
+		}
+	}).then(res => res.json());
+	let incidents = [];
+	if (statusData && statusData.maintenanceList && statusData.maintenanceList.length > 0) {
+		incidents = statusData.maintenanceList;
+	}
+	await redis.lockQueueClient.set('incidents', JSON.stringify(incidents), 'EX', 300, 'NX');
+	return res.json(incidents);
 }
 
 /**

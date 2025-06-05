@@ -11,9 +11,13 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 
 	switch (mapName) {
 		case 'ddos': {
-			const mapValueOptions = Object.entries(mapValueNames).map((entry, i) => (
-				<option key={`option${i}`} value={entry[0].toString()}>{entry[1]}</option>
-			));
+			const mapValueOptions = Object.entries(mapValueNames).reduce((acc, [v, mvn]) => {
+				const valueOptions = Object.entries(mvn).map((entry, i) => (
+					<option key={`option${i}`} value={entry[0].toString()}>{entry[1]}</option>
+				));
+				acc[v] = valueOptions;
+				return acc;
+			}, {});
 			formElements = (
 				<>
 					<td>
@@ -52,20 +56,20 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						>
 							<option disabled value=''>protection mode</option>
-							{mapValueOptions}
+							{mapValueOptions['m']}
 						</select>
 					</td>
 					<td>
-						<div className='form-check'>
-							<input
-								className='form-check-input'
-								type='checkbox'
-								{...(handleFieldChange ? { checked: editValue.t === true } : { defaultChecked: editValue.t === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('t', e.target.checked ? true : false)}
-								name='t'
-							/>
-							<label className='form-check-label'>Tor exits only</label>
-						</div>
+						<select
+							className='form-select'
+							{...(handleFieldChange ? { value: editValue.l || 1 } : { defaultValue: 1 })}
+							onChange={(e) => handleFieldChange && handleFieldChange('l', e.target.value)}
+							name='l'
+							required
+							disabled={!['1', '2', '4'].includes(editValue?.m?.toString())}
+						>
+							{mapValueOptions['l']}
+						</select>
 					</td>
 				</>
 			);
