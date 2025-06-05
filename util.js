@@ -65,8 +65,8 @@ export const fMap = {
 	[process.env.NEXT_PUBLIC_DDOS_MAP_NAME]: {
 		fname: 'Protection Rules',
 		description: 'Set protection modes on domains and/or paths',
-		columnNames: ['Domain/Path', 'Mode', 'Tor Exits Only'],
-		columnKeys: ['m', 't'],
+		columnNames: ['Domain/Path', 'Mode', 'Suspicion Level'],
+		columnKeys: ['m', 'l'],
 	},
 
 	[process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME]: {
@@ -160,18 +160,18 @@ export const fMap = {
 	},
 };
 
-export function makeArrayIfSingle(obj) {
+export function makeArrayIfSingle (obj) {
 	return !Array.isArray(obj) ? [obj] : obj;
 }
 
-export function validClustersString(string) {
+export function validClustersString (string) {
 	return !string.split(',').some((c) => {
 		const cUrl = url.parse(c);
 		return (cUrl.protocol !== 'http:' || !cUrl.hostname);
 	});
 }
 
-export function extractMap(item) {
+export function extractMap (item) {
 	const name = item.file &&
 		item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
 	if (!fMap[name]) { return null; }
@@ -185,7 +185,7 @@ export function extractMap(item) {
 	};
 }
 
-export function dynamicResponse(req, res, code, data) {
+export function dynamicResponse (req, res, code, data) {
 	const isRedirect = code === 302;
 	if ((req.headers && req.headers['content-type'] === 'application/json')
 		|| res.locals.isApiKey) {
@@ -200,7 +200,7 @@ export function dynamicResponse(req, res, code, data) {
 }
 
 //check if list includes domain of a wildcard
-export function wildcardAllowed(domain, allowedDomains) {
+export function wildcardAllowed (domain, allowedDomains) {
 	if (domain.includes('\\')) { throw new Error('Illegal wildcardAllowed'); }
 	const wcRegex = new RegExp(`${domain.replace(/\*\./g, '([^ ]*\\.|^)')}$`);
 	return allowedDomains.some((d) => {
@@ -209,13 +209,13 @@ export function wildcardAllowed(domain, allowedDomains) {
 }
 
 //check if a domain matches a wildcard
-export function wildcardMatches(domain, wildcard) {
+export function wildcardMatches (domain, wildcard) {
 	if (wildcard.includes('\\')) { throw new Error('Illegal wildcardMatches'); }
 	const wcRegex = new RegExp(`${wildcard.replace(/\*\./g, '^.*\\.')}$`);
 	return wcRegex.test(domain);
 }
 
-export function getApproxSubject(storageName) {
+export function getApproxSubject (storageName) {
 	let ret = storageName
 		.replaceAll('_', '.')
 		.substr(0, storageName.length - 4);
@@ -225,7 +225,7 @@ export function getApproxSubject(storageName) {
 	return ret;
 }
 
-export function filterCertsByDomain(certs, allowedDomains) {
+export function filterCertsByDomain (certs, allowedDomains) {
 	return certs.filter((c) => {
 		const approxSubject = getApproxSubject(c.storage_name);
 		return allowedDomains.includes(approxSubject);

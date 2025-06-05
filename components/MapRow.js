@@ -4,7 +4,7 @@ import MapFormFields from './MapFormFields.js';
 import asnMap from '../maps/asn.json';
 import * as API from '../api.js';
 
-export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
+export default function MapRow ({ map, row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
 	const { key, value } = row;
 	const router = useRouter();
 
@@ -102,12 +102,11 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 					)}
 					{typeof value === 'string' && showValues === true && (
 						<td className='overflow-hidden text-truncate' style={{ maxWidth: 500 }}>
-							{mapValueNames[editValue.value] || editValue.value}
+							{editValue.value}
 						</td>
 					)}
 					{typeof value === 'object' && columnKeys.map((ck, mvi) => {
 						let displayValue = editValue[ck];
-
 						if (typeof displayValue === 'boolean' || displayValue === 'true' || displayValue === 'false') {
 							displayValue = displayValue === true || displayValue === 'true' ? (
 								<span className='text-success'><i className='bi-check-lg pe-none' width='16' height='16' /></span>
@@ -115,9 +114,8 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 								<span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>
 							);
 						} else if (displayValue != null) {
-							displayValue = mapValueNames[displayValue.toString()] || displayValue.toString();
+							displayValue = mapValueNames?.[ck]?.[displayValue.toString()] || displayValue.toString();
 						}
-
 						return <td key={`mvi_${mvi}`}>{displayValue}</td>;
 					})}
 				</>
