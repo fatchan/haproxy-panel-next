@@ -24,7 +24,7 @@ async function reset () {
 				allowedTemplates: ['basic'],
 				onboarding: true,
 				maxDomains: 5,
-				billing: { price: 0, description: 'Free trial' },
+				billing: { price: 1, description: 'Free trial' },
 				inactive: false,
 			});
 	} else {
