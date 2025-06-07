@@ -83,10 +83,12 @@ export const sections = [
 		name: 'Knowledge Base',
 		icon: 'bi-book-half',
 		links: [
+			{ href: '/kb/protection', label: 'Protection Settings', icon: 'bi-shield-check' },
 			{ href: '/kb/firewall', label: 'Firewall', icon: 'bi-bricks' },
 			{ href: '/kb/https', label: 'HTTPS & CSRs ', icon: 'bi-file-earmark-lock' },
 			{ href: '/kb/debug', label: 'Debug URLs', icon: 'bi-bug' },
 			{ href: '/kb/streaming', label: 'Live Streaming', icon: 'bi-cast' },
+			{ href: '/kb/ports', label: 'Network Ports', icon: 'bi-hdd-network' },
 		],
 	}
 ];
@@ -153,7 +155,7 @@ const MenuLinks = ({ router }) => {
 		Router.events.on('routeChangeStart', setPath);
 		sections.forEach(section => {
 			if (section.links.some(link => {
-				console.log(link?.subpaths, path);
+				// console.log(link?.subpaths, path);
 				return path.startsWith(link.href) || link?.subpaths?.some(l => path.startsWith(l));
 			})) {
 				setOpenSections(prev => ({ ...prev, [section.name]: true }));
