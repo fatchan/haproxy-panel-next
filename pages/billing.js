@@ -3,23 +3,12 @@ import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
 import PaymentModal from '../components/PaymentModal.js';
-import { allowedCryptos } from '../util.js';
+import InvoiceRow from '../components/InvoiceRow.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
-import { calculateRemainingHours } from '../util.js';
 import withAuth from '../components/withAuth.js';
 
-const statusColors = {
-	'cancelled': 'secondary',
-	'pending': 'primary',
-	'paid': 'success',
-	'unpaid': 'warning',
-	'overdue': 'danger',
-	'other': 'info',
-	'expired': 'secondary'
-};
-
-function Billing(props) {
+function Billing (props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props || {});
 	const [error, setError] = useState();
@@ -98,7 +87,17 @@ function Billing(props) {
 
 	const { invoices, csrf, user } = state;
 
-	function openInvoice(invoice, previousCrypto) {
+	const firstNextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+	const dueNextMonth = new Date(firstNextMonth);
+	dueNextMonth.setDate(firstNextMonth.getDate() + 7);
+	const upcomingInvoice = {
+		description: user?.billing?.description,
+		dueDate: dueNextMonth,
+		amount: user?.billing?.price || 0,
+		status: 'upcoming',
+	};
+
+	function openInvoice (invoice, previousCrypto) {
 		setLoading(true);
 		const crypto = selectedCrypto[invoice._id] || invoice?.paymentData?.crypto || previousCrypto;
 		API.createPaymentRequest({
@@ -146,68 +145,24 @@ function Billing(props) {
 					<tbody>
 						<tr className='align-middle'>
 							<th>Description</th>
-							<th>Date</th>
+							<th>Issue Date</th>
+							<th>Due Date</th>
 							<th>Amount</th>
 							<th>Status</th>
 							<th>Action</th>
 						</tr>
-						{invoices.map((inv) => {
-							const remainingHours = inv.recalculate_after && calculateRemainingHours(inv.recalculate_after_start, inv.recalculate_after);
-							const timedOut = remainingHours != null && remainingHours <= 0 && inv.status === 'unpaid';
-							return (
-								<tr key={inv._id} className='align-middle'>
-									<td>{inv.description}</td>
-									<td suppressHydrationWarning={true}>
-										{new Date(inv.date).toLocaleString()}
-									</td>
-									<td>${(inv.amount / 100).toFixed(2)}</td>
-									<td>
-										{timedOut
-											? <span className={`badge rounded-pill text-bg-${statusColors['unpaid']} text-uppercase`}>
-												unpaid
-											</span>
-											: <span className={`badge rounded-pill text-bg-${statusColors[inv.status]} text-uppercase`}>
-												{inv.status} {/*remainingHours > 0 && `(times out in ${remainingHours.toFixed(remainingHours < 1 ? 1 : 0)} hours)`*/}
-											</span>}
-									</td>
-									<td>
-										<div className='d-flex gap-2'>
-											{inv?.paymentData?.paid !== true /*&& !timedOut*/ ? (
-												//dropdown and pay button for unpaid invoices
-												<>
-													<select
-														className='form-select form-select-sm'
-														onChange={(e) => handleCryptoChange(inv._id, e.target.value)}
-														value={inv?.paymentData?.crypto || selectedCrypto[inv._id] || ''}
-														disabled={inv.status === 'paid' || inv?.paymentData?.crypto}
-														required
-													>
-														<option value='' disabled>Select crypto</option>
-														{allowedCryptos.map((crypto) => (
-															<option key={crypto} value={crypto}>{crypto}</option>
-														))}
-													</select>
-													<button
-														className='btn btn-success btn-sm'
-														onClick={() => openInvoice(inv)}
-													>
-														Pay
-													</button>
-												</>
-											) : (
-												//view button for paid invoices
-												<button
-													className='btn btn-primary btn-sm'
-													onClick={() => openInvoice(inv)}
-												>
-													View
-												</button>
-											)}
-										</div>
-									</td>
-								</tr>
-							);
-						})}
+						{!invoices.some(i => i.status === 'unpaid') && <InvoiceRow
+							key={'upcoming'}
+							inv={upcomingInvoice}
+							handleCryptoChange={handleCryptoChange}
+							openInvoice={openInvoice}
+						/>}
+						{invoices.map((inv) => (<InvoiceRow
+							key={inv._id}
+							inv={inv}
+							handleCryptoChange={handleCryptoChange}
+							openInvoice={openInvoice}
+						/>))}
 					</tbody>
 				</table>
 			</div>
@@ -234,8 +189,8 @@ function Billing(props) {
 	);
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+export async function getServerSideProps ({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(Billing);

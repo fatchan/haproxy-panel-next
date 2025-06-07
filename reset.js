@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 await dotenv.config({ path: '.env' });
-
+import { ObjectId } from 'mongodb';
 import * as db from './db.js';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 
-async function reset() {
+async function reset () {
 	await db.connect();
 	const numAccounts = await db.db().collection('accounts').countDocuments();
 	const randomPassword = randomBytes(20).toString('base64');
@@ -15,11 +15,17 @@ async function reset() {
 		await db.db().collection('accounts')
 			.insertOne({
 				_id: 'admin',
+				streamsId: ObjectId().toString(),
+				email: 'localhost',
+				emailVerified: false,
+				displayName: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],
-				balance: 0,
-				onboarding: null,
-				allowedTemplates: ['basic', 'nocogent']
+				allowedTemplates: ['basic'],
+				onboarding: true,
+				maxDomains: 5,
+				billing: { price: 0, description: 'Free trial' },
+				inactive: false,
 			});
 	} else {
 		await db.db().collection('accounts')

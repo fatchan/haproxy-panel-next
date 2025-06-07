@@ -20,7 +20,7 @@ const SusLevels = {
 	BFP: '2',
 	VPN: '3',
 	DC: '4',
-}
+};
 
 const mapValueNames = {
 	m: {
@@ -31,7 +31,7 @@ const mapValueNames = {
 		[ProtectionModes.POW_ALL_CAPTCHA_SUSPICIOUS_ONLY]: 'PoW (All) + Captcha (Suspicious Only)',
 		[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
 	},
-	l: { //beside map form fields and rows?
+	l: {
 		[SusLevels.TOR]: '1 (Tor Exits)',
 		[SusLevels.BFP]: '2 (+Fingerprints)',
 		[SusLevels.VPN]: '3 (+VPNs)',
@@ -41,7 +41,6 @@ const mapValueNames = {
 
 const protectionModeSet = new Set(Object.values(ProtectionModes));
 const susLevelSet = new Set(Object.values(SusLevels));
-
 
 export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 
