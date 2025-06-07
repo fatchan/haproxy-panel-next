@@ -6,7 +6,7 @@ import NProgress from 'nprogress';
 import Router from 'next/router';
 import '@fontsource/inter';
 import './global.css';
-import { Toaster } from 'react-hot-toast';
+import { ToasterWithMax } from '../components/ToasterWithMax.js';
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/requestchangepassword', '/'];
 NProgress.configure({ showSpinner: false });
@@ -14,10 +14,11 @@ Router.events.on('routeChangeStart', (url) => loadRoutes.includes(url) && NProgr
 Router.events.on('routeChangeComplete', (url) => loadRoutes.includes(url) && NProgress.done());
 Router.events.on('routeChangeError', () => NProgress.done());
 
-export default function App({ Component, pageProps }) {
+export default function App ({ Component, pageProps }) {
 	return (
 		<Layout {...pageProps}>
-			<Toaster
+			<ToasterWithMax
+				position='bottom-right'
 				toastOptions={{
 					style: {
 						background: 'var(--bs-body-bg)',
