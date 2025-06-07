@@ -136,7 +136,7 @@ export async function addCert(req, res, next) {
 		altnames.forEach(d => {
 			url.parse(`https://${d}`);
 		});
-	} catch (e) {
+	} catch {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 

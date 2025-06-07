@@ -17,7 +17,7 @@ async function reset () {
 				_id: 'admin',
 				streamsId: ObjectId().toString(),
 				email: 'localhost',
-				emailVerified: false,
+				emailVerified: true,
 				displayName: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],

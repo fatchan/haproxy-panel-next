@@ -119,7 +119,7 @@ export async function mapData (req, res, next) {
 			map = map.map(a => {
 				try {
 					a.value = JSON.parse(a.value);
-				} catch (e) {
+				} catch {
 					console.warn('Failed to parse map value', a.value);
 					return undefined;
 				}
@@ -131,7 +131,7 @@ export async function mapData (req, res, next) {
 				map = map.map(a => {
 					try {
 						a.value = decodeURIComponent(a.value);
-					} catch (e) {
+					} catch {
 						console.warn('Failed to parse map value', a.value);
 						return undefined;
 					}

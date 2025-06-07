@@ -4,7 +4,7 @@ import { dynamicResponse } from '../util.js';
  * GET /cache
  * cache page
  */
-export async function cachePage(app, req, res) {
+export async function cachePage (app, req, res) {
 	//TODO: any data about cache page i.e stats?
 	res.locals.data = {
 		user: res.locals.user,
@@ -17,7 +17,7 @@ export async function cachePage(app, req, res) {
  * POST /cache/purge
  * add domain validation
  */
-export async function purgeURL(req, res, _next) {
+export async function purgeURL (req, res, _next) {
 
 	if (!req.body.url || typeof req.body.url !== 'string' || req.body.url.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -32,7 +32,7 @@ export async function purgeURL(req, res, _next) {
 			&& res.locals.user.username !== 'admin') { //TODO: acting/impersonating mode
 			return dynamicResponse(req, res, 403, { error: 'Domain not authorized' });
 		}
-	} catch (error) {
+	} catch {
 		return dynamicResponse(req, res, 400, { error: 'Invalid URL format' });
 	}
 

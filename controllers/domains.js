@@ -82,7 +82,7 @@ export async function addDomain(req, res, next) {
 	try {
 		const { hostname } = url.parse(`https://${domain}`);
 		domain = hostname;
-	} catch (e) {
+	} catch {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
