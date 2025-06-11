@@ -79,6 +79,9 @@ export async function toggleStream(body, dispatch, errorCallback, router) {
 export async function concludeStream(body, dispatch, errorCallback, router) {
 	return ApiCall(`/forms/stream/${body.id}/conclude`, 'POST', body, dispatch, errorCallback, router, 0.5);
 }
+export async function reloadEdges(body, dispatch, errorCallback, router) {
+	return ApiCall(`/forms/stream/${body.id}/reload-edges`, 'POST', body, dispatch, errorCallback, router, 0.5);
+}
 export async function deleteStream(body, dispatch, errorCallback, router) {
 	return ApiCall(`/forms/stream/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5);
 }

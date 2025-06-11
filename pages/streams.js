@@ -30,7 +30,7 @@ const SecretString = ({ text }) => {
 	);
 };
 
-function Streams(props) {
+function Streams (props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -47,7 +47,7 @@ function Streams(props) {
 	const anyConcluding = state?.streamKeys?.some(x => !x.enabled) || false;
 	useEffect(() => {
 		let interval;
-		if (anyConcluding && (state?.streams?.length||0) > 0) {
+		if (anyConcluding && (state?.streams?.length || 0) > 0) {
 			interval = setInterval(() => {
 				API.getStreams(dispatch, setError, router);
 			}, 3000);
@@ -70,7 +70,7 @@ function Streams(props) {
 
 	const { csrf, streamKeys, streams, streamWebhooks, user } = state;
 
-	async function addStream(e) {
+	async function addStream (e) {
 		e.preventDefault();
 		setError(null);
 		await API.addStream({ _csrf: csrf, appName: e.target.appName.value }, () => {
@@ -79,28 +79,35 @@ function Streams(props) {
 		e.target.reset();
 	}
 
-	async function concludeStream(csrf, id) {
+	async function concludeStream (csrf, id) {
 		setError(null);
 		await API.concludeStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function toggleStream(csrf, id) {
+	async function reloadEdges (csrf, id) {
+		setError(null);
+		await API.reloadEdges({ _csrf: csrf, id }, () => {
+			API.getStreams(dispatch, setError, router);
+		}, setError, router);
+	}
+
+	async function toggleStream (csrf, id) {
 		setError(null);
 		await API.toggleStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function deleteStream(csrf, id) {
+	async function deleteStream (csrf, id) {
 		setError(null);
 		await API.deleteStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function addStreamWebhook(e) {
+	async function addStreamWebhook (e) {
 		e.preventDefault();
 		setError(null);
 		await API.addStreamWebhook({ _csrf: csrf, url: e.target.url.value, type: e.target.type.value }, () => {
@@ -109,7 +116,7 @@ function Streams(props) {
 		e.target.reset();
 	}
 
-	async function deleteStreamWebhook(csrf, id) {
+	async function deleteStreamWebhook (csrf, id) {
 		setError(null);
 		await API.deleteStreamWebhook({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
@@ -129,15 +136,24 @@ function Streams(props) {
 			return (
 				<tr key={`stream_${s}`} className='align-middle'>
 					<td className='text-left' style={{ width: 0 }}>
-					    <a
-					        className='btn btn-sm btn-danger'
-					        onClick={() => concludeStream(csrf, streamNameKeyId)}
-					        title={streamKey.enabled ? 'End Stream' : ''}
-					        disabled={!streamKey.enabled}
-					    >
-					        <i className='bi-stop-fill pe-none' width='16' height='16' />
-					        {!streamKey.enabled && <span className='ms-1'>Ending...</span>}
-					    </a>
+						<a
+							className='btn btn-sm btn-danger'
+							onClick={() => concludeStream(csrf, streamNameKeyId)}
+							title={streamKey.enabled ? 'End Stream' : ''}
+							disabled={!streamKey.enabled}
+						>
+							<i className='bi-stop-fill pe-none' width='16' height='16' />
+						</a>
+					</td>
+					<td className='text-left' style={{ width: 0 }}>
+						<a
+							className='btn btn-sm btn-warning'
+							onClick={() => reloadEdges(csrf, streamNameKeyId)}
+							title={streamKey.enabled ? 'Reload Edges' : ''}
+							disabled={!streamKey.enabled}
+						>
+							<i className='bi-arrow-clockwise pe-none' width='16' height='16' />
+						</a>
 					</td>
 					<td>
 						<a
@@ -153,7 +169,7 @@ function Streams(props) {
 					</td>
 					<td>
 						<div className='d-flex align-items-center'>
-							<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`}/>
+							<CopyButton text={`https://${process.env.NEXT_PUBLIC_OME_EDGE_HOSTNAME}/${s}/llhls.m3u8`} />
 							<a
 								target='_blank'
 								rel='noreferrer'
@@ -178,19 +194,19 @@ function Streams(props) {
 					</a>
 				</td>
 				<td className='text-left' style={{ width: 0 }}>
-				    <div className='form-check form-switch'>
-				        <input
-				            className='form-check-input'
-				            type='checkbox'
-				            id={`switch-${s._id}`}
-				            checked={s.enabled}
-				            disabled={!s.enabled && activeStreamIds.includes(s._id)}
-				            onChange={() => toggleStream(csrf, s._id)}
-				        />
-				        <label className='form-check-label text-sm' htmlFor={`switch-${s._id}`}>
-				            {s.enabled ? <span className='green'>Enabled</span> : <span className='red'>Disabled</span>}
-				        </label>
-				    </div>
+					<div className='form-check form-switch'>
+						<input
+							className='form-check-input'
+							type='checkbox'
+							id={`switch-${s._id}`}
+							checked={s.enabled}
+							disabled={!s.enabled && activeStreamIds.includes(s._id)}
+							onChange={() => toggleStream(csrf, s._id)}
+						/>
+						<label className='form-check-label text-sm' htmlFor={`switch-${s._id}`}>
+							{s.enabled ? <span className='green'>Enabled</span> : <span className='red'>Disabled</span>}
+						</label>
+					</div>
 				</td>
 				<td>
 					{s.appName}
@@ -366,7 +382,7 @@ function Streams(props) {
 
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+export async function getServerSideProps ({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
 	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 

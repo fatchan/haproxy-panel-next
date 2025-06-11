@@ -566,6 +566,46 @@
         }
       }
     },
+    "/forms/stream/{id}/reload-edges": {
+      "post": {
+        "tags": [
+          "Live Streaming"
+        ],
+        "summary": "Terminates the current session of stream edges pulling from the origin, and will allow reconnection to clear e.g. stuck edges",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stream key id",
+            "schema": {
+              "type": "string",
+              "example": "67a822f4518bc836547c9b1a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/forms/stream/{id}/toggle": {
       "post": {
         "tags": [
