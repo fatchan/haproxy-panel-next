@@ -566,12 +566,12 @@
         }
       }
     },
-    "/forms/stream/{id}/reload-edges": {
+    "/forms/stream/{id}/restart": {
       "post": {
         "tags": [
           "Live Streaming"
         ],
-        "summary": "Terminates the current session of stream edges pulling from the origin, and will allow reconnection to clear e.g. stuck edges",
+        "summary": "Deletes the stream, but unlike conclude will allow immediate reconnection to clear e.g. stuck streams",
         "security": [
           {
             "api_key": []

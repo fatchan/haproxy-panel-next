@@ -86,9 +86,9 @@ function Streams (props) {
 		}, setError, router);
 	}
 
-	async function reloadEdges (csrf, id) {
+	async function restartStream (csrf, id) {
 		setError(null);
-		await API.reloadEdges({ _csrf: csrf, id }, () => {
+		await API.restartStream({ _csrf: csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
@@ -148,7 +148,7 @@ function Streams (props) {
 					<td className='text-left' style={{ width: 0 }}>
 						<a
 							className='btn btn-sm btn-warning'
-							onClick={() => reloadEdges(csrf, streamNameKeyId)}
+							onClick={() => restartStream(csrf, streamNameKeyId)}
 							title={streamKey.enabled ? 'Reload Edges' : ''}
 							disabled={!streamKey.enabled}
 						>
@@ -260,6 +260,7 @@ function Streams (props) {
 					<tbody>
 
 						<tr className='align-middle'>
+							<th />
 							<th />
 							<th>
 								Thumbnail

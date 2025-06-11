@@ -307,14 +307,15 @@ export async function concludeStream (req, res, _next) {
 }
 
 /**
- * POST /stream/:id/reload-edges
- * Restart stream edges
+ * POST /stream/:id/restart
+ * Restart stream (conclude without connection ban)
  */
-export async function reloadEdges (req, res, _next) {
+export async function restartStream (req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
+	//unlike conclude, not setting the stream key to concluding so reconnect will be allowed
 	const existingStream = await db.db().collection('streams').findOne({
 		userName: res.locals.user.username,
 		_id: ObjectId(req.params.id),
@@ -325,8 +326,8 @@ export async function reloadEdges (req, res, _next) {
 	}
 
 	const appName = existingStream.appName;
-	//Concluding on edges, but not deleting from origin, can fix stuck edges
 	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
+	res.locals.ovenMediaDelete(res.locals.user.streamsId, appName);
 
 	return dynamicResponse(req, res, 200, {});
 }

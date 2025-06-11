@@ -468,13 +468,13 @@ export default function router (server, app) {
 		streamsController.concludeStream,
 	);
 	clusterRouter.post(
-		'/stream/:id([a-f0-9]{24})/reload-edges',
+		'/stream/:id([a-f0-9]{24})/restart',
 		useSession,
 		fetchSession,
 		checkSession,
 		csrfMiddleware,
 		useOvenMedia,
-		streamsController.reloadEdges,
+		streamsController.restartStream,
 	);
 	clusterRouter.post(
 		'/stream/:id([a-f0-9]{24})/toggle',
