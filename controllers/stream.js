@@ -20,7 +20,7 @@ const validateSignature = (payload, signature) => {
 
 /**
  * POST /stream/alert-webhook
- * oven media engine admissionswebhook handler
+ * oven media engine alertwebhook handler
  */
 export async function alertWebhook (req, res) {
 	//NOTE: follows response format for ovenmedia engine
@@ -231,32 +231,42 @@ export async function admissionsWebhook (req, res) {
 		.toArray();
 
 	if (streamsIdWebhooks && streamsIdWebhooks.length > 0) {
-		console.log('admissionsWebhook received for:', payload.request.url, 'oven signature:', ovenSignature);
+		console.log('admissionsWebhook received for:', payload.request.url, 'oven signature:', ovenSignature, 'appName:', appName);
 	}
 
-	Promise.all(streamsIdWebhooks.map(async wh => {
-		const webhookBody = payload.request;
-		const jsonBody = JSON.stringify(webhookBody);
-		const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
-			.update(jsonBody)
-			.digest('hex');
-		return fetch(wh.url, {
-			method: 'POST',
-			redirect: 'manual', //Dont follow user link redirects
-			body: jsonBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'x-bf-signature': outgoingSignature
-			},
-		}).then(res => console.log(wh.url, 'response:', res.status));
-	})).catch(console.warn); //Note: async
+	try {
+		await Promise.all([
+			res.locals.ovenMediaConclude(streamsId, appName),
+			res.locals.ovenMediaDelete(streamsId, appName),
+		])
+		console.log('Concluding and deleting pre-admission, streamsId:', streamsId, 'appName:', appName);
+	} catch (e) {
+		console.warn('Concluding and deleting pre-admission error:', e);
+	} finally {
+		Promise.all(streamsIdWebhooks.map(async wh => {
+			const webhookBody = payload.request;
+			const jsonBody = JSON.stringify(webhookBody);
+			const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
+				.update(jsonBody)
+				.digest('hex');
+			return fetch(wh.url, {
+				method: 'POST',
+				redirect: 'manual', //Dont follow user link redirects
+				body: jsonBody,
+				headers: {
+					'Content-Type': 'application/json',
+					'x-bf-signature': outgoingSignature
+				},
+			}).then(res => console.log(wh.url, 'response:', res.status));
+		})).catch(console.warn); //Note: async
 
-	return res.status(200).json({
-		allowed: true,
-		new_url: parsedUrl,
-		lifetime: 0, // 0 means infinity
-		reason: 'authorized'
-	});
+		return res.status(200).json({
+			allowed: true,
+			new_url: parsedUrl,
+			lifetime: 0, // 0 means infinity
+			reason: 'authorized'
+		});
+	}
 
 };
 
