@@ -307,6 +307,31 @@ export async function concludeStream (req, res, _next) {
 }
 
 /**
+ * POST /stream/:id/reload-edges
+ * Restart stream edges
+ */
+export async function reloadEdges (req, res, _next) {
+	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const existingStream = await db.db().collection('streams').findOne({
+		userName: res.locals.user.username,
+		_id: ObjectId(req.params.id),
+	});
+
+	if (!existingStream) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	const appName = existingStream.appName;
+	//Concluding on edges, but not deleting from origin, can fix stuck edges
+	res.locals.ovenMediaConclude(res.locals.user.streamsId, appName);
+
+	return dynamicResponse(req, res, 200, {});
+}
+
+/**
  * POST /stream/:id/toggle
  * toggle the enabled state of a stream
  */
