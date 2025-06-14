@@ -36,6 +36,26 @@ app.prepare()
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);
+
+		server.use((req, res, next) => {
+			const startTime = new Date();
+			if (!req.originalUrl.startsWith('/_next')) {
+				res.on('finish', () => {
+					const timeLocal = startTime.toISOString();
+					const realIpRemoteAddr = req.headers['x-real-ip'] || req.ip;
+					const xContinentCode = req.headers['x-continent-code'] || '-';
+					const xCountryCode = req.headers['x-country-code'] || '-';
+					const status = res.statusCode;
+					const request = `${req.method} ${req.originalUrl}`;
+					const referer = req.headers['referer'] || '-';
+					const userAgent = req.headers['user-agent'] || '-';
+					const bytesSent = res.get('Content-Length') || 0;
+					console.log(`[${timeLocal}] (${realIpRemoteAddr}) ${xContinentCode} ${xCountryCode} ${status} "${request}" "${referer}" "${userAgent}" ${bytesSent} ${JSON.stringify(req.body)}`);
+				});
+			}
+			next();
+		});
+
 		server.use('/.well-known/acme-challenge', express.static('/tmp/.well-known/acme-challenge'));
 
 		router(server, app);
@@ -47,7 +67,7 @@ app.prepare()
 		server.use((err, _req, res, _next) => {
 			const now = Date.now();
 			console.error('An error occurred', now, err);
-			return res.send('An error occurred. Please contact support with code: '+now);
+			return res.send('An error occurred. Please contact support with code: ' + now);
 		});
 
 		server.listen(port, hostname, (err) => {
