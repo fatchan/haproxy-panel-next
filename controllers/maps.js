@@ -457,7 +457,7 @@ export async function patchMapForm (req, res, next) {
 			if (!req.body.m || !protectionModeSet.has(req.body.m.toString())) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 			}
-			if (!req.body.l || !susLevelSet.has(req.body.l.toString())) {
+			if (req.body.l != null && !susLevelSet.has(req.body.l.toString())) {
 				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 			}
 		}
