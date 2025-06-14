@@ -50,7 +50,7 @@ app.prepare()
 					const referer = req.headers['referer'] || '-';
 					const userAgent = req.headers['user-agent'] || '-';
 					const bytesSent = res.get('Content-Length') || 0;
-					console.log(`[${timeLocal}] (${realIpRemoteAddr}) ${xContinentCode} ${xCountryCode} ${status} "${request}" "${referer}" "${userAgent}" ${bytesSent} ${JSON.stringify(req.body)}`);
+					console.log(`[${timeLocal}] (${realIpRemoteAddr}) ${xContinentCode} ${xCountryCode} ${status} "${request}" "${referer}" "${userAgent}" ${bytesSent}`);
 				});
 			}
 			next();
