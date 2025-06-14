@@ -1,8 +1,6 @@
 import express from 'express';
 import csrf from 'csurf';
 import ShkeeperManager from './lib/billing/shkeeper.js';
-import definition from './openapi/haproxy.js';
-import agent from './agent.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerCss from './lib/swagger/css.js';
 import swaggerDocument from './openapi/basedflare.json' with { type: 'json' };
@@ -27,8 +25,11 @@ import {
 	adminCheck
 } from './lib/middleware/session.js';
 import {
-	getHaproxy
+	useHaproxy
 } from './lib/middleware/haproxy.js';
+import {
+	useVarnish
+} from './lib/middleware/varnish.js';
 import {
 	useOvenMedia
 } from './lib/middleware/oven.js';
@@ -45,8 +46,6 @@ export default function router (server, app) {
 			csrfHandler(req, res, next);
 		}
 	};
-	const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u));
-	const haproxyMiddleware = getHaproxy(server, app, clusterUrls, agent, definition);
 
 	server.use('/api-docs', swaggerUi.serve);
 	server.get('/api-docs', swaggerUi.setup(swaggerDocument, {
@@ -97,22 +96,22 @@ export default function router (server, app) {
 	);
 
 	const mapNames = [
-			process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
-			process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
-			process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
-			process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
-			process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
-			process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-			process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
-			process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
-			process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
-			process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
-			process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
-			process.env.NEXT_PUBLIC_CSS_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
+		process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
+		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
+		process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
+		process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
+		process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
+		process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+		process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
+		process.env.NEXT_PUBLIC_CSS_MAP_NAME,
 		// 'translation',
-		],
+	],
 		mapNamesOrString = mapNames.join('|');
 
 	//authed pages
@@ -122,7 +121,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		accountController.dashboardPage.bind(null, app),
 	);
@@ -132,7 +131,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		cacheController.cachePage.bind(null, app),
 	);
@@ -159,7 +158,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		accountController.onboardingPage.bind(null, app),
 	);
@@ -169,7 +168,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		accountController.accountJson,
 	);
@@ -185,7 +184,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		accountController.onboardingJson,
 	);
@@ -228,7 +227,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		mapsController.mapPage.bind(null, app),
 	);
@@ -238,7 +237,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		mapsController.mapJson,
 	);
@@ -363,7 +362,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		certsController.certsPage.bind(null, app),
 	);
@@ -373,7 +372,7 @@ export default function router (server, app) {
 		fetchSession,
 		checkSession,
 		checkOnboarding,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		certsController.certsJson,
 	);
@@ -384,7 +383,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useVarnish,
 		csrfMiddleware,
 		cacheController.purgeURL,
 	);
@@ -393,7 +392,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		accountController.globalToggle,
 	);
@@ -402,7 +401,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		mapsController.patchMapForm,
 	);
@@ -411,7 +410,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		mapsController.deleteMapForm,
 	);
@@ -436,7 +435,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		domainsController.addDomain,
 	);
@@ -445,7 +444,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		domainsController.deleteDomain,
 	);
@@ -517,7 +516,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		apikeysController.addApiKey,
 	);
@@ -526,7 +525,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		apikeysController.deleteApiKey,
 	);
@@ -535,7 +534,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		certsController.addCert,
 	);
@@ -544,7 +543,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		certsController.uploadCert,
 	);
@@ -553,7 +552,7 @@ export default function router (server, app) {
 		useSession,
 		fetchSession,
 		checkSession,
-		haproxyMiddleware,
+		useHaproxy,
 		csrfMiddleware,
 		certsController.deleteCert,
 	);
