@@ -5,7 +5,7 @@ process
 	.on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 import express from 'express';
 import next from 'next';

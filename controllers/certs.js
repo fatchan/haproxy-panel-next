@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 import * as db from '../db.js';
 import * as acme from '../acme.js';
 import url from 'node:url';

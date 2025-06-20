@@ -6,7 +6,7 @@ process
 
 import dotenv from 'dotenv';
 import * as db from './db.js';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 import * as redis from './redis.js';
 import { pathToFileURL } from 'node:url';
 const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;

@@ -68,6 +68,7 @@ export const sections = [
 		links: [
 			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up' },
 		],
+		disabled: !process.env.NEXT_PUBLIC_ENABLE_STATS,
 	},
 	{
 		links: [
@@ -78,6 +79,7 @@ export const sections = [
 		links: [
 			{ href: '/streams', label: 'Live Streaming', icon: 'bi-cast' },
 		],
+		disabled: !process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME,
 	},
 	{
 		name: 'Knowledge Base',
@@ -98,6 +100,7 @@ const MenuLinks = ({ router }) => {
 	const [openSections, setOpenSections] = useState({});
 
 	const renderSection = (section, index) => {
+		if (section.disabled) { return null; }
 		return section.links.length === 1
 			? <ul key={`section_${section.links[0].name}_${index}`} className='nav nav-pills mb-2'>
 				<li className='nav-item w-100' key={`${section.name}_${index}`}>
@@ -166,7 +169,6 @@ const MenuLinks = ({ router }) => {
 		};
 	}, [router.pathname]);
 
-	//meh
 	const toggleSection = (section) => {
 		setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
 	};
@@ -186,12 +188,14 @@ const MenuLinks = ({ router }) => {
 						Onboarding
 					</Link>
 				</li>
-				<li className='nav-item'>
-					<Link href='/billing' className={path.startsWith('/billing') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
-						<i className='bi-wallet2 pe-none me-2' width='16' height='16' />
-						Billing
-					</Link>
-				</li>
+				{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER
+					&& (<li className='nav-item'>
+						<Link href='/billing' className={path.startsWith('/billing') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
+							<i className='bi-wallet2 pe-none me-2' width='16' height='16' />
+							Billing
+						</Link>
+					</li>)
+				}
 				<li className='nav-item'>
 					<Link href='/account' className={path.startsWith('/account') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
 						<i className='bi-person pe-none me-2' width='16' height='16' />

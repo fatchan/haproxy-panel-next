@@ -7,6 +7,11 @@ process
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+if (!process.env.INFLUX_HOST) {
+	console.error('INFLUX_HOST not set, statistics will not be recorded');
+	process.exit(1);
+}
+
 import * as redis from '../redis.js';
 import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
@@ -20,11 +25,6 @@ const haproxyStatsQueue = new Queue('stats', {
 		db: redis.lockQueueClient.options.db,
 	}
 });
-
-if (!process.env.INFLUX_HOST) {
-	console.error('INFLUX_HOST not set, statistics will not be recorded');
-	process.exit(1);
-}
 
 async function main () {
 	try {

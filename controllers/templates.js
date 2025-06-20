@@ -1,11 +1,12 @@
 import * as db from '../db.js';
 import { dynamicResponse } from '../util.js';
+import { update } from '../update.js';
 
 /**
  * POST /template
  * Upsert templates and delete any no longer existing templates
  */
-export async function upsertTemplates(req, res) {
+export async function upsertTemplates (req, res) {
 	if (!Array.isArray(req.body.templates) || req.body.templates.length === 0) {
 		return dynamicResponse(req, res, 403, { error: 'Invalid input' });
 	}
@@ -35,7 +36,7 @@ export async function upsertTemplates(req, res) {
  * POST /update
  * Placeholder for update logic (to be implemented)
  */
-export async function update(req, res) {
+export async function updateTemplates (_req, res) {
 	await update(); //updates existing records with updated templates
 	return res.json({ ok: true });
 }
@@ -44,7 +45,7 @@ export async function update(req, res) {
  * POST /down
  * Update the list of down IPs
  */
-export async function updateDownIPs(req, res) {
+export async function updateDownIPs (req, res) {
 	const ips = req.body.ips.filter((x) => x && x.length > 0);
 	if (ips.length === 0) {
 		await db.db().collection('down').updateOne(

@@ -168,9 +168,7 @@ export async function mapData (req, res, next) {
 		/* falls through */
 		case process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME:
 		case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
-			if (process.env.CUSTOM_BACKENDS_ENABLED) {
-				showValues = true;
-			}
+			showValues = true;
 			const isHosts = req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME;
 			if (isHosts) {
 				map = map.map(a => {
@@ -306,7 +304,7 @@ export async function deleteMapForm (req, res, next) {
 			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 		}
 		try {
-			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
 				const matchingBackend = await res.locals
 					.dataPlaneRetry('showRuntimeMap', {
@@ -469,7 +467,7 @@ export async function patchMapForm (req, res, next) {
 		}
 
 		//validate value is IP:port
-		if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 			//validate key is country code
 			if (!req.body.geo || typeof req.body.geo !== 'string' || !continentMap[req.body.geo]) {
 				return dynamicResponse(req, res, 403, { error: 'Invalid backend geo route value' });
@@ -495,11 +493,7 @@ export async function patchMapForm (req, res, next) {
 				value = req.body.value;
 				break;
 			case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
-				if (process.env.CUSTOM_BACKENDS_ENABLED) {
-					value = `${req.body.ip}|${req.body.geo}`;
-				} else {
-					value = 0;
-				}
+				value = `${req.body.ip}|${req.body.geo}`;
 				break;
 			case process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME:
 			case process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME:
@@ -551,7 +545,7 @@ export async function patchMapForm (req, res, next) {
 
 		try {
 
-			if (process.env.CUSTOM_BACKENDS_ENABLED && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				const { hostname: address, port } = new URL(`http://${req.body.ip}`);
 				const backendAllowed = await backendIpAllowed(res.locals.dataPlaneRetry, res.locals.user.username, address);
 				if (!backendAllowed) {

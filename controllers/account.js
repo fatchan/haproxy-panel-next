@@ -7,7 +7,7 @@ import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
 import { randomBytes } from 'node:crypto';
 import * as redis from '../redis.js';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 const localNSResolver = new Resolver();
 localNSResolver.setServers(process.env.NAMESERVERS.split(','));
@@ -18,10 +18,6 @@ googleResolver.setServers(['8.8.8.8']);
 const quad9Resolver = new Resolver();
 quad9Resolver.setServers(['9.9.9.9']);
 const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
-
-const uptimeKumaAuth = Buffer.from(
-	`:${process.env.UPTIME_KUMA_API_KEY}`,
-).toString('base64');
 
 //TODO: move to lib
 const nameserverTxtDomains = process.env.NAMESERVER_TXT_DOMAINS.split(',');
@@ -138,7 +134,14 @@ export async function accountJson (req, res, next) {
  * GET /incidents.json
  * get incidents from uptime kuma
  */
+const uptimeKumaAuth = Buffer.from(
+	`:${process.env.UPTIME_KUMA_API_KEY}`,
+).toString('base64');
 export async function incidentsJson (req, res, _next) {
+	if (!process.env.UPTIME_KUMA_STATUS_URL) {
+		console.warn('process.env.UPTIME_KUMA_STATUS_URL not set, skipping incident check');
+		return res.json([]);
+	}
 	let cachedRes = await redis.lockQueueClient.get('incidents');
 	if (cachedRes) {
 		return res.json(JSON.parse(cachedRes));

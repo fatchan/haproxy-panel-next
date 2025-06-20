@@ -5,7 +5,7 @@ process
 	.on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 import * as redis from '../redis.js';
 import Queue from 'bull';

@@ -34,6 +34,25 @@ import {
 	useOvenMedia
 } from './lib/middleware/oven.js';
 
+const mapNames = [
+	process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
+	process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
+	process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
+	process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
+	process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
+	process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
+	process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
+	process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+	process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
+	process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
+	process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
+	process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+	process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
+	process.env.NEXT_PUBLIC_CSS_MAP_NAME,
+	// 'translation',
+],
+	mapNamesOrString = mapNames.join('|');
+
 export default function router (server, app) {
 
 	const shkeeperManager = new ShkeeperManager();
@@ -94,25 +113,6 @@ export default function router (server, app) {
 		useSession,
 		accountController.verifyEmail,
 	);
-
-	const mapNames = [
-		process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
-		process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
-		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
-		process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
-		process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-		process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
-		process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
-		process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
-		process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
-		process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
-		process.env.NEXT_PUBLIC_CSS_MAP_NAME,
-		// 'translation',
-	],
-		mapNamesOrString = mapNames.join('|');
 
 	//authed pages
 	server.get(
@@ -189,39 +189,6 @@ export default function router (server, app) {
 		accountController.onboardingJson,
 	);
 	server.get(
-		'/billing',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		billingController.billingPage.bind(null, app),
-	);
-	server.get(
-		'/billing.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		billingController.billingJson,
-	);
-	server.get(
-		'/stats',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		csrfMiddleware,
-		statsController.statsPage.bind(null, app),
-	);
-	server.get(
-		'/stats.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		statsController.statsJson,
-	);
-	server.get(
 		`/map/:name(${mapNamesOrString})`,
 		useSession,
 		fetchSession,
@@ -256,33 +223,6 @@ export default function router (server, app) {
 		checkSession,
 		csrfMiddleware,
 		domainsController.domainsJson,
-	);
-	server.get(
-		'/streams',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.streamsPage.bind(null, app),
-	);
-	server.get(
-		'/streams.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.streamsJson,
-	);
-	server.get(
-		'/streams/viewcounts.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.streamsViewcountsJson,
 	);
 	server.get(
 		'/apikeys',
@@ -449,69 +389,6 @@ export default function router (server, app) {
 		domainsController.deleteDomain,
 	);
 	clusterRouter.post(
-		'/stream',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.addStream,
-	);
-	clusterRouter.post(
-		'/stream/:id([a-f0-9]{24})/conclude',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.concludeStream,
-	);
-	clusterRouter.post(
-		'/stream/:id([a-f0-9]{24})/restart',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.restartStream,
-	);
-	clusterRouter.post(
-		'/stream/:id([a-f0-9]{24})/toggle',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.toggleStream,
-	);
-	clusterRouter.delete(
-		'/stream/:id([a-f0-9]{24})',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.deleteStream,
-	);
-	clusterRouter.post(
-		'/stream/webhook',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.addStreamWebhook,
-	);
-	clusterRouter.delete(
-		'/stream/webhook/:id([a-f0-9]{24})',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		useOvenMedia,
-		streamsController.deleteStreamWebhook,
-	);
-	clusterRouter.post(
 		'/apikey/add',
 		useSession,
 		fetchSession,
@@ -575,7 +452,6 @@ export default function router (server, app) {
 		},
 	);
 
-	// admin template stuff
 	clusterRouter.post(
 		'/template',
 		useSession,
@@ -592,7 +468,7 @@ export default function router (server, app) {
 		checkSession,
 		csrfMiddleware,
 		adminCheck,
-		templateController.update
+		templateController.updateTemplates
 	);
 	clusterRouter.post(
 		'/down',
@@ -604,18 +480,148 @@ export default function router (server, app) {
 		templateController.updateDownIPs
 	);
 
-	// billing
-	clusterRouter.post(
-		'/billing/payment_request',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		billingController.createPaymentRequest,
-	);
-	server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
-	server.post('/forms/stream/admissions-webhook', useOvenMedia, (req, res, _next) => streamsController.admissionsWebhook(req, res));
-	server.post('/forms/stream/alert-webhook', useOvenMedia, (req, res, _next) => streamsController.alertWebhook(req, res));
+	if (process.env.LOKI_BASE_URL) {
+		server.get(
+			'/stats',
+			useSession,
+			fetchSession,
+			checkSession,
+			checkOnboarding,
+			csrfMiddleware,
+			statsController.statsPage.bind(null, app),
+		);
+		server.get(
+			'/stats.json',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			statsController.statsJson,
+		);
+	}
+
+	if (process.env.NEXT_PUBLIC_ENABLE_SHKEEPER) {
+		server.get(
+			'/billing',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			billingController.billingPage.bind(null, app),
+		);
+		server.get(
+			'/billing.json',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			billingController.billingJson,
+		);
+		clusterRouter.post(
+			'/billing/payment_request',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			billingController.createPaymentRequest,
+		);
+		server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
+	}
+
+	if (process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME) {
+		server.get(
+			'/streams',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.streamsPage.bind(null, app),
+		);
+		server.get(
+			'/streams.json',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.streamsJson,
+		);
+		server.get(
+			'/streams/viewcounts.json',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.streamsViewcountsJson,
+		);
+		clusterRouter.post(
+			'/stream',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.addStream,
+		);
+		clusterRouter.post(
+			'/stream/:id([a-f0-9]{24})/conclude',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.concludeStream,
+		);
+		clusterRouter.post(
+			'/stream/:id([a-f0-9]{24})/restart',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.restartStream,
+		);
+		clusterRouter.post(
+			'/stream/:id([a-f0-9]{24})/toggle',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.toggleStream,
+		);
+		clusterRouter.delete(
+			'/stream/:id([a-f0-9]{24})',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.deleteStream,
+		);
+		clusterRouter.post(
+			'/stream/webhook',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.addStreamWebhook,
+		);
+		clusterRouter.delete(
+			'/stream/webhook/:id([a-f0-9]{24})',
+			useSession,
+			fetchSession,
+			checkSession,
+			csrfMiddleware,
+			useOvenMedia,
+			streamsController.deleteStreamWebhook,
+		);
+		server.post('/forms/stream/admissions-webhook', useOvenMedia, (req, res, _next) => streamsController.admissionsWebhook(req, res));
+		server.post('/forms/stream/alert-webhook', useOvenMedia, (req, res, _next) => streamsController.alertWebhook(req, res));
+	}
 
 	server.use('/forms', clusterRouter);
 }

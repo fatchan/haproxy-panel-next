@@ -7,6 +7,11 @@ process
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+if (!process.env.INFLUX_HOST) {
+	console.error('INFLUX_HOST not set, statistics will not be recorded');
+	process.exit(1);
+}
+
 import * as redis from '../redis.js';
 import Queue from 'bull';
 const haproxyStatsQueue = new Queue('stats', {
@@ -17,11 +22,6 @@ const haproxyStatsQueue = new Queue('stats', {
 		db: redis.lockQueueClient.options.db,
 	}
 });
-
-if (!process.env.INFLUX_HOST) {
-	console.error('INFLUX_HOST not set, statistics will not be recorded');
-	process.exit(1);
-}
 
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import agent from '../agent.js';

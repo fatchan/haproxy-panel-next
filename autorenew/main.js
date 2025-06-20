@@ -5,7 +5,7 @@ process
 	.on('unhandledRejection', console.error);
 
 import dotenv from 'dotenv';
-await dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' });
 import * as db from '../db.js';
 import FormData from 'form-data';
 import agent from '../agent.js';
@@ -22,18 +22,18 @@ const clusterUrls = process.env.DEFAULT_CLUSTER.split(',').map(u => new URL(u))
 	, firstClusterURL = clusterUrls[0]
 	, base64Auth = Buffer.from(`${firstClusterURL.username}:${firstClusterURL.password}`).toString('base64');
 
-async function main() {
+async function main () {
 	await db.connect();
 	await acme.init();
 	loop();
 }
 
-function getCertsOlderThan(days=60) {
+function getCertsOlderThan (days = 60) {
 	return db.db().collection('certs')
 		.find({
 			// _id: '*.zeroddos.net',
 			date: {
-				'$lt': new Date(new Date().setDate(new Date().getDate()-days))
+				'$lt': new Date(new Date().setDate(new Date().getDate() - days))
 			},
 		}, {
 			date: 1,
@@ -43,7 +43,7 @@ function getCertsOlderThan(days=60) {
 		.toArray();
 }
 
-async function postFileAll(path, options, file, fdOptions) {
+async function postFileAll (path, options, file, fdOptions) {
 	const promiseResults = await Promise.all(clusterUrls.map(clusterUrl => {
 		const fd = new FormData();
 		fd.append('file_upload', file, fdOptions);
@@ -52,7 +52,7 @@ async function postFileAll(path, options, file, fdOptions) {
 	return promiseResults[0];
 }
 
-async function updateCert(dbCert) {
+async function updateCert (dbCert) {
 	const { subject, altnames } = dbCert;
 	console.log('Renew cert request:', subject, altnames);
 	const { csr, key, cert, haproxyCert, date } = await acme.generate(subject, altnames, ['dns-01', 'http-01']);
@@ -62,10 +62,10 @@ async function updateCert(dbCert) {
 			'authorization': `Basic ${base64Auth}`,
 		},
 	}, haproxyCert,
-	{
-		filename: `${subject}.pem`,
-		contentType: 'text/plain',
-	}
+		{
+			filename: `${subject}.pem`,
+			contentType: 'text/plain',
+		}
 	);
 	if (message) {
 		return console.error('Problem renewing', subject, altnames, 'message:', message);
@@ -91,19 +91,19 @@ async function updateCert(dbCert) {
 		});
 }
 
-async function loop() {
+async function loop () {
 	try {
 		const expiringCerts = await getCertsOlderThan(60);
 		if (expiringCerts.length === 0) {
 			console.log('No certs close to expiry');
 		}
 		for (const c of expiringCerts) {
-			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate()+90)), 'for', c.subject, c.altnames.toString());
+			console.log('Renewing cert that expires', new Date(new Date(c.date).setDate(new Date(c.date).getDate() + 90)), 'for', c.subject, c.altnames.toString());
 			const rootDomain = psl.parse(c.subject.replace('*', 'x')).domain;
 			let certDomainNameservers = [];
 			try {
 				certDomainNameservers = await resolver.resolve(rootDomain, 'NS');
-			} catch(e) {
+			} catch (e) {
 				console.warn(e); //probably just no NS records, bad domain
 				certDomainNameservers = null;
 			}
@@ -115,14 +115,15 @@ async function loop() {
 				await new Promise(res => setTimeout(res, 5000));
 			}
 		}
-	} catch(e) {
+	} catch (e) {
 		console.error(e);
 		console.log('Sleeping for', 60000);
-		fetch(process.env.AUTORENEW_WARNING_ENDPOINT)
-			.then(res => console.log('sending autorenew warning, status:', res.status))
-			.catch(err => console.error(err));
-		process.exit(-1);
-		return;
+		if (process.env.AUTORENEW_WARNING_ENDPOINT) {
+			fetch(process.env.AUTORENEW_WARNING_ENDPOINT)
+				.then(res => console.log('sending autorenew warning, status:', res.status))
+				.catch(err => console.error(err));
+		}
+		return process.exit(1);
 	}
 	console.log('Sleeping for', 3600000);
 	setTimeout(loop, 3600000);

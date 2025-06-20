@@ -7,7 +7,7 @@ import * as API from '../api.js';
 import NProgress from 'nprogress';
 import withAuth from '../components/withAuth.js';
 
-function Onboarding(props) {
+function Onboarding (props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -15,7 +15,7 @@ function Onboarding(props) {
 	const [error, setError] = useState();
 	const [csrState, setCsrState] = useState();
 
-	async function fetchOnboarding(key) {
+	async function fetchOnboarding (key) {
 		key && setLoading(oldLoading => ({ ...oldLoading, [key]: true }));
 		try {
 			await API.getOnboarding(async res => {
@@ -67,28 +67,28 @@ function Onboarding(props) {
 	const backendAdded = backendMap && backendMap.count > 0 && hasBackend === true;
 	const certAdded = user.numCerts && user.numCerts > 0;
 
-	async function updateOnboarding(step) {
+	async function updateOnboarding (step) {
 		await API.updateOnboarding({
 			step
 		}, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 	}
 
-	async function addDomain(e) {
+	async function addDomain (e) {
 		e.preventDefault();
 		await API.addDomain({ _csrf: csrf, domain: e.target.domain.value, onboarding: e.target.onboarding.value }, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 		e.target.reset();
 	}
 
-	async function addToMap(e) {
+	async function addToMap (e) {
 		e.preventDefault();
 		await API.addToMap('hosts', { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value, onboarding: e.target.onboarding.value }, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 		e.target.reset();
 	}
 
-	async function addCert(e) {
+	async function addCert (e) {
 		e.preventDefault();
 		await API.addCert({
 			_csrf: csrf,
@@ -100,7 +100,7 @@ function Onboarding(props) {
 		e.target.reset();
 	}
 
-	async function verifyCSR(e) {
+	async function verifyCSR (e) {
 		e.preventDefault();
 		setError(null);
 		await API.verifyCSR({
@@ -241,17 +241,14 @@ function Onboarding(props) {
 								<option value=''>select domain</option>
 								{(user.domains || []).map((d, i) => (<option key={'option' + i} value={d}>{d}</option>))}
 							</select>
-							{
-								(process.env.NEXT_PUBLIC_CUSTOM_BACKENDS_ENABLED) &&
-								<input
-									className='form-control mb-3'
-									type='text'
-									name='value'
-									placeholder='backend ip:port'
-									disabled={backendAdded}
-									required
-								/>
-							}
+							<input
+								className='form-control mb-3'
+								type='text'
+								name='value'
+								placeholder='backend ip:port'
+								disabled={backendAdded}
+								required
+							/>
 							<input className='btn btn-success' type='submit' value='Add backend' disabled={backendAdded} />
 						</form>
 					</>}
@@ -355,8 +352,8 @@ function Onboarding(props) {
 	</>);
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+export async function getServerSideProps ({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 };
 
 export default withAuth(Onboarding);

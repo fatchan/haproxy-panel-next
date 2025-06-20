@@ -3,6 +3,11 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
+if (!process.env.AUTODISCOVER_HOST) {
+	console.warn('process.env.AUTODISCOVER_HOST not set, autodiscover server not running');
+	process.exit(1);
+}
+
 const base64Auth = Buffer.from(`${process.env.AUTODISCOVER_USER}:${process.env.AUTODISCOVER_PASS}`).toString('base64');
 const fetchOptions = {
 	headers: {
@@ -13,12 +18,12 @@ const fetchOptions = {
 class AutodiscoverService {
 	#autodiscoveredHosts = [];
 
-	async init() {
+	async init () {
 		await this.autodiscover(); // Initial autodiscover
 		setInterval(() => this.autodiscover(), 60000); // Repeat autodiscover every 60 seconds
 	}
 
-	async autodiscover() {
+	async autodiscover () {
 		try {
 			const response = await fetch(`${process.env.AUTODISCOVER_HOST}/v1/autodiscover`, fetchOptions);
 			const json = await response.json();
@@ -31,7 +36,7 @@ class AutodiscoverService {
 		}
 	}
 
-	get urls() {
+	get urls () {
 		return this.#autodiscoveredHosts;
 	}
 }
