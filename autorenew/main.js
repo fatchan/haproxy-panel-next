@@ -62,10 +62,10 @@ async function updateCert (dbCert) {
 			'authorization': `Basic ${base64Auth}`,
 		},
 	}, haproxyCert,
-		{
-			filename: `${subject}.pem`,
-			contentType: 'text/plain',
-		}
+	{
+		filename: `${subject}.pem`,
+		contentType: 'text/plain',
+	}
 	);
 	if (message) {
 		return console.error('Problem renewing', subject, altnames, 'message:', message);
