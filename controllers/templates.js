@@ -1,6 +1,6 @@
 import * as db from '../db.js';
 import { dynamicResponse } from '../util.js';
-import { update } from '../update.js';
+import update from '../update.js';
 
 /**
  * POST /template
