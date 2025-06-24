@@ -11,6 +11,7 @@ import express from 'express';
 import next from 'next';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import rawBodySaver from './lib/middleware/rawbody.js';
 
 import * as acme from './acme.js';
 import * as redis from './redis.js';
@@ -31,8 +32,8 @@ app.prepare()
 
 		const server = express();
 		server.set('query parser', 'simple');
-		server.use(bodyParser.json({ strict: true })); // for parsing application/json
-		server.use(bodyParser.urlencoded({ extended: false })); // for parsing application/x-www-form-urlencoded
+		server.use(bodyParser.json({ strict: true, verify: rawBodySaver })); // for parsing application/json
+		server.use(bodyParser.urlencoded({ extended: false, verify: rawBodySaver })); // for parsing application/x-www-form-urlencoded
 		server.use(cookieParser(process.env.COOKIE_SECRET));
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);

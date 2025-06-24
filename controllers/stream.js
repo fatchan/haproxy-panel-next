@@ -11,9 +11,10 @@ const generateRandomString = (length = 32) => {
 };
 
 const validateSignature = (payload, signature) => {
+	console.log('validating', payload, signature);
 	const secretKey = process.env.OME_WEBHOOK_SECRET || 'changeme';
 	const hmac = crypto.createHmac('sha1', secretKey);
-	hmac.update(JSON.stringify(payload));
+	hmac.update(payload);
 	const expectedSignature = hmac.digest('base64url');
 	return expectedSignature === signature; //todo: time safe compare
 };
@@ -27,11 +28,8 @@ export async function alertWebhook (req, res) {
 	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	if (!validateSignature(payload, ovenSignature)) {
-		// return res.status(401).json({});
-		if (req.headers['x-forwarded-for'] !== process.env.TEMP_IP) {
-			return res.status(401).json({});
-		}
+	if (!validateSignature(req.rawBody, ovenSignature)) {
+		return res.status(401).json({ reason: 'invalid signature' });
 	}
 
 	// reply early with blank json
@@ -50,9 +48,6 @@ export async function alertWebhook (req, res) {
 		return console.warn('Invalid sourceAppString in alertWebhook:', sourceAppString);
 	}
 
-	// Trigger before account check because this isn't controlled by the cp
-	// res.locals.ovenMediaStartAsync(streamsId, appName);
-
 	const streamsIdAccount = await db.db().collection('accounts').findOne({
 		streamsId,
 	}, {
@@ -62,10 +57,7 @@ export async function alertWebhook (req, res) {
 	});
 
 	if (!streamsIdAccount) {
-		return res.status(200).json({
-			allowed: false,
-			reason: 'Invalid stream account id'
-		});
+		return console.warn('Invalid streamsIdAccount in alertWebhook:', streamsIdAccount);
 	}
 
 	const streamsIdUsername = streamsIdAccount._id.toString();
@@ -117,7 +109,7 @@ export async function admissionsWebhook (req, res) {
 	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
 
-	if (!validateSignature(payload, ovenSignature)) {
+	if (!validateSignature(req.rawBody, ovenSignature)) {
 		return res.status(200).json({
 			allowed: false,
 			reason: 'Invalid stream url'
