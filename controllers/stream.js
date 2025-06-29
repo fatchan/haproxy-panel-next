@@ -227,10 +227,6 @@ export async function admissionsWebhook (req, res) {
 	}
 
 	try {
-		// await Promise.all([
-			// res.locals.ovenMediaConclude(streamsId, appName),
-			// res.locals.ovenMediaDelete(streamsId, appName),
-		// ])
 		await res.locals.ovenMediaConclude(streamsId, appName);
 		console.log('Concluding pre-admission, streamsId:', streamsId, 'appName:', appName);
 	} catch (e) {

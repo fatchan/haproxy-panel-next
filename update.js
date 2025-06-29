@@ -15,9 +15,9 @@ isMain && await db.connect();
 import { getNsTemplate, getSoaTemplate, aTemplate, aaaaTemplate } from './templates.js';
 isMain && update();
 
-async function processKey(domainKey) {
+async function processKey (domainKey) {
 	const domainHashKeys = await redis.client.hkeys(domainKey);
-	const domain = domainKey.substring(4, domainKey.length-1);
+	const domain = domainKey.substring(4, domainKey.length - 1);
 	return Promise.all(domainHashKeys.map(async (hkey) => {
 		try {
 			console.log('Updating', domain);
@@ -30,7 +30,7 @@ async function processKey(domainKey) {
 			}
 			if (records['a'] && records['a'][0]['t'] === true) {
 				const templateName = records['a'][0]['tn'] || defaultTemplate;
-				const existingATemplate = await aTemplate(templateName);
+				const existingATemplate = (await aTemplate(templateName)) || (await aTemplate(defaultTemplate));
 				if (existingATemplate) {
 					records['a'] = JSON.parse(JSON.stringify(existingATemplate));
 				} else {
@@ -39,7 +39,7 @@ async function processKey(domainKey) {
 			}
 			if (records['aaaa'] && records['aaaa'][0]['t'] === true) {
 				const templateName = records['aaaa'][0]['tn'] || defaultTemplate;
-				const existingAAAATemplate = await aaaaTemplate(templateName);
+				const existingAAAATemplate = (await aaaaTemplate(templateName)) || (await aaaaTemplate(defaultTemplate));
 				if (existingAAAATemplate) {
 					records['aaaa'] = JSON.parse(JSON.stringify(existingAAAATemplate));
 				} else {
@@ -58,13 +58,18 @@ async function processKey(domainKey) {
 				records['soa'].MBox = `root.${domain}.`;
 			}
 			await redis.hset(domainKey, hkey, records);
-		} catch(e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}));
 }
 
-export default async function update() {
+const close = () => {
+	redis.close();
+	db.client().close();
+}
+
+export default async function update () {
 	let allKeys = [];
 	const stream = redis.client.scanStream({
 		match: 'dns:*',
@@ -76,10 +81,10 @@ export default async function update() {
 	stream.on('end', async () => {
 		await Promise.all(allKeys.map(async k => processKey(k)))
 			.catch(e => console.error(e));
-		isMain && redis.close();
+		isMain && close();
 	});
 	stream.on('error', (err) => {
 		console.err(err);
-		isMain && redis.close();
+		isMain && close();
 	});
 }

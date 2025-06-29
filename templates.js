@@ -5,14 +5,14 @@ export function aTemplate(template) {
 	return db.db().collection('templates').findOne({
 		type: 'a',
 		...(template ? { template } : { template: 'basic' })
-	}).then(res => res.data);
+	}).then(res => res?.data);
 }
 
 export function aaaaTemplate(template) {
 	return db.db().collection('templates').findOne({
 		type: 'aaaa',
 		...(template ? { template } : { template: 'basic' })
-	}).then(res => res.data);
+	}).then(res => res?.data);
 };
 
 export async function getAllTemplateIps(type, allowedTemplates) {
