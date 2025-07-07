@@ -37,6 +37,7 @@ async function reset () {
 				}
 			});
 	}
+	await db.db().collection('streams').createIndex({ userName: 1, appName: 1 });
 	db.client().close();
 }
 

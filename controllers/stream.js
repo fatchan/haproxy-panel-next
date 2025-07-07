@@ -264,14 +264,17 @@ export async function admissionsWebhook (req, res) {
  * Forcefully end a live stream
  */
 export async function concludeStream (req, res, _next) {
-	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	const result = await db.db().collection('streams').findOneAndUpdate(
 		{
 			userName: res.locals.user.username,
-			_id: ObjectId(req.params.id),
+			'$or': [
+				(/[a-f0-9]{24}/.test(req.params.id) ? { _id: ObjectId(req.params.id) } : null),
+				{ appName: req.params.id },
+			].filter(x => x)
 		},
 		[{
 			$set: {
@@ -299,14 +302,17 @@ export async function concludeStream (req, res, _next) {
  * Restart stream (conclude without connection ban)
  */
 export async function restartStream (req, res, _next) {
-	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	//unlike conclude, not setting the stream key to concluding so reconnect will be allowed
 	const existingStream = await db.db().collection('streams').findOne({
 		userName: res.locals.user.username,
-		_id: ObjectId(req.params.id),
+		'$or': [
+			(/[a-f0-9]{24}/.test(req.params.id) ? { _id: ObjectId(req.params.id) } : null),
+			{ appName: req.params.id },
+		].filter(x => x)
 	});
 
 	if (!existingStream) {
@@ -325,14 +331,17 @@ export async function restartStream (req, res, _next) {
  * toggle the enabled state of a stream
  */
 export async function toggleStream (req, res, _next) {
-	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	const result = await db.db().collection('streams').findOneAndUpdate(
 		{
 			userName: res.locals.user.username,
-			_id: ObjectId(req.params.id),
+			'$or': [
+				(/[a-f0-9]{24}/.test(req.params.id) ? { _id: ObjectId(req.params.id) } : null),
+				{ appName: req.params.id },
+			].filter(x => x)
 		},
 		[{
 			$set: {
@@ -482,14 +491,17 @@ export async function addStream (req, res, _next) {
  */
 export async function deleteStream (req, res, _next) {
 
-	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
+	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	const deletedStream = await db.db().collection('streams')
 		.findOneAndDelete({
 			userName: res.locals.user.username,
-			_id: ObjectId(req.params.id),
+			'$or': [
+				(/[a-f0-9]{24}/.test(req.params.id) ? { _id: ObjectId(req.params.id) } : null),
+				{ appName: req.params.id },
+			].filter(x => x)
 		});
 
 	console.log('deletedStream', deletedStream);

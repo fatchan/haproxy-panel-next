@@ -566,7 +566,7 @@ export default function router (server, app) {
 			streamsController.addStream,
 		);
 		clusterRouter.post(
-			'/stream/:id([a-f0-9]{24})/conclude',
+			'/stream/:id([a-zA-Z0-9-_]+)/conclude',
 			useSession,
 			fetchSession,
 			checkSession,
@@ -575,7 +575,7 @@ export default function router (server, app) {
 			streamsController.concludeStream,
 		);
 		clusterRouter.post(
-			'/stream/:id([a-f0-9]{24})/restart',
+			'/stream/:id([a-zA-Z0-9-_]+)/restart',
 			useSession,
 			fetchSession,
 			checkSession,
@@ -584,7 +584,7 @@ export default function router (server, app) {
 			streamsController.restartStream,
 		);
 		clusterRouter.post(
-			'/stream/:id([a-f0-9]{24})/toggle',
+			'/stream/:id([a-zA-Z0-9-_]+)/toggle',
 			useSession,
 			fetchSession,
 			checkSession,
@@ -593,7 +593,7 @@ export default function router (server, app) {
 			streamsController.toggleStream,
 		);
 		clusterRouter.delete(
-			'/stream/:id([a-f0-9]{24})',
+			'/stream/:id([a-zA-Z0-9-_]+)',
 			useSession,
 			fetchSession,
 			checkSession,

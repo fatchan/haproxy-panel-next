@@ -542,7 +542,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Stream key id",
+            "description": "Stream key id or key name",
             "schema": {
               "type": "string",
               "example": "67a822f4518bc836547c9b1a"
@@ -582,7 +582,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Stream key id",
+            "description": "Stream key id or key name",
             "schema": {
               "type": "string",
               "example": "67a822f4518bc836547c9b1a"
@@ -622,7 +622,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Stream key id",
+            "description": "Stream key id or key name",
             "schema": {
               "type": "string",
               "example": "67a822f4518bc836547c9b1a"
@@ -662,7 +662,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Stream key id",
+            "description": "Stream key id or key name",
             "schema": {
               "type": "string",
               "example": "67a822f4518bc836547c9b1a"
