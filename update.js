@@ -67,7 +67,7 @@ async function processKey (domainKey) {
 const close = () => {
 	redis.close();
 	db.client().close();
-}
+};
 
 export default async function update () {
 	let allKeys = [];
