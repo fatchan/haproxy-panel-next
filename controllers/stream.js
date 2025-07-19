@@ -138,6 +138,8 @@ export async function admissionsWebhook (req, res) {
 		});
 	}
 
+	console.log(JSON.stringify(payload, null, 2));
+
 	if (direction === 'outgoing') {
 		return res.status(200).json({
 			allowed: true,
@@ -227,8 +229,10 @@ export async function admissionsWebhook (req, res) {
 	}
 
 	try {
-		await res.locals.ovenMediaConclude(streamsId, appName);
-		console.log('Concluding pre-admission, streamsId:', streamsId, 'appName:', appName);
+		if (status === 'opening') {
+//			console.log('Waiting before opening...');
+//			await new Promise(res => setTimeout(res, 5000));
+		}
 	} catch (e) {
 		console.warn('Concluding pre-admission error:', e);
 	} finally {
@@ -249,13 +253,20 @@ export async function admissionsWebhook (req, res) {
 			}).then(res => console.log(wh.url, 'response:', res.status));
 		})).catch(console.warn); //Note: async
 
-		return res.status(200).json({
+		res.status(200).json({
 			allowed: true,
 			new_url: parsedUrl,
 			lifetime: 0, // 0 means infinity
 			reason: 'authorized'
 		});
 	}
+
+//	if (status === 'closing') {
+//		console.log('Concluding and deleting post-closing, streamsId:', streamsId, 'appName:', appName);
+//		await res.locals.ovenMediaConclude(streamsId, appName);
+//		await res.locals.ovenMediaDelete(streamsId, appName);
+//		console.log('Concluded and deleted post-closing, streamsId:', streamsId, 'appName:', appName);
+//	}
 
 };
 

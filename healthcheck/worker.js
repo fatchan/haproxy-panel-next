@@ -32,6 +32,7 @@ const ignoredErrorCodes = [
 	'ERR_TLS_CERT_ALTNAME_INVALID',
 	'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
 	'CERT_HAS_EXPIRED',
+	'ERR_SSL_TLSV1_UNRECOGNIZED_NAME',
 ];
 
 let downedIps = [];
