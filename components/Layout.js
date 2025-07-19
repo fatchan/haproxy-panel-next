@@ -7,10 +7,10 @@ import { footerLinks } from '../instance-config.js';
 import InfoAlert from './InfoAlert';
 import * as API from '../api.js';
 
-export default withRouter(function Layout({ children, router, user }) {
+export default withRouter(function Layout ({ children, router, user }) {
 	const [incidents, setIncidents] = useState([]);
 	useEffect(() => {
-		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e); }, router);
+		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e); });
 	}, []);
 
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
@@ -20,8 +20,8 @@ export default withRouter(function Layout({ children, router, user }) {
 		<>
 
 			<Head>
-				<meta charSet='utf-8'/>
-				<meta name='viewport' content='width=device-width initial-scale=1'/>
+				<meta charSet='utf-8' />
+				<meta name='viewport' content='width=device-width initial-scale=1' />
 				<link rel='shortcut icon' href='/favicon.ico' />
 			</Head>
 
