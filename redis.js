@@ -19,17 +19,18 @@ export const lockQueueClient = new Redis({
 	db: 1,
 });
 
-export const omeClient = new Redis({
-	host: process.env.REDIS_HOST3 || '127.0.0.1',
-	port: process.env.REDIS_PORT3 || 6379,
-	password: process.env.REDIS_PASS3 || '',
-	db: 0,
-});
+export const omeClient = process.env.REDIS_HOST3
+	? new Redis({
+		host: process.env.REDIS_HOST3 || '127.0.0.1',
+		port: process.env.REDIS_PORT3 || 6379,
+		password: process.env.REDIS_PASS3 || '',
+		db: 0,
+	}) : null;
 
 export function close () {
 	client.quit();
 	lockQueueClient.quit();
-	omeClient.quit();
+	omeClient?.quit();
 }
 
 //set value with expiry
