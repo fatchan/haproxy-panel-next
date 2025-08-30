@@ -178,7 +178,7 @@ const DnsEditRecordPage = (props) => {
 										<option value='caa'>CAA</option>
 										<option value='soa'>SOA</option>
 									</optgroup>
-									<optgroup label='Templates'>
+									{process.env.NEXT_PUBLIC_TEMPLATES && <optgroup label='Templates'>
 										{templateOptions
 											.filter(({ value }) => {
 												const [_, templateName] = value.split(':');
@@ -191,7 +191,7 @@ const DnsEditRecordPage = (props) => {
 											))}
 										<option value='soa_template'>SOA</option>
 										<option value='ns_template'>NS</option>
-									</optgroup>
+									</optgroup>}
 								</select>
 							</label>
 						</div>
