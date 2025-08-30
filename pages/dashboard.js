@@ -120,14 +120,14 @@ function DashboardHome(props) {
 					</div>
 
 					{/* Statistics Card */}
-					<div className='col'>
+					{process.env.NEXT_PUBLIC_ENABLE_STATS && <div className='col'>
 						<Link href='/stats' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-graph-up fs-2'></i>
 								<h5 className='card-title'>Statistics</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Cache Card */}
 					<div className='col'>
@@ -140,14 +140,14 @@ function DashboardHome(props) {
 					</div>
 
 					{/* Streams Card */}
-					<div className='col'>
+					{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME && <div className='col'>
 						<Link href='/streams' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-cast fs-2'></i>
 								<h5 className='card-title'>Live Streaming</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* API keys Card */}
 					<div className='col'>
@@ -170,14 +170,14 @@ function DashboardHome(props) {
 					</div>
 
 					{/* Billing */}
-					<div className='col'>
+					{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER && <div className='col'>
 						<Link href='/billing' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-credit-card fs-2'></i>
 								<h5 className='card-title'>Billing</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Downed IPs */}
 					{isAdmin && <div className='col'>
