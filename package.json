@@ -12,6 +12,7 @@
     "next": "next build",
     "start": "NODE_ENV=production node server.js",
     "start-dev": "NODE_ENV=development node server.js",
+    "restart-minimal": "npm run build && pm2 restart ecosystem.config.cjs --only \"autorenew,healthcheck-main,healthcheck-worker,sync-main,webapp\" --env production",
     "toggle-sync": "pm2 ls | grep -E \"autorenew|sync-main|healthcheck-main\" | grep -q \"stopped\" && pm2 start autorenew sync-main healthcheck-main || pm2 stop autorenew sync-main healthcheck-main"
   },
   "keywords": [],
