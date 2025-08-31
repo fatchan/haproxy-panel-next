@@ -571,9 +571,11 @@ export async function patchMapForm (req, res, next) {
 							const serverNameIds = servers
 								.map(s => parseInt(s.name.substr(6), 10))
 								.sort((a, b) => a - b);
-							return Math.max(serverIds[serverIds.length - 1], serverNameIds[serverNameIds.length - 1]) + 1;
+							const highestId = Math.max(serverIds[serverIds.length - 1], serverNameIds[serverNameIds.length - 1]);
+							// 2 in the else case Because server ID "1" is the other_port "server" and will cause a conflict on patching the server
+							return !isNaN(highestId) ? highestId + 1 : 2;
 						}
-						return 1;
+						return 2; // see above
 					});
 				if (!freeSlotId) {
 					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
