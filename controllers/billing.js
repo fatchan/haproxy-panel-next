@@ -1,6 +1,6 @@
 import * as db from '../db.js';
 import ShkeeperManager from '../lib/billing/shkeeper.js';
-import  { ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 import { accountData } from './account.js';
@@ -94,7 +94,10 @@ export async function createPaymentRequest(req, res) {
 			invoice.recalculate_after = responseRecalculateAfter;
 			hoursRemaining = calculateRemainingHours(recalculateAfterStart, responseRecalculateAfter);
 		} else {
-			hoursRemaining = calculateRemainingHours(invoice.recalculate_after_start, invoice.recalculate_after);
+			hoursRemaining = calculateRemainingHours(
+				invoice.recalculate_after_start,
+				invoice.recalculate_after
+			);
 		}
 
 		console.log('hoursRemaining', hoursRemaining);
@@ -145,7 +148,7 @@ export async function createPaymentRequest(req, res) {
 		//generate different qr code uri depending on the crypto
 		const qrCodeText = await createQrCodeText(shkeeperResponse, usingCrypto);
 
-		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText, invoice: invoice  });
+		return dynamicResponse(req, res, 200, { shkeeperResponse, qrCodeText, invoice: invoice });
 
 	} catch (error) {
 		console.error('Error processing payment request:', error);

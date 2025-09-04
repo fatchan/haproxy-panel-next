@@ -95,7 +95,6 @@ export async function accountJson(req, res, next) {
 	return res.json({ ...data, user: res.locals.user });
 }
 
-
 /**
  * GET /onboarding.json
  * onboarding page json data

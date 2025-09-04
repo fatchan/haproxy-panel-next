@@ -23,7 +23,7 @@ const validateSignature = (payload, signature) => {
  * POST /stream/alert-webhook
  * oven media engine alertwebhook handler
  */
-export async function alertWebhook (req, res) {
+export async function alertWebhook(req, res) {
 	//NOTE: follows response format for ovenmedia engine
 	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
@@ -95,7 +95,7 @@ export async function alertWebhook (req, res) {
 				'Content-Type': 'application/json',
 				'x-bf-signature': outgoingSignature
 			},
-		}).then(res => console.log(wh.url, 'response:', res.status));
+		}).then(r => console.log(wh.url, 'response:', r.status));
 	})).catch(console.warn); //Note: async
 
 };
@@ -104,7 +104,7 @@ export async function alertWebhook (req, res) {
  * POST /stream/admissions-webhook
  * oven media engine admissionswebhook handler
  */
-export async function admissionsWebhook (req, res) {
+export async function admissionsWebhook(req, res) {
 	//NOTE: follows response format for ovenmedia engine
 	const ovenSignature = req.headers['x-ome-signature'];
 	const payload = req.body;
@@ -198,7 +198,7 @@ export async function admissionsWebhook (req, res) {
 	if (streamData.concluding === true) {
 		if (status === 'closing') {
 			//The stream was concluded, so ban their IP for 2 minutes
-			await redis.setex(`stream_ban:${client.real_ip}`, 120, '1');
+			redis.setex(`stream_ban:${client.real_ip}`, 120, '1');
 			await db.db().collection('streams').updateOne(
 				{
 					userName: streamsIdUsername,
@@ -228,45 +228,29 @@ export async function admissionsWebhook (req, res) {
 		console.log('admissionsWebhook received for:', payload.request.url, 'oven signature:', ovenSignature, 'appName:', appName);
 	}
 
-	try {
-		if (status === 'opening') {
-//			console.log('Waiting before opening...');
-//			await new Promise(res => setTimeout(res, 5000));
-		}
-	} catch (e) {
-		console.warn('Concluding pre-admission error:', e);
-	} finally {
-		Promise.all(streamsIdWebhooks.map(async wh => {
-			const webhookBody = payload.request;
-			const jsonBody = JSON.stringify(webhookBody);
-			const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
-				.update(jsonBody)
-				.digest('hex');
-			return fetch(wh.url, {
-				method: 'POST',
-				redirect: 'manual', //Dont follow user link redirects
-				body: jsonBody,
-				headers: {
-					'Content-Type': 'application/json',
-					'x-bf-signature': outgoingSignature
-				},
-			}).then(res => console.log(wh.url, 'response:', res.status));
-		})).catch(console.warn); //Note: async
+	Promise.all(streamsIdWebhooks.map(async wh => {
+		const webhookBody = payload.request;
+		const jsonBody = JSON.stringify(webhookBody);
+		const outgoingSignature = crypto.createHmac('sha256', wh.signingSecret)
+			.update(jsonBody)
+			.digest('hex');
+		return fetch(wh.url, {
+			method: 'POST',
+			redirect: 'manual', //Dont follow user link redirects
+			body: jsonBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'x-bf-signature': outgoingSignature
+			},
+		}).then(r => console.log(wh.url, 'response:', r.status));
+	})).catch(console.warn); //Note: async
 
-		res.status(200).json({
-			allowed: true,
-			new_url: parsedUrl,
-			lifetime: 0, // 0 means infinity
-			reason: 'authorized'
-		});
-	}
-
-//	if (status === 'closing') {
-//		console.log('Concluding and deleting post-closing, streamsId:', streamsId, 'appName:', appName);
-//		await res.locals.ovenMediaConclude(streamsId, appName);
-//		await res.locals.ovenMediaDelete(streamsId, appName);
-//		console.log('Concluded and deleted post-closing, streamsId:', streamsId, 'appName:', appName);
-//	}
+	res.status(200).json({
+		allowed: true,
+		new_url: parsedUrl,
+		lifetime: 0, // 0 means infinity
+		reason: 'authorized'
+	});
 
 };
 
@@ -274,7 +258,7 @@ export async function admissionsWebhook (req, res) {
  * POST /stream/:id/conclude
  * Forcefully end a live stream
  */
-export async function concludeStream (req, res, _next) {
+export async function concludeStream(req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -312,7 +296,7 @@ export async function concludeStream (req, res, _next) {
  * POST /stream/:id/restart
  * Restart stream (conclude without connection ban)
  */
-export async function restartStream (req, res, _next) {
+export async function restartStream(req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -341,7 +325,7 @@ export async function restartStream (req, res, _next) {
  * POST /stream/:id/toggle
  * toggle the enabled state of a stream
  */
-export async function toggleStream (req, res, _next) {
+export async function toggleStream(req, res, _next) {
 	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
@@ -384,7 +368,7 @@ export async function toggleStream (req, res, _next) {
  * GET /streams
  * domains page
  */
-export async function streamsPage (app, req, res) {
+export async function streamsPage(app, req, res) {
 	//TODO: streamsData() func  refactor
 	const [streamKeys, streamWebhooks, streams] = await Promise.all([
 		db.db().collection('streams')
@@ -413,7 +397,7 @@ export async function streamsPage (app, req, res) {
  * GET /streams.json
  * stream keys json data
  */
-export async function streamsJson (req, res) {
+export async function streamsJson(req, res) {
 	const [streamKeys, streamWebhooks, streams] = await Promise.all([
 		db.db().collection('streams')
 			.find({
@@ -440,7 +424,7 @@ export async function streamsJson (req, res) {
  * GET /streams/viewcounts.json
  * stream keys json data
  */
-export async function streamsViewcountsJson (req, res) {
+export async function streamsViewcountsJson(req, res) {
 	const streams = await redis.getKeysPattern(redis.omeClient, `app/${res.locals.user.streamsId}+*`);
 	const viewCountMap = {};
 	await Promise.all(streams.map(async (s) => {
@@ -460,7 +444,7 @@ export async function streamsViewcountsJson (req, res) {
  * POST /stream
  * add stream key
  */
-export async function addStream (req, res, _next) {
+export async function addStream(req, res, _next) {
 
 	if (!req.body.appName || typeof req.body.appName !== 'string' || req.body.appName.length === 0 || !/[a-zA-Z0-9-_]+/.test(req.body.appName)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -500,7 +484,7 @@ export async function addStream (req, res, _next) {
  * DELETE /stream/:id
  * delete stream key
  */
-export async function deleteStream (req, res, _next) {
+export async function deleteStream(req, res, _next) {
 
 	if (!req.params.id || typeof req.params.id !== 'string' || !/[a-zA-Z0-9-_]+/.test(req.params.id)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -532,7 +516,7 @@ export async function deleteStream (req, res, _next) {
  * POST /stream/webhook
  * Set the callback URL and (re)generates the signing secret
  */
-export async function addStreamWebhook (req, res, _next) {
+export async function addStreamWebhook(req, res, _next) {
 
 	if (!req.body.url || typeof req.body.url !== 'string' || req.body.url.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -568,7 +552,7 @@ export async function addStreamWebhook (req, res, _next) {
  * POST /stream/webhook/:id
  * add stream key
  */
-export async function deleteStreamWebhook (req, res, _next) {
+export async function deleteStreamWebhook(req, res, _next) {
 
 	if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });

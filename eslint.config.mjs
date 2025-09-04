@@ -114,7 +114,7 @@ export default defineConfig([
       'prefer-const': [
         'error',
         {
-          destructuring: 'any',
+          destructuring: 'all',
           ignoreReadBeforeAssign: true,
         },
       ],

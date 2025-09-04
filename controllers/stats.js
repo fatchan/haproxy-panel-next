@@ -13,7 +13,8 @@ export async function fetchStatusChartData(domains, granularity, parsedStartTime
 	const regexPattern = buildRegexPattern(domains);
 	const statusQuery = `sum by(status) (rate({job="haproxy", hh=~"${regexPattern}"} | json | status != \`\` | __error__ != \`JSONParserErr\` [${granularity}]))`;
 
-	const statusChartData = await statsFetch(statusQuery, parsedStartTime, parsedEndTime).then(processStatusChartData);
+	const statusChartData = await statsFetch(statusQuery, parsedStartTime, parsedEndTime)
+		.then(processStatusChartData);
 	return statusChartData;
 }
 
@@ -21,7 +22,8 @@ export async function fetchHostnameChartData(domains, granularity, parsedStartTi
 	const regexPattern = buildRegexPattern(domains);
 	const hostnameQuery = `sum by(hh) (rate({job="haproxy", hh=~"${regexPattern}"} | json | __error__ != \`JSONParserErr\` | status != \`-1\` [${granularity}])) or vector(0)`;
 
-	const hostnameChartData = await statsFetch(hostnameQuery, parsedStartTime, parsedEndTime).then(processHostnameChartData);
+	const hostnameChartData = await statsFetch(hostnameQuery, parsedStartTime, parsedEndTime)
+		.then(processHostnameChartData);
 	return hostnameChartData;
 }
 

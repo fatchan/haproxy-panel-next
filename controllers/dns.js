@@ -48,7 +48,7 @@ export async function dnsRecordPage(app, req, res) {
 		csrf: req.csrfToken(),
 		recordSet,
 	};
-	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone||'name'}/${req.params.type||'a'}`);
+	return app.render(req, res, `/dns/${req.params.domain}/${req.params.zone || 'name'}/${req.params.type || 'a'}`);
 };
 
 /**
@@ -130,7 +130,8 @@ export async function dnsRecordUpdate(req, res) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}*/
 	let { ttl } = req.body;
-	let { domain, zone, type } = req.params;
+	const { domain, zone } = req.params;
+	let { type } = req.params;
 	let records = [];
 	let template = type.includes('_template');
 	if (template) {
@@ -177,9 +178,9 @@ export async function dnsRecordUpdate(req, res) {
 		const allAs = await getAllTemplateIps('a');
 		const allowedAIps = await getAllTemplateIps('a', res.locals.user.allowedTemplates);
 		const allAAAAs = (await getAllTemplateIps('aaaa'))
-			.map(x => parse(x).toString({ zeroElide: false, zeroPad:false })); // prevent bypass with compressed addresses
+			.map(x => parse(x).toString({ zeroElide: false, zeroPad: false })); // prevent bypass with compressed addresses
 		const allowedAAAAIps = (await getAllTemplateIps('aaaa', res.locals.user.allowedTemplates))
-			.map(x => parse(x).toString({ zeroElide: false, zeroPad:false })); // prevent bypass with compressed addresses
+			.map(x => parse(x).toString({ zeroElide: false, zeroPad: false })); // prevent bypass with compressed addresses
 		switch (type) {
 			default: {
 				for (let i = 0; i < (type == 'soa' ? 1 : 100); i++) {
@@ -246,14 +247,14 @@ export async function dnsRecordUpdate(req, res) {
 						closest != null && (closest = true);
 						lat && (lat = parseFloat(lat));
 						long && (long = parseFloat(long));
-						geov && (geov = geov.map(x => x.trim()).slice(0,300)); //todo: country/continent filter
-						fb && (fb = fb.map(x => x.trim()).slice(0,20));
-					} catch(e) {
+						geov && (geov = geov.map(x => x.trim()).slice(0, 300)); //todo: country/continent filter
+						fb && (fb = fb.map(x => x.trim()).slice(0, 20));
+					} catch (e) {
 						console.error(e);
 						return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 					}
 					let record;
-					switch(type) {
+					switch (type) {
 						case 'a': {
 							if (!isIPv4(value)) {
 								return dynamicResponse(req, res, 400, { error: 'Value must be a valid IPv4 address for A records' });
@@ -270,7 +271,7 @@ export async function dnsRecordUpdate(req, res) {
 							if (!isIPv6(value)) {
 								return dynamicResponse(req, res, 400, { error: 'Value must be a valid IPv6 address for AAAA records' });
 							}
-							const parsedIpv6 = parse(value).toString({ zeroElide: false, zeroPad:false });
+							const parsedIpv6 = parse(value).toString({ zeroElide: false, zeroPad: false });
 							if (allAAAAs.includes(parsedIpv6)
 								&& !allowedAAAAIps.includes(parsedIpv6)) {
 								return dynamicResponse(req, res, 400, { error: 'Restricted IP, please contact support' });
@@ -313,10 +314,13 @@ export async function dnsRecordUpdate(req, res) {
 	if (!recordSetRaw) {
 		recordSetRaw = {};
 	} else if (recordSetRaw[type] && recordSetRaw[type].l === true //single check for SOAs
-		|| (Array.isArray(recordSetRaw[type]) && (recordSetRaw[type].length > 0 && recordSetRaw[type][0].l === true))) { //array check for others
+		|| (Array.isArray(recordSetRaw[type])
+			&& (recordSetRaw[type].length > 0 && recordSetRaw[type][0].l === true))) { //array check for others
 		return dynamicResponse(req, res, 400, { error: 'You can\'t edit or overwrite locked records' });
 	}
-	if (Array.isArray(recordSetRaw[type]) && recordSetRaw[type].length > 0 && recordSetRaw[type][0].tn) {
+	if (Array.isArray(recordSetRaw[type])
+		&& recordSetRaw[type].length > 0
+		&& recordSetRaw[type][0].tn) {
 		originalTemplateName = recordSetRaw[type][0].tn;
 		console.log('found original template name (.tn):', originalTemplateName);
 	}

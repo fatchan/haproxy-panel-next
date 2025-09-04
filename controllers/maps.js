@@ -42,12 +42,12 @@ const mapValueNames = {
 const protectionModeSet = new Set(Object.values(ProtectionModes));
 const susLevelSet = new Set(Object.values(SusLevels));
 
-export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
+export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 
 	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
-		.then(res => res.data)
-		.then(res => {
-			return res.map(e => {
+		.then(r => r.data)
+		.then(r => {
+			return r.map(e => {
 				//TODO: handle ipv6 backend (not supported yet anyway)
 				const [ipAndPort, geo] = e.value.split('|');
 				const [splitIp, _] = ipAndPort.split(':');
@@ -66,7 +66,7 @@ export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
 			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
 			id: existingEntry.domain,
 		})
-			.then(res => res.data);
+			.then(r => r.data);
 		if (backendMapEntry) {
 			return backendMapEntry.value === username; //Return true if this user already owns this backend IP
 		}
@@ -80,7 +80,7 @@ export async function backendIpAllowed (dataPlaneRetry, username, backendIp) {
  * GET /maps/:name
  * Show map filtering to users domains
  */
-export async function mapData (req, res, next) {
+export async function mapData(req, res, next) {
 	let map,
 		mapInfo,
 		showValues = false,
@@ -97,7 +97,7 @@ export async function mapData (req, res, next) {
 		}, {});
 		mapInfo = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', mapName)
-			.then(res => res.data)
+			.then(r => r.data)
 			.then(extractMap);
 		if (!mapInfo) {
 			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
@@ -106,7 +106,7 @@ export async function mapData (req, res, next) {
 			.dataPlaneRetry('showRuntimeMap', {
 				map: mapName
 			})
-			.then(res => res.data);
+			.then(r => r.data);
 	} catch (e) {
 		console.error(e);
 		return next(e);
@@ -217,13 +217,13 @@ export async function mapData (req, res, next) {
 	};
 }
 
-export async function mapPage (app, req, res, next) {
+export async function mapPage(app, req, res, next) {
 	const data = await mapData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, `/map/${data.name}`);
 }
 
-export async function mapJson (req, res, next) {
+export async function mapJson(req, res, next) {
 	const data = await mapData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
@@ -232,7 +232,7 @@ export async function mapJson (req, res, next) {
  * POST /maps/:name/delete
  * Delete the map entries of the body 'domain'
  */
-export async function deleteMapForm (req, res, next) {
+export async function deleteMapForm(req, res, next) {
 	if (!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
@@ -246,14 +246,14 @@ export async function deleteMapForm (req, res, next) {
 		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME
 		|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
 		let value;
-		const existingEntries = await res.locals
+		const existingMapEntries = await res.locals
 			.dataPlaneRetry('showRuntimeMap', {
 				map: req.params.name,
 				// id: req.body.key,
 			})
-			.then((res) => res.data)
+			.then((r) => r.data)
 			.catch(() => { });
-		const existingEntry = existingEntries && existingEntries
+		const existingEntry = existingMapEntries && existingMapEntries
 			.find(en => en.key === req.body.key);
 		console.log('existingEntry', existingEntry);
 		if (existingEntry && existingEntry.value) {
@@ -310,7 +310,7 @@ export async function deleteMapForm (req, res, next) {
 					.dataPlaneRetry('showRuntimeMap', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					})
-					.then((res) => res.data)
+					.then(r => r.data)
 					.then(backends => backends.find(mb => mb.key === req.body.key));
 				console.log('matchingBackend', matchingBackend);
 				if (!matchingBackend) {
@@ -354,7 +354,7 @@ export async function deleteMapForm (req, res, next) {
  * POST /maps/:name/add
  * Add map entries of the body 'domain'
  */
-export async function patchMapForm (req, res, next) {
+export async function patchMapForm(req, res, next) {
 	if (req.body && req.body.key && typeof req.body.key === 'string') {
 
 		const mapName = metaMapMapping[req.params.name] || req.params.name;
@@ -505,7 +505,7 @@ export async function patchMapForm (req, res, next) {
 						map: req.params.name,
 						id: req.body.key,
 					})
-					.then((res) => res.data)
+					.then(r => r.data)
 					.catch(() => { });
 				if (existingEntry && existingEntry.value) {
 					const existingSplitEntries = existingEntry.value.split(':');
@@ -547,7 +547,11 @@ export async function patchMapForm (req, res, next) {
 
 			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				const { hostname: address, port } = new URL(`http://${req.body.ip}`);
-				const backendAllowed = await backendIpAllowed(res.locals.dataPlaneRetry, res.locals.user.username, address);
+				const backendAllowed = await backendIpAllowed(
+					res.locals.dataPlaneRetry,
+					res.locals.user.username,
+					address
+				);
 				if (!backendAllowed) {
 					return dynamicResponse(req, res, 403, { error: 'No permission to add a backend with that IP' });
 				}
@@ -556,13 +560,13 @@ export async function patchMapForm (req, res, next) {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					})
-					.then(res => res.data)
+					.then(r => r.data)
 					.catch(() => { });
 				const freeSlotId = await res.locals
 					.dataPlaneRetry('getRuntimeServers', {
 						backend: 'servers'
 					})
-					.then(res => res.data)
+					.then(r => r.data)
 					.then(servers => {
 						if (servers.length > 0) {
 							const serverIds = servers
@@ -571,7 +575,10 @@ export async function patchMapForm (req, res, next) {
 							const serverNameIds = servers
 								.map(s => parseInt(s.name.substr(6), 10))
 								.sort((a, b) => a - b);
-							const highestId = Math.max(serverIds[serverIds.length - 1], serverNameIds[serverNameIds.length - 1]);
+							const highestId = Math.max(
+								serverIds[serverIds.length - 1],
+								serverNameIds[serverNameIds.length - 1]
+							);
 							// 2 in the else case Because server ID "1" is the other_port "server" and will cause a conflict on patching the server
 							return !isNaN(highestId) ? highestId + 1 : 2;
 						}
@@ -614,7 +621,7 @@ export async function patchMapForm (req, res, next) {
 						.dataPlaneRetry('showRuntimeMap', {
 							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
 						})
-						.then(res => res.data);
+						.then(r => r.data);
 					const fullBackendMapEntry = fullBackendMap
 						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
 					await res.locals
@@ -642,7 +649,7 @@ export async function patchMapForm (req, res, next) {
 						map: mapName,
 						id: req.body.key,
 					})
-					.then(res => res.data)
+					.then(r => r.data)
 					.catch(() => { }));
 			if (existingEntry) {
 				await res.locals
