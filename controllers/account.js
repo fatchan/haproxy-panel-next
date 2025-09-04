@@ -3,65 +3,28 @@ import * as db from '../db.js';
 import { ObjectId } from 'mongodb';
 import { extractMap, dynamicResponse } from '../util.js';
 import sendEmail from '../lib/email/send.js';
-import { Resolver } from 'node:dns/promises';
 import dotenv from 'dotenv';
 import { randomBytes } from 'node:crypto';
-import * as redis from '../redis.js';
+import { getNameserverTxtRecords, checkPublicDNSRecord, expectedNSRecords } from '../lib/nameservers.js';
 dotenv.config({ path: '.env' });
-
-const localNSResolver = new Resolver();
-localNSResolver.setServers(process.env.NAMESERVERS.split(','));
-const cloudflareResolver = new Resolver();
-cloudflareResolver.setServers(['1.1.1.1']);
-const googleResolver = new Resolver();
-googleResolver.setServers(['8.8.8.8']);
-const quad9Resolver = new Resolver();
-quad9Resolver.setServers(['9.9.9.9']);
-const publicResolvers = [cloudflareResolver, googleResolver, quad9Resolver];
-
-//TODO: move to lib
-const nameserverTxtDomains = process.env.NAMESERVER_TXT_DOMAINS.split(',');
-async function getNameserverTxtRecords () {
-	for (const ntd of nameserverTxtDomains) {
-		try {
-			let txtRecords = await localNSResolver.resolve(ntd, 'TXT');
-			if (txtRecords && txtRecords.length > 0) {
-				return txtRecords;
-			}
-		} catch (error) {
-			console.error(`Error querying TXT records for ${ntd}:`, error);
-		}
-	}
-	return []; //todo: handle better on FE if none found at all
-}
-
-//TODO: move to lib
-const expectedNameservers = new Set(process.env.NAMESERVERS_HOSTS.split(','));
-async function checkPublicDNSRecord (domain, type, expectedSet) {
-	const results = await Promise.all(publicResolvers.map(async pr => {
-		const res = await pr.resolve(domain, type);
-		return new Set(res || []);
-	}));
-	return results.every(res => res.size === new Set([...res, ...expectedSet]).size);
-}
 
 /**
  * account page data shared between html/json routes
  */
-export async function accountData (req, res, _next) {
+export async function accountData(req, res, _next) {
 	let maps = []
 		, txtRecords = []
 		, globalAcl = '0';
 	if (res.locals.dataPlaneRetry) {
 		maps = res.locals
 			.dataPlaneRetry('getAllRuntimeMapFiles')
-			.then(res => res.data)
-			.then(data => data.map(extractMap))
-			.then(maps => maps.filter(n => n))
-			.then(maps => maps.sort((a, b) => a.fname.localeCompare(b.fname)));
+			.then(r => r.data)
+			.then(d => d.map(extractMap))
+			.then(m => m.filter(n => n))
+			.then(m => m.sort((a, b) => a.fname.localeCompare(b.fname)));
 		globalAcl = res.locals
 			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
-			.then(res => res.data.description.split('').reverse()[0]);
+			.then(r => r.data.description.split('').reverse()[0]);
 		txtRecords = getNameserverTxtRecords();
 		([maps, globalAcl, txtRecords] = await Promise.all([maps, globalAcl, txtRecords]));
 	}
@@ -76,11 +39,13 @@ export async function accountData (req, res, _next) {
 /**
  * extra information needed for the onboarding page to display known completed steps
  */
-export async function onboardingData (req, res, _next) {
-	const firstDomain = res.locals.user.domains && res.locals.user.domains.length > 0 ? res.locals.user.domains[0] : null;
+export async function onboardingData(_req, res, _next) {
+	const firstDomain = res.locals.user.domains && res.locals.user.domains.length > 0
+		? res.locals.user.domains[0]
+		: null;
 	const [anyBackend, nameserversPropagated] = await Promise.all([
 		db.db().collection('mapnotes').findOne({ username: res.locals.user.username, map: 'hosts' }),
-		firstDomain ? checkPublicDNSRecord(firstDomain, 'NS', expectedNameservers) : void 0,
+		firstDomain ? checkPublicDNSRecord(firstDomain, 'NS', expectedNSRecords) : void 0,
 	]);
 	return {
 		hasBackend: anyBackend != null,
@@ -92,7 +57,7 @@ export async function onboardingData (req, res, _next) {
  * GET /account
  * account page html
  */
-export async function accountPage (app, req, res, next) {
+export async function accountPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, '/account');
@@ -102,7 +67,7 @@ export async function accountPage (app, req, res, next) {
  * GET /dashboard
  * account page html
  */
-export async function dashboardPage (app, req, res, next) {
+export async function dashboardPage(app, req, res, next) {
 	const data = await accountData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, '/dashboard');
@@ -112,7 +77,7 @@ export async function dashboardPage (app, req, res, next) {
  * GET /onboarding
  * account page html
  */
-export async function onboardingPage (app, req, res, next) {
+export async function onboardingPage(app, req, res, next) {
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
@@ -125,45 +90,17 @@ export async function onboardingPage (app, req, res, next) {
  * GET /account.json
  * account page json data
  */
-export async function accountJson (req, res, next) {
+export async function accountJson(req, res, next) {
 	const data = await accountData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
 
-/**
- * GET /incidents.json
- * get incidents from uptime kuma
- */
-const uptimeKumaAuth = Buffer.from(
-	`:${process.env.UPTIME_KUMA_API_KEY}`,
-).toString('base64');
-export async function incidentsJson (req, res, _next) {
-	if (!process.env.UPTIME_KUMA_STATUS_URL) {
-		console.warn('process.env.UPTIME_KUMA_STATUS_URL not set, skipping incident check');
-		return res.json([]);
-	}
-	let cachedRes = await redis.lockQueueClient.get('incidents');
-	if (cachedRes) {
-		return res.json(JSON.parse(cachedRes));
-	}
-	const statusData = await fetch(process.env.UPTIME_KUMA_STATUS_URL, {
-		headers: {
-			'Authorization': uptimeKumaAuth
-		}
-	}).then(res => res.json());
-	let incidents = [];
-	if (statusData && statusData.maintenanceList && statusData.maintenanceList.length > 0) {
-		incidents = statusData.maintenanceList;
-	}
-	await redis.lockQueueClient.set('incidents', JSON.stringify(incidents), 'EX', 300, 'NX');
-	return res.json(incidents);
-}
 
 /**
  * GET /onboarding.json
  * onboarding page json data
  */
-export async function onboardingJson (req, res, next) {
+export async function onboardingJson(req, res, next) {
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
@@ -175,14 +112,14 @@ export async function onboardingJson (req, res, next) {
  * POST /forms/global/toggle
  * toggle global ACL
  */
-export async function globalToggle (req, res, next) {
+export async function globalToggle(req, res, next) {
 	if (res.locals.user.username !== 'admin') {
 		return dynamicResponse(req, res, 403, { error: 'Global ACL can only be toggled by an administrator' });
 	}
 	try {
 		const globalAcl = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')
-			.then(res => res.data.description.split('').reverse()[0]);
+			.then(r => r.data.description.split('').reverse()[0]);
 		if (globalAcl === '1') {
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
@@ -208,12 +145,13 @@ export async function globalToggle (req, res, next) {
  * POST /forms/login
  * login
  */
-export async function login (req, res) {
+export async function login(req, res) {
 
 	const username = req.body.username.toLowerCase();
 	const password = req.body.password;
 
-	if (!username || typeof username !== 'string' || username.length === 0 || !/^[a-zA-Z0-9]+$/.test(username)
+	if (!username || typeof username !== 'string' || username.length === 0
+		|| !/^[a-zA-Z0-9]+$/.test(username)
 		|| !password || typeof password !== 'string' || password.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
 	}
@@ -226,11 +164,10 @@ export async function login (req, res) {
 	if (!account) {
 		return dynamicResponse(req, res, 403, { error: 'Incorrect username or password' });
 	}
-	// if (account.emailVerified !== true) {
-	// 	return dynamicResponse(req, res, 400, { error: 'Check your inbox to verify your email first' });
-	// }
 	if (account.inactive === true) {
-		return dynamicResponse(req, res, 403, { error: 'Your account has been suspended for inactivity, please contact support.' });
+		return dynamicResponse(req, res, 403, {
+			error: 'Your account has been suspended for inactivity, please contact support.'
+		});
 	}
 	const passwordMatch = await bcrypt.compare(password, account.passwordHash);
 	if (passwordMatch === true) {
@@ -244,7 +181,7 @@ export async function login (req, res) {
  * POST /forms/register
  * regiser
  */
-export async function register (req, res) {
+export async function register(req, res) {
 
 	if (!res.locals.user || res.locals.user.username !== 'admin') {
 		return dynamicResponse(req, res, 400, { error: 'Registration is currently invite-only, please email contact@ceoofbased.com to inquire about openings.' });
@@ -312,7 +249,7 @@ export async function register (req, res) {
  * POST /forms/logout
  * logout
  */
-export function logout (req, res) {
+export function logout(req, res) {
 	req.session.destroy();
 	return dynamicResponse(req, res, 302, { redirect: '/login' });
 };
@@ -321,7 +258,7 @@ export function logout (req, res) {
  * POST /forms/onboarding
  * update onboarding step
  */
-export async function updateOnboarding (req, res) {
+export async function updateOnboarding(req, res) {
 	if (!res.locals.user) {
 		return dynamicResponse(req, res, 400, { error: 'Bad request' });
 	}
@@ -344,7 +281,7 @@ export async function updateOnboarding (req, res) {
  * POST /forms/requestchangepassword
  * Verify password reset token and set new password
  */
-export async function requestPasswordChange (req, res) {
+export async function requestPasswordChange(req, res) {
 	const email = req.body.email;
 
 	if (!email || typeof email !== 'string' || email.length === 0) {
@@ -372,7 +309,7 @@ export async function requestPasswordChange (req, res) {
  * POST /forms/changepassword
  * Verify password reset token and set new password
  */
-export async function changePassword (req, res) {
+export async function changePassword(req, res) {
 	const { token, password, repeat_password: rPassword } = req.body;
 
 	if (!token || typeof token !== 'string' || token.length === 0
@@ -420,7 +357,7 @@ export async function changePassword (req, res) {
  * POST /forms/verifyemail
  * Verify email after registration
  */
-export async function verifyEmail (req, res) {
+export async function verifyEmail(req, res) {
 	const { token } = req.body;
 
 	if (!token || typeof token !== 'string' || token.length === 0) {

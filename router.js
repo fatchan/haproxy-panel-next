@@ -6,6 +6,7 @@ import swaggerCss from './lib/swagger/css.js';
 import swaggerDocument from './openapi/basedflare.json' with { type: 'json' };
 
 import * as accountController from './controllers/account.js';
+import * as incidentsController from './controllers/incidents.js';
 import * as mapsController from './controllers/maps.js';
 import * as certsController from './controllers/certs.js';
 import * as dnsController from './controllers/dns.js';
@@ -18,43 +19,22 @@ import * as streamsController from './controllers/stream.js';
 import * as apikeysController from './controllers/apikeys.js';
 
 import {
-	useSession,
-	fetchSession,
-	checkSession,
-	checkOnboarding,
-	adminCheck
+	useSession, fetchSession, checkSession, checkOnboarding, adminCheck,
 } from './lib/middleware/session.js';
-import {
-	useHaproxy
-} from './lib/middleware/haproxy.js';
-import {
-	useVarnish
-} from './lib/middleware/varnish.js';
-import {
-	useOvenMedia
-} from './lib/middleware/oven.js';
+import { useHaproxy } from './lib/middleware/haproxy.js';
+import { useVarnish } from './lib/middleware/varnish.js';
+import { useOvenMedia } from './lib/middleware/oven.js';
 
-const mapNames = [
-		process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
-		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
-		process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
-		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
-		process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
-		process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-		process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
-		process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
-		process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
-		process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
-		process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
-		process.env.NEXT_PUBLIC_CSS_MAP_NAME,
-	// 'translation',
-	],
-	mapNamesOrString = mapNames.join('|');
+const mapNamesOrString = [
+	process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME, process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
+	process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME, process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
+	process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME, process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
+	process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME, process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+	process.env.NEXT_PUBLIC_DDOS_MAP_NAME, process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
+	process.env.NEXT_PUBLIC_HOSTS_MAP_NAME, process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+	process.env.NEXT_PUBLIC_IMAGES_MAP_NAME, process.env.NEXT_PUBLIC_CSS_MAP_NAME].join('|');
 
-export default function router (server, app) {
-
+export default function router(server, app) {
 	const shkeeperManager = new ShkeeperManager();
 	const csrfHandler = csrf();
 	const csrfMiddleware = (req, res, next) => {
@@ -67,9 +47,10 @@ export default function router (server, app) {
 	};
 
 	server.use('/api-docs', swaggerUi.serve);
-	server.get('/api-docs', swaggerUi.setup(swaggerDocument, {
-		customCss: swaggerCss,
-	}));
+	server.get(
+		'/api-docs', swaggerUi.setup(swaggerDocument, {
+			customCss: swaggerCss,
+		}),);
 
 	//unauthed pages
 	server.get('/', useSession, fetchSession, (req, res, _next) => {
@@ -82,546 +63,93 @@ export default function router (server, app) {
 		return app.render(req, res, '/register');
 	});
 
+	//common middlewares
+	const sessionChain = [useSession, fetchSession, checkSession];
+	const haproxyCsrfChain = [useHaproxy, csrfMiddleware];
+
 	//register/login/logout/onboarding forms
 	server.post('/forms/login', useSession, accountController.login);
-	server.post(
-		'/forms/onboarding',
-		useSession,
-		fetchSession,
-		checkSession,
-		accountController.updateOnboarding,
-	);
+	server.post('/forms/onboarding', sessionChain, accountController.updateOnboarding,);
 	server.post('/forms/logout', useSession, accountController.logout);
-	server.post(
-		'/forms/register',
-		useSession,
-		fetchSession,
-		accountController.register,
-	);
-	server.post(
-		'/forms/requestchangepassword',
-		useSession,
-		accountController.requestPasswordChange,
-	);
-	server.post(
-		'/forms/changepassword',
-		useSession,
-		accountController.changePassword,
-	);
-	server.post(
-		'/forms/verifyemail',
-		useSession,
-		accountController.verifyEmail,
-	);
+	server.post('/forms/register', useSession, fetchSession, accountController.register,);
+	server.post('/forms/requestchangepassword', useSession, accountController.requestPasswordChange,);
+	server.post('/forms/changepassword', useSession, accountController.changePassword,);
+	server.post('/forms/verifyemail', useSession, accountController.verifyEmail);
 
 	//authed pages
-	server.get(
-		'/dashboard',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		accountController.dashboardPage.bind(null, app),
-	);
-	server.get(
-		'/cache',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		cacheController.cachePage.bind(null, app),
-	);
-	server.get(
-		'/account',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		csrfMiddleware,
-		accountController.accountPage.bind(null, app),
-	);
-	server.get(
-		'/csr',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		csrfMiddleware,
-		certsController.csrPage.bind(null, app),
-	);
-	server.get(
-		'/onboarding',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		accountController.onboardingPage.bind(null, app),
-	);
-	server.get(
-		'/account.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		accountController.accountJson,
-	);
-	server.get(
-		'/incidents.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		accountController.incidentsJson,
-	);
-	server.get(
-		'/onboarding.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		accountController.onboardingJson,
-	);
-	server.get(
-		`/map/:name(${mapNamesOrString})`,
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		mapsController.mapPage.bind(null, app),
-	);
-	server.get(
-		`/map/:name(${mapNamesOrString}).json`,
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		mapsController.mapJson,
-	);
-	server.get(
-		'/domains',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		domainsController.domainsPage.bind(null, app),
-	);
-	server.get(
-		'/domains.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		domainsController.domainsJson,
-	);
-	server.get(
-		'/apikeys',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		apikeysController.apiKeysPage.bind(null, app),
-	);
-	server.get(
-		'/apikeys.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		apikeysController.apiKeysJson,
-	);
-	server.get(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/new',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsRecordPage.bind(null, app),
-	);
-	server.get(
-		'/dns/:domain([a-zA-Z0-9-\.]+).json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsDomainJson,
-	);
-	server.get(
-		'/dns/:domain([a-zA-Z0-9-\.]+)',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsDomainPage.bind(null, app),
-	);
-	server.get(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+).json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsRecordJson,
-	);
-	server.get(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+)',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsRecordPage.bind(null, app),
-	);
-	server.get(
-		'/down',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.downPage.bind(null, app),
-	);
-	server.get(
-		'/down.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.downJson,
-	);
-	server.get(
-		'/certs',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		certsController.certsPage.bind(null, app),
-	);
-	server.get(
-		'/certs.json',
-		useSession,
-		fetchSession,
-		checkSession,
-		checkOnboarding,
-		useHaproxy,
-		csrfMiddleware,
-		certsController.certsJson,
-	);
+	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app),);
+	server.get('/cache', sessionChain, checkOnboarding, haproxyCsrfChain, cacheController.cachePage.bind(null, app),);
+	server.get('/account', sessionChain, checkOnboarding, csrfMiddleware, accountController.accountPage.bind(null, app),);
+	server.get('/csr', sessionChain, checkOnboarding, csrfMiddleware, certsController.csrPage.bind(null, app),);
+	server.get('/onboarding', sessionChain, haproxyCsrfChain, accountController.onboardingPage.bind(null, app),);
+	server.get('/account.json', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.accountJson,);
+	server.get('/incidents.json', sessionChain, incidentsController.incidentsJson,);
+	server.get('/onboarding.json', sessionChain, haproxyCsrfChain, accountController.onboardingJson,);
+	server.get(`/map/:name(${mapNamesOrString})`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapPage.bind(null, app),);
+	server.get(`/map/:name(${mapNamesOrString}).json`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapJson,);
+	server.get('/domains', sessionChain, csrfMiddleware, domainsController.domainsPage.bind(null, app),);
+	server.get('/domains.json', sessionChain, csrfMiddleware, domainsController.domainsJson,);
+	server.get('/apikeys', sessionChain, csrfMiddleware, apikeysController.apiKeysPage.bind(null, app),);
+	server.get('/apikeys.json', sessionChain, csrfMiddleware, apikeysController.apiKeysJson,);
+	server.get('/dns/:domain([a-zA-Z0-9-\.]+)/new', sessionChain, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app),);
+	server.get('/dns/:domain([a-zA-Z0-9-\.]+).json', sessionChain, csrfMiddleware, dnsController.dnsDomainJson,);
+	server.get('/dns/:domain([a-zA-Z0-9-\.]+)', sessionChain, csrfMiddleware, dnsController.dnsDomainPage.bind(null, app),);
+	server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+).json', sessionChain, csrfMiddleware, dnsController.dnsRecordJson,);
+	server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+)', sessionChain, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app),);
+	server.get('/down', sessionChain, csrfMiddleware, dnsController.downPage.bind(null, app),);
+	server.get('/down.json', sessionChain, csrfMiddleware, dnsController.downJson,);
+	server.get('/certs', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsPage.bind(null, app),);
+	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson,);
 
-	const clusterRouter = express.Router({ caseSensitive: true });
-	clusterRouter.post(
-		'/cache/purge',
-		useSession,
-		fetchSession,
-		checkSession,
-		useVarnish,
-		csrfMiddleware,
-		cacheController.purgeURL,
-	);
-	clusterRouter.post(
-		'/global/toggle',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		accountController.globalToggle,
-	);
-	clusterRouter.post(
-		`/map/:name(${mapNamesOrString})/add`,
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		mapsController.patchMapForm,
-	);
-	clusterRouter.delete(
-		`/map/:name(${mapNamesOrString})/delete`,
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		mapsController.deleteMapForm,
-	);
-	clusterRouter.delete(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)/delete',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsRecordDelete,
-	);
-	clusterRouter.post(
-		'/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		dnsController.dnsRecordUpdate,
-	);
-	clusterRouter.post(
-		'/domain/add',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		domainsController.addDomain,
-	);
-	clusterRouter.delete(
-		'/domain/delete',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		domainsController.deleteDomain,
-	);
-	clusterRouter.post(
-		'/apikey/add',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		apikeysController.addApiKey,
-	);
-	clusterRouter.delete(
-		'/apikey/delete',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		apikeysController.deleteApiKey,
-	);
-	clusterRouter.post(
-		'/cert/add',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		certsController.addCert,
-	);
-	clusterRouter.post(
-		'/cert/upload',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		certsController.uploadCert,
-	);
-	clusterRouter.delete(
-		'/cert/delete',
-		useSession,
-		fetchSession,
-		checkSession,
-		useHaproxy,
-		csrfMiddleware,
-		certsController.deleteCert,
-	);
-	clusterRouter.post(
-		'/csr/verify',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		certsController.verifyUserCSR,
-	);
-	clusterRouter.get(
-		'/csrf',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		(req, res, _next) => {
-			return res.send(req.csrfToken());
-		},
-	);
+	const formsRouter = express.Router({ caseSensitive: true });
+	formsRouter.post('/cache/purge', sessionChain, useVarnish, csrfMiddleware, cacheController.purgeURL,);
+	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, accountController.globalToggle,);
+	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm,);
+	formsRouter.delete(`/map/:name(${mapNamesOrString})/delete`, sessionChain, haproxyCsrfChain, mapsController.deleteMapForm,);
+	formsRouter.delete('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)/delete', sessionChain, csrfMiddleware, dnsController.dnsRecordDelete,);
+	formsRouter.post('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z_:]+)', sessionChain, csrfMiddleware, dnsController.dnsRecordUpdate,);
+	formsRouter.post('/domain/add', sessionChain, haproxyCsrfChain, domainsController.addDomain,);
+	formsRouter.delete('/domain/delete', sessionChain, haproxyCsrfChain, domainsController.deleteDomain,);
+	formsRouter.post('/apikey/add', sessionChain, haproxyCsrfChain, apikeysController.addApiKey,);
+	formsRouter.delete('/apikey/delete', sessionChain, haproxyCsrfChain, apikeysController.deleteApiKey,);
+	formsRouter.post('/cert/add', sessionChain, haproxyCsrfChain, certsController.addCert,);
+	formsRouter.post('/cert/upload', sessionChain, haproxyCsrfChain, certsController.uploadCert,);
+	formsRouter.delete('/cert/delete', sessionChain, haproxyCsrfChain, certsController.deleteCert,);
+	formsRouter.post('/csr/verify', sessionChain, csrfMiddleware, certsController.verifyUserCSR,);
+	formsRouter.get('/csrf', sessionChain, csrfMiddleware, (req, res, _next) => {
+		return res.send(req.csrfToken());
+	});
 
-	clusterRouter.post(
-		'/template',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		adminCheck,
-		templateController.upsertTemplates
-	);
-	clusterRouter.post(
-		'/update',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		adminCheck,
-		templateController.updateTemplates
-	);
-	clusterRouter.post(
-		'/down',
-		useSession,
-		fetchSession,
-		checkSession,
-		csrfMiddleware,
-		adminCheck,
-		templateController.updateDownIPs
-	);
+	formsRouter.post('/template', sessionChain, csrfMiddleware, adminCheck, templateController.upsertTemplates,);
+	formsRouter.post('/update', sessionChain, csrfMiddleware, adminCheck, templateController.updateTemplates,);
+	formsRouter.post('/down', sessionChain, csrfMiddleware, adminCheck, templateController.updateDownIPs,);
 
 	if (process.env.LOKI_BASE_URL) {
-		server.get(
-			'/stats',
-			useSession,
-			fetchSession,
-			checkSession,
-			checkOnboarding,
-			csrfMiddleware,
-			statsController.statsPage.bind(null, app),
-		);
-		server.get(
-			'/stats.json',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			statsController.statsJson,
-		);
+		server.get('/stats', sessionChain, checkOnboarding, csrfMiddleware, statsController.statsPage.bind(null, app),);
+		server.get('/stats.json', sessionChain, csrfMiddleware, statsController.statsJson,);
 	}
 
 	if (process.env.NEXT_PUBLIC_ENABLE_SHKEEPER) {
-		server.get(
-			'/billing',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			billingController.billingPage.bind(null, app),
-		);
-		server.get(
-			'/billing.json',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			billingController.billingJson,
-		);
-		clusterRouter.post(
-			'/billing/payment_request',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			billingController.createPaymentRequest,
-		);
-		server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
+		server.get('/billing', sessionChain, csrfMiddleware, billingController.billingPage.bind(null, app),);
+		server.get('/billing.json', sessionChain, csrfMiddleware, billingController.billingJson,);
+		formsRouter.post('/billing/payment_request', sessionChain, csrfMiddleware, billingController.createPaymentRequest,);
+		server.post('/forms/billing/callback', shkeeperManager.handleCallback);
 	}
 
 	if (process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME) {
-		server.get(
-			'/streams',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.streamsPage.bind(null, app),
-		);
-		server.get(
-			'/streams.json',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.streamsJson,
-		);
-		server.get(
-			'/streams/viewcounts.json',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.streamsViewcountsJson,
-		);
-		clusterRouter.post(
-			'/stream',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.addStream,
-		);
-		clusterRouter.post(
-			'/stream/:id([a-zA-Z0-9-_]+)/conclude',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.concludeStream,
-		);
-		clusterRouter.post(
-			'/stream/:id([a-zA-Z0-9-_]+)/restart',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.restartStream,
-		);
-		clusterRouter.post(
-			'/stream/:id([a-zA-Z0-9-_]+)/toggle',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.toggleStream,
-		);
-		clusterRouter.delete(
-			'/stream/:id([a-zA-Z0-9-_]+)',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.deleteStream,
-		);
-		clusterRouter.post(
-			'/stream/webhook',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.addStreamWebhook,
-		);
-		clusterRouter.delete(
-			'/stream/webhook/:id([a-f0-9]{24})',
-			useSession,
-			fetchSession,
-			checkSession,
-			csrfMiddleware,
-			useOvenMedia,
-			streamsController.deleteStreamWebhook,
-		);
-		server.post('/forms/stream/admissions-webhook', useOvenMedia, (req, res, _next) => streamsController.admissionsWebhook(req, res));
-		server.post('/forms/stream/alert-webhook', useOvenMedia, (req, res, _next) => streamsController.alertWebhook(req, res));
+		server.get('/streams', sessionChain, csrfMiddleware, useOvenMedia, streamsController.streamsPage.bind(null, app),);
+		server.get('/streams.json', sessionChain, csrfMiddleware, useOvenMedia, streamsController.streamsJson,);
+		server.get('/streams/viewcounts.json', sessionChain, csrfMiddleware, useOvenMedia, streamsController.streamsViewcountsJson,);
+		formsRouter.post('/stream', sessionChain, csrfMiddleware, useOvenMedia, streamsController.addStream,);
+		formsRouter.post('/stream/:id([a-zA-Z0-9-_]+)/conclude', sessionChain, csrfMiddleware, useOvenMedia, streamsController.concludeStream,);
+		formsRouter.post('/stream/:id([a-zA-Z0-9-_]+)/restart', sessionChain, csrfMiddleware, useOvenMedia, streamsController.restartStream,);
+		formsRouter.post('/stream/:id([a-zA-Z0-9-_]+)/toggle', sessionChain, csrfMiddleware, useOvenMedia, streamsController.toggleStream,);
+		formsRouter.delete('/stream/:id([a-zA-Z0-9-_]+)', sessionChain, csrfMiddleware, useOvenMedia, streamsController.deleteStream,);
+		formsRouter.post('/stream/webhook', sessionChain, csrfMiddleware, useOvenMedia, streamsController.addStreamWebhook,);
+		formsRouter.delete('/stream/webhook/:id([a-f0-9]{24})', sessionChain, csrfMiddleware, useOvenMedia, streamsController.deleteStreamWebhook,);
+		server.post('/forms/stream/admissions-webhook', useOvenMedia, streamsController.admissionsWebhook,);
+		server.post('/forms/stream/alert-webhook', useOvenMedia, streamsController.alertWebhook,);
 	}
 
-	server.use('/forms', clusterRouter);
+	server.use('/forms', formsRouter);
 }

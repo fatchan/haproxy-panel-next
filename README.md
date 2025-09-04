@@ -1,33 +1,37 @@
-# Control Panel
+# Basedflare Panel (haproxy-panel-next)
 
-Work in progress. Not recommended for production deployment. No instructions or help provided whatsoever.
+Control panel for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-protection).
+Internally uses [haproxy dataplaneapi](https://gitgud.io/fatchan/dataplaneapi/).
 
-Internally uses [haproxy dataplaneapi](https://github.com/haproxytech/dataplaneapi/).
-Intended for use with [haproxy-protection](https://gitgud.io/fatchan/haproxy-protection).
-
-Provides a control panel interface to conveniently manage clusters (groups of identically configured) HAProxy servers. Can be used with a single server cluster. Uses haproxy runtime apis to update maps, acls, etc.
+**Available as a managed service 👉 [Basedflare.com](https://basedflare.com)**
 
 ##### Features:
-- List/add/remove clusters (server groups).
-- List/add/remove domains for your account.
-- Control allowed hosts for a cluster.
-- Custom backend server IP and port per-domain.
-- HTTPS certificate management. Automatically generate for domain(s) and upload to cluster servers.
-- Supports local private CA. Can install root cert on all your proxies and can sign CSR's for proper origin ssl validation.
-- IP or subnet blacklist. Supports ipv4 and ipv6.
-- IP or subnet whitelist. Supports ipv4 and ipv6.
-- Redirects, rewrites url to a different domain+path.
-- Protection rules, choose bot protection mode "none" (whitelist), proof-of-work or proof-of-work+captcha. Can be domain-wide or a domain+path. Path overrides domain-wide.
-- Global override for protection mode, to enable for all domains in a cluster.
-- Maintenance mode, disables proxying for selected domains and serves an "under maintenance" page from haproxy.
-- Statistics page with server and backend-level breakdowns based on haproxy stats socket data. Ability to export statistics to influxdb.
+
+- Domains and DNS management with geo routing, health checks, fallbacks.
+- Backend server management with load balancing and geo routing.
+- Easily generate and automatically renew ssl certs with Letsencrypt.
+- Built in private CA and CSR's for proper origin ssl validation.
+- Blacklist IPs, subnets or whole ASNs.
+- Whitelist IPs or subnets.
+- Redirect or rewrite urls to different domain or domain+path.
+- Bot protection rules with options for Proof-of-work or captcha.
+- Challenge only suspicious users based on IP reputation/network, TLS fingerprint or other custom values.
+- Maintenance mode page to avoid 50x while performing mandatory downtime on backends.
+- Customisable css and images on bot-check and other pages served from the edge.
+- Purge varnish cache for individual urls, prefixes, or domains.
+- Integration with InfluxDB and Loki for in-panel statistics.
+- Integration with SHKeeper for invoicing and payments.
+- Integration with OvenMediaEngine for managed livestreaming support.
+- API keys for programmatic management of all aspects.
+- Customisable branding for the panel itself.
 
 ## License
+
 GNU AGPLv3, see [LICENSE](LICENSE).
 
 #### Screenshots
 
-![screenshot](img/screenshot.png "account page")
+![screenshot](img/screenshot.png 'account page')
 
 ## For generous people
 
