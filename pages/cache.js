@@ -15,6 +15,7 @@ function Cache(props) {
 	const [error, setError] = useState();
 	const [message, setMessage] = useState();
 	const [isPrefixPurge, setIsPrefixPurge] = useState(false);
+	const { csrf } = state || {};
 
 	useEffect(() => {
 		if (!state.user) {
@@ -53,8 +54,6 @@ function Cache(props) {
 			NProgress.done(true);
 		}
 	}
-
-	const { csrf } = state || {};
 
 	return (
 		<>
@@ -139,8 +138,8 @@ function Cache(props) {
 
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(Cache);

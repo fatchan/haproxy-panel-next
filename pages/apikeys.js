@@ -47,9 +47,9 @@ function ApiKeys(props) {
 		e.target.reset();
 	}
 
-	async function deleteApiKey(csrf, id) {
+	async function deleteApiKey(_csrf, id) {
 		setError(null);
-		await API.deleteApiKey({ _csrf: csrf, keyId: id }, dispatch, setError, router);
+		await API.deleteApiKey({ _csrf, keyId: id }, dispatch, setError, router);
 		await API.getApiKeys(dispatch, setError, router);
 	}
 
@@ -85,7 +85,7 @@ function ApiKeys(props) {
 							<button
 								type='button'
 								className='btn-close'
-								onClick={() => closeModal()}
+								onClick={() => setNewKey()}
 							></button>
 						</div>
 						<div className='modal-body'>

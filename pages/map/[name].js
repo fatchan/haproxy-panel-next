@@ -75,8 +75,8 @@ const MapPage = (props) => {
 		e.target.reset();
 	}
 
-	async function deleteFromMap(csrf, key) {
-		await API.deleteFromMap(mapInfo.name, { _csrf: csrf, key }, dispatch, setError, router);
+	async function deleteFromMap(_csrf, key) {
+		await API.deleteFromMap(mapInfo.name, { _csrf, key }, dispatch, setError, router);
 		await API.getMap(mapName, dispatch, setError, router);
 	}
 

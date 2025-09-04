@@ -66,13 +66,13 @@ const DnsDomainIndexPage = (props) => {
 			.filter(x => x && JSON.stringify(x).includes(filter))
 			.map(e => {
 				return Object.entries(e[1])
-					.map((recordSet, i) => (
+					.map((record, i) => (
 						<RecordSetRow
 							csrf={csrf}
 							domain={domain}
 							key={`${e[0]}_${i}`}
 							name={e[0]}
-							recordSet={recordSet}
+							recordSet={record}
 							dispatch={dispatch}
 							setError={setError}
 							router={router}
@@ -149,7 +149,7 @@ const DnsDomainIndexPage = (props) => {
 
 };
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
 	return { props: res.locals.data };
 }
 

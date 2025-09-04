@@ -45,9 +45,9 @@ function Domains(props) {
 		e.target.reset();
 	}
 
-	async function deleteDomain(csrf, domain) {
+	async function deleteDomain(_csrf, domain) {
 		setError(null);
-		await API.deleteDomain({ _csrf: csrf, domain }, dispatch, setError, router);
+		await API.deleteDomain({ _csrf, domain }, dispatch, setError, router);
 		await API.getDomains(dispatch, setError, router);
 	}
 

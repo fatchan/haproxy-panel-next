@@ -30,7 +30,7 @@ const SecretString = ({ text }) => {
 	);
 };
 
-function Streams (props) {
+function Streams(props) {
 
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
@@ -70,7 +70,7 @@ function Streams (props) {
 
 	const { csrf, streamKeys, streams, streamWebhooks, user } = state;
 
-	async function addStream (e) {
+	async function addStream(e) {
 		e.preventDefault();
 		setError(null);
 		await API.addStream({ _csrf: csrf, appName: e.target.appName.value }, () => {
@@ -79,35 +79,35 @@ function Streams (props) {
 		e.target.reset();
 	}
 
-	async function concludeStream (csrf, id) {
+	async function concludeStream(_csrf, id) {
 		setError(null);
-		await API.concludeStream({ _csrf: csrf, id }, () => {
+		await API.concludeStream({ _csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function restartStream (csrf, id) {
+	async function restartStream(_csrf, id) {
 		setError(null);
-		await API.restartStream({ _csrf: csrf, id }, () => {
+		await API.restartStream({ _csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function toggleStream (csrf, id) {
+	async function toggleStream(_csrf, id) {
 		setError(null);
-		await API.toggleStream({ _csrf: csrf, id }, () => {
+		await API.toggleStream({ _csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function deleteStream (csrf, id) {
+	async function deleteStream(_csrf, id) {
 		setError(null);
-		await API.deleteStream({ _csrf: csrf, id }, () => {
+		await API.deleteStream({ _csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	async function addStreamWebhook (e) {
+	async function addStreamWebhook(e) {
 		e.preventDefault();
 		setError(null);
 		await API.addStreamWebhook({ _csrf: csrf, url: e.target.url.value, type: e.target.type.value }, () => {
@@ -116,21 +116,21 @@ function Streams (props) {
 		e.target.reset();
 	}
 
-	async function deleteStreamWebhook (csrf, id) {
+	async function deleteStreamWebhook(_csrf, id) {
 		setError(null);
-		await API.deleteStreamWebhook({ _csrf: csrf, id }, () => {
+		await API.deleteStreamWebhook({ _csrf, id }, () => {
 			API.getStreams(dispatch, setError, router);
 		}, setError, router);
 	}
 
-	let activeStreamIds = [];
+	const activeStreamIds = [];
 
 	const streamsTable = streams
 		// .sort((a, b) => a.localeCompare(b))
 		.filter(s => (!filter || filter.length === 0) || (s && s.includes(filter)))
 		.map(s => {
 			const streamName = s.substring(s.indexOf('+') + 1);
-			const streamKey = streamKeys.find(s => s.appName === streamName);
+			const streamKey = streamKeys.find(sk => sk.appName === streamName);
 			const streamNameKeyId = streamKey._id;
 			activeStreamIds.push(streamNameKeyId);
 			return (
@@ -383,7 +383,7 @@ function Streams (props) {
 
 }
 
-export async function getServerSideProps ({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
 	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 

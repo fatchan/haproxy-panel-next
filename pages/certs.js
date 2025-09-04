@@ -66,21 +66,21 @@ const Certs = (props) => {
 		await API.getCerts(dispatch, setError, router);
 	}
 
-	async function deleteCert(csrf, subject, storageName) {
+	async function deleteCert(_csrf, subject, storageName) {
 		setError(null);
 		await API.deleteCert({
-			_csrf: csrf,
+			_csrf,
 			subject,
 			storage_name: storageName,
 		}, dispatch, setError, router);
 		await API.getCerts(dispatch, setError, router);
 	}
 
-	async function uploadCert(csrf, domain) {
+	async function uploadCert(_csrf, domain) {
 		try {
 			setError(null);
 			await API.uploadCert({
-				_csrf: csrf,
+				_csrf,
 				domain: domain
 			}, dispatch, setError, router);
 		} catch (err) {
@@ -123,7 +123,7 @@ const Certs = (props) => {
 		.filter(d => d.subject.includes(filter) || d.altnames.some(an => an.includes(filter)))
 		.map((d, i) => {
 			//TODO: refactor, to component
-			let creation = new Date(d.date);
+			const creation = new Date(d.date);
 			const expiry = creation.setDate(creation.getDate() + 90);
 			const daysRemaining = (Math.floor(expiry - Date.now()) / 86400000).toFixed(1);
 			const inCluster = clusterCerts.some(c => c.storage_name === d.storageName);

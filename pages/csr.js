@@ -15,6 +15,7 @@ function Csr(props) {
 	const [mainDomain, setMainDomain] = useState('');
 	const [altNames, setAltNames] = useState('');
 	const [opensslCommand, setOpensslCommand] = useState('');
+	const { csrf, csr } = state || {};
 
 	useEffect(() => {
 		if (!state.user) {
@@ -40,8 +41,6 @@ function Csr(props) {
 		}, dispatch, setError, router);
 		NProgress.done(true);
 	}
-
-	const { csrf, csr } = state || {};
 
 	if (!state.user) {
 		return (
@@ -150,8 +149,8 @@ function Csr(props) {
 
 }
 
-export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale}) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(Csr);

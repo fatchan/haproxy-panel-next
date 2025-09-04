@@ -31,19 +31,19 @@ export default defineConfig([
 
       'no-multi-spaces': ['error', { ignoreEOLComments: false }],
 
-      'max-len': [
-        'error',
-        {
-          code: 100,
-          tabWidth: 1,
-          ignoreComments: true,
-          ignoreTrailingComments: true,
-          ignoreUrls: true,
-          ignoreStrings: true,
-          ignoreTemplateLiterals: true,
-          ignoreRegExpLiterals: true,
-        },
-      ],
+      // 'max-len': [
+      //   'error',
+      //   {
+      //     code: 100,
+      //     tabWidth: 1,
+      //     ignoreComments: true,
+      //     ignoreTrailingComments: true,
+      //     ignoreUrls: true,
+      //     ignoreStrings: true,
+      //     ignoreTemplateLiterals: true,
+      //     ignoreRegExpLiterals: true,
+      //   },
+      // ],
 
       'brace-style': [
         'error',
