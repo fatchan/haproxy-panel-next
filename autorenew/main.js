@@ -61,8 +61,7 @@ async function updateCert (dbCert) {
 		headers: {
 			'authorization': `Basic ${base64Auth}`,
 		},
-	}, haproxyCert,
-	{
+	}, haproxyCert, {
 		filename: `${subject}.pem`,
 		contentType: 'text/plain',
 	}

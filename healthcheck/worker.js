@@ -38,7 +38,7 @@ const ignoredErrorCodes = [
 let downedIps = [];
 
 //backup for raw handshake check
-function checkTLSHandshake (ip, port, domain) {
+function checkTLSHandshake(ip, port, domain) {
 	return new Promise((resolve, reject) => {
 		const controller = new AbortController();
 		setTimeout(() => {
@@ -75,7 +75,7 @@ function checkTLSHandshake (ip, port, domain) {
 	});
 }
 
-async function doCheck (domainKey, hkey, record) {
+async function doCheck(domainKey, hkey, record) {
 	if (!record || record.h !== true) {
 		record.u = true;
 		return record;
@@ -118,8 +118,8 @@ async function doCheck (domainKey, hkey, record) {
 						//should have plenty of time if abortcontroller is hit, 60s>15s
 						const backupHandshakeResponse = await checkTLSHandshake(record.ip, 443, hostHeader);
 						recordHealth = backupHandshakeResponse === true ? '1' : '0';
-					} catch (e) {
-						console.warn('health check down for', domainKey, hkey, record.ip, 'error:', e);
+					} catch (e2) {
+						console.warn('health check down for', domainKey, hkey, record.ip, 'error:', e2);
 						recordHealth = '0';
 					}
 				}
@@ -136,14 +136,14 @@ async function doCheck (domainKey, hkey, record) {
 			record.u = false;
 		}
 	} catch (e) {
-		console.error('Healthcheck error', domain, hkey, e.message || e);
+		console.error('Healthcheck error', domainKey, hkey, e.message || e);
 	} finally {
 		await lock.release();
 		return record;
 	}
 }
 
-async function processKey (domainKey) {
+async function processKey(domainKey) {
 	try {
 		const domainHashKeys = await redis.client.hkeys(domainKey);
 		domainHashKeys.forEach(async (hkey) => {
@@ -173,13 +173,13 @@ async function processKey (domainKey) {
 	}
 }
 
-async function handleJob (job, done) { //job.id, job.data
+async function handleJob(job, done) { //job.id, job.data
 	const { keys } = job.data;
 	keys.forEach(processKey);
 	done();
 }
 
-async function updateDowned () {
+async function updateDowned() {
 	try {
 		downedIps = await db.db().collection('down')
 			.findOne({
@@ -192,7 +192,7 @@ async function updateDowned () {
 	}
 }
 
-async function main () {
+async function main() {
 	await db.connect();
 	await updateDowned();
 	setInterval(() => updateDowned(), 10000);

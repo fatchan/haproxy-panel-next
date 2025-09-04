@@ -38,7 +38,7 @@ app.prepare()
 		server.disable('x-powered-by');
 		server.set('trust proxy', 1);
 
-		server.use((req, res, next) => {
+		server.use((req, res, _next) => {
 			const startTime = new Date();
 			if (!req.originalUrl.startsWith('/_next')) {
 				res.on('finish', () => {
@@ -54,7 +54,7 @@ app.prepare()
 					console.log(`[${timeLocal}] (${realIpRemoteAddr}) ${xContinentCode} ${xCountryCode} ${status} "${request}" "${referer}" "${userAgent}" ${bytesSent}`);
 				});
 			}
-			next();
+			_next();
 		});
 
 		server.use('/.well-known/acme-challenge', express.static('/tmp/.well-known/acme-challenge'));

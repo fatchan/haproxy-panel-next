@@ -99,6 +99,14 @@ const MenuLinks = ({ router }) => {
 	const [path, setPath] = useState(router.asPath);
 	const [openSections, setOpenSections] = useState({});
 
+	const toggleSection = (section) => {
+		setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+	};
+
+	const handleLinkClick = (section) => {
+		setOpenSections((prev) => ({ ...prev, [section]: true }));
+	};
+
 	const renderSection = (section, index) => {
 		if (section.disabled) { return null; }
 		return section.links.length === 1
@@ -168,14 +176,6 @@ const MenuLinks = ({ router }) => {
 			Router.events.off('routeChangeStart', setPath);
 		};
 	}, [router.pathname]);
-
-	const toggleSection = (section) => {
-		setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-	};
-
-	const handleLinkClick = (section) => {
-		setOpenSections((prev) => ({ ...prev, [section]: true }));
-	};
 
 	const bottomLinks = (
 		<>

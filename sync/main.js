@@ -119,7 +119,7 @@ async function main() {
 
 		console.time('Running sync check');
 
-		let mapTable = {};
+		const mapTable = {};
 		await Promise.all(autodiscoverService.urls
 			.filter(url => clusterHostnames.includes(url.hostname))
 			.map(async url => {
@@ -149,7 +149,7 @@ async function main() {
 			return console.error('Failed to get master record of map sizes');
 		}
 
-		for (let [key, mapCount] of Object.entries(mapTable)) {
+		for (const [key, mapCount] of Object.entries(mapTable)) {
 			mapTable[key].synced = mapCountsEqual(mapCount, master);
 		}
 
@@ -157,7 +157,7 @@ async function main() {
 
 		console.timeEnd('Running sync check');
 
-		for (let key in mapTable) {
+		for (const key in mapTable) {
 			if (!mapTable[key].synced) {
 
 				console.warn('WARNING:', key, 'is out of sync with', masterHostname);
@@ -170,7 +170,7 @@ async function main() {
 					.then(res => console.log('sending sync warning, status:', res.status))
 					.catch(err => console.error(err));
 
-				for (let mapName of MAPS_TO_SYNC) {
+				for (const mapName of MAPS_TO_SYNC) {
 					const masterEntries = await getMapEntries(new URL(`https://${masterHostname}:2001`), mapName);
 					if (masterEntries) {
 						console.log(`Fetched entries for ${mapName} from master.`);

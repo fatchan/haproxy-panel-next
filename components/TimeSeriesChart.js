@@ -50,7 +50,7 @@ const simpleStringToColor = str => {
 	const hash = Array.from(str)
 		.reduce((h, c) => h + c.charCodeAt(0).toString(16), '')
 		.slice(0, 9);
-	let color = parseInt(hash, 16);
+	const color = parseInt(hash, 16);
 	let r = (color >> 16) & 0xff;
 	let g = (color >> 8) & 0xff;
 	let b = color & 0xff;

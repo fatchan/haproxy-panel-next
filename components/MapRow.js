@@ -72,8 +72,8 @@ export default function MapRow ({ map, row, onDeleteSubmit, name, csrf, showValu
 					user={user}
 					editValue={editValue}
 					handleFieldChange={handleFieldChange}
-					handleSave={handleSave}  // Pass handleSave
-					handleCancel={handleCancel}  // Pass handleCancel
+					handleSave={handleSave} // Pass handleSave
+					handleCancel={handleCancel} // Pass handleCancel
 				/>
 			) : (
 				<>
