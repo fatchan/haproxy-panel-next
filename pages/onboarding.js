@@ -86,7 +86,7 @@ function Onboarding(props) {
 		await API.addToMap('hosts', {
 			_csrf: csrf,
 			key: e.target.key.value,
-			value: e.target.value?.value,
+			ip: e.target.ip?.value,
 			onboarding: e.target.onboarding.value,
 			geo: e.target.geo.value,
 		}, dispatch, setError, router);
@@ -251,7 +251,7 @@ function Onboarding(props) {
 							<input
 								className='form-control mb-3'
 								type='text'
-								name='value'
+								name='ip'
 								placeholder='backend ip:port'
 								disabled={backendAdded}
 								required

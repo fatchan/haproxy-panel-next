@@ -474,12 +474,14 @@ export async function patchMapForm(req, res, next) {
 			}
 			let parsedValue;
 			try {
-				parsedValue = url.parse(`https://${req.body.ip}`);
+				parsedValue = new URL(`scheme://${req.body.ip}`);
 				if (!parsedValue.host || !parsedValue.port) {
+					console.warn('parsedValue no host or port:', parsedValue);
 					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 				}
 				// parse(parsedValue.hostname); //better ip parsing, will error if invalid
-			} catch {
+			} catch (e) {
+				console.warn(e);
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
 			req.body.ip = parsedValue.host; //host includes port
