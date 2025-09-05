@@ -83,7 +83,13 @@ function Onboarding(props) {
 
 	async function addToMap(e) {
 		e.preventDefault();
-		await API.addToMap('hosts', { _csrf: csrf, key: e.target.key.value, value: e.target.value?.value, onboarding: e.target.onboarding.value }, dispatch, setError, router);
+		await API.addToMap('hosts', {
+			_csrf: csrf,
+			key: e.target.key.value,
+			value: e.target.value?.value,
+			onboarding: e.target.onboarding.value,
+			geo: e.target.geo.value,
+		}, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 		e.target.reset();
 	}
@@ -235,6 +241,7 @@ function Onboarding(props) {
 						<form onSubmit={addToMap} className='mb-3' action='/forms/map/hosts/add' method='post'>
 							<input type='hidden' name='_csrf' value={csrf} />
 							<input type='hidden' name='onboarding' value='1' />
+							<input type='hidden' name='geo' value='XX' />
 							<select className='form-select mb-3' name='key' defaultValue=''
 								disabled={backendAdded}
 								required>
@@ -296,7 +303,7 @@ function Onboarding(props) {
 				<span className='pt-1 form-checked-content'>
 					<strong>
 						<i className='bi-building-fill-lock pe-none me-2' width='1em' height='1em' />
-						8. Get your HTTPS CSR signed
+						7. Get your HTTPS CSR signed
 					</strong>
 					<span className='d-block text-body-secondary mt-3'>
 						<p>Finally, generate a certificate signing request for your origin server(s) and have it signed by the {process.env.NEXT_PUBLIC_APP_NAME} certificate authority.</p>

@@ -41,7 +41,7 @@ export async function accountData(req, res, _next) {
  */
 export async function onboardingData(_req, res, _next) {
 	const firstDomain = res.locals.user.domains && res.locals.user.domains.length > 0
-		? res.locals.user.domains[0]
+		? res.locals.user.domains.find(d => d !== 'localhost')
 		: null;
 	const [anyBackend, nameserversPropagated] = await Promise.all([
 		db.db().collection('mapnotes').findOne({ username: res.locals.user.username, map: 'hosts' }),
