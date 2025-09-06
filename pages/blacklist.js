@@ -12,11 +12,12 @@ function BlacklistPage() {
       <Head><title>Blacklist</title></Head>
       <h5 className="fw-bold">Blacklist:</h5>
       <InfoAlert>Block IPs, subnets, ASNs, countries or continents.</InfoAlert>
-
-      <MapContainer mapName={'blockedip'} minimal />
-      <MapContainer mapName={'blockedasn'} minimal />
-      <MapContainer mapName={'blockedcc'} minimal />
-      <MapContainer mapName={'blockedcn'} minimal />
+      <div className='round-border'>
+        <MapContainer mapName={'blockedip'} minimal />
+        <MapContainer mapName={'blockedasn'} minimal />
+        <MapContainer mapName={'blockedcc'} minimal />
+        <MapContainer mapName={'blockedcn'} minimal />
+      </div>
       <BackButton to="/dashboard" />
     </>
   );
