@@ -1,13 +1,10 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
-
 import AutodiscoverService from '../autodiscover.js';
 const autodiscoverService = new AutodiscoverService();
 

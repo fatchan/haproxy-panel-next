@@ -1,11 +1,8 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
-
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 
 import * as redis from '../redis.js';
 import Queue from 'bull';

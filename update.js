@@ -1,12 +1,10 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
-import dotenv from 'dotenv';
 import * as db from './db.js';
-dotenv.config({ path: '.env' });
 import * as redis from './redis.js';
 import { pathToFileURL } from 'node:url';
 const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -15,7 +13,7 @@ isMain && await db.connect();
 import { getNsTemplate, getSoaTemplate, aTemplate, aaaaTemplate } from './templates.js';
 isMain && update();
 
-async function processKey (domainKey) {
+async function processKey(domainKey) {
 	const domainHashKeys = await redis.client.hkeys(domainKey);
 	const domain = domainKey.substring(4, domainKey.length - 1);
 	return Promise.all(domainHashKeys.map(async (hkey) => {
@@ -69,7 +67,7 @@ const close = () => {
 	db.client().close();
 };
 
-export default async function update () {
+export default async function update() {
 	let allKeys = [];
 	const stream = redis.client.scanStream({
 		match: 'dns:*',

@@ -8,7 +8,7 @@ import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
 import InfoAlert from '../../../../components/InfoAlert.js';
 import * as API from '../../../../api.js';
-import { continentMap, continentOptions } from '../../../../lib/misc/continents.js';
+import { continentMap, continentOptions } from '../../../../lib/misc/geo.js';
 countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en'))
 	.map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));

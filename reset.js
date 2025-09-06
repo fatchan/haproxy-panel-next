@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
+import 'dotenv/config';
 import { ObjectId } from 'mongodb';
 import * as db from './db.js';
 import { randomBytes } from 'crypto';

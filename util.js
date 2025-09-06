@@ -1,14 +1,9 @@
-import url from 'url';
-
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
-
 import QRCode from 'qrcode';
 
 export const metaMapMapping = {
 	[process.env.NEXT_PUBLIC_IMAGES_MAP_NAME]: process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
 
-	//Note: May not be necessary, these use rela maps not meta maps
+	//Note: May not be necessary, these use real maps not meta maps
 	// 'css': null,
 	// 'translation': null,
 };
@@ -160,11 +155,11 @@ export const fMap = {
 	},
 };
 
-export function makeArrayIfSingle (obj) {
+export function makeArrayIfSingle(obj) {
 	return !Array.isArray(obj) ? [obj] : obj;
 }
 
-export function extractMap (item) {
+export function extractMap(item) {
 	const name = item.file &&
 		item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;
 	if (!fMap[name]) { return null; }
@@ -178,7 +173,7 @@ export function extractMap (item) {
 	};
 }
 
-export function dynamicResponse (req, res, code, data) {
+export function dynamicResponse(req, res, code, data) {
 	const isRedirect = code === 302;
 	if ((req.headers && req.headers['content-type'] === 'application/json')
 		|| res.locals.isApiKey) {
@@ -193,7 +188,7 @@ export function dynamicResponse (req, res, code, data) {
 }
 
 //check if list includes domain of a wildcard
-export function wildcardAllowed (domain, allowedDomains) {
+export function wildcardAllowed(domain, allowedDomains) {
 	if (domain.includes('\\')) { throw new Error('Illegal wildcardAllowed'); }
 	const wcRegex = new RegExp(`${domain.replace(/\*\./g, '([^ ]*\\.|^)')}$`);
 	return allowedDomains.some((d) => {
@@ -202,13 +197,13 @@ export function wildcardAllowed (domain, allowedDomains) {
 }
 
 //check if a domain matches a wildcard
-export function wildcardMatches (domain, wildcard) {
+export function wildcardMatches(domain, wildcard) {
 	if (wildcard.includes('\\')) { throw new Error('Illegal wildcardMatches'); }
 	const wcRegex = new RegExp(`${wildcard.replace(/\*\./g, '^.*\\.')}$`);
 	return wcRegex.test(domain);
 }
 
-export function getApproxSubject (storageName) {
+export function getApproxSubject(storageName) {
 	let ret = storageName
 		.replaceAll('_', '.')
 		.substr(0, storageName.length - 4);
@@ -218,7 +213,7 @@ export function getApproxSubject (storageName) {
 	return ret;
 }
 
-export function filterCertsByDomain (certs, allowedDomains) {
+export function filterCertsByDomain(certs, allowedDomains) {
 	return certs.filter((c) => {
 		const approxSubject = getApproxSubject(c.storage_name);
 		return allowedDomains.includes(approxSubject);

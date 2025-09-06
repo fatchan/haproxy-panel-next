@@ -1,8 +1,6 @@
 import * as db from '../db.js';
 import ShkeeperManager from '../lib/billing/shkeeper.js';
 import { ObjectId } from 'mongodb';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 import { accountData } from './account.js';
 import { calculateRemainingHours, dynamicResponse, allowedCryptos, createQrCodeText } from '../util.js';
 

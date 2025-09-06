@@ -1,11 +1,9 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 import { isIPv4 } from 'net';
 import * as db from '../db.js';
 import * as redis from '../redis.js';

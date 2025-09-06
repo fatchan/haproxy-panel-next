@@ -1,8 +1,3 @@
-'use strict';
-
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
-
 if (!process.env.AUTODISCOVER_HOST) {
 	console.warn('process.env.AUTODISCOVER_HOST not set, using static DEFAULT_CLUSTER');
 }

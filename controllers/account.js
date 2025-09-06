@@ -3,10 +3,8 @@ import * as db from '../db.js';
 import { ObjectId } from 'mongodb';
 import { extractMap, dynamicResponse } from '../util.js';
 import sendEmail from '../lib/email/send.js';
-import dotenv from 'dotenv';
 import { randomBytes } from 'node:crypto';
 import { getNameserverTxtRecords, checkPublicDNSRecord, expectedNSRecords } from '../lib/nameservers.js';
-dotenv.config({ path: '.env' });
 
 /**
  * account page data shared between html/json routes

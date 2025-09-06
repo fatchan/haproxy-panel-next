@@ -1,46 +1,9 @@
-import { extractMap, dynamicResponse, metaMapMapping, fMap } from '../util.js';
+import { extractMap, dynamicResponse, metaMapMapping } from '../util.js';
 import { createCIDR, parse } from 'ip6addr';
 import * as db from '../db.js';
-import url from 'url';
-import countries from 'i18n-iso-countries';
-const countryMap = countries.getAlpha2Codes();
-import { continentMap } from '../lib/misc/continents.js';
-
-const ProtectionModes = {
-	NONE: '0',
-	POW_SUSPICIOUS_ONLY: '1',
-	CAPTCHA_SUSPICIOUS_ONLY: '2',
-	POW_ALL: '3',
-	POW_ALL_CAPTCHA_SUSPICIOUS_ONLY: '4',
-	CAPTCHA_ALL: '5',
-};
-
-const SusLevels = {
-	TOR: '1',
-	BFP: '2',
-	VPN: '3',
-	DC: '4',
-};
-
-const mapValueNames = {
-	m: {
-		[ProtectionModes.NONE]: 'None',
-		[ProtectionModes.POW_SUSPICIOUS_ONLY]: 'PoW (Suspicious Only)',
-		[ProtectionModes.CAPTCHA_SUSPICIOUS_ONLY]: 'Captcha (Suspicious Only)',
-		[ProtectionModes.POW_ALL]: 'PoW (All)',
-		[ProtectionModes.POW_ALL_CAPTCHA_SUSPICIOUS_ONLY]: 'PoW (All) + Captcha (Suspicious Only)',
-		[ProtectionModes.CAPTCHA_ALL]: 'Captcha (All)',
-	},
-	l: {
-		[SusLevels.TOR]: '1 (Tor Exits)',
-		[SusLevels.BFP]: '2 (+Fingerprints)',
-		[SusLevels.VPN]: '3 (+VPNs)',
-		[SusLevels.DC]: '4 (+Datacenters)',
-	}
-};
-
-const protectionModeSet = new Set(Object.values(ProtectionModes));
-const susLevelSet = new Set(Object.values(SusLevels));
+import { continentMap, countryMap } from '../lib/misc/geo.js';
+import { getMapNotes, nameToProcessors } from '../lib/maps/processors.js';
+import { mapValueNames, protectionModeSet, susLevelSet } from '../lib/maps/labels.js';
 
 export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
 
@@ -85,127 +48,41 @@ export async function mapData(req, res, next) {
 		mapInfo,
 		showValues = false,
 		mapNotes = {};
-	const mapName = metaMapMapping[req.params.name] || req.params.name;
+	const requestedName = req.params.name;
+	const mapName = metaMapMapping[requestedName] || requestedName;
+
 	try {
-		mapNotes = await db.db().collection('mapnotes').find({
-			username: res.locals.user.username,
-			map: mapName
-		}).toArray();
-		mapNotes = mapNotes.reduce((acc, note) => {
-			acc[note.key] = note.note;
-			return acc;
-		}, {});
+		mapNotes = await getMapNotes(db, res.locals.user.username, mapName);
+
 		mapInfo = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', mapName)
 			.then(r => r.data)
 			.then(extractMap);
-		if (!mapInfo) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
-		}
+
+		if (!mapInfo) { return dynamicResponse(req, res, 400, { error: 'Invalid map' }); }
+
 		map = await res.locals
-			.dataPlaneRetry('showRuntimeMap', {
-				map: mapName
-			})
+			.dataPlaneRetry('showRuntimeMap', { map: mapName })
 			.then(r => r.data);
 	} catch (e) {
 		console.error(e);
 		return next(e);
 	}
 
-	switch (req.params.name) {
-		case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
-			showValues = true;
-		case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
-			map = map.map(a => {
-				try {
-					a.value = JSON.parse(a.value);
-				} catch {
-					console.warn('Failed to parse map value', a.value);
-					return undefined;
-				}
-				return a;
-			}).filter(x => x);
-		/* falls through */
-		case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
-			if (req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
-				map = map.map(a => {
-					try {
-						a.value = decodeURIComponent(a.value);
-					} catch {
-						console.warn('Failed to parse map value', a.value);
-						return undefined;
-					}
-					return a;
-				}).filter(x => x);
-			}
-		/* falls through */
-		case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
-		case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
-		case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
-			const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
-			map = map.filter(a => {
-				const { pathname } = new URL(`https://${a.key}`);
-				const isPowIconPath = pathname === `/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
-				return isImages ? isPowIconPath : !isPowIconPath;
-			});
-			if (isImages) {
-				map = map.map(a => {
-					return {
-						...a,
-						key: new URL(`http://${a.key}`).hostname,
-						value: {
-							image: 'bot-check', //TODO: make dynamic once other image types are supported
-							value: a.value,
-						}
-					};
-				});
-				mapInfo = {
-					...mapInfo,
-					...fMap[req.params.name],
-				};
-			}
-			showValues = true;
-		/* falls through */
-		case process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME:
-		case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
-			showValues = true;
-			const isHosts = req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME;
-			if (isHosts) {
-				map = map.map(a => {
-					const [ipAndPort, geo] = a.value.split('|');
-					return {
-						...a,
-						value: {
-							ip: ipAndPort,
-							geo: geo,
-						}
-					};
-				});
-			}
-		/* falls through */
-		case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
-			map = map.filter(a => {
-				const { hostname } = new URL(`https://${a.key}`);
-				return res.locals.user.domains.includes(hostname);
-			});
-			break;
-		case process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME:
-		case process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME:
-		case process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME:
-		case process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME:
-		case process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME:
-			map = map
-				.filter(a => {
-					return a.value && a.value.split(':').includes(res.locals.user.username);
-				})
-				.map(x => {
-					x.value = res.locals.user.username;
-					return x;
-				});
-			break;
-		default:
-			return dynamicResponse(req, res, 400, { error: 'Invalid map' });
+	try {
+		const processorFns = nameToProcessors[requestedName];
+		if (!processorFns) { return dynamicResponse(req, res, 400, { error: 'Invalid map' }); }
+		for (const proc of processorFns) {
+			const result = proc({ map, mapInfo, showValues, res });
+			map = result.map;
+			mapInfo = result.mapInfo;
+			showValues = result.showValues;
+		}
+	} catch (e) {
+		console.error(e);
+		return next(e);
 	}
+
 	return {
 		mapValueNames,
 		mapInfo,

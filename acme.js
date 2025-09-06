@@ -1,6 +1,3 @@
-'use strict';
-
-import fs from 'fs';
 import acme from 'acme-client';
 import * as redis from './redis.js';
 import redlock from './redlock.js';
@@ -23,12 +20,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 	// console.log('challenge', challenge);
 	// console.log('keyAuthorization', keyAuthorization);
 
-	if (challenge.type === 'http-01') {
-		const filePath = `/tmp/.well-known/acme-challenge/${challenge.token}`;
-		const fileContents = keyAuthorization;
-		console.log(`Creating challenge response for ${authz.identifier.value} at path: ${filePath}`);
-		await fs.writeFile(filePath, fileContents);
-	} else if (challenge.type === 'dns-01') {
+	if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';
@@ -48,7 +40,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 			if (!recordSetRaw) {
 				recordSetRaw = {};
 			}
-			recordSetRaw['txt'] = (recordSetRaw['txt']||[]).concat([record]);
+			recordSetRaw['txt'] = (recordSetRaw['txt'] || []).concat([record]);
 			await redis.hset(`dns:${domain}.`, subdomain, recordSetRaw);
 			console.log(`Created TXT record for "${subdomain}.${domain}" with value "${recordValue}"`);
 			//CAA record (testing)
@@ -68,12 +60,14 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 				await redis.hset(`dns:${domain}.`, caaSubdomain, caaRecordSetRaw);
 			}
 			console.log(`Created TXT record for "${caaSubdomain}.${domain}"`);
-		} catch(e) {
+		} catch (e) {
 			console.error(e);
 		} finally {
 			await lock.release();
 			await lock2.release();
 		}
+	} else {
+		throw new Error(`Unsupported challenge type: ${challenge.type}`);
 	}
 }
 
@@ -89,11 +83,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 	console.log('Triggered challengeRemoveFn()');
 
-	if (challenge.type === 'http-01') {
-		const filePath = `/tmp/.well-known/acme-challenge/${challenge.token}`;
-		console.log(`Removing challenge response for ${authz.identifier.value} at path: ${filePath}`);
-		await fs.unlink(filePath);
-	} else if (challenge.type === 'dns-01') {
+	if (challenge.type === 'dns-01') {
 		const parsed = psl.parse(authz.identifier.value);
 		const domain = parsed.domain;
 		let subdomain = '_acme-challenge';
@@ -112,7 +102,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 			if (!recordSetRaw) {
 				recordSetRaw = {};
 			}
-			recordSetRaw['txt'] = (recordSetRaw['txt']||[]).filter(r => r.text !== recordValue);
+			recordSetRaw['txt'] = (recordSetRaw['txt'] || []).filter(r => r.text !== recordValue);
 			if (recordSetRaw['txt'].length === 0) {
 				await redis.hdel(`dns:${domain}.`, subdomain);
 			} else {
@@ -133,13 +123,16 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 			}
 			await redis.hset(`dns:${domain}.`, caaSubdomain, caaRecordSetRaw);
 			console.log(`Removed TXT record for "${caaSubdomain}.${domain}"`);
-		} catch(e) {
+		} catch (e) {
 			console.error(e);
 		} finally {
 			await lock.release();
 			await lock2.release();
 		}
+	} else {
+		throw new Error(`Unsupported challenge type: ${challenge.type}`);
 	}
+
 }
 
 let _client;
@@ -151,7 +144,7 @@ export async function init() {
 	});
 }
 
-export async function generate(domain, altnames, challengePriority=['http-01', 'dns-01']) {
+export async function generate(domain, altnames, challengePriority = ['dns-01', 'http-01']) { //http unsupported -- no need
 	/* Create CSR */
 	const [key, csr] = await acme.crypto.createCsr({
 		commonName: domain,

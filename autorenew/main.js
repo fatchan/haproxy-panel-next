@@ -1,11 +1,9 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
 
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 import * as db from '../db.js';
 import FormData from 'form-data';
 import agent from '../agent.js';

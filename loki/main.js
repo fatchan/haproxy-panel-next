@@ -1,11 +1,8 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
-
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 
 if (!process.env.LOKI_BASE_URL) {
 	console.warn('process.env.LOKI_BASE_URL not set, loki pruner not running');

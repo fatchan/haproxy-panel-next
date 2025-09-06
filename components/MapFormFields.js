@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
-import { continentOptions } from '../lib/misc/continents.js';
+import { continentOptions } from '../lib/misc/geo.js';
 countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 

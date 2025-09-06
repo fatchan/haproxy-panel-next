@@ -1,5 +1,3 @@
-'use strict';
-
 import { generateKeyPairSync } from 'node:crypto';
 import { wildcardAllowed } from './util.js';
 import fs from 'node:fs';

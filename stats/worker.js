@@ -1,11 +1,8 @@
-'use strict';
+import 'dotenv/config';
 
 process
 	.on('uncaughtException', console.error)
 	.on('unhandledRejection', console.error);
-
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 
 if (!process.env.INFLUX_HOST) {
 	console.error('INFLUX_HOST not set, statistics will not be recorded');

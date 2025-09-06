@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 import * as db from '../db.js';
 import * as acme from '../acme.js';
-import url from 'node:url';
 import { dynamicResponse, wildcardAllowed, filterCertsByDomain } from '../util.js';
 import { verifyCSR } from '../ca.js';
 import { Resolver } from 'node:dns/promises';

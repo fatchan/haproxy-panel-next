@@ -1,5 +1,3 @@
-'use strict';
-
 import Redlock from 'redlock';
 import * as redis from './redis.js';
 const redlock = new Redlock([redis.lockQueueClient], {

@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
 import { dynamicResponse } from '../util.js';
 import { statsFetch, processStatusChartData, processHostnameChartData, processTrafficChartData, processBotcheckChartData } from '../lib/stats.js';
 
