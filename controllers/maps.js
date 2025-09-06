@@ -24,7 +24,9 @@ export async function mapData(req, res, next) {
 			.then(r => r.data)
 			.then(extractMap);
 
-		if (!mapInfo) { return dynamicResponse(req, res, 400, { error: 'Invalid map' }); }
+		if (!mapInfo) {
+			return; // dynamicResponse(req, res, 400, { error: 'Invalid map' });
+		}
 
 		map = await res.locals
 			.dataPlaneRetry('showRuntimeMap', { map: mapName })
@@ -38,9 +40,8 @@ export async function mapData(req, res, next) {
 		const processorFns = nameToProcessors[requestedName];
 		if (!processorFns) { return dynamicResponse(req, res, 400, { error: 'Invalid map' }); }
 		for (const proc of processorFns) {
-			const result = proc({ map, mapInfo, showValues, res });
+			const result = proc({ map, showValues, res });
 			map = result.map;
-			mapInfo = result.mapInfo;
 			showValues = result.showValues;
 		}
 	} catch (e) {
@@ -237,13 +238,15 @@ export async function patchMapForm(req, res, next) {
 
 	const mapName = metaMapMapping[req.params.name] || req.params.name;
 
-	const validKey = handleMapKey(req, res, next);
+	const validKey = await handleMapKey(req, res);
 	if (!validKey) {
+		console.warn('handleMapKey failed');
 		return;
 	}
 
-	const value = handleMapValue(req, res, next);
+	const value = await handleMapValue(req, res);
 	if (!value) {
+		console.warn('handleMapValue failed');
 		return;
 	}
 

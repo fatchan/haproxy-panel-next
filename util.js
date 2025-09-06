@@ -51,6 +51,7 @@ export const allowedCryptos = (process.env.NEXT_PUBLIC_ALLOWED_CRYPTOS || '')
 
 export const fMap = {
 	[process.env.NEXT_PUBLIC_HOSTS_MAP_NAME]: {
+		name: 'hosts',
 		fname: 'Backends',
 		description: 'Backend mappings for domains',
 		columnNames: ['Domain', 'Backend', 'Geo Route'],
@@ -58,6 +59,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_DDOS_MAP_NAME]: {
+		name: 'ddos',
 		fname: 'Protection Rules',
 		description: 'Set protection modes on domains and/or paths',
 		columnNames: ['Domain/Path', 'Mode', 'Suspicion Level'],
@@ -65,6 +67,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME]: {
+		name: 'ddos_config',
 		fname: 'Protection Settings',
 		description: 'Customise protection settings on a per-domain basis',
 		columnNames: [
@@ -79,6 +82,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME]: {
+		name: 'blockedip',
 		fname: 'IP Blacklist',
 		description: 'IPs/subnets that are outright blocked',
 		columnNames: ['IP/Subnet', 'Note'],
@@ -86,6 +90,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME]: {
+		name: 'blockedasn',
 		fname: 'ASN Blacklist',
 		description: 'ASNs that are outright blocked',
 		columnNames: ['AS Number', 'Note'],
@@ -93,6 +98,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME]: {
+		name: 'blockedcc',
 		fname: 'Country Blacklist',
 		description: 'Countries that are outright blocked',
 		columnNames: ['Country Code', 'Note'],
@@ -100,6 +106,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME]: {
+		name: 'blockedcn',
 		fname: 'Continent Blacklist',
 		description: 'Continents that are outright blocked',
 		columnNames: ['Continent Code', 'Note'],
@@ -107,6 +114,7 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME]: {
+		name: 'whitelist',
 		fname: 'IP Whitelist',
 		description: 'IPs/subnets that bypass protection rules',
 		columnNames: ['IP/Subnet', 'Note'],
@@ -114,18 +122,21 @@ export const fMap = {
 	},
 
 	[process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME]: {
+		name: 'maintenance',
 		fname: 'Maintenance Mode',
 		description: 'Disable proxying and show maintenance page for selected domains',
 		columnNames: ['Domain', ''],
 	},
 
 	[process.env.NEXT_PUBLIC_REWRITE_MAP_NAME]: {
+		name: 'rewrite',
 		fname: 'Rewrites',
 		description: 'Rewrite domain to a different domain and/or path',
 		columnNames: ['Domain', 'Rewrite to'],
 	},
 
 	[process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME]: {
+		name: 'redirect',
 		fname: 'Redirects',
 		description: 'Redirect one domain to another, stripping path',
 		columnNames: ['Domain', 'Redirect to'],

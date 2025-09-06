@@ -222,7 +222,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		}
 		case 'images': {
 			const activeDomains = (map || []).map(e => e.key);
-			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
+			const inactiveDomains = user?.domains?.filter(d => !activeDomains.includes(d)) || [];
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
@@ -285,7 +285,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		}
 		case 'css': {
 			const activeDomains = (map || []).map(e => e.key);
-			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
+			const inactiveDomains = user?.domains?.filter(d => !activeDomains.includes(d)) || [];
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
@@ -336,7 +336,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		}
 		case 'maintenance': {
 			const activeDomains = (map || []).map(e => e.key);
-			const inactiveDomains = user?.domains.filter(d => !activeDomains.includes(d));
+			const inactiveDomains = user?.domains?.filter(d => !activeDomains.includes(d)) || [];
 			const domainSelectOptions = inactiveDomains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
