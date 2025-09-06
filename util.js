@@ -164,13 +164,6 @@ export function makeArrayIfSingle (obj) {
 	return !Array.isArray(obj) ? [obj] : obj;
 }
 
-export function validClustersString (string) {
-	return !string.split(',').some((c) => {
-		const cUrl = url.parse(c);
-		return (cUrl.protocol !== 'http:' || !cUrl.hostname);
-	});
-}
-
 export function extractMap (item) {
 	const name = item.file &&
 		item.file.match(/\/etc\/haproxy\/map\/(?<name>.+).map/).groups.name;

@@ -132,9 +132,9 @@ export async function addCert(req, res, next) {
 	}
 
 	try {
-		url.parse(`https://${subject}`);
+		new URL(`https://${subject}`);
 		altnames.forEach(d => {
-			url.parse(`https://${d}`);
+			new URL(`https://${d}`);
 		});
 	} catch {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });

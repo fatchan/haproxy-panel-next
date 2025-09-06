@@ -41,20 +41,6 @@ export async function createPaymentRequest(body, dispatch, errorCallback, router
 	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router);
 }
 
-// Clusters
-export async function getClusters(dispatch, errorCallback, router) {
-	return ApiCall('/clusters.json', 'GET', null, dispatch, errorCallback, router);
-}
-export async function addCluster(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cluster/add', 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function deleteCluster(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cluster/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
-}
-export async function changeCluster(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cluster', 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-
 // Domains
 export async function getDomains(dispatch, errorCallback, router) {
 	return ApiCall('/domains.json', 'GET', null, dispatch, errorCallback, router);

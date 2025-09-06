@@ -144,7 +144,7 @@ export async function mapData(req, res, next) {
 		case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
 			const isImages = req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME;
 			map = map.filter(a => {
-				const { pathname } = url.parse(`https://${a.key}`);
+				const { pathname } = new URL(`https://${a.key}`);
 				const isPowIconPath = pathname === `/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 				return isImages ? isPowIconPath : !isPowIconPath;
 			});
@@ -185,7 +185,7 @@ export async function mapData(req, res, next) {
 		/* falls through */
 		case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
 			map = map.filter(a => {
-				const { hostname } = url.parse(`https://${a.key}`);
+				const { hostname } = new URL(`https://${a.key}`);
 				return res.locals.user.domains.includes(hostname);
 			});
 			break;
@@ -293,7 +293,7 @@ export async function deleteMapForm(req, res, next) {
 		|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
 		|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
 		|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
-		const { hostname } = url.parse(`https://${req.body.key}`);
+		const { hostname } = new URL(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
 			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
@@ -368,7 +368,7 @@ export async function patchMapForm(req, res, next) {
 			|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
 			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
 			|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
-			const { hostname } = url.parse(`https://${req.body.key}`);
+			const { hostname } = new URL(`https://${req.body.key}`);
 			const allowed = res.locals.user.domains.includes(hostname);
 			if (!allowed) {
 				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
@@ -385,7 +385,7 @@ export async function patchMapForm(req, res, next) {
 			if (req.body.image !== 'bot-check') {
 				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 			}
-			const { hostname } = url.parse(`https://${req.body.key}`);
+			const { hostname } = new URL(`https://${req.body.key}`);
 			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 		}
 
