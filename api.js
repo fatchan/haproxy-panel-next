@@ -165,7 +165,7 @@ function buildOptions(route, method, body) {
 	return options;
 }
 
-export async function ApiCall(route, method='get', body, dispatch, errorCallback, router, finishProgress=1) {
+export async function ApiCall(route, method = 'get', body, dispatch, errorCallback, router, finishProgress = 1) {
 
 	// Start progress bar
 	if (finishProgress !== false) {
@@ -176,10 +176,11 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	const requestOptions = buildOptions(route, method, body);
 
 	// Make request, catch errors, and finally{} to always end progress bar
-	let response;
+	let response, error;
 	try {
 		response = await fetch(route, requestOptions);
-	} catch(e) {
+	} catch (e) {
+		error = e;
 		console.error(e);
 	} finally {
 		if (finishProgress != null) {
@@ -190,7 +191,7 @@ export async function ApiCall(route, method='get', body, dispatch, errorCallback
 	}
 
 	if (!response) {
-		errorCallback('An error occurred');
+		errorCallback(error?.message || 'An error occurred');
 		NProgress.done(true);
 		return;
 	}

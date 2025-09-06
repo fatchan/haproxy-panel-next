@@ -1,43 +1,8 @@
 import { extractMap, dynamicResponse, metaMapMapping } from '../util.js';
-import { createCIDR, parse } from 'ip6addr';
 import * as db from '../db.js';
-import { continentMap, countryMap } from '../lib/misc/geo.js';
 import { getMapNotes, nameToProcessors } from '../lib/maps/processors.js';
-import { mapValueNames, protectionModeSet, susLevelSet } from '../lib/maps/labels.js';
-
-export async function backendIpAllowed(dataPlaneRetry, username, backendIp) {
-
-	const hostsMap = await dataPlaneRetry('showRuntimeMap', { map: process.env.NEXT_PUBLIC_HOSTS_MAP_NAME })
-		.then(r => r.data)
-		.then(r => {
-			return r.map(e => {
-				//TODO: handle ipv6 backend (not supported yet anyway)
-				const [ipAndPort, geo] = e.value.split('|');
-				const [splitIp, _] = ipAndPort.split(':');
-				const parsedIp = parse(splitIp).toString({ zeroElide: false, zeroPad: false }); // prevent bypass with compressed addresses
-				return {
-					ip: parsedIp, //parsed ip
-					domain: e.key, //domain
-					geo: geo, //geo routing region (cn)
-				};
-			});
-		});
-	const existingEntry = hostsMap.find(e => e.ip === backendIp);
-	if (existingEntry) {
-		//theres already another backend with this IP, check domtoacc mapping
-		const backendMapEntry = await dataPlaneRetry('getRuntimeMapEntry', {
-			map: process.env.NEXT_PUBLIC_DOMTOACC_MAP_NAME,
-			id: existingEntry.domain,
-		})
-			.then(r => r.data);
-		if (backendMapEntry) {
-			return backendMapEntry.value === username; //Return true if this user already owns this backend IP
-		}
-	}
-
-	return true; //No existing entry, fresh ip
-
-}
+import { mapValueNames } from '../lib/maps/labels.js';
+import { backendIpAllowed, handleMapKey, handleMapValue } from '../lib/maps/converters.js';
 
 /**
  * GET /maps/:name
@@ -52,7 +17,7 @@ export async function mapData(req, res, next) {
 	const mapName = metaMapMapping[requestedName] || requestedName;
 
 	try {
-		mapNotes = await getMapNotes(db, res.locals.user.username, mapName);
+		mapNotes = await getMapNotes(res.locals.user.username, mapName);
 
 		mapInfo = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', mapName)
@@ -110,18 +75,27 @@ export async function mapJson(req, res, next) {
  * Delete the map entries of the body 'domain'
  */
 export async function deleteMapForm(req, res, next) {
+
 	if (!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
 	if (req.body && req.body.note && (typeof req.body.note !== 'string' || req.body.note.length > 200)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid note' });
 	}
+
 	const mapName = metaMapMapping[req.params.name] || req.params.name;
-	if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
+
+	if ([
+		process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME,
+		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
+		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
+	].includes(req.params.name)) {
+		/*
+			Maps with split values for e.g. multi-username that get updated
+		*/
+
 		let value;
 		const existingMapEntries = await res.locals
 			.dataPlaneRetry('showRuntimeMap', {
@@ -132,7 +106,8 @@ export async function deleteMapForm(req, res, next) {
 			.catch(() => { });
 		const existingEntry = existingMapEntries && existingMapEntries
 			.find(en => en.key === req.body.key);
-		console.log('existingEntry', existingEntry);
+
+		// If theres an existing entry, filter and update the value with user removed
 		if (existingEntry && existingEntry.value) {
 			let existingEntries = existingEntry.value.split(':');
 			if (!existingEntries || !existingEntries.includes(res.locals.user.username)) {
@@ -140,9 +115,10 @@ export async function deleteMapForm(req, res, next) {
 			}
 			existingEntries = existingEntries.filter(e => e !== res.locals.user.username);
 			value = existingEntries.join(':'); //0 length if was only name
+
 			try {
 				if (value && value.length > 0) {
-					//if value still exists, other user has whitelisted, so replace withg updated value
+					// if value still exists, other user has whitelisted, so replace with updated value
 					await res.locals
 						.dataPlaneAll('replaceRuntimeMapEntry', {
 							map: req.params.name,
@@ -151,7 +127,7 @@ export async function deleteMapForm(req, res, next) {
 							value: value,
 						}, null, false, false);
 				} else {
-					//else we were the last/only one, so remove
+					// else we were the last/only one, so remove so no -m found/empty value
 					await res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
 							map: req.params.name,
@@ -162,25 +138,36 @@ export async function deleteMapForm(req, res, next) {
 				return next(e);
 			}
 		}
-	} else if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
-		|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
+
+	} else if ([
+		process.env.NEXT_PUBLIC_HOSTS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_MAP_NAME,
+		process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
+		process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME,
+		process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME,
+		process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
+		process.env.NEXT_PUBLIC_IMAGES_MAP_NAME,
+		process.env.NEXT_PUBLIC_CSS_MAP_NAME,
+	].includes(req.params.name)) {
+		/*
+			Maps with single values that get added/overwritten
+		*/
+
 		const { hostname } = new URL(`https://${req.body.key}`);
 		const allowed = res.locals.user.domains.includes(hostname);
 		if (!allowed) {
 			return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
 		}
+
 		//TODO: handle for other image types and make dynamic for e.g. css, translations map(s)
 		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
 			//tood: handle for images other than bot-check
 			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
 		}
+
 		try {
+
+			//backend map handled specially
 			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
 				const matchingBackend = await res.locals
@@ -189,20 +176,24 @@ export async function deleteMapForm(req, res, next) {
 					})
 					.then(r => r.data)
 					.then(backends => backends.find(mb => mb.key === req.body.key));
-				console.log('matchingBackend', matchingBackend);
+
+				// can happen if desynced
 				if (!matchingBackend) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid backend state, please contact support' });
 				}
+
+				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map)
 				const splitValue = matchingBackend.value.split(',');
-				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map
 				await Promise.all([
+					//delete multiple of the actual servers
 					await Promise.all(splitValue.map(bsv =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
-								name: bsv.substring(0, bsv.length - 3), // strip geo code
+								name: bsv.substring(0, bsv.length - 3), // strip 3 chars for geo continent code and separator
 							}, null, null, false, true)
 					)),
+					//and the single map entry w/ value separator
 					res.locals
 						.dataPlaneAll('deleteRuntimeMapEntry', {
 							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
@@ -210,20 +201,27 @@ export async function deleteMapForm(req, res, next) {
 						}, null, null, false, true)
 				]);
 			}
+
+			//then the regular map action
 			await res.locals
 				.dataPlaneAll('deleteRuntimeMapEntry', {
 					map: mapName, //'ddos'
 					id: req.body.key, //'example.com'
 				}, null, null, false, false);
+
 		} catch (e) {
 			return next(e);
 		}
+
 	}
+
+	// update map notes in either case
 	await db.db().collection('mapnotes').deleteMany({
 		username: res.locals.user.username,
 		map: req.params.name,
 		key: req.body.key,
 	});
+
 	return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 }
 
@@ -232,340 +230,185 @@ export async function deleteMapForm(req, res, next) {
  * Add map entries of the body 'domain'
  */
 export async function patchMapForm(req, res, next) {
-	if (req.body && req.body.key && typeof req.body.key === 'string') {
 
-		const mapName = metaMapMapping[req.params.name] || req.params.name;
+	if (!req.body || !req.body.key || typeof req.body.key !== 'string') {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
 
-		//validate key is domain
-		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME) {
-			const { hostname } = new URL(`https://${req.body.key}`);
-			const allowed = res.locals.user.domains.includes(hostname);
-			if (!allowed) {
-				return dynamicResponse(req, res, 403, { error: 'No permission for that domain' });
-			}
-		}
+	const mapName = metaMapMapping[req.params.name] || req.params.name;
 
-		if (req.params.name === process.env.NEXT_PUBLIC_CSS_MAP_NAME
-			&& (!req.body || !req.body.value || typeof req.body.value !== 'string')) {
-			return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-		}
+	const validKey = handleMapKey(req, res, next);
+	if (!validKey) {
+		return;
+	}
 
-		if (req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
-			//TODO: update once more image types are available, refactor mapping to reuse logic in delete map endpoint
-			if (req.body.image !== 'bot-check') {
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-			const { hostname } = new URL(`https://${req.body.key}`);
-			req.body.key = `${hostname}/${process.env.NEXT_PUBLIC_DOT_PATH}/pow-icon`;
-		}
+	const value = handleMapValue(req, res, next);
+	if (!value) {
+		return;
+	}
 
-		//validate key is valid ip address
-		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME) {
-			let parsedIp, parsedSubnet;
-			try {
-				parsedIp = parse(req.body.key);
-			} catch { parsedIp = null; /*invalid ip, or a subnet*/ }
-			try {
-				parsedSubnet = createCIDR(req.body.key);
-			} catch { parsedSubnet = null; /*invalid subnet or just an ip*/ }
-			const parsedIpOrSubnet = parsedIp || parsedSubnet;
-			if (!parsedIpOrSubnet) {
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-			req.body.key = parsedIpOrSubnet.toString({ zeroElide: false, zeroPad: false });
-		}
+	try {
 
-		//validate key is ASN
-		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME) {
-			if (!/^\d+$/.test(req.body.key)) {
-				return dynamicResponse(req, res, 403, { error: 'Invalid ASN' });
-			}
-			//req.body.key is a number
-		}
-
-		//validate key is country code
-		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME) {
-			if (!countryMap[req.body.key]) {
-				return dynamicResponse(req, res, 403, { error: 'Invalid country code' });
-			}
-			//req.body.key is a cc
-		}
-
-		//validate key is country code
-		if (req.params.name === process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME) {
-			if (!continentMap[req.body.key] || req.body.key === 'XX') { //XX only for hosts map for now
-				return dynamicResponse(req, res, 403, { error: 'Invalid continent code' });
-			}
-			//req.body.key is a cn
-		}
-
-		//validate value is url (roughly)
-		if (req.params.name === process.env.NEXT_PUBLIC_REWRITE_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME
-			|| req.params.name === process.env.NEXT_PUBLIC_IMAGES_MAP_NAME) {
-			try {
-				new URL(`http://${req.body.value}`);
-			} catch {
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-		}
-
-		//validate ddos_config
-		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME) {
-			const { pd, cex } = req.body;
-			if ((pd && (isNaN(pd) || parseInt(pd, 10) !== +pd || pd < 8))
-				|| (cex && (isNaN(cex) || parseInt(cex, 10) !== +cex))) {
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-		}
-
-		//validate ddos
-		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
-			if (!req.body.m || !protectionModeSet.has(req.body.m.toString())) {
-				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
-			}
-			if (req.body.l != null && !susLevelSet.has(req.body.l.toString())) {
-				return dynamicResponse(req, res, 400, { error: 'Invalid value' });
-			}
-		}
-		if (req.params.name === process.env.NEXT_PUBLIC_DDOS_MAP_NAME) {
-			const { m } = req.body; //t, v, etc
-			if (m && (isNaN(m) || parseInt(m, 10) !== +m || m < 0)) {
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-		}
-
-		//validate value is IP:port
+		// Host name is special case where we have to update backends/servers, not just map manupulation
 		if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
-			//validate key is country code
-			if (!req.body.geo || typeof req.body.geo !== 'string' || !continentMap[req.body.geo]) {
-				return dynamicResponse(req, res, 403, { error: 'Invalid backend geo route value' });
-			}
-			let parsedValue;
-			try {
-				parsedValue = new URL(`scheme://${req.body.ip}`);
-				if (!parsedValue.host || !parsedValue.port) {
-					console.warn('parsedValue no host or port:', parsedValue);
-					return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-				}
-				// parse(parsedValue.hostname); //better ip parsing, will error if invalid
-			} catch (e) {
-				console.warn(e);
-				return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-			}
-			req.body.ip = parsedValue.host; //host includes port
-		}
 
-		let value;
-		switch (req.params.name) {
-			case process.env.NEXT_PUBLIC_REWRITE_MAP_NAME:
-			case process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME:
-			case process.env.NEXT_PUBLIC_IMAGES_MAP_NAME:
-				value = req.body.value;
-				break;
-			case process.env.NEXT_PUBLIC_HOSTS_MAP_NAME:
-				value = `${req.body.ip}|${req.body.geo}`;
-				break;
-			case process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME:
-			case process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME:
-			case process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME:
-			case process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME:
-			case process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME: {
-				const existingEntry = await res.locals
-					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: req.params.name,
-						id: req.body.key,
-					})
-					.then(r => r.data)
-					.catch(() => { });
-				if (existingEntry && existingEntry.value) {
-					const existingSplitEntries = existingEntry.value.split(':');
-					existingSplitEntries.push(res.locals.user.username);
-					const dedupedSplitEntries = [...new Set(existingSplitEntries)];
-					value = dedupedSplitEntries.join(':');
-				} else {
-					value = res.locals.user.username;
-				}
-				break;
+			const { hostname: address, port } = new URL(`scheme://${req.body.ip}`);
+			const backendAllowed = await backendIpAllowed(
+				res.locals.dataPlaneRetry,
+				res.locals.user.username,
+				address
+			);
+
+			// prevent adding priviliged or conflicting backend IPs from another user
+			if (!backendAllowed) {
+				return dynamicResponse(req, res, 403, { error: 'No permission to add a backend with that IP' });
 			}
-			case process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME:
-				value = res.locals.user.username;
-				break;
-			case process.env.NEXT_PUBLIC_DDOS_MAP_NAME:
-				value = JSON.stringify({
-					m: parseInt(req.body.m || 1, 10),
-					l: parseInt(req.body.l || 1, 10),
+
+			// get the backend map for existing entry dat
+			const backendMapEntry = await res.locals
+				.dataPlaneRetry('getRuntimeMapEntry', {
+					map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+					id: req.body.key,
+				})
+				.catch(() => { });
+
+			// try to fetch the number for the next server name
+			const freeSlotId = await res.locals
+				.dataPlaneRetry('getRuntimeServers', {
+					backend: 'servers'
+				})
+				.then(r => r.data)
+				.then(servers => {
+					if (servers.length > 0) {
+						const serverIds = servers
+							.map(s => parseInt(s.id, 10))
+							.sort((a, b) => a - b);
+						const serverNameIds = servers
+							.map(s => parseInt(s.name.substr(6), 10))
+							.sort((a, b) => a - b);
+						const highestId = Math.max(
+							serverIds[serverIds.length - 1],
+							serverNameIds[serverNameIds.length - 1]
+						);
+						// 2 in the else case Because server ID "1" is the other_port "server" and will cause a conflict on patching the server
+						return !isNaN(highestId) ? highestId + 1 : 2;
+					}
+					return 2; // see above
 				});
-				break;
-			case process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME:
-				value = JSON.stringify({
-					pd: parseInt(req.body.pd || 24, 10),
-					pt: req.body.pt === 'argon2' ? 'argon2' : 'sha256',
-					cex: parseInt(req.body.cex || 21600, 10),
-					cip: req.body.cip === true ? true : false,
-					js: req.body.js !== true ? false : true, //inverted to help w existing default
-				});
-				break;
-			case process.env.NEXT_PUBLIC_CSS_MAP_NAME:
-				value = encodeURIComponent(req.body.value);
-				console.log('value', value);
-				break;
-			default:
-				return dynamicResponse(req, res, 400, { error: 'Invalid map' });
-		}
 
-		try {
-
-			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
-				const { hostname: address, port } = new URL(`http://${req.body.ip}`);
-				const backendAllowed = await backendIpAllowed(
-					res.locals.dataPlaneRetry,
-					res.locals.user.username,
-					address
-				);
-				if (!backendAllowed) {
-					return dynamicResponse(req, res, 403, { error: 'No permission to add a backend with that IP' });
-				}
-				const backendMapEntry = await res.locals
-					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-						id: req.body.key,
-					})
-					.then(r => r.data)
-					.catch(() => { });
-				const freeSlotId = await res.locals
-					.dataPlaneRetry('getRuntimeServers', {
-						backend: 'servers'
-					})
-					.then(r => r.data)
-					.then(servers => {
-						if (servers.length > 0) {
-							const serverIds = servers
-								.map(s => parseInt(s.id, 10))
-								.sort((a, b) => a - b);
-							const serverNameIds = servers
-								.map(s => parseInt(s.name.substr(6), 10))
-								.sort((a, b) => a - b);
-							const highestId = Math.max(
-								serverIds[serverIds.length - 1],
-								serverNameIds[serverNameIds.length - 1]
-							);
-							// 2 in the else case Because server ID "1" is the other_port "server" and will cause a conflict on patching the server
-							return !isNaN(highestId) ? highestId + 1 : 2;
-						}
-						return 2; // see above
-					});
-				if (!freeSlotId) {
-					return dynamicResponse(req, res, 400, { error: 'No server slots available' });
-				}
-				const serverName = `websrv${freeSlotId}`;
-				const runtimeServerResp = await res.locals
-					.dataPlaneAll('addRuntimeServer', {
-						backend: 'servers',
-					}, {
-						address,
-						port: parseInt(port, 10),
-						name: serverName,
-						ssl_cafile: 'ca-certificates.crt',
-						sni: 'req.hdr(Host)',
-						ssl_reuse: 'enabled',
-						ssl: 'enabled',
-						verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
-						//
-						// check: 'enabled',
-						// observe: 'layer4',
-						//
-					}, null, false, true);
-				console.log('added runtime server', req.body.key, runtimeServerResp.data);
-				await res.locals
-					.dataPlaneAll('replaceRuntimeServer', {
-						name: serverName,
-						backend: 'servers',
-					}, {
-						admin_state: 'ready',
-						operational_state: 'up',
-					}, null, false, true);
-				if (backendMapEntry) {
-					console.info('Setting multiple domain->ip entries for', req.body.key, backendMapEntry);
-					// Have to show the whole map because getRuntimeMapEntry will only have first value (why? beats me)
-					const fullBackendMap = await res.locals
-						.dataPlaneRetry('showRuntimeMap', {
-							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
-						})
-						.then(r => r.data);
-					const fullBackendMapEntry = fullBackendMap
-						.find(entry => entry.key === req.body.key); //Find is OK because there shouldn't be duplicate keys
-					await res.locals
-						.dataPlaneAll('replaceRuntimeMapEntry', {
-							map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-							id: req.body.key,
-						}, {
-							value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
-						}, null, false, false);
-				} else {
-					await res.locals
-						.dataPlaneAll('addPayloadRuntimeMap', {
-							name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-						}, [{
-							key: req.body.key,
-							value: `websrv${freeSlotId}|${req.body.geo}`,
-						}], null, false, false);
-				}
+			// guard if "next" id not available, which shoulnt happen
+			if (!freeSlotId) {
+				return dynamicResponse(req, res, 400, { error: 'No server slots available' });
 			}
 
-			const existingEntry = mapName === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
-				? null
-				: (await res.locals
-					.dataPlaneRetry('getRuntimeMapEntry', {
-						map: mapName,
-						id: req.body.key,
+			// add the backend server
+			const serverName = `websrv${freeSlotId}`;
+			const runtimeServerResp = await res.locals
+				.dataPlaneAll('addRuntimeServer', {
+					backend: 'servers',
+				}, {
+					address,
+					port: parseInt(port, 10),
+					name: serverName,
+					ssl_cafile: 'ca-certificates.crt',
+					sni: 'req.hdr(Host)',
+					ssl_reuse: 'enabled',
+					ssl: 'enabled',
+					verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
+					//
+					// check: 'enabled',
+					// observe: 'layer4',
+					//
+				}, null, false, true);
+
+			// call repalce to set admin and operational state (cant be set on dynamic runtime servers during server "add")
+			await res.locals
+				.dataPlaneAll('replaceRuntimeServer', {
+					name: serverName,
+					backend: 'servers',
+				}, {
+					admin_state: 'ready',
+					operational_state: 'up',
+				}, null, false, true);
+			console.log('added runtime server', req.body.key, runtimeServerResp.data);
+
+			// if theres an existing backend map entry, update
+			if (backendMapEntry) {
+				console.info('setting load balanced backend entry:', req.body.key, backendMapEntry);
+				// Have to show the whole map because getRuntimeMapEntry doesnt return multiples
+				const fullBackendMap = await res.locals
+					.dataPlaneRetry('showRuntimeMap', {
+						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
 					})
-					.then(r => r.data)
-					.catch(() => { }));
-			if (existingEntry) {
+					.then(r => r.data);
+				const fullBackendMapEntry = fullBackendMap
+					.find(entry => entry.key === req.body.key); //find is OK because keys are pointers and shouldnt be dupes
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
-						map: mapName,
+						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					}, {
-						value: value,
+						value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
 					}, null, false, false);
 			} else {
+				// otherwise add new backend
 				await res.locals
 					.dataPlaneAll('addPayloadRuntimeMap', {
-						name: mapName
+						name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					}, [{
 						key: req.body.key,
-						value: value,
-					}], null, null, false);
+						value: `websrv${freeSlotId}|${req.body.geo}`,
+					}], null, false, false);
 			}
-			await db.db().collection('mapnotes').replaceOne({
-				username: res.locals.user.username,
-				map: mapName,
-				key: req.body.key,
-			}, {
-				username: res.locals.user.username,
-				map: mapName,
-				key: req.body.key,
-				note: req.body.note,
-			}, {
-				upsert: true,
-			});
-			if (req.body.edit) {
-				return dynamicResponse(req, res, 200, {});
-			}
-			return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
-		} catch (e) {
-			return next(e);
+
 		}
+
+		//then do map actions
+		const existingEntry = mapName === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME
+			? null
+			: (await res.locals
+				.dataPlaneRetry('getRuntimeMapEntry', {
+					map: mapName,
+					id: req.body.key,
+				})
+				.then(r => r.data)
+				.catch(() => { }));
+		if (existingEntry) {
+			await res.locals
+				.dataPlaneAll('replaceRuntimeMapEntry', {
+					map: mapName,
+					id: req.body.key,
+				}, {
+					value: value,
+				}, null, false, false);
+		} else {
+			await res.locals
+				.dataPlaneAll('addPayloadRuntimeMap', {
+					name: mapName
+				}, [{
+					key: req.body.key,
+					value: value,
+				}], null, null, false);
+		}
+		await db.db().collection('mapnotes').replaceOne({
+			username: res.locals.user.username,
+			map: mapName,
+			key: req.body.key,
+		}, {
+			username: res.locals.user.username,
+			map: mapName,
+			key: req.body.key,
+			note: req.body.note,
+		}, {
+			upsert: true,
+		});
+
+		if (req.body.edit) {
+			return dynamicResponse(req, res, 200, {});
+		}
+
+		return dynamicResponse(req, res, 302, { redirect: req.body.onboarding ? '/onboarding' : `/map/${req.params.name}` });
+	} catch (e) {
+		return next(e);
 	}
-	return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 }
