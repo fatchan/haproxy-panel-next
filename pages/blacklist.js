@@ -9,11 +9,11 @@ import MapFormFields from '../components/MapFormFields';
 import * as API from '../api.js';
 import { fMap } from '../util.js';
 import ErrorAlert from '../components/ErrorAlert.js';
-import { useRouter } from 'next/router.js';
+// import { useRouter } from 'next/router.js';
 
 function BlacklistPage(props) {
 
-	const router = useRouter();
+	// const router = useRouter();
 	const [mapName, setMapName] = useState('blockedip');
 	const [state, setState] = useState(props);
 	const [error, setError] = useState();
@@ -36,7 +36,7 @@ function BlacklistPage(props) {
 		setRefresh({
 			...refresh,
 			[mapName]: Date.now(),
-		}) // hmmm
+		}); // hmmm
 		e.target.reset();
 		setEditValue({});
 	};
