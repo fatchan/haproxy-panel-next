@@ -22,7 +22,7 @@ const mapAlerts = {
 	whitelist: <>Whitelist an IP or netblock from bot-check and maintenance modes for your domains.</>,
 };
 
-export default function MapContainer({ mapName, initialData = {}, minimal }) {
+export default function MapContainer({ mapName, initialData = {}, minimal, refresh }) {
 
 	const router = useRouter();
 	const [state, _setState] = useState(initialData);
@@ -45,7 +45,13 @@ export default function MapContainer({ mapName, initialData = {}, minimal }) {
 	const { user, mapValueNames, mapInfo, map, csrf, showValues, mapNotes } = state || {};
 
 	useEffect(() => {
-    // fetch if missing or different map
+		if (refresh?.[mapName] && map) {
+			API.getMap(mapName, setState, setError, router);
+		}
+	}, [refresh?.[mapName]]);
+
+	useEffect(() => {
+		// fetch if missing or different map
 		if (!state.map || (mapInfo && mapInfo.name !== mapName)) {
 			setLoading(true);
 			API.getMap(mapName, setState, setError, router);
@@ -126,7 +132,7 @@ export default function MapContainer({ mapName, initialData = {}, minimal }) {
 											<th style={{ width: 0 }} />
 											<th>{fMap[mapName].columnNames?.[0] || ''}</th>
 											{(showValues === true || fMap[mapName].showAllColumns === true) &&
-                        fMap[mapName].columnNames?.slice(1)?.map((x, mci) => <th key={`mci_${mci}`}>{x}</th>)}
+												fMap[mapName].columnNames?.slice(1)?.map((x, mci) => <th key={`mci_${mci}`}>{x}</th>)}
 										</>
 									)}
 								</tr>

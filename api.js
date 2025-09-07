@@ -214,7 +214,7 @@ export async function ApiCall(route, method = 'get', body, dispatch, errorCallba
 			errorCallback(response.error);
 			return;
 		}
-		dispatch(response);
+		dispatch && dispatch(response);
 		return response;
 	} else {
 		errorCallback('An error occurred');

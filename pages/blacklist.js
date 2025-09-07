@@ -17,18 +17,28 @@ function BlacklistPage(props) {
 	const [mapName, setMapName] = useState('blockedip');
 	const [state, setState] = useState(props);
 	const [error, setError] = useState();
+	const [editValue, setEditValue] = useState({});
+	const [refresh, setRefresh] = useState({});
 	const { user, csrf } = state || {};
+
+	const handleFieldChange = (field, newValue) => {
+		setEditValue(prev => ({ ...prev, [field]: newValue }));
+	};
 
 	async function addToMap(e) {
 		e.preventDefault();
 		setError();
 		await API.addToMap(mapName, {
 			_csrf: csrf,
-			key: e.target.key?.value,
-			note: e.target.node?.value,
+			...editValue,
 		}, setState, setError, null);
-		await API.getMap(mapName, setState, setError, router);
+		// await API.getMap(mapName, setState, setError, router);
+		setRefresh({
+			...refresh,
+			[mapName]: Date.now(),
+		}) // hmmm
 		e.target.reset();
+		setEditValue({});
 	};
 
 	return (
@@ -39,16 +49,14 @@ function BlacklistPage(props) {
 			<InfoAlert>Block IPs, subnets, ASNs, countries or continents.</InfoAlert>
 
 			<div className='round-border'>
-				<MapContainer mapName={'blockedip'} minimal />
-				<MapContainer mapName={'blockedasn'} minimal />
-				<MapContainer mapName={'blockedcc'} minimal />
-				<MapContainer mapName={'blockedcn'} minimal />
+				<MapContainer mapName={'blockedip'} minimal refresh={refresh} />
+				<MapContainer mapName={'blockedasn'} minimal refresh={refresh} />
+				<MapContainer mapName={'blockedcc'} minimal refresh={refresh} />
+				<MapContainer mapName={'blockedcn'} minimal refresh={refresh} />
 			</div>
 
-			{error && <span className='mt-3'><ErrorAlert error={error} /></span>}
-
 			<div className='w-100 table-responsive round-border mt-3'>
-				<form onSubmit={(e) => addToMap(e)} className='d-flex'>
+				<form onSubmit={addToMap} className='d-flex'>
 					<table className='table text-nowrap mb-0'>
 						<tbody>
 							<tr className='align-middle'>
@@ -68,12 +76,16 @@ function BlacklistPage(props) {
 									mapName={fMap[mapName].name}
 									user={user}
 									noButtons
+									handleFieldChange={handleFieldChange}
+									editValue={editValue}
 								/>
 							</tr>
 						</tbody>
 					</table>
 				</form>
 			</div>
+
+			{error && <div className='mt-3'><ErrorAlert error={error} /></div>}
 
 			<BackButton to='/dashboard' />
 

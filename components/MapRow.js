@@ -4,7 +4,7 @@ import MapFormFields from './MapFormFields.js';
 import asnMap from '../maps/asn.json';
 import * as API from '../api.js';
 
-export default function MapRow ({ map, row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
+export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValues, mapValueNames, columnKeys, mapNote, showNote, setError, user }) {
 	const { key, value } = row;
 	const router = useRouter();
 
@@ -43,7 +43,7 @@ export default function MapRow ({ map, row, onDeleteSubmit, name, csrf, showValu
 			payload,
 			async () => {
 				if (originalState.key !== editValue.key) {
-					API.deleteFromMap(name, { _csrf: csrf, key: originalState.key }, null, setError, router, 1);
+					API.deleteFromMap(name, { _csrf: csrf, key: originalState.key, edit: true }, null, setError, router, 1);
 				}
 				setOriginalState(editValue);
 				setIsEditing(false);

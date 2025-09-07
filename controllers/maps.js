@@ -231,6 +231,10 @@ export async function deleteMapForm(req, res, next) {
 		key: req.body.key,
 	});
 
+	if (req.body.edit) {
+		return dynamicResponse(req, res, 200, {});
+	}
+
 	return dynamicResponse(req, res, 302, { redirect: `/map/${req.params.name}` });
 }
 
