@@ -87,6 +87,7 @@ export default function router(server, app) {
 	server.get('/onboarding.json', sessionChain, haproxyCsrfChain, accountController.onboardingJson,);
 	server.get(`/map/:name(${mapNamesOrString})`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapPage.bind(null, app),);
 	server.get(`/map/:name(${mapNamesOrString}).json`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapJson,);
+	server.get('/blacklist', sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.blacklistPage.bind(null, app),);
 	server.get('/domains', sessionChain, csrfMiddleware, domainsController.domainsPage.bind(null, app),);
 	server.get('/domains.json', sessionChain, csrfMiddleware, domainsController.domainsJson,);
 	server.get('/apikeys', sessionChain, csrfMiddleware, apikeysController.apiKeysPage.bind(null, app),);

@@ -66,6 +66,14 @@ export async function mapPage(app, req, res, next) {
 	return app.render(req, res, `/map/${data.name}`);
 }
 
+export async function blacklistPage(app, req, res, _next) {
+	res.locals.data = {
+		csrf: req.csrfToken(),
+		user: res.locals.user,
+	};
+	return app.render(req, res, '/blacklist');
+}
+
 export async function mapJson(req, res, next) {
 	const data = await mapData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });

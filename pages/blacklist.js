@@ -45,10 +45,10 @@ function BlacklistPage(props) {
 				<MapContainer mapName={'blockedcn'} minimal />
 			</div>
 
-			{error && <ErrorAlert error={error} />}
+			{error && <span className='mt-3'><ErrorAlert error={error} /></span>}
 
 			<div className='w-100 table-responsive round-border mt-3'>
-				<form onSubmit={addToMap} className='d-flex'>
+				<form onSubmit={(e) => addToMap(e)} className='d-flex'>
 					<table className='table text-nowrap mb-0'>
 						<tbody>
 							<tr className='align-middle'>
