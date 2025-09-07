@@ -13,7 +13,7 @@ function MapPage(props) {
 	return (
 		<>
 			<MapContainer mapName={mapName} initialData={initialData} />
-			<BackButton to="/dashboard" />
+			<BackButton to='/dashboard' />
 		</>
 	);
 }

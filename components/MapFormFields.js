@@ -6,7 +6,7 @@ import { continentOptions } from '../lib/misc/geo.js';
 countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
-const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel }) => {
+const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel, noButtons }) => {
 	let formElements;
 
 	switch (mapName) {
@@ -28,7 +28,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -89,7 +89,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -186,7 +186,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -236,7 +236,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -299,7 +299,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -350,7 +350,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -378,7 +378,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		case 'whitelist': {
 			formElements = (
 				<>
-					<td>
+					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
 								<i className='bi-plus-lg pe-none' width='16' height='16' />
@@ -386,15 +386,15 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
 								</button>
 							</>
 						)}
-					</td>
-					<td>
+					</td>}
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
@@ -405,7 +405,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-					<td>
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
@@ -422,7 +422,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		case 'blockedasn': {
 			formElements = (
 				<>
-					<td>
+					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
 								<i className='bi-plus-lg pe-none' width='16' height='16' />
@@ -430,15 +430,15 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
 								</button>
 							</>
 						)}
-					</td>
-					<td>
+					</td>}
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
@@ -449,7 +449,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-					<td>
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
@@ -477,7 +477,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
@@ -527,7 +527,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		case 'blockedcc': {
 			formElements = (
 				<>
-					<td>
+					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
 								<i className='bi-plus-lg pe-none' width='16' height='16' />
@@ -535,15 +535,15 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
 								</button>
 							</>
 						)}
-					</td>
-					<td>
+					</td>}
+					<td className='w-50'>
 						<Select
 							menuPosition='fixed'
 							options={countryOptions}
@@ -555,7 +555,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-					<td>
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
@@ -572,7 +572,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		case 'blockedcn': {
 			formElements = (
 				<>
-					<td>
+					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
 								<i className='bi-plus-lg pe-none' width='16' height='16' />
@@ -580,15 +580,15 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						) : (
 							<>
 								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-save-fill pe-none' width='16' height='16' />
+									<i className='bi-floppy-fill pe-none' width='16' height='16' />
 								</button>
 								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
 									<i className='bi-x-lg pe-none' width='16' height='16' />
 								</button>
 							</>
 						)}
-					</td>
-					<td>
+					</td>}
+					<td className='w-50'>
 						<Select
 							menuPosition='fixed'
 							options={continentOptions.filter(x => x.value !== 'XX')}
@@ -600,7 +600,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-					<td>
+					<td className='w-50'>
 						<input
 							className='form-control'
 							type='text'
