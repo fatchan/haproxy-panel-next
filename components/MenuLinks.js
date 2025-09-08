@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { withRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Router from 'next/router';
+import OrgsSwitcher from './OrgSwitcher';
 
 export const sections = [
 	{
@@ -221,6 +222,7 @@ const MenuLinks = ({ router }) => {
 				<ResolvedImage src='/favicon.ico' width='32' height='32' alt=' ' />
 				<span className='mx-2 fs-4 text-decoration-none'>{process.env.NEXT_PUBLIC_APP_NAME}</span>
 			</Link>
+			<OrgsSwitcher />
 			<hr />
 			{sections.slice(0, -1).map(renderSection)}
 			{bottomLinks}

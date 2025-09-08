@@ -17,6 +17,7 @@ import * as templateController from './controllers/templates.js';
 import * as cacheController from './controllers/cache.js';
 import * as streamsController from './controllers/stream.js';
 import * as apikeysController from './controllers/apikeys.js';
+import * as orgsController from './controllers/orgs.js';
 
 import {
 	useSession, fetchSession, checkSession, checkOnboarding, adminCheck,
@@ -77,6 +78,8 @@ export default function router(server, app) {
 	server.post('/forms/verifyemail', useSession, accountController.verifyEmail);
 
 	//authed pages
+	server.get('/orgs', sessionChain, orgsController.orgsPage.bind(null, app));
+	server.get('/orgs.json', sessionChain, orgsController.orgsJson);
 	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app),);
 	server.get('/cache', sessionChain, checkOnboarding, haproxyCsrfChain, cacheController.cachePage.bind(null, app),);
 	server.get('/account', sessionChain, checkOnboarding, csrfMiddleware, accountController.accountPage.bind(null, app),);
@@ -103,6 +106,9 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson,);
 
 	const formsRouter = express.Router({ caseSensitive: true });
+	formsRouter.post('/orgs/switch', sessionChain, orgsController.switchOrg);
+	formsRouter.post('/orgs/members', ...sessionChain, orgsController.addMember);
+	formsRouter.delete('/orgs/members', ...sessionChain, orgsController.removeMember);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, csrfMiddleware, cacheController.purgeURL,);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, accountController.globalToggle,);
 	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm,);

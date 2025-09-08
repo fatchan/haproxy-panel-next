@@ -211,7 +211,7 @@ export async function register(req, res) {
 
 	const passwordHash = await bcrypt.hash(req.body.password, 12);
 
-	await db.db().collection('accounts')
+	const newAccount = await db.db().collection('accounts')
 		.insertOne({
 			_id: username,
 			streamsId: ObjectId().toString(),
@@ -226,6 +226,15 @@ export async function register(req, res) {
 			billing: { price: 0, description: 'Free trial' },
 			inactive: false,
 		});
+
+	if (!newAccount?.insertedId) {
+		return dynamicResponse(req, res, 400, { error: 'Account creation failed, please contact support' });
+	}
+	await db.db().collection('orgs').insertOne({
+		owner: newAccount.insertedId,
+		members: [newAccount.insertedId],
+		createdAt: new Date(),
+	});
 
 	const token = randomBytes(32).toString('hex');
 	await db.db().collection('verifications').insertOne({
