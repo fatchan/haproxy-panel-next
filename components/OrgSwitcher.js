@@ -10,7 +10,7 @@ export default function OrgsSwitcher() {
 	const [loading, setLoading] = useState(false);
 	const [switching, setSwitching] = useState(false);
 	const [error, setError] = useState();
-	const { orgs, currentOrgId } = state || {};
+	const { orgs, originalUser, currentOrgId } = state || {};
 
 	useEffect(() => {
 		setLoading(true);
@@ -20,12 +20,13 @@ export default function OrgsSwitcher() {
 	const options = useMemo(() => {
 		return (orgs || []).map(o => ({
 			value: o._id,
-			label: `${o.owner || o._id}'s Org`,
+			label: `${o.owner === originalUser.username ? '🏠 ' : ''}${o.owner || o._id}'s Org`,
+			owner: o.owner,
 		}));
 	}, [state]);
 
 	const handleChange = async selected => {
-		if (!selected) {return;}
+		if (!selected) { return; }
 		setError();
 		setSwitching(true);
 		await API.switchOrg({ orgId: selected.value }, null, setError, router);
@@ -34,7 +35,9 @@ export default function OrgsSwitcher() {
 		router.reload(); //easiest thing
 	};
 
-	const selectedOption = options.find(o => o.value === currentOrgId) || null;
+	const selectedOption = options.find(o => o.value === currentOrgId)
+		|| options.find(o => o.owner === originalUser.username) //should default to own org when none selected
+		|| null;
 
 	return (
 		<div className='orgs-switcher'>

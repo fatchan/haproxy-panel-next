@@ -13,6 +13,9 @@ const generateApiKey = (length = 64) => {
  * api keys page
  */
 export async function apiKeysPage(app, req, res) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access API keys' });
+	}
 	const originalUser = res.locals.originalUser;
 	const apiKeys = await db.db().collection('apikeys')
 		.find({
@@ -37,6 +40,9 @@ export async function apiKeysPage(app, req, res) {
  * stream keys json data
  */
 export async function apiKeysJson(req, res) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access API keys' });
+	}
 	const originalUser = res.locals.originalUser;
 	const apiKeys = await db.db().collection('apikeys')
 		.find({
@@ -60,6 +66,10 @@ export async function apiKeysJson(req, res) {
  * add stream key
  */
 export async function addApiKey(req, res, _next) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access API keys' });
+	}
+
 	const originalUser = res.locals.originalUser;
 
 	if (!req.body.label || typeof req.body.label !== 'string' || req.body.label.length === 0 || req.body.label.length > 1000) {
@@ -87,6 +97,10 @@ export async function addApiKey(req, res, _next) {
  * delete stream key
  */
 export async function deleteApiKey(req, res, _next) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access API keys' });
+	}
+
 	const originalUser = res.locals.originalUser;
 
 	if (!req.body.keyId || typeof req.body.keyId !== 'string' || req.body.keyId.length !== 24) {

@@ -9,6 +9,10 @@ import { calculateRemainingHours, dynamicResponse, allowedCryptos, createQrCodeT
  * billing page
  */
 export async function billingPage(app, req, res, next) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access billing' });
+	}
+
 	const billingUser = res.locals.originalUser;
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
@@ -23,6 +27,10 @@ export async function billingPage(app, req, res, next) {
  * billing page json data
  */
 export async function billingJson(req, res, next) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access billing' });
+	}
+
 	const billingUser = res.locals.originalUser;
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
@@ -36,6 +44,10 @@ export async function billingJson(req, res, next) {
  * billing page json data
  */
 export async function createPaymentRequest(req, res) {
+	if (res.locals.isApiKey) {
+		return dynamicResponse(req, res, 403, { error: 'API keys cannot access billing' });
+	}
+
 	const billingUser = res.locals.originalUser;
 	const { invoiceId, crypto } = req.body;
 

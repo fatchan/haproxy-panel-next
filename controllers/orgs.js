@@ -49,7 +49,7 @@ export async function orgsPage(app, req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const orgs = await getOrgsForUser(username);
 	const currentOrgId = req.session?.currentOrg;
-	res.locals.data = { orgs, currentOrgId };
+	res.locals.data = { orgs, currentOrgId, originalUser: res.locals.originalUser };
 	return app.render(req, res, '/orgs');
 }
 
@@ -60,7 +60,7 @@ export async function orgsJson(req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
-	return dynamicResponse(req, res, 200, { orgs, currentOrgId });
+	return dynamicResponse(req, res, 200, { orgs, currentOrgId, originalUser: res.locals.originalUser });
 }
 
 /**
@@ -81,12 +81,12 @@ export async function addMember(req, res, _next) {
 	if (!userExists) { return dynamicResponse(req, res, 404, { error: 'User not found' }); }
 
 	// add member if not present
-	const result = await db.db().collection('orgs').updateOne(
+	await db.db().collection('orgs').updateOne(
 		{ _id: org._id },
 		{ $addToSet: { members: memberUsername } }
 	);
 
-	return dynamicResponse(req, res, 200, { ok: true, added: result.modifiedCount === 1, member: memberUsername });
+	return dynamicResponse(req, res, 200, {});
 }
 
 /**
