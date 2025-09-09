@@ -100,7 +100,7 @@ export async function addCert(req, res, next) {
 	let certDomainNameservers = [];
 	try {
 		certDomainNameservers = await resolver.resolve(rootDomain, 'NS');
-	} catch(e) {
+	} catch (e) {
 		console.warn(e); //probably just no NS records, bad domain
 		certDomainNameservers = null;
 	}
@@ -271,7 +271,7 @@ export async function deleteCert(req, res) {
  * Delete the map entries of the body 'domain'
  */
 export async function verifyUserCSR(req, res, next) {
-	if(!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
+	if (!req.body || !req.body.csr || typeof req.body.csr !== 'string' || req.body.csr.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid CSR' });
 	}
 	try {

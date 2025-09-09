@@ -82,7 +82,7 @@ export async function addDomain(req, res, next) {
 	}
 
 	if (
-		res.locals.user.username !== 'admin' &&
+		res.locals.isAdmin &&
 		res.locals.user.domains &&
 		res.locals.user.domains.length >= (res.locals.user.maxDomains || 5)
 	) {

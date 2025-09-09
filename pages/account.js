@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as API from '../api.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import WarningAlert from '../components/WarningAlert.js';
 import withAuth from '../components/withAuth.js';
 
 function AccountPage(props) {
@@ -10,7 +11,7 @@ function AccountPage(props) {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-	const { user } = state || {};
+	const { user, impersonating } = state || {};
 
 	useEffect(() => {
 		API.getAccount(dispatch, setError, router);
@@ -34,6 +35,8 @@ function AccountPage(props) {
 			<Head>
 				<title>Account Details</title>
 			</Head>
+
+			{impersonating === true && <WarningAlert text={`Displaying for original user: ${user.username}`} />}
 
 			{error && <ErrorAlert error={error} />}
 
@@ -85,7 +88,7 @@ function AccountPage(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(AccountPage);

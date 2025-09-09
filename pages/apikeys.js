@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import WarningAlert from '../components/WarningAlert.js';
 import InfoAlert from '../components/InfoAlert.js';
 import SearchFilter from '../components/SearchFilter.js';
 import * as API from '../api.js';
@@ -35,7 +36,7 @@ function ApiKeys(props) {
 		);
 	}
 
-	const { csrf, apiKeys } = state;
+	const { csrf, user, apiKeys, impersonating } = state;
 
 	async function addApiKey(e) {
 		e.preventDefault();
@@ -112,6 +113,8 @@ function ApiKeys(props) {
 			<h5 className='fw-bold'>
 				API Keys:
 			</h5>
+
+			{impersonating === true && <WarningAlert text={`Displaying for original user: ${user.username}`} />}
 
 			<InfoAlert><a href='/api-docs' target='_blank' rel='noreferrer'>API Documentation</a></InfoAlert>
 

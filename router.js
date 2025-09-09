@@ -20,7 +20,7 @@ import * as apikeysController from './controllers/apikeys.js';
 import * as orgsController from './controllers/orgs.js';
 
 import {
-	useSession, fetchSession, checkSession, checkOnboarding, adminCheck,
+	useSession, fetchSession, checkSession, checkOnboarding, adminCheck, fetchAdmin,
 } from './lib/middleware/session.js';
 import { useHaproxy } from './lib/middleware/haproxy.js';
 import { useVarnish } from './lib/middleware/varnish.js';
@@ -107,9 +107,9 @@ export default function router(server, app) {
 
 	const formsRouter = express.Router({ caseSensitive: true });
 	formsRouter.post('/orgs/switch', sessionChain, orgsController.switchOrg);
-	formsRouter.post('/orgs/members', ...sessionChain, orgsController.addMember);
-	formsRouter.delete('/orgs/members', ...sessionChain, orgsController.removeMember);
-	formsRouter.post('/cache/purge', sessionChain, useVarnish, csrfMiddleware, cacheController.purgeURL,);
+	formsRouter.post('/orgs/members', sessionChain, orgsController.addMember);
+	formsRouter.delete('/orgs/members', sessionChain, orgsController.removeMember);
+	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL,);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, accountController.globalToggle,);
 	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm,);
 	formsRouter.delete(`/map/:name(${mapNamesOrString})/delete`, sessionChain, haproxyCsrfChain, mapsController.deleteMapForm,);
@@ -127,9 +127,9 @@ export default function router(server, app) {
 		return res.send(req.csrfToken());
 	});
 
-	formsRouter.post('/template', sessionChain, csrfMiddleware, adminCheck, templateController.upsertTemplates,);
-	formsRouter.post('/update', sessionChain, csrfMiddleware, adminCheck, templateController.updateTemplates,);
-	formsRouter.post('/down', sessionChain, csrfMiddleware, adminCheck, templateController.updateDownIPs,);
+	formsRouter.post('/template', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, templateController.upsertTemplates,);
+	formsRouter.post('/update', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, templateController.updateTemplates,);
+	formsRouter.post('/down', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, templateController.updateDownIPs,);
 
 	if (process.env.LOKI_BASE_URL) {
 		server.get('/stats', sessionChain, checkOnboarding, csrfMiddleware, statsController.statsPage.bind(null, app),);

@@ -9,11 +9,12 @@ import { calculateRemainingHours, dynamicResponse, allowedCryptos, createQrCodeT
  * billing page
  */
 export async function billingPage(app, req, res, next) {
+	const billingUser = res.locals.originalUser;
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
-		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
+		db.db().collection('invoices').find({ username: billingUser.username }).sort({ _id: -1 }).toArray(),
 	]);
-	res.locals.data = { ...data, invoices, user: res.locals.user };
+	res.locals.data = { ...data, invoices, user: billingUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/billing');
 }
 
@@ -22,11 +23,12 @@ export async function billingPage(app, req, res, next) {
  * billing page json data
  */
 export async function billingJson(req, res, next) {
+	const billingUser = res.locals.originalUser;
 	const [data, invoices] = await Promise.all([
 		accountData(req, res, next),
-		db.db().collection('invoices').find({ username: res.locals.user.username }).sort({ _id: -1 }).toArray(),
+		db.db().collection('invoices').find({ username: billingUser.username }).sort({ _id: -1 }).toArray(),
 	]);
-	return res.json({ ...data, invoices, user: res.locals.user });
+	return res.json({ ...data, invoices, user: billingUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
 }
 
 /**
@@ -34,7 +36,7 @@ export async function billingJson(req, res, next) {
  * billing page json data
  */
 export async function createPaymentRequest(req, res) {
-
+	const billingUser = res.locals.originalUser;
 	const { invoiceId, crypto } = req.body;
 
 	if (!invoiceId || typeof invoiceId !== 'string' || invoiceId.length !== 24) {
@@ -42,7 +44,7 @@ export async function createPaymentRequest(req, res) {
 	}
 
 	let invoice = await db.db().collection('invoices').findOne({
-		username: res.locals.user.username,
+		username: billingUser.username,
 		_id: ObjectId(invoiceId)
 	});
 
@@ -80,7 +82,7 @@ export async function createPaymentRequest(req, res) {
 		if (!invoice.recalculate_after && responseRecalculateAfter) {
 			const recalculateAfterStart = new Date();
 			await db.db().collection('invoices').updateOne({
-				username: res.locals.user.username,
+				username: billingUser.username,
 				_id: ObjectId(invoiceId)
 			}, {
 				$set: {
@@ -130,12 +132,12 @@ export async function createPaymentRequest(req, res) {
 			if (invoice.paymentData) {
 				// if it already had payment data, dont delete in case of needing support later;
 				await db.db().collection('invoices').updateOne(
-					{ username: res.locals.user.username, _id: ObjectId(invoiceId) },
+					{ username: billingUser.username, _id: ObjectId(invoiceId) },
 					{ $set: { status: 'expired' } }
 				);
 			} else {
 				await db.db().collection('invoices').deleteOne(
-					{ username: res.locals.user.username, _id: ObjectId(invoiceId) },
+					{ username: billingUser.username, _id: ObjectId(invoiceId) },
 				);
 			}
 			invoice = newInvoice;

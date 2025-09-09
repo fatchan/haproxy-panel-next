@@ -38,11 +38,12 @@ export async function accountData(req, res, _next) {
  * extra information needed for the onboarding page to display known completed steps
  */
 export async function onboardingData(_req, res, _next) {
-	const firstDomain = res.locals.user.domains && res.locals.user.domains.length > 0
-		? res.locals.user.domains.find(d => d !== 'localhost')
+	const originalUser = res.locals.originalUser;
+	const firstDomain = originalUser.domains && originalUser.domains.length > 0
+		? originalUser.domains.find(d => d !== 'localhost') //for docker dev env testing
 		: null;
 	const [anyBackend, nameserversPropagated] = await Promise.all([
-		db.db().collection('mapnotes').findOne({ username: res.locals.user.username, map: 'hosts' }),
+		db.db().collection('mapnotes').findOne({ username: originalUser.username, map: 'hosts' }),
 		firstDomain ? checkPublicDNSRecord(firstDomain, 'NS', expectedNSRecords) : void 0,
 	]);
 	return {
@@ -56,8 +57,9 @@ export async function onboardingData(_req, res, _next) {
  * account page html
  */
 export async function accountPage(app, req, res, next) {
+	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: res.locals.user };
+	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/account');
 }
 
@@ -66,8 +68,9 @@ export async function accountPage(app, req, res, next) {
  * account page html
  */
 export async function dashboardPage(app, req, res, next) {
+	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: res.locals.user };
+	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/dashboard');
 }
 
@@ -76,11 +79,12 @@ export async function dashboardPage(app, req, res, next) {
  * account page html
  */
 export async function onboardingPage(app, req, res, next) {
+	const originalUser = res.locals.originalUser;
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
 	]);
-	res.locals.data = { ...addData, ...onbData, user: res.locals.user };
+	res.locals.data = { ...addData, ...onbData, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/onboarding');
 }
 
@@ -89,8 +93,9 @@ export async function onboardingPage(app, req, res, next) {
  * account page json data
  */
 export async function accountJson(req, res, next) {
+	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	return res.json({ ...data, user: res.locals.user });
+	return res.json({ ...data, user: originalUser, impersonating: false });
 }
 
 /**
@@ -98,11 +103,12 @@ export async function accountJson(req, res, next) {
  * onboarding page json data
  */
 export async function onboardingJson(req, res, next) {
+	const originalUser = res.locals.originalUser;
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
 	]);
-	return res.json({ ...addData, ...onbData, user: res.locals.user });
+	return res.json({ ...addData, ...onbData, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
 }
 
 /**
@@ -110,7 +116,7 @@ export async function onboardingJson(req, res, next) {
  * toggle global ACL
  */
 export async function globalToggle(req, res, next) {
-	if (res.locals.user.username !== 'admin') {
+	if (!res.locals.isAdmin) { //already a middleware but meh
 		return dynamicResponse(req, res, 403, { error: 'Global ACL can only be toggled by an administrator' });
 	}
 	try {
@@ -180,7 +186,7 @@ export async function login(req, res) {
  */
 export async function register(req, res) {
 
-	if (!res.locals.user || res.locals.user.username !== 'admin') {
+	if (!res.locals.isAdmin) {
 		return dynamicResponse(req, res, 400, { error: 'Registration is currently invite-only, please email contact@ceoofbased.com to inquire about openings.' });
 	}
 
@@ -265,16 +271,14 @@ export function logout(req, res) {
  * update onboarding step
  */
 export async function updateOnboarding(req, res) {
-	if (!res.locals.user) {
-		return dynamicResponse(req, res, 400, { error: 'Bad request' });
-	}
+	const originalUser = res.locals.originalUser;
 	const step = req.body.step;
 	if (!step || isNaN(step) || parseInt(step, 10) !== +step) {
 		return dynamicResponse(req, res, 400, { error: 'Bad request' });
 	}
 	await db.db().collection('accounts')
 		.updateOne({
-			_id: res.locals.user.username
+			_id: originalUser.username
 		}, {
 			'$set': {
 				onboarding: parseInt(step, 10),

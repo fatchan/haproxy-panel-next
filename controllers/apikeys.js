@@ -13,9 +13,10 @@ const generateApiKey = (length = 64) => {
  * api keys page
  */
 export async function apiKeysPage(app, req, res) {
+	const originalUser = res.locals.originalUser;
 	const apiKeys = await db.db().collection('apikeys')
 		.find({
-			username: res.locals.user.username,
+			username: originalUser.username,
 		}, {
 			projection: {
 				key: 0, //hide the key
@@ -23,9 +24,10 @@ export async function apiKeysPage(app, req, res) {
 		})
 		.toArray();
 	res.locals.data = {
-		user: res.locals.user,
+		user: originalUser,
 		csrf: req.csrfToken(),
 		apiKeys: apiKeys || [],
+		impersonating: res.locals.originalUser.username !== res.locals.user.username,
 	};
 	return app.render(req, res, '/apikeys');
 };
@@ -35,9 +37,10 @@ export async function apiKeysPage(app, req, res) {
  * stream keys json data
  */
 export async function apiKeysJson(req, res) {
+	const originalUser = res.locals.originalUser;
 	const apiKeys = await db.db().collection('apikeys')
 		.find({
-			username: res.locals.user.username,
+			username: originalUser.username,
 		}, {
 			projection: {
 				key: 0,
@@ -46,8 +49,9 @@ export async function apiKeysJson(req, res) {
 		.toArray();
 	return res.json({
 		csrf: req.csrfToken(),
-		user: res.locals.user,
+		user: originalUser,
 		apiKeys: apiKeys || [],
+		impersonating: res.locals.originalUser.username !== res.locals.user.username,
 	});
 };
 
@@ -56,6 +60,7 @@ export async function apiKeysJson(req, res) {
  * add stream key
  */
 export async function addApiKey(req, res, _next) {
+	const originalUser = res.locals.originalUser;
 
 	if (!req.body.label || typeof req.body.label !== 'string' || req.body.label.length === 0 || req.body.label.length > 1000) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -67,7 +72,7 @@ export async function addApiKey(req, res, _next) {
 
 	db.db().collection('apikeys')
 		.insertOne({
-			username: res.locals.user.username,
+			username: originalUser.username,
 			label,
 			dateCreated: new Date(),
 			key,
@@ -82,6 +87,7 @@ export async function addApiKey(req, res, _next) {
  * delete stream key
  */
 export async function deleteApiKey(req, res, _next) {
+	const originalUser = res.locals.originalUser;
 
 	if (!req.body.keyId || typeof req.body.keyId !== 'string' || req.body.keyId.length !== 24) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
@@ -90,7 +96,7 @@ export async function deleteApiKey(req, res, _next) {
 	db.db().collection('apikeys')
 		.deleteOne({
 			_id: ObjectId(req.body.keyId),
-			username: res.locals.user.username,
+			username: originalUser.username,
 		});
 
 	return dynamicResponse(req, res, 200, {});

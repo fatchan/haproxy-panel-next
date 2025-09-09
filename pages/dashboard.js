@@ -14,6 +14,7 @@ function DashboardHome(props) {
 	const { globalAcl, csrf, user } = state || {};
 	const domainCount = user?.domains?.length || 0;
 	const isAdmin = user && user.username === 'admin';
+	//impersonation wont let global toggle work in backend, ErrorAlert for now
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
@@ -196,7 +197,7 @@ function DashboardHome(props) {
 }
 
 export async function getServerSideProps({ _req, res, _query, _resolvedUrl, _locale, _locales, _defaultLocale }) {
-	return { props: JSON.parse(JSON.stringify(res.locals.data||{})) };
+	return { props: JSON.parse(JSON.stringify(res.locals.data || {})) };
 }
 
 export default withAuth(DashboardHome);

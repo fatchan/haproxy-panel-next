@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import BackButton from '../components/BackButton.js';
 import ErrorAlert from '../components/ErrorAlert.js';
+import WarningAlert from '../components/WarningAlert.js';
 import PaymentModal from '../components/PaymentModal.js';
 import InvoiceRow from '../components/InvoiceRow.js';
 import * as API from '../api.js';
@@ -85,7 +86,7 @@ function Billing (props) {
 		);
 	}
 
-	const { invoices, csrf, user } = state;
+	const { invoices, csrf, user, impersonating } = state;
 
 	const firstNextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
 	const dueNextMonth = new Date(firstNextMonth);
@@ -138,6 +139,8 @@ function Billing (props) {
 			<h5 className='fw-bold'>
 				Invoices:
 			</h5>
+
+			{impersonating === true && <WarningAlert text={`Displaying for original user: ${user.username}`} />}
 
 			{/* Invoices table */}
 			<div className='table-responsive round-border'>

@@ -12,7 +12,7 @@ async function getOrgsForUser(username) {
  * POST /orgs/switch
  */
 export async function switchOrg(req, res, _next) {
-	const username = res.locals.originalUser?.username || res.locals.user?.username;
+	const username = res.locals.originalUser.username;
 	const { orgId } = req.body;
 
 	if (!orgId || typeof orgId !== 'string' || orgId.length === 0) {
@@ -27,10 +27,10 @@ export async function switchOrg(req, res, _next) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid orgId' });
 	}
 
-	if (!org) {
+	if (!org || !org.members) {
 		return dynamicResponse(req, res, 404, { error: 'Org not found' });
 	}
-	if (!Array.isArray(org?.members) || !org.members.includes(username)) {
+	if (!Array.isArray(org.members) || !org.members.includes(username)) {
 		return dynamicResponse(req, res, 403, { error: 'Org not found' });
 	}
 
@@ -46,7 +46,7 @@ export async function switchOrg(req, res, _next) {
  * GET /orgs (page)
  */
 export async function orgsPage(app, req, res, _next) {
-	const username = res.locals.originalUser?.username || res.locals.user?.username;
+	const username = res.locals.originalUser.username;
 	const orgs = await getOrgsForUser(username);
 	const currentOrgId = req.session?.currentOrg;
 	res.locals.data = { orgs, currentOrgId };
@@ -57,7 +57,7 @@ export async function orgsPage(app, req, res, _next) {
  * GET /orgs.json
  */
 export async function orgsJson(req, res, _next) {
-	const username = res.locals.originalUser?.username || res.locals.user?.username;
+	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
 	return dynamicResponse(req, res, 200, { orgs, currentOrgId });
@@ -67,7 +67,7 @@ export async function orgsJson(req, res, _next) {
  * POST /orgs/members
  */
 export async function addMember(req, res, _next) {
-	const username = res.locals.originalUser?.username || res.locals.user?.username;
+	const username = res.locals.originalUser.username;
 	const { orgId, memberUsername } = req.body;
 	if (!username) { return dynamicResponse(req, res, 401, { error: 'Not authenticated' }); }
 	if (!orgId || !memberUsername) { return dynamicResponse(req, res, 400, { error: 'orgId and memberUsername required' }); }
@@ -93,7 +93,7 @@ export async function addMember(req, res, _next) {
  * DELETE /orgs/members
  */
 export async function removeMember(req, res, _next) {
-	const username = res.locals.originalUser?.username || res.locals.user?.username;
+	const username = res.locals.originalUser.username;
 	const { orgId, memberUsername } = req.body;
 	if (!username) {
 		return dynamicResponse(req, res, 401, { error: 'Not authenticated' });
