@@ -1,6 +1,6 @@
 {
   "name": "haproxy-panel-next",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -51,6 +51,7 @@
     "react-select": "^5.10.2",
     "recharts": "^2.15.4",
     "redlock": "^5.0.0-beta.2",
+    "semver": "^7.7.2",
     "sharp": "^0.33.5",
     "swagger-ui-express": "^5.0.1"
   },

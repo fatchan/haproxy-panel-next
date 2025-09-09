@@ -289,7 +289,7 @@ export async function updateOnboarding(req, res) {
 
 /**
  * POST /forms/requestchangepassword
- * Verify password reset token and set new password
+ * request new password
  */
 export async function requestPasswordChange(req, res) {
 	const email = req.body.email;
