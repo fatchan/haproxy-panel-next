@@ -75,7 +75,7 @@ function OrganisationPage(props) {
 			) : (
 				<>
 					<div className='mb-3'>
-						<strong>Name:</strong> {currentOrg.owner}'s Org
+						<strong>Name:</strong> {currentOrg.owner}&apos;s Org
 					</div>
 					<div className='mb-3'>
 						<strong>Owner:</strong> {currentOrg.owner}

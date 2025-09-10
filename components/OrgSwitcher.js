@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 
@@ -10,7 +11,7 @@ export default function OrgsSwitcher() {
 	const [loading, setLoading] = useState(false);
 	const [switching, setSwitching] = useState(false);
 	const [error, setError] = useState();
-	const { orgs, originalUser, currentOrgId } = state || {};
+	const { orgs, originalUser, currentOrgId, csrf } = state || {};
 
 	useEffect(() => {
 		setLoading(true);
@@ -29,7 +30,7 @@ export default function OrgsSwitcher() {
 		if (!selected) { return; }
 		setError();
 		setSwitching(true);
-		await API.switchOrg({ orgId: selected.value }, null, setError, router);
+		await API.switchOrg({ _csrf: csrf, orgId: selected.value }, null, setError, router);
 		await API.getOrgs(setState, setError, router);
 		setSwitching(false);
 		router.reload(); //easiest thing
@@ -41,7 +42,9 @@ export default function OrgsSwitcher() {
 
 	return (
 		<div className='orgs-switcher'>
-			<div className='orgs-switcher-label'>Organisation</div>
+			<Link className='orgs-switcher-label text-body' href='/organisation'>
+				Organisation <i className='bi-arrow-right-short' width='16' height='16' />
+			</Link>
 			<div>
 				<Select
 					classNamePrefix='select'

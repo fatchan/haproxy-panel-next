@@ -60,6 +60,7 @@ footer {
 .orgs-switcher-label {
 	font-size: 12px;
 	margin: 6px 0px;
+	text-decoration: none;
 }
 
 .table,
