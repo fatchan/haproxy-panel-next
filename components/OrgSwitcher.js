@@ -41,7 +41,8 @@ export default function OrgsSwitcher(props) {
 		|| options.find(o => o.owner === originalUser.username) //should default to own org when none selected
 		|| null;
 
-	if (!billingUser || billingUser.billing.description !== 'Enterprise plan') {
+	if ((!billingUser || billingUser?.billing?.description !== 'Enterprise plan')
+		&& !orgs.some(o => o.owner !== billingUser.username)) {
 		return null;
 	}
 
