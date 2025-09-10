@@ -42,7 +42,7 @@ export default function OrgsSwitcher(props) {
 		|| null;
 
 	if ((!billingUser || billingUser?.billing?.description !== 'Enterprise plan')
-		&& !orgs.some(o => o.owner !== billingUser.username)) {
+		&& !(orgs || []).some(o => o.owner !== billingUser.username)) {
 		return null;
 	}
 

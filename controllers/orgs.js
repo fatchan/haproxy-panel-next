@@ -14,9 +14,9 @@ async function getOrgsForUser(username) {
 export async function switchOrg(req, res, _next) {
 	const username = res.locals.originalUser.username;
 
-	if (res.locals.originalUser.billing.description !== 'Enterprise plan') {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
+	// if (res.locals.originalUser.billing.description !== 'Enterprise plan') {
+	// 	return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	// }
 
 	const { orgId } = req.body;
 
