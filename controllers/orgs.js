@@ -49,7 +49,7 @@ export async function orgsPage(app, req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const orgs = await getOrgsForUser(username);
 	const currentOrgId = req.session?.currentOrg;
-	res.locals.data = { orgs, currentOrgId, originalUser: res.locals.originalUser };
+	res.locals.data = { csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser };
 	return app.render(req, res, '/orgs');
 }
 
@@ -60,7 +60,7 @@ export async function orgsJson(req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
-	return dynamicResponse(req, res, 200, { orgs, currentOrgId, originalUser: res.locals.originalUser });
+	return dynamicResponse(req, res, 200, { csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser });
 }
 
 /**
@@ -68,17 +68,23 @@ export async function orgsJson(req, res, _next) {
  */
 export async function addMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
+
 	const { orgId, memberUsername } = req.body;
-	if (!username) { return dynamicResponse(req, res, 401, { error: 'Not authenticated' }); }
-	if (!orgId || !memberUsername) { return dynamicResponse(req, res, 400, { error: 'orgId and memberUsername required' }); }
+
+	if (!orgId || typeof orgId !== 'string' || orgId.length === 0
+		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
 
 	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId) });
-	if (!org) { return dynamicResponse(req, res, 404, { error: 'Org not found' }); }
-	if (org.owner !== username) { return dynamicResponse(req, res, 403, { error: 'Only org owner can add members' }); }
+	if (!org || org.owner !== username) {
+		return dynamicResponse(req, res, 404, { error: 'Org not found' });
+	}
 
-	// ensure user exists
 	const userExists = await db.db().collection('accounts').findOne({ _id: memberUsername }, { projection: { _id: 1 } });
-	if (!userExists) { return dynamicResponse(req, res, 404, { error: 'User not found' }); }
+	if (!userExists) {
+		return dynamicResponse(req, res, 404, { error: 'User not found' });
+	}
 
 	// add member if not present
 	await db.db().collection('orgs').updateOne(
@@ -94,22 +100,19 @@ export async function addMember(req, res, _next) {
  */
 export async function removeMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
+
 	const { orgId, memberUsername } = req.body;
-	if (!username) {
-		return dynamicResponse(req, res, 401, { error: 'Not authenticated' });
-	}
-	if (!orgId || !memberUsername) {
-		return dynamicResponse(req, res, 400, { error: 'orgId and memberUsername required' });
+
+	if (!orgId || typeof orgId !== 'string' || orgId.length === 0
+		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
 	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId) });
-	if (!org) {
+	if (!org || org.owner !== username) {
 		return dynamicResponse(req, res, 404, { error: 'Org not found' });
 	}
 
-	if (org.owner !== username) {
-		return dynamicResponse(req, res, 403, { error: 'Only org owner can remove members' });
-	}
 	if (memberUsername === org.owner) {
 		return dynamicResponse(req, res, 400, { error: 'Cannot remove org owner' });
 	}

@@ -41,7 +41,7 @@ export default function OrgsSwitcher() {
 
 	return (
 		<div className='orgs-switcher'>
-			<div style={{ fontSize: 12, marginBottom: 6, color: '#333' }}>Organisation</div>
+			<div className='orgs-switcher-label'>Organisation</div>
 			<div>
 				<Select
 					classNamePrefix='select'

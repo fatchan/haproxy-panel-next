@@ -1,5 +1,5 @@
 import express from 'express';
-import csrf from 'csurf';
+import csurf from '@dr.pogodin/csurf';
 import ShkeeperManager from './lib/billing/shkeeper.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerCss from './lib/swagger/css.js';
@@ -37,7 +37,7 @@ const mapNamesOrString = [
 
 export default function router(server, app) {
 	const shkeeperManager = new ShkeeperManager();
-	const csrfHandler = csrf();
+	const csrfHandler = csurf();
 	const csrfMiddleware = (req, res, next) => {
 		if (res.locals.isApiKey === true) {
 			req.csrfToken = () => ''; // Api keys dont require this
@@ -78,8 +78,8 @@ export default function router(server, app) {
 	server.post('/forms/verifyemail', useSession, accountController.verifyEmail);
 
 	//authed pages
-	server.get('/orgs', sessionChain, orgsController.orgsPage.bind(null, app));
-	server.get('/orgs.json', sessionChain, orgsController.orgsJson);
+	server.get('/orgs', sessionChain, csrfMiddleware, orgsController.orgsPage.bind(null, app));
+	server.get('/orgs.json', sessionChain, csrfMiddleware, orgsController.orgsJson);
 	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app),);
 	server.get('/cache', sessionChain, checkOnboarding, haproxyCsrfChain, cacheController.cachePage.bind(null, app),);
 	server.get('/account', sessionChain, checkOnboarding, csrfMiddleware, accountController.accountPage.bind(null, app),);
@@ -106,9 +106,9 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson,);
 
 	const formsRouter = express.Router({ caseSensitive: true });
-	formsRouter.post('/orgs/switch', sessionChain, orgsController.switchOrg);
-	formsRouter.post('/orgs/members', sessionChain, orgsController.addMember);
-	formsRouter.delete('/orgs/members', sessionChain, orgsController.removeMember);
+	formsRouter.post('/orgs/switch', sessionChain, csrfMiddleware, orgsController.switchOrg);
+	formsRouter.post('/orgs/members', sessionChain, csrfMiddleware, orgsController.addMember);
+	formsRouter.delete('/orgs/members', sessionChain, csrfMiddleware, orgsController.removeMember);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL,);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, accountController.globalToggle,);
 	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm,);

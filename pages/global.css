@@ -57,6 +57,11 @@ footer {
 	font-size: small;
 }
 
+.orgs-switcher-label {
+	font-size: 12px;
+	margin: 6px 0px;
+}
+
 .table,
 .list-group {
 	max-width: 100%;
