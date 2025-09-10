@@ -2,6 +2,7 @@ import { dynamicResponse } from '../util.js';
 import { statsFetch, processStatusChartData, processHostnameChartData, processTrafficChartData, processBotcheckChartData } from '../lib/stats.js';
 
 const allowedGranularities = ['30s', '1m', '2m', '5m', '10m', '30m', '1h'];
+const allowedTypes = ['status', 'hostname', 'traffic', 'botcheck'];
 
 function buildRegexPattern(domains) {
 	return domains.map(domain => domain.replace(/\./g, '\\\\.')).join('|');
@@ -59,7 +60,10 @@ export async function fetchBotcheckChartData(domains, granularity, parsedStartTi
  */
 export async function statsJson(req, res, _next) {
 	const { type, granularity = '1m', startTime, endTime } = req.query;
-	const allowedTypes = ['status', 'hostname', 'traffic', 'botcheck'];
+
+	if (!res?.locals?.user?.domains || res.locals.user.domains.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'No domains' });
+	}
 
 	if (!allowedTypes.includes(type)) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid type' });
