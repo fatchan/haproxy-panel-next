@@ -57,9 +57,8 @@ export async function onboardingData(_req, res, _next) {
  * account page html
  */
 export async function accountPage(app, req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	res.locals.data = { ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/account');
 }
 
@@ -68,9 +67,8 @@ export async function accountPage(app, req, res, next) {
  * menu page html
  */
 export async function menuPage(app, req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	res.locals.data = { ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/menu');
 }
 
@@ -79,9 +77,8 @@ export async function menuPage(app, req, res, next) {
  * account page html
  */
 export async function dashboardPage(app, req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	res.locals.data = { ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/dashboard');
 }
 
@@ -90,12 +87,11 @@ export async function dashboardPage(app, req, res, next) {
  * account page html
  */
 export async function onboardingPage(app, req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
 	]);
-	res.locals.data = { ...addData, ...onbData, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	res.locals.data = { ...addData, ...onbData, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
 	return app.render(req, res, '/onboarding');
 }
 
@@ -104,9 +100,8 @@ export async function onboardingPage(app, req, res, next) {
  * account page json data
  */
 export async function accountJson(req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const data = await accountData(req, res, next);
-	return res.json({ ...data, user: originalUser, impersonating: false });
+	return res.json({ ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
 }
 
 /**
@@ -114,12 +109,11 @@ export async function accountJson(req, res, next) {
  * onboarding page json data
  */
 export async function onboardingJson(req, res, next) {
-	const originalUser = res.locals.originalUser;
 	const [addData, onbData] = await Promise.all([
 		accountData(req, res, next),
 		onboardingData(req, res, next),
 	]);
-	return res.json({ ...addData, ...onbData, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
+	return res.json({ ...addData, ...onbData, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
 }
 
 /**

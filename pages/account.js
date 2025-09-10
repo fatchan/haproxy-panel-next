@@ -11,7 +11,7 @@ function AccountPage(props) {
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
 
-	const { user, impersonating } = state || {};
+	const { impersonating, originalUser } = state || {};
 
 	useEffect(() => {
 		API.getAccount(dispatch, setError, router);
@@ -36,7 +36,7 @@ function AccountPage(props) {
 				<title>Account Details</title>
 			</Head>
 
-			{impersonating === true && <WarningAlert text={`Displaying for original user: ${user.username}`} />}
+			{impersonating === true && <WarningAlert text={`Displaying for original user: ${originalUser.username}`} />}
 
 			{error && <ErrorAlert error={error} />}
 
@@ -46,22 +46,22 @@ function AccountPage(props) {
 				<div className='card mb-4'>
 					<div className='card-body'>
 						<h6 className='card-title'>Username</h6>
-						<p className='card-text'>{user.username}</p>
+						<p className='card-text'>{originalUser.username}</p>
 					</div>
 				</div>
 
 				<div className='card mb-4'>
 					<div className='card-body'>
 						<h6 className='card-title'>Email</h6>
-						<p className='card-text'>{user.email}</p>
+						<p className='card-text'>{originalUser.email}</p>
 					</div>
 				</div>
 
 				<div className='card mb-4'>
 					<div className='card-body'>
 						<h6 className='card-title'>Subscription</h6>
-						<span className='card-text'>Plan: {user.billing.description}</span>
-						<p className='card-text'>Price: ${(user.billing.price / 100).toFixed(2)} per month</p>
+						<span className='card-text'>Plan: {originalUser.billing.description}</span>
+						<p className='card-text'>Price: ${(originalUser.billing.price / 100).toFixed(2)} per month</p>
 					</div>
 				</div>
 
@@ -69,7 +69,7 @@ function AccountPage(props) {
 					<div className='card-body'>
 						<h6 className='card-title'>Domains</h6>
 						<p className='card-text'>
-							<strong>{user.domains.length}</strong> Domains / <strong>{user.maxDomains ? user.maxDomains : '∞'}</strong> Max
+							<strong>{originalUser.domains.length}</strong> Domains / <strong>{originalUser.maxDomains ? originalUser.maxDomains : '∞'}</strong> Max
 						</p>
 					</div>
 				</div>
@@ -78,7 +78,7 @@ function AccountPage(props) {
 					<div className='card-body'>
 						<h6 className='card-title'>Account Stream ID</h6>
 						<p className='card-text'>
-							<strong>{user.streamsId}</strong>
+							<strong>{originalUser.streamsId}</strong>
 						</p>
 					</div>
 				</div>

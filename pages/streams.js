@@ -246,7 +246,7 @@ function Streams(props) {
 				<title>Stream Keys</title>
 			</Head>
 
-			<InfoAlert>Your Account Stream ID: <code>{user.streamsId}</code>. For more information visit the <a href='/kb/streaming' target='_blank' rel='noreferrer'>Streaming Knowledgebase</a>.</InfoAlert>
+			<InfoAlert>Streams ID: <code>{user.streamsId}</code>. For more information visit the <a href='/kb/streaming' target='_blank' rel='noreferrer'>Streaming Knowledgebase</a>.</InfoAlert>
 
 			<h5 className='fw-bold'>
 				Live Streams:
