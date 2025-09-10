@@ -64,6 +64,17 @@ export async function accountPage(app, req, res, next) {
 }
 
 /**
+ * GET /menu
+ * menu page html
+ */
+export async function menuPage(app, req, res, next) {
+	const originalUser = res.locals.originalUser;
+	const data = await accountData(req, res, next);
+	res.locals.data = { ...data, user: originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	return app.render(req, res, '/menu');
+}
+
+/**
  * GET /dashboard
  * account page html
  */

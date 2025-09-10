@@ -7,7 +7,7 @@ import { footerLinks } from '../instance-config.js';
 import InfoAlert from './InfoAlert';
 import * as API from '../api.js';
 
-export default withRouter(function Layout ({ children, router, user }) {
+export default withRouter(function Layout({ children, router, user, originalUser }) {
 	const [incidents, setIncidents] = useState([]);
 	useEffect(() => {
 		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e); });
@@ -29,7 +29,7 @@ export default withRouter(function Layout ({ children, router, user }) {
 
 				{!noSidebar && <div className='col-auto sidebar h-100 m-0 px-0'>
 					<div className='d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto' style={{ width: '265px' }}>
-						<MenuLinks />
+						<MenuLinks user={user} originalUser={originalUser} />
 					</div>
 				</div>}
 

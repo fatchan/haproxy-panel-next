@@ -97,7 +97,7 @@ export const sections = [
 	}
 ];
 
-const MenuLinks = ({ router }) => {
+const MenuLinks = ({ router, user, originalUser }) => {
 	const [path, setPath] = useState(router.asPath);
 	const [openSections, setOpenSections] = useState({});
 
@@ -222,7 +222,7 @@ const MenuLinks = ({ router }) => {
 				<ResolvedImage src='/favicon.ico' width='32' height='32' alt=' ' />
 				<span className='mx-2 fs-4 text-decoration-none'>{process.env.NEXT_PUBLIC_APP_NAME}</span>
 			</Link>
-			<OrgsSwitcher />
+			<OrgsSwitcher originalUser={originalUser || user} />
 			<hr />
 			{sections.slice(0, -1).map(renderSection)}
 			{bottomLinks}

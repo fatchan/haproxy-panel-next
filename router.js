@@ -83,6 +83,7 @@ export default function router(server, app) {
 	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app),);
 	server.get('/cache', sessionChain, checkOnboarding, haproxyCsrfChain, cacheController.cachePage.bind(null, app),);
 	server.get('/account', sessionChain, checkOnboarding, csrfMiddleware, accountController.accountPage.bind(null, app),);
+	server.get('/menu', sessionChain, checkOnboarding, csrfMiddleware, accountController.menuPage.bind(null, app),);
 	server.get('/csr', sessionChain, checkOnboarding, csrfMiddleware, certsController.csrPage.bind(null, app),);
 	server.get('/onboarding', sessionChain, haproxyCsrfChain, accountController.onboardingPage.bind(null, app),);
 	server.get('/account.json', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.accountJson,);

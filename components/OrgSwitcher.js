@@ -5,13 +5,14 @@ import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 
-export default function OrgsSwitcher() {
+export default function OrgsSwitcher(props) {
 	const router = useRouter();
-	const [state, setState] = useState();
+	const [state, setState] = useState(props);
 	const [loading, setLoading] = useState(false);
 	const [switching, setSwitching] = useState(false);
 	const [error, setError] = useState();
-	const { orgs, originalUser, currentOrgId, csrf } = state || {};
+	const { orgs, user, originalUser, currentOrgId, csrf } = state || {};
+	const billingUser = originalUser || user;
 
 	useEffect(() => {
 		setLoading(true);
@@ -39,6 +40,10 @@ export default function OrgsSwitcher() {
 	const selectedOption = options.find(o => o.value === currentOrgId)
 		|| options.find(o => o.owner === originalUser.username) //should default to own org when none selected
 		|| null;
+
+	if (!billingUser || billingUser.billing.description !== 'Enterprise plan') {
+		return null;
+	}
 
 	return (
 		<div className='orgs-switcher'>
