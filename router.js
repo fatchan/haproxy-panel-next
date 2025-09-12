@@ -101,8 +101,8 @@ export default function router(server, app) {
 	server.get('/dns/:domain([a-zA-Z0-9-\.]+)', sessionChain, csrfMiddleware, dnsController.dnsDomainPage.bind(null, app),);
 	server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+).json', sessionChain, csrfMiddleware, dnsController.dnsRecordJson,);
 	server.get('/dns/:domain([a-zA-Z0-9-\.]+)/:zone([a-zA-Z0-9-\.@_]+)/:type([a-z]+)', sessionChain, csrfMiddleware, dnsController.dnsRecordPage.bind(null, app),);
-	server.get('/down', sessionChain, csrfMiddleware, dnsController.downPage.bind(null, app),);
-	server.get('/down.json', sessionChain, csrfMiddleware, dnsController.downJson,);
+	server.get('/down', sessionChain, fetchAdmin, csrfMiddleware, dnsController.downPage.bind(null, app),);
+	server.get('/down.json', sessionChain, fetchAdmin, csrfMiddleware, dnsController.downJson,);
 	server.get('/certs', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsPage.bind(null, app),);
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson,);
 
