@@ -365,7 +365,7 @@ export async function downPage(app, req, res) {
 * downed ips json
 */
 export async function downJson(req, res) {
-	if (!res.locals.isAdmiwn) {
+	if (!res.locals.isAdmin) {
 		return dynamicResponse(req, res, 403, { error: 'No permission' });
 	}
 	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
