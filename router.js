@@ -72,7 +72,7 @@ export default function router(server, app) {
 	server.post('/forms/login', useSession, accountController.login);
 	server.post('/forms/onboarding', sessionChain, accountController.updateOnboarding,);
 	server.post('/forms/logout', useSession, accountController.logout);
-	server.post('/forms/register', useSession, fetchSession, accountController.register,);
+	server.post('/forms/register', useSession, fetchSession, fetchAdmin, accountController.register,);
 	server.post('/forms/requestchangepassword', useSession, accountController.requestPasswordChange,);
 	server.post('/forms/changepassword', useSession, accountController.changePassword,);
 	server.post('/forms/verifyemail', useSession, accountController.verifyEmail);
