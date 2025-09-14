@@ -1,167 +1,160 @@
 import NProgress from 'nprogress';
 
-// Account
-export async function getAccount(dispatch, errorCallback, router) {
-	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router);
+
+export async function getAccount(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function getIncidents(dispatch, errorCallback, router) {
-	return ApiCall('/incidents.json', 'GET', null, dispatch, errorCallback, router);
+export async function getCsrf(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/csrf', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function getOnboarding(dispatch, errorCallback, router) {
-	return ApiCall('/onboarding.json', 'GET', null, dispatch, errorCallback, router);
+export async function getIncidents(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/incidents.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function getBilling(dispatch, errorCallback, router) {
-	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router);
+export async function getOnboarding(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/onboarding.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function updateOnboarding(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/onboarding', 'POST', body, dispatch, errorCallback, router);
+export async function getBilling(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/billing.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function login(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/login', 'POST', body, dispatch, errorCallback, router);
+export async function updateOnboarding(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/onboarding', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function requestchangepassword(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/requestchangepassword', 'POST', body, dispatch, errorCallback, router);
+export async function login(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/login', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function changepassword(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/changepassword', 'POST', body, dispatch, errorCallback, router);
+export async function requestchangepassword(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/requestchangepassword', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function verifyemail(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/verifyemail', 'POST', body, dispatch, errorCallback, router);
+export async function changepassword(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/changepassword', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function register(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/register', 'POST', body, dispatch, errorCallback, router);
+export async function verifyemail(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/verifyemail', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function getDownIps(dispatch, errorCallback, router) {
-	return ApiCall('/down.json', 'GET', null, dispatch, errorCallback, router);
+export async function register(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/register', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function setDownIps(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/down', 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function getDownIps(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/down.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function createPaymentRequest(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router);
+export async function setDownIps(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/down', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
+}
+export async function createPaymentRequest(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/billing/payment_request', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
 
-// Orgs
-export async function getOrgs(dispatch, errorCallback, router) {
-	return ApiCall('/orgs.json', 'GET', null, dispatch, errorCallback, router);
+export async function getOrgs(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/orgs.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function switchOrg(body, dispatch, errorCallback, router, progress) {
-	return ApiCall('/forms/orgs/switch', 'POST', body, dispatch, errorCallback, router, progress || 0.5);
+export async function switchOrg(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall('/forms/orgs/switch', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
-export async function addOrgMember(body, dispatch, errorCallback, router, progress) {
-	return ApiCall('/forms/orgs/members', 'POST', body, dispatch, errorCallback, router, progress || 0.5);
+export async function addOrgMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall('/forms/orgs/members', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
-export async function removeOrgMember(body, dispatch, errorCallback, router, progress) {
-	return ApiCall('/forms/orgs/members', 'DELETE', body, dispatch, errorCallback, router, progress || 0.5);
-}
-
-// Domains
-export async function getDomains(dispatch, errorCallback, router) {
-	return ApiCall('/domains.json', 'GET', null, dispatch, errorCallback, router);
-}
-export async function addDomain(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/domain/add', 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function deleteDomain(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/domain/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
+export async function removeOrgMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall('/forms/orgs/members', 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 
-// Streams
-export async function getStreams(dispatch, errorCallback, router) {
-	return ApiCall('/streams.json', 'GET', null, dispatch, errorCallback, router);
+export async function getDomains(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/domains.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function addStream(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream', 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function addDomain(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/domain/add', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function toggleStream(body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/stream/${body.id}/toggle`, 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function concludeStream(body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/stream/${body.id}/conclude`, 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function restartStream(body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/stream/${body.id}/restart`, 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function deleteStream(body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/stream/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5);
-}
-export async function addStreamWebhook(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/stream/webhook', 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function deleteStreamWebhook(body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/stream/webhook/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5);
+export async function deleteDomain(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/domain/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
 
-// Apikeys
-export async function getApiKeys(dispatch, errorCallback, router) {
-	return ApiCall('/apikeys.json', 'GET', null, dispatch, errorCallback, router);
+export async function getStreams(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/streams.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function addApiKey(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/apikey/add', 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function addStream(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/stream', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function deleteApiKey(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/apikey/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
+export async function toggleStream(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/stream/${body.id}/toggle`, 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-
-// Dns
-export async function getDnsDomain(domain, dispatch, errorCallback, router) {
-	return ApiCall(`/dns/${domain}.json`, 'GET', null, dispatch, errorCallback, router);
+export async function concludeStream(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/stream/${body.id}/conclude`, 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function getDnsRecords(domain, zone, type, dispatch, errorCallback, router) {
-	return ApiCall(`/dns/${domain}/${zone}/${type}.json`, 'GET', null, dispatch, errorCallback, router);
+export async function restartStream(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/stream/${body.id}/restart`, 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function addUpdateDnsRecord(domain, zone, type, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/dns/${domain}/${zone}/${type}`, 'POST', body, dispatch, errorCallback, router);
+export async function deleteStream(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/stream/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function deleteDnsRecord(domain, zone, type, body, dispatch, errorCallback, router) {
-	return ApiCall(`/forms/dns/${domain}/${zone}/${type}/delete`, 'DELETE', body, dispatch, errorCallback, router);
+export async function addStreamWebhook(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/stream/webhook', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-
-// Certs
-export async function getCerts(dispatch, errorCallback, router) {
-	return ApiCall('/certs.json', 'GET', null, dispatch, errorCallback, router);
-}
-export async function addCert(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cert/add', 'POST', body, dispatch, errorCallback, router, 0.5);
-}
-export async function deleteCert(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cert/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5);
-}
-export async function uploadCert(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cert/upload', 'DELETE', body, dispatch, errorCallback, router, 0.5);
-}
-export async function verifyCSR(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/csr/verify', 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function deleteStreamWebhook(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/stream/webhook/${body.id}`, 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
 
-// Maps
-export async function getMap(mapName, dispatch, errorCallback, router) {
-	return ApiCall(`/map/${mapName}.json`, 'GET', null, dispatch, errorCallback, router);
+export async function getApiKeys(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/apikeys.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
-export async function addToMap(mapName, body, dispatch, errorCallback, router, progress) {
-	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, progress || 0.5);
+export async function addApiKey(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/apikey/add', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
-export async function deleteFromMap(mapName, body, dispatch, errorCallback, router, progress) {
-	return ApiCall(`/forms/map/${mapName}/delete`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5);
+export async function deleteApiKey(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/apikey/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
 
-// Stats
-export async function getStats(body, dispatch, errorCallback, router) {
+export async function getDnsDomain(domain, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/dns/${domain}.json`, 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function getDnsRecords(domain, zone, type, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/dns/${domain}/${zone}/${type}.json`, 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function addUpdateDnsRecord(domain, zone, type, body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/dns/${domain}/${zone}/${type}`, 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function deleteDnsRecord(domain, zone, type, body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/dns/${domain}/${zone}/${type}/delete`, 'DELETE', body, dispatch, errorCallback, router, 1, customHeaders);
+}
+
+export async function getCerts(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/certs.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function addCert(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/cert/add', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
+}
+export async function deleteCert(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/cert/delete', 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
+}
+export async function uploadCert(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/cert/upload', 'DELETE', body, dispatch, errorCallback, router, 0.5, customHeaders);
+}
+export async function verifyCSR(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/csr/verify', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
+}
+
+export async function getMap(mapName, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/map/${mapName}.json`, 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function addToMap(mapName, body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall(`/forms/map/${mapName}/add`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+}
+export async function deleteFromMap(mapName, body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall(`/forms/map/${mapName}/delete`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+}
+
+export async function getStats(body, dispatch, errorCallback, router, customHeaders = {}) {
 	const queryString = new URLSearchParams(body);
-	return ApiCall(`/stats.json?${queryString.toString()}`, 'GET', null, dispatch, errorCallback, router);
+	return ApiCall(`/stats.json?${queryString.toString()}`, 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
 
-// Global toggle
-export async function globalToggle(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5);
+export async function globalToggle(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/global/toggle', 'POST', body, dispatch, errorCallback, router, 0.5, customHeaders);
 }
 
-// Cache
-export async function cachePurge(body, dispatch, errorCallback, router) {
-	return ApiCall('/forms/cache/purge', 'POST', body, dispatch, errorCallback, router);
+export async function cachePurge(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/forms/cache/purge', 'POST', body, dispatch, errorCallback, router, 1, customHeaders);
 }
 
-function buildOptions(route, method, body) {
+function buildOptions(route, method, body, customHeaders) {
 
 	// Convert method uppercase
 	method = method.toUpperCase();
@@ -170,6 +163,7 @@ function buildOptions(route, method, body) {
 		method,
 		headers: {
 			'Content-Type': 'application/json',
+			...customHeaders,
 		}
 	};
 	if (body != null) {
@@ -179,7 +173,21 @@ function buildOptions(route, method, body) {
 	return options;
 }
 
-export async function ApiCall(route, method = 'get', body, dispatch, errorCallback, router, finishProgress = 1) {
+async function ApiCallTest(route, method = 'get', body, customHeaders = {}) {
+	const requestOptions = buildOptions(route, method, body, customHeaders);
+	const res = await fetch(`http://localhost:3000${route}`, requestOptions);
+	const ct = res?.headers?.get('content-type') || '';
+	if (ct.startsWith('application/json')) {
+		return res.json();
+	}
+	return res.text();
+}
+
+export async function ApiCall(route, method = 'get', body, dispatch, errorCallback, router, finishProgress = 1, customHeaders = {}) {
+
+	if (process.env.TEST) {
+		return ApiCallTest(route, method, body, customHeaders);
+	}
 
 	// Start progress bar
 	if (finishProgress !== false) {
