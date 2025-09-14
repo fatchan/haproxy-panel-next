@@ -50,7 +50,7 @@ export default withRouter(function Layout({ children, router, user, originalUser
 							{incidents && incidents.map((inc, i) => (
 								<InfoAlert key={`incident_${i}`}>
 									<h6>{inc.title}</h6>
-									<small>{inc.description}</small>
+									<small>{inc?.description || inc?.content}</small>
 								</InfoAlert>
 							))}
 							{children}

@@ -24,7 +24,12 @@ export async function incidentsJson(_req, res, _next) {
 	}).then(r => r.json());
 	let incidents = [];
 	if (statusData && statusData.maintenanceList && statusData.maintenanceList.length > 0) {
-		incidents = statusData.maintenanceList;
+		//Maintenance tasks affecting specific monitors
+		incidents = incidents.concat(statusData.maintenanceList);
+	}
+	if (statusData && statusData.incident && statusData.incident.content) {
+		//General "Incident" message not referring to a specific monitor
+		incidents = incidents.concat(statusData.incident);
 	}
 	await redis.lockQueueClient.set('incidents', JSON.stringify(incidents), 'EX', 300, 'NX');
 	return res.json(incidents);
