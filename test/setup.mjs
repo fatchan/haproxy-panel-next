@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { getAccount, getIncidents, getOnboarding, addDomain, getCsrf } from '../api.js';
 
 describe('login and basic API smoke tests', () => {
@@ -16,10 +15,10 @@ describe('login and basic API smoke tests', () => {
       redirect: 'manual',
     });
 
-    const raw = res.headers.raw();
-    expect(raw['set-cookie']).toBeDefined();
-    expect(raw['set-cookie'][0]).toMatch(/^connect\.sid/);
-    sessionCookie = raw['set-cookie'][0];
+    const hdr = res.headers;
+    expect(hdr.get('set-cookie')).toBeDefined();
+    expect(hdr.get('set-cookie')).toMatch(/^connect\.sid/);
+    sessionCookie = hdr.get('set-cookie');
     console.log('Session Cookie:', sessionCookie);
   });
 
@@ -74,7 +73,4 @@ describe('login and basic API smoke tests', () => {
     expect(accountAfter.user.domains).toContain('example.com');
   });
 
-  test('cleanup: optionally remove example.com if API supports delete (noop if not)', async () => {
-    // TODO: deleteDomain API route to remove test domain.
-  });
 });

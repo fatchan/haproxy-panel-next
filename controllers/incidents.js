@@ -1,5 +1,5 @@
 import * as redis from '../redis.js';
-import * as redlock from '../redlock.js';
+import redlock from '../redlock.js';
 
 const uptimeKumaAuth = Buffer.from(
 	`:${process.env.UPTIME_KUMA_API_KEY}`,
