@@ -24,7 +24,7 @@ import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import agent from '../agent.js';
 
 import fetch from 'node-fetch';
-const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('proxmox', 'proxmoxdb')
+const writeApi = new InfluxDB({ url: process.env.INFLUX_HOST, token: (process.env.INFLUX_TOKEN || null) }).getWriteApi('org', 'proxmoxdb')
 	, base64Auth = Buffer.from(`${process.env.DATAPLANE_USER}:${process.env.DATAPLANE_PASS}`).toString('base64');
 
 async function fetchStats (host, parameters) {

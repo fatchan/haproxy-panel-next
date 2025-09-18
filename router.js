@@ -141,7 +141,7 @@ export default function router(server, app) {
 		server.get('/billing', sessionChain, csrfMiddleware, billingController.billingPage.bind(null, app),);
 		server.get('/billing.json', sessionChain, csrfMiddleware, billingController.billingJson,);
 		formsRouter.post('/billing/payment_request', sessionChain, csrfMiddleware, billingController.createPaymentRequest,);
-		server.post('/forms/billing/callback', shkeeperManager.handleCallback);
+		server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
 	}
 
 	if (process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME) {

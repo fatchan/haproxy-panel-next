@@ -1,6 +1,5 @@
 import NProgress from 'nprogress';
 
-
 export async function getAccount(dispatch, errorCallback, router, customHeaders = {}) {
 	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
