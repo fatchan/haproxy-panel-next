@@ -236,6 +236,7 @@ export async function ApiCall(route, method = 'get', body, dispatch, errorCallba
 			return;
 		}
 		dispatch && dispatch(response);
+		NProgress.done(true);
 		return response;
 	} else {
 		errorCallback('An error occurred');

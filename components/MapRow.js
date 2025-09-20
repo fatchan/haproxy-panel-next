@@ -62,64 +62,62 @@ export default function MapRow({ map, row, onDeleteSubmit, name, csrf, showValue
 	};
 
 	return (
-		<tr className='align-middle'>
-			{isEditing ? (
-				<MapFormFields
-					map={map}
-					formType='edit'
-					mapName={name}
-					mapValueNames={mapValueNames}
-					user={user}
-					editValue={editValue}
-					handleFieldChange={handleFieldChange}
-					handleSave={handleSave} // Pass handleSave
-					handleCancel={handleCancel} // Pass handleCancel
-				/>
-			) : (
-				<>
-					<td className='text-left'>
-						<a className='btn btn-sm btn-primary me-2' onClick={handleEdit} role='button'>
-							<i className='bi-pencil-fill pe-none' width='16' height='16' />
-						</a>
-						<a className='btn btn-sm btn-danger' onClick={() => {
-							if (name === 'hosts') {
-								if (!confirm('If you get an error deleting a backend, please contact support')) {
-									return;
-								}
+		isEditing ? (
+			<MapFormFields
+				map={map}
+				formType='edit'
+				mapName={name}
+				mapValueNames={mapValueNames}
+				user={user}
+				editValue={editValue}
+				handleFieldChange={handleFieldChange}
+				handleSave={handleSave} // Pass handleSave
+				handleCancel={handleCancel} // Pass handleCancel
+			/>
+		) : (
+			<tr className='align-middle'>
+				<td className='text-left'>
+					<a className='btn btn-sm btn-primary me-2' onClick={handleEdit} role='button'>
+						<i className='bi-pencil-fill pe-none' width='16' height='16' />
+					</a>
+					<a className='btn btn-sm btn-danger' onClick={() => {
+						if (name === 'hosts') {
+							if (!confirm('If you get an error deleting a backend, please contact support')) {
+								return;
 							}
-							onDeleteSubmit(csrf, editValue.key);
-						}} role='button'>
-							<i className='bi-trash-fill pe-none' width='16' height='16' />
-						</a>
-					</td>
-					<td>
-						{editValue.key}{name === 'blockedasn' && asnMap[editValue.key] && ` (${asnMap[editValue.key]})`}
-					</td>
-					{showNote && (
-						<td>
-							{editValue.note ? editValue.note : <span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>}
-						</td>
-					)}
-					{typeof value === 'string' && showValues === true && (
-						<td className='overflow-hidden text-truncate' style={{ maxWidth: 500 }}>
-							{editValue.value}
-						</td>
-					)}
-					{typeof value === 'object' && columnKeys.map((ck, mvi) => {
-						let displayValue = editValue[ck];
-						if (typeof displayValue === 'boolean' || displayValue === 'true' || displayValue === 'false') {
-							displayValue = displayValue === true || displayValue === 'true' ? (
-								<span className='text-success'><i className='bi-check-lg pe-none' width='16' height='16' /></span>
-							) : (
-								<span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>
-							);
-						} else if (displayValue != null) {
-							displayValue = mapValueNames?.[ck]?.[displayValue.toString()] || displayValue.toString();
 						}
-						return <td key={`mvi_${mvi}`}>{displayValue}</td>;
-					})}
-				</>
-			)}
-		</tr>
+						onDeleteSubmit(csrf, editValue.key);
+					}} role='button'>
+						<i className='bi-trash-fill pe-none' width='16' height='16' />
+					</a>
+				</td>
+				<td>
+					{editValue.key}{name === 'blockedasn' && asnMap[editValue.key] && ` (${asnMap[editValue.key]})`}
+				</td>
+				{showNote && (
+					<td>
+						{editValue.note ? editValue.note : <span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>}
+					</td>
+				)}
+				{typeof value === 'string' && showValues === true && (
+					<td className='overflow-hidden text-truncate' style={{ maxWidth: 500 }}>
+						{editValue.value}
+					</td>
+				)}
+				{typeof value === 'object' && columnKeys.map((ck, mvi) => {
+					let displayValue = editValue[ck];
+					if (typeof displayValue === 'boolean' || displayValue === 'true' || displayValue === 'false') {
+						displayValue = displayValue === true || displayValue === 'true' ? (
+							<span className='text-success'><i className='bi-check-lg pe-none' width='16' height='16' /></span>
+						) : (
+							<span className='text-secondary'><i className='bi-dash-lg pe-none' width='16' height='16' /></span>
+						);
+					} else if (displayValue != null) {
+						displayValue = mapValueNames?.[ck]?.[displayValue.toString()] || displayValue.toString();
+					}
+					return <td key={`mvi_${mvi}`}>{displayValue}</td>;
+				})}
+			</tr>
+		)
 	);
 }

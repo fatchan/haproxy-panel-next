@@ -19,7 +19,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				return acc;
 			}, {});
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -71,7 +71,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							{mapValueOptions['l']}
 						</select>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
@@ -79,105 +79,132 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 			const domainSelectOptions = user?.domains.map((d, i) => (
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
-			formElements = (
-				<>
-					<td>
-						{formType === 'add' ? (
-							<button className='btn btn-sm btn-success' type='submit'>
-								<i className='bi-plus-lg pe-none' width='16' height='16' />
+			const firstRow = (<>
+				<td>
+					{formType === 'add' ? (
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
+						</button>
+					) : (
+						<>
+							<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+								<i className='bi-floppy-fill pe-none' width='16' height='16' />
 							</button>
-						) : (
-							<>
-								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-floppy-fill pe-none' width='16' height='16' />
-								</button>
-								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
-									<i className='bi-x-lg pe-none' width='16' height='16' />
-								</button>
-							</>
-						)}
-					</td>
-					<td>
-						<select
-							className='form-select'
-							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
-							name='key'
-							required
-						>
-							<option value='' />
-							{domainSelectOptions}
-						</select>
-					</td>
-					<td>
+							<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+								<i className='bi-x-lg pe-none' width='16' height='16' />
+							</button>
+						</>
+					)}
+				</td>
+				<td>
+					<select
+						className='form-select'
+						{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+						name='key'
+						required
+					>
+						<option value='' />
+						{domainSelectOptions}
+					</select>
+				</td>
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<select
+						className='form-select'
+						{...(handleFieldChange ? { value: editValue.pt || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('pt', e.target.value)}
+						name='pt'
+						required
+					>
+						<option disabled value=''>pow type</option>
+						<option value='sha256'>sha256</option>
+						<option value='argon2'>argon2</option>
+					</select>
+				</td>
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<input
+						className='form-control'
+						type='number'
+						min='8'
+						{...(handleFieldChange ? { value: editValue?.pd?.toString() || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value.toString())}
+						name='pd'
+						placeholder='difficulty'
+						required
+					/>
+				</td>
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<input
+						className='form-control'
+						type='number'
+						{...(handleFieldChange ? { value: editValue?.cex?.toString() || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value.toString())}
+						name='cex'
+						placeholder='cookie expiry (seconds)'
+						required
+					/>
+				</td>
+			</>);
+			const secondRow = (<>
+				{formType === 'edit' ? null : <td colSpan='2' />}
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<div className='form-check'>
 						<input
-							className='form-control'
-							type='number'
-							min='8'
-							{...(handleFieldChange ? { value: editValue?.pd?.toString() || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('pd', e.target.value.toString())}
-							name='pd'
-							placeholder='difficulty'
-							required
+							className='form-check-input'
+							type='checkbox'
+							{...(handleFieldChange ? { checked: editValue.cip === true } : { defaultChecked: editValue.cip === true })}
+							onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? true : false)}
+							name='cip'
 						/>
-					</td>
-					<td>
-						<select
-							className='form-select'
-							{...(handleFieldChange ? { value: editValue.pt || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('pt', e.target.value)}
-							name='pt'
-							required
-						>
-							<option disabled value=''>pow type</option>
-							<option value='sha256'>sha256</option>
-							<option value='argon2'>argon2</option>
-						</select>
-					</td>
-					<td>
+						{formType === 'add' && <label className='form-check-label'>Lock cookie to IP</label>}
+					</div>
+				</td>
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<div className='form-check'>
 						<input
-							className='form-control'
-							type='number'
-							{...(handleFieldChange ? { value: editValue?.cex?.toString() || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('cex', e.target.value.toString())}
-							name='cex'
-							placeholder='cookie expiry (seconds)'
-							required
+							className='form-check-input'
+							type='checkbox'
+							{...(handleFieldChange ? { checked: editValue.sl === true } : { defaultChecked: editValue.sl === true })}
+							onChange={(e) => handleFieldChange && handleFieldChange('sl', e.target.checked ? true : false)}
+							name='sl'
 						/>
-					</td>
-					<td>
-						<div className='form-check'>
-							<input
-								className='form-check-input'
-								type='checkbox'
-								{...(handleFieldChange ? { checked: editValue.cip === true } : { defaultChecked: editValue.cip === true })}
-								onChange={(e) => handleFieldChange && handleFieldChange('cip', e.target.checked ? true : false)}
-								name='cip'
-							/>
-							<label className='form-check-label'>Lock cookie to IP</label>
-						</div>
-					</td>
-					<td>
-						<div className='form-check'>
-							<input
-								className='form-check-input'
-								type='checkbox'
-								{...(handleFieldChange ? { checked: editValue.js !== false } : { defaultChecked: editValue.js !== false })}
-								onChange={(e) => handleFieldChange && handleFieldChange('js', e.target.checked ? true : false)}
-								name='js'
-							/>
-							<label className='form-check-label'>Show NoJS</label>
-						</div>
-					</td>
-
-				</>
+						{formType === 'add' && <label className='form-check-label'>Require Interaction</label>}
+					</div>
+				</td>
+				<td colSpan={formType === 'edit' ? 1 : 2}>
+					<div className='form-check'>
+						<input
+							className='form-check-input'
+							type='checkbox'
+							{...(handleFieldChange ? { checked: editValue.js !== false } : { defaultChecked: editValue.js !== false })}
+							onChange={(e) => handleFieldChange && handleFieldChange('js', e.target.checked ? true : false)}
+							name='js'
+						/>
+						{formType === 'add' && <label className='form-check-label'>Show NoJS</label>}
+					</div>
+				</td>
+			</>
 			);
+			formElements = formType === 'edit' ? (
+				<tr className='align-middle'>
+					{firstRow}
+					{secondRow}
+				</tr>
+			) : (
+				<>
+					<tr className='align-middle' style={{ borderBottom: 'transparent' }}>
+						{firstRow}
+					</tr>
+					<tr className='align-middle'>
+						{secondRow}
+					</tr>
+				</>);
 			break;
 		}
 		case 'redirect':
 		case 'rewrite': {
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -216,7 +243,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
@@ -227,7 +254,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -279,7 +306,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
@@ -290,7 +317,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -330,7 +357,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
@@ -341,7 +368,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -370,14 +397,14 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							{domainSelectOptions}
 						</select>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
 		case 'blockedip':
 		case 'whitelist': {
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -415,13 +442,13 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
 		case 'blockedasn': {
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -459,7 +486,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
@@ -468,7 +495,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				<option key={`option${i}`} value={d}>{d}</option>
 			));
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					<td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -520,13 +547,13 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
 		case 'blockedcc': {
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -565,13 +592,13 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}
 		case 'blockedcn': {
 			formElements = (
-				<>
+				<tr className='align-middle'>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -610,7 +637,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</>
+				</tr>
 			);
 			break;
 		}

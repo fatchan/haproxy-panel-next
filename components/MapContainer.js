@@ -139,7 +139,7 @@ export default function MapContainer({ mapName, initialData = {}, minimal, refre
 
 								{mapRows}
 
-								{!minimal && <tr className='align-middle'>
+								{!minimal &&
 									<MapFormFields
 										map={map}
 										formType='add'
@@ -149,7 +149,7 @@ export default function MapContainer({ mapName, initialData = {}, minimal, refre
 										editValue={editValue}
 										handleFieldChange={handleFieldChange}
 									/>
-								</tr>}
+								}
 							</tbody>
 						)}
 				</table>

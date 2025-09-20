@@ -72,13 +72,14 @@ export const fMap = {
 		description: 'Customise protection settings on a per-domain basis',
 		columnNames: [
 			'Domain',
-			'Difficulty',
 			'POW Type',
+			'Difficulty',
 			'Expiry',
 			'Per-IP Cookie',
+			'Require Interaction',
 			'Show NoJS'
 		],
-		columnKeys: ['pd', 'pt', 'cex', 'cip', 'js'],
+		columnKeys: ['pt', 'pd', 'cex', 'cip', 'sl', 'js'],
 	},
 
 	[process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME]: {
