@@ -267,7 +267,7 @@ export async function patchMapForm(req, res, next) {
 		// Host name is special case where we have to update backends/servers, not just map manupulation
 		if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 
-			const { hostname: address, port } = new URL(`scheme://${req.body.ip}`);
+			const { hostname: address, port } = new URL(`scheme://${req.body.h}`);
 			const backendAllowed = await backendIpAllowed(
 				res.locals.dataPlaneRetry,
 				res.locals.user.username,

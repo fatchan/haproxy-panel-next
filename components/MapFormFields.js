@@ -3,6 +3,7 @@ import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
 import { continentOptions } from '../lib/misc/geo.js';
+import Link from 'next/link';
 countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
@@ -528,9 +529,9 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						<input
 							className='form-control'
 							type='text'
-							{...(handleFieldChange ? { value: editValue.ip || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('ip', e.target.value)}
-							name='ip'
+							{...(handleFieldChange ? { value: editValue.h || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('h', e.target.value)}
+							name='h'
 							placeholder='backend ip:port'
 							required
 						/>
@@ -546,6 +547,18 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							name='geo'
 							required
 						/>
+					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.xp === true } : { defaultChecked: editValue.xp === true })}
+								onChange={(e) => handleFieldChange && handleFieldChange('xp', e.target.checked ? true : false)}
+								name='xp'
+							/>
+							{formType === 'add' && <label className='form-check-label'><Link href='/kb/ports' target='_blank'>Extra Ports</Link></label>}
+						</div>
 					</td>
 				</tr>
 			);

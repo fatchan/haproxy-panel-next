@@ -54,8 +54,8 @@ export const fMap = {
 		name: 'hosts',
 		fname: 'Backends',
 		description: 'Backend mappings for domains',
-		columnNames: ['Domain', 'Backend', 'Geo Route'],
-		columnKeys: ['ip', 'geo'],
+		columnNames: ['Domain', 'Backend', 'Geo Route', 'Extra Ports'],
+		columnKeys: ['h', 'cn', 'xp'],
 	},
 
 	[process.env.NEXT_PUBLIC_DDOS_MAP_NAME]: {
