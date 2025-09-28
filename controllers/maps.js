@@ -192,14 +192,14 @@ export async function deleteMapForm(req, res, next) {
 				}
 
 				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map)
-				const splitValue = matchingBackend.value.split(',');
+				const backendServerArray = JSON.parse(matchingBackend.value);
 				await Promise.all([
 					//delete multiple of the actual servers
-					await Promise.all(splitValue.map(bsv =>
+					await Promise.all(backendServerArray.map(server =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
-								name: bsv.substring(0, bsv.length - 3), // strip 3 chars for geo continent code and separator
+								name: server.h,
 							}, null, null, false, true)
 					)),
 					//and the single map entry w/ value separator
@@ -358,12 +358,14 @@ export async function patchMapForm(req, res, next) {
 					.then(r => r.data);
 				const fullBackendMapEntry = fullBackendMap
 					.find(entry => entry.key === req.body.key); //find is OK because keys are pointers and shouldnt be dupes
+				let backendMapEntryArray = JSON.parse(fullBackendMapEntry.value);
+				backendMapEntryArray = backendMapEntryArray.concat(JSON.parse(value));
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					}, {
-						value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
+						value: JSON.stringify(backendMapEntryArray),
 					}, null, false, false);
 			} else {
 				// otherwise add new backend
@@ -372,7 +374,7 @@ export async function patchMapForm(req, res, next) {
 						name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					}, [{
 						key: req.body.key,
-						value: `websrv${freeSlotId}|${req.body.geo}`,
+						value: JSON.stringify([JSON.parse(value)]),
 					}], null, false, false);
 			}
 

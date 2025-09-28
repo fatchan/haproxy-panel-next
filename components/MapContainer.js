@@ -110,8 +110,6 @@ export default function MapContainer({ mapName, initialData = {}, minimal, refre
 			<SearchFilter filter={filter} setFilter={setFilter} />
 		</>}
 
-		{error && <ErrorAlert error={error} />}
-
 		<div className={`w-100 table-responsive ${minimal ? 'minimal-border' : 'round-border'}`}>
 			<form onSubmit={addToMap} className='d-flex'>
 				<table className='table text-nowrap mb-0'>
