@@ -107,7 +107,7 @@ export async function deleteMapForm(req, res, next) {
 		const existingEntry = await res.locals
 			.dataPlaneRetry('getRuntimeMapEntry', {
 				map: req.params.name,
-				key: req.body.key,
+				id: req.body.key,
 			})
 			.then((r) => r.data)
 			.catch(() => { });
@@ -178,7 +178,7 @@ export async function deleteMapForm(req, res, next) {
 				const matchingBackend = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
-						key: req.body.key
+						id: req.body.key
 					})
 					.then(r => r.data);
 
@@ -189,6 +189,7 @@ export async function deleteMapForm(req, res, next) {
 
 				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map)
 				const backendServerArray = JSON.parse(matchingBackend.value);
+
 				await Promise.all([
 					//delete multiple of the actual servers
 					await Promise.all(backendServerArray.map(server =>
@@ -347,7 +348,7 @@ export async function patchMapForm(req, res, next) {
 			if (backendMapEntry) {
 				console.info('setting load balanced backend entry:', req.body.key, backendMapEntry);
 				//Note: fixed bug in client-native that makes getRuntimeMapEntry incompatible with commas in values
-				const singleBackendMapEntry = res.locals
+				const singleBackendMapEntry = await res.locals
 					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
@@ -369,7 +370,7 @@ export async function patchMapForm(req, res, next) {
 						name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					}, [{
 						key: req.body.key,
-						value: JSON.stringify([JSON.parse(value)]),
+						value: JSON.stringify([{ ...JSON.parse(value), h: serverName }]),
 					}], null, false, false);
 			}
 
