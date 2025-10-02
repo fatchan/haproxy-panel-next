@@ -76,6 +76,7 @@ function BlacklistPage(props) {
 									mapName={fMap[mapName].name}
 									user={user}
 									noButtons
+									noRowWrapper
 									handleFieldChange={handleFieldChange}
 									editValue={editValue}
 								/>
