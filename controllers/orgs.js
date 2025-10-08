@@ -4,7 +4,17 @@ import { dynamicResponse } from '../util.js';
 
 async function getOrgsForUser(username) {
 	return db.db().collection('orgs')
-		.find({ members: username }, { projection: { owner: 1, members: 1, createdAt: 1 } })
+		.find({
+			[`members.${username}`]: {
+				$exists: true
+			}
+		}, {
+			projection: {
+				owner: 1,
+				members: 1,
+				createdAt: 1
+			}
+		})
 		.toArray();
 }
 
@@ -13,12 +23,7 @@ async function getOrgsForUser(username) {
  */
 export async function switchOrg(req, res, _next) {
 	const username = res.locals.originalUser.username;
-
-	// if (res.locals.originalUser.billing.description !== 'Enterprise plan') {
-	// 	return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	// }
-
-	const { orgId } = req.body;
+	const { orgId } = req.params;
 
 	if (!orgId || typeof orgId !== 'string' || orgId.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'orgId required' });
@@ -26,17 +31,15 @@ export async function switchOrg(req, res, _next) {
 
 	let org;
 	try {
-		org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId) });
+		org = await db.db().collection('orgs').findOne({
+			_id: new ObjectId(orgId),
+			[`members.${username}`]: {
+				$exists: true
+			}
+		});
 	} catch (e) {
 		console.error(e);
 		return dynamicResponse(req, res, 400, { error: 'Invalid orgId' });
-	}
-
-	if (!org || !org.members) {
-		return dynamicResponse(req, res, 404, { error: 'Org not found' });
-	}
-	if (!Array.isArray(org.members) || !org.members.includes(username)) {
-		return dynamicResponse(req, res, 403, { error: 'Org not found' });
 	}
 
 	// persist in session
@@ -73,12 +76,8 @@ export async function orgsJson(req, res, _next) {
  */
 export async function addMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
-
-	if (res.locals.originalUser.billing.description !== 'Enterprise plan') {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
-
-	const { orgId, memberUsername } = req.body;
+	const { orgId } = req.params;
+	const { memberUsername } = req.body;
 
 	if (!orgId || typeof orgId !== 'string' || orgId.length === 0
 		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
@@ -98,7 +97,14 @@ export async function addMember(req, res, _next) {
 	// add member if not present
 	await db.db().collection('orgs').updateOne(
 		{ _id: org._id },
-		{ $addToSet: { members: memberUsername } }
+		{
+			$set: {
+				[`members.${memberUsername}`]: {
+					/* TODO: properties for perms matrix, metadata, etc */
+					'addedDate': new Date(),
+				}
+			}
+		}
 	);
 
 	return dynamicResponse(req, res, 200, {});
@@ -109,20 +115,15 @@ export async function addMember(req, res, _next) {
  */
 export async function removeMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
+	const { orgId, memberUsername } = req.params;
 
-	if (res.locals.originalUser.billing.description !== 'Enterprise plan') {
-		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
-	}
-
-	const { orgId, memberUsername } = req.body;
-
-	if (!orgId || typeof orgId !== 'string' || orgId.length === 0
+	if (!orgId || typeof orgId !== 'string' || orgId.length !== 24
 		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId) });
-	if (!org || org.owner !== username) {
+	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId), owner: username });
+	if (!org) {
 		return dynamicResponse(req, res, 404, { error: 'Org not found' });
 	}
 
@@ -132,7 +133,11 @@ export async function removeMember(req, res, _next) {
 
 	await db.db().collection('orgs').updateOne(
 		{ _id: org._id },
-		{ $pull: { members: memberUsername } }
+		{
+			$unset: {
+				[`members.${memberUsername}`]: '', //removes member from obj
+			}
+		}
 	);
 
 	return dynamicResponse(req, res, 200, {});

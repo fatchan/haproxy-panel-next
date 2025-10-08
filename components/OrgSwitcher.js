@@ -4,6 +4,16 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
+import Capabilities from '../lib/capabilities.js';
+
+//TODO: move?
+export function shouldShowSwitcher(billingUser, orgs) {
+	if (!billingUser) return false;
+	const caps = billingUser.billing?.capabilities || [];
+	const hasOrgCap = caps.includes(Capabilities.ORGANISATIONS);
+	const memberOfOtherOrg = (orgs || []).some(o => o.owner !== billingUser.username);
+	return hasOrgCap || memberOfOtherOrg;
+}
 
 export default function OrgsSwitcher(props) {
 	const router = useRouter();
@@ -19,7 +29,7 @@ export default function OrgsSwitcher(props) {
 		API.getOrgs(setState, setError, router).finally(() => setLoading(false));
 	}, []);
 
-	const options = useMemo(() => {
+	const orgOptions = useMemo(() => {
 		return (orgs || []).map(o => ({
 			value: o._id,
 			label: `${o.owner === originalUser.username ? '🏠 ' : ''}${o.owner || o._id}'s Org`,
@@ -37,12 +47,11 @@ export default function OrgsSwitcher(props) {
 		router.reload(); //easiest thing
 	};
 
-	const selectedOption = options.find(o => o.value === currentOrgId)
-		|| options.find(o => o.owner === originalUser.username) //should default to own org when none selected
+	const selectedOption = orgOptions.find(o => o.value === currentOrgId)
+		|| orgOptions.find(o => o.owner === originalUser.username) //should default to own org when none selected
 		|| null;
 
-	if ((!billingUser || billingUser?.billing?.description !== 'Enterprise plan')
-		&& !(orgs || []).some(o => o.owner !== billingUser.username)) {
+	if (!shouldShowSwitcher(billingUser, orgs)) {
 		return null;
 	}
 
@@ -56,11 +65,11 @@ export default function OrgsSwitcher(props) {
 					classNamePrefix='select'
 					className='basic-multi-select'
 					isLoading={loading || switching}
-					options={options}
+					options={orgOptions}
 					value={selectedOption}
 					onChange={handleChange}
 					isSearchable={false}
-					placeholder={loading ? 'Loading…' : options.length ? 'Select org' : 'No orgs'} //should never be "no orgs" really
+					placeholder={loading ? 'Loading…' : orgOptions.length ? 'Select org' : 'No orgs'} //should never be "no orgs" really
 					styles={{
 						control: initial => ({ ...initial, minHeight: 34 }),
 						menu: initial => ({ ...initial, zIndex: 2000 }),
