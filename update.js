@@ -18,8 +18,8 @@ async function processKey(domainKey) {
 	const domain = domainKey.substring(4, domainKey.length - 1);
 	return Promise.all(domainHashKeys.map(async (hkey) => {
 		try {
-			console.log('Updating', domain);
 			const records = await redis.hget(domainKey, hkey);
+			let updated = false;
 			let defaultTemplate = 'basic';
 			const domainAccount = await db.db().collection('accounts').findOne({ domains: domain });
 			if (domainAccount && domainAccount.allowedTemplates[0] !== 'basic') {
@@ -31,6 +31,7 @@ async function processKey(domainKey) {
 				const existingATemplate = (await aTemplate(templateName)) || (await aTemplate(defaultTemplate));
 				if (existingATemplate) {
 					records['a'] = JSON.parse(JSON.stringify(existingATemplate));
+					updated = true;
 				} else {
 					console.warn('Template missing or invalid for domain:', domain, 'record tn:', records['a'][0]['tn']);
 				}
@@ -40,6 +41,7 @@ async function processKey(domainKey) {
 				const existingAAAATemplate = (await aaaaTemplate(templateName)) || (await aaaaTemplate(defaultTemplate));
 				if (existingAAAATemplate) {
 					records['aaaa'] = JSON.parse(JSON.stringify(existingAAAATemplate));
+					updated = true;
 				} else {
 					console.warn('AAAA Template missing or invalid for domain:', domain, 'record tn:', records['aaaa'][0]['tn']);
 				}
@@ -54,6 +56,9 @@ async function processKey(domainKey) {
 				records['soa'] = JSON.parse(JSON.stringify(getSoaTemplate()))[0];
 				records['soa']['l'] = locked;
 				records['soa'].MBox = `root.${domain}.`;
+			}
+			if (updated === true) {
+				console.log('[template record update] updated', hkey, domain);
 			}
 			await redis.hset(domainKey, hkey, records);
 		} catch (e) {
