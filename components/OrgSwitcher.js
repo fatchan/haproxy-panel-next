@@ -8,7 +8,7 @@ import Capabilities from '../lib/capabilities.js';
 
 //TODO: move?
 export function shouldShowSwitcher(billingUser, orgs) {
-	if (!billingUser) return false;
+	if (!billingUser) {return false;}
 	const caps = billingUser.billing?.capabilities || [];
 	const hasOrgCap = caps.includes(Capabilities.ORGANISATIONS);
 	const memberOfOtherOrg = (orgs || []).some(o => o.owner !== billingUser.username);

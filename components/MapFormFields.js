@@ -444,7 +444,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 				</td>
 			</>
 			);
-			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'blockedasn': {
@@ -489,7 +489,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 				</>
 			);
-			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'hosts': {
@@ -620,7 +620,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 				</>
 			);
-			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'blockedcn': {
@@ -666,7 +666,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 					</td>
 				</>
 			);
-			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		default:

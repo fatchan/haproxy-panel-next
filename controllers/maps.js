@@ -353,7 +353,7 @@ export async function patchMapForm(req, res, next) {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					})
-					.then(r => r.data)
+					.then(r => r.data);
 				let backendMapEntryArray = JSON.parse(singleBackendMapEntry.value);
 				backendMapEntryArray = backendMapEntryArray.concat(JSON.parse(value));
 				await res.locals

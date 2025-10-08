@@ -95,16 +95,16 @@ function OrganisationPage(props) {
 								</tr>
 
 								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
-									<tr className="align-middle" key={mi}>
-										<td className="col-1 text-center">
+									<tr className='align-middle' key={mi}>
+										<td className='col-1 text-center'>
 											{isOwner && (
 												<button
 													disabled={name === currentOrg.owner}
 													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
-													title="Remove member"
+													title='Remove member'
 													onClick={() => onRemoveMember(name)}
 												>
-													<i className="bi-trash-fill pe-none" width="16" height="16" />
+													<i className='bi-trash-fill pe-none' width='16' height='16' />
 												</button>
 											)}
 										</td>
