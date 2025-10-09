@@ -52,7 +52,7 @@ export default function MapContainer({ mapName, initialData = {}, minimal, refre
 
 	useEffect(() => {
 		// fetch if missing or different map
-		if (!state.map || (mapInfo && mapInfo.name !== mapName)) {
+		if (!state.map || (mapInfo && !(mapInfo?.aliases?.includes(mapName) || mapInfo.name === mapName))) {
 			setLoading(true);
 			API.getMap(mapName, setState, setError, router);
 		}

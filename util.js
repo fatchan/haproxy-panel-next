@@ -131,6 +131,7 @@ export const fMap = {
 
 	[process.env.NEXT_PUBLIC_REWRITE_MAP_NAME]: {
 		name: 'rewrite',
+		aliases: ['images'],
 		fname: 'Rewrites',
 		description: 'Rewrite domain to a different domain and/or path',
 		columnNames: ['Domain', 'Rewrite to'],
