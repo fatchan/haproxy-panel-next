@@ -330,6 +330,7 @@ export async function patchMapForm(req, res, next) {
 					...(req.body.c === true ? {
 						check: 'enabled',
 						observe: 'layer4',
+						inter: 120000,
 					} : {}),
 				}, null, false, true);
 
