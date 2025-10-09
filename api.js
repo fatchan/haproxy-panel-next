@@ -47,13 +47,13 @@ export async function getOrgs(dispatch, errorCallback, router, customHeaders = {
 	return ApiCall('/orgs.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
 export async function switchOrg(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall('/forms/orgs/switch', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/orgs/${body.orgId}/switch`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function addOrgMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall('/forms/orgs/members', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/orgs/${body.orgId}/members`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function removeOrgMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall('/forms/orgs/members', 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/orgs/${body.orgId}/members/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 
 export async function getDomains(dispatch, errorCallback, router, customHeaders = {}) {

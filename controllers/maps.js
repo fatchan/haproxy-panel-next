@@ -101,20 +101,16 @@ export async function deleteMapForm(req, res, next) {
 		process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
 		process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
 	].includes(req.params.name)) {
-		/*
-			Maps with split values for e.g. multi-username that get updated
-		*/
+		// Maps with : separated values for e.g. multi-username that get updated
 
 		let value;
-		const existingMapEntries = await res.locals
-			.dataPlaneRetry('showRuntimeMap', {
+		const existingEntry = await res.locals
+			.dataPlaneRetry('getRuntimeMapEntry', {
 				map: req.params.name,
-				// id: req.body.key,
+				id: req.body.key,
 			})
 			.then((r) => r.data)
 			.catch(() => { });
-		const existingEntry = existingMapEntries && existingMapEntries
-			.find(en => en.key === req.body.key);
 
 		// If theres an existing entry, filter and update the value with user removed
 		if (existingEntry && existingEntry.value) {
@@ -180,26 +176,27 @@ export async function deleteMapForm(req, res, next) {
 			if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 				//Make sure to also update backends map if editing hosts map and putting duplicate
 				const matchingBackend = await res.locals
-					.dataPlaneRetry('showRuntimeMap', {
+					.dataPlaneRetry('getRuntimeMapEntry', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+						id: req.body.key
 					})
-					.then(r => r.data)
-					.then(backends => backends.find(mb => mb.key === req.body.key));
+					.then(r => r.data);
 
 				// can happen if desynced
-				if (!matchingBackend) {
+				if (!matchingBackend || !matchingBackend.value) {
 					return dynamicResponse(req, res, 400, { error: 'Invalid backend state, please contact support' });
 				}
 
 				//NOTE: deletes all backends (for now, requires enhancement to match between hosts map and backends map)
-				const splitValue = matchingBackend.value.split(',');
+				const backendServerArray = JSON.parse(matchingBackend.value);
+
 				await Promise.all([
 					//delete multiple of the actual servers
-					await Promise.all(splitValue.map(bsv =>
+					await Promise.all(backendServerArray.map(server =>
 						res.locals
 							.dataPlaneAll('deleteRuntimeServer', {
 								backend: 'servers',
-								name: bsv.substring(0, bsv.length - 3), // strip 3 chars for geo continent code and separator
+								name: server.h,
 							}, null, null, false, true)
 					)),
 					//and the single map entry w/ value separator
@@ -267,7 +264,7 @@ export async function patchMapForm(req, res, next) {
 		// Host name is special case where we have to update backends/servers, not just map manupulation
 		if (req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
 
-			const { hostname: address, port } = new URL(`scheme://${req.body.ip}`);
+			const { hostname: address, port } = new URL(`scheme://${req.body.h}`);
 			const backendAllowed = await backendIpAllowed(
 				res.locals.dataPlaneRetry,
 				res.locals.user.username,
@@ -330,10 +327,10 @@ export async function patchMapForm(req, res, next) {
 					ssl_reuse: 'enabled',
 					ssl: 'enabled',
 					verify: process.env.ALLOW_SELF_SIGNED_SSL === 'true' ? 'none' : 'required',
-					//
-					// check: 'enabled',
-					// observe: 'layer4',
-					//
+					...(req.body.c === true ? {
+						check: 'enabled',
+						observe: 'layer4',
+					} : {}),
 				}, null, false, true);
 
 			// call repalce to set admin and operational state (cant be set on dynamic runtime servers during server "add")
@@ -350,20 +347,21 @@ export async function patchMapForm(req, res, next) {
 			// if theres an existing backend map entry, update
 			if (backendMapEntry) {
 				console.info('setting load balanced backend entry:', req.body.key, backendMapEntry);
-				// Have to show the whole map because getRuntimeMapEntry doesnt return multiples
-				const fullBackendMap = await res.locals
-					.dataPlaneRetry('showRuntimeMap', {
-						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME
+				//Note: fixed bug in client-native that makes getRuntimeMapEntry incompatible with commas in values
+				const singleBackendMapEntry = await res.locals
+					.dataPlaneRetry('getRuntimeMapEntry', {
+						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+						id: req.body.key,
 					})
 					.then(r => r.data);
-				const fullBackendMapEntry = fullBackendMap
-					.find(entry => entry.key === req.body.key); //find is OK because keys are pointers and shouldnt be dupes
+				let backendMapEntryArray = JSON.parse(singleBackendMapEntry.value);
+				backendMapEntryArray = backendMapEntryArray.concat(JSON.parse(value));
 				await res.locals
 					.dataPlaneAll('replaceRuntimeMapEntry', {
 						map: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 						id: req.body.key,
 					}, {
-						value: `${fullBackendMapEntry.value},websrv${freeSlotId}|${req.body.geo}`,
+						value: JSON.stringify(backendMapEntryArray),
 					}, null, false, false);
 			} else {
 				// otherwise add new backend
@@ -372,7 +370,7 @@ export async function patchMapForm(req, res, next) {
 						name: process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
 					}, [{
 						key: req.body.key,
-						value: `websrv${freeSlotId}|${req.body.geo}`,
+						value: JSON.stringify([{ ...JSON.parse(value), h: serverName }]),
 					}], null, false, false);
 			}
 

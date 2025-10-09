@@ -3,10 +3,11 @@ import Select from 'react-select';
 import countries from 'i18n-iso-countries';
 import enCountries from 'i18n-iso-countries/langs/en.json';
 import { continentOptions } from '../lib/misc/geo.js';
+import Link from 'next/link';
 countries.registerLocale(enCountries);
 const countryOptions = Object.entries(countries.getNames('en')).map(e => ({ value: e[0], label: `${e[1]} (${e[0]})` }));
 
-const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel, noButtons }) => {
+const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue, handleFieldChange, handleSave, handleCancel, noButtons, noRowWrapper }) => {
 	let formElements;
 
 	switch (mapName) {
@@ -403,52 +404,52 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 		}
 		case 'blockedip':
 		case 'whitelist': {
-			formElements = (
-				<tr className='align-middle'>
-					{!noButtons && <td>
-						{formType === 'add' ? (
-							<button className='btn btn-sm btn-success' type='submit'>
-								<i className='bi-plus-lg pe-none' width='16' height='16' />
+			const rowElements = (<>
+				{!noButtons && <td>
+					{formType === 'add' ? (
+						<button className='btn btn-sm btn-success' type='submit'>
+							<i className='bi-plus-lg pe-none' width='16' height='16' />
+						</button>
+					) : (
+						<>
+							<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
+								<i className='bi-floppy-fill pe-none' width='16' height='16' />
 							</button>
-						) : (
-							<>
-								<button className='btn btn-sm btn-success me-2' type='button' onClick={handleSave}>
-									<i className='bi-floppy-fill pe-none' width='16' height='16' />
-								</button>
-								<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
-									<i className='bi-x-lg pe-none' width='16' height='16' />
-								</button>
-							</>
-						)}
-					</td>}
-					<td className='w-50'>
-						<input
-							className='form-control'
-							type='text'
-							{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
-							placeholder='ip or subnet'
-							name='key'
-							required
-						/>
-					</td>
-					<td className='w-50'>
-						<input
-							className='form-control'
-							type='text'
-							{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
-							name='note'
-							placeholder='Note'
-						/>
-					</td>
-				</tr>
+							<button className='btn btn-sm btn-secondary' type='button' onClick={handleCancel}>
+								<i className='bi-x-lg pe-none' width='16' height='16' />
+							</button>
+						</>
+					)}
+				</td>}
+				<td className='w-50'>
+					<input
+						className='form-control'
+						type='text'
+						{...(handleFieldChange ? { value: editValue.key || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('key', e.target.value)}
+						placeholder='ip or subnet'
+						name='key'
+						required
+					/>
+				</td>
+				<td className='w-50'>
+					<input
+						className='form-control'
+						type='text'
+						{...(handleFieldChange ? { value: editValue.note || '' } : { defaultValue: '' })}
+						onChange={(e) => handleFieldChange && handleFieldChange('note', e.target.value)}
+						name='note'
+						placeholder='Note'
+					/>
+				</td>
+			</>
 			);
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'blockedasn': {
-			formElements = (
-				<tr className='align-middle'>
+			const rowElements = (
+				<>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -486,8 +487,9 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</tr>
+				</>
 			);
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'hosts': {
@@ -528,9 +530,9 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 						<input
 							className='form-control'
 							type='text'
-							{...(handleFieldChange ? { value: editValue.ip || '' } : { defaultValue: '' })}
-							onChange={(e) => handleFieldChange && handleFieldChange('ip', e.target.value)}
-							name='ip'
+							{...(handleFieldChange ? { value: editValue.h || '' } : { defaultValue: '' })}
+							onChange={(e) => handleFieldChange && handleFieldChange('h', e.target.value)}
+							name='h'
 							placeholder='backend ip:port'
 							required
 						/>
@@ -547,13 +549,37 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							required
 						/>
 					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.xp === true } : { defaultChecked: editValue.xp === true })}
+								onChange={(e) => handleFieldChange && handleFieldChange('xp', e.target.checked ? true : false)}
+								name='xp'
+							/>
+							{formType === 'add' && <label className='form-check-label'><Link href='/kb/ports' target='_blank'>Extra Ports</Link></label>}
+						</div>
+					</td>
+					<td>
+						<div className='form-check'>
+							<input
+								className='form-check-input'
+								type='checkbox'
+								{...(handleFieldChange ? { checked: editValue.c === true } : { defaultChecked: editValue.c === true })}
+								onChange={(e) => handleFieldChange && handleFieldChange('c', e.target.checked ? true : false)}
+								name='c'
+							/>
+							{formType === 'add' && <label className='form-check-label'>Health Check</label>}
+						</div>
+					</td>
 				</tr>
 			);
 			break;
 		}
 		case 'blockedcc': {
-			formElements = (
-				<tr className='align-middle'>
+			const rowElements = (
+				<>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -592,13 +618,14 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</tr>
+				</>
 			);
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		case 'blockedcn': {
-			formElements = (
-				<tr className='align-middle'>
+			const rowElements = (
+				<>
 					{!noButtons && <td>
 						{formType === 'add' ? (
 							<button className='btn btn-sm btn-success' type='submit'>
@@ -637,8 +664,9 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 							placeholder='Note'
 						/>
 					</td>
-				</tr>
+				</>
 			);
+			formElements = noRowWrapper ? rowElements : <tr className='align-middle'>{rowElements}</tr>;
 			break;
 		}
 		default:

@@ -90,25 +90,34 @@ function OrganisationPage(props) {
 								<tr className='align-middle'>
 									<th />
 									<th>Username</th>
+									<th>Added Date</th>
 									<th>Role</th>
 								</tr>
 
-								{(currentOrg.members || []).map((member, mi) => (
+								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
 									<tr className='align-middle' key={mi}>
 										<td className='col-1 text-center'>
 											{isOwner && (
 												<button
-													disabled={member === currentOrg.owner}
-													className={`btn btn-sm ${member !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
+													disabled={name === currentOrg.owner}
+													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
 													title='Remove member'
-													onClick={() => onRemoveMember(member)}
+													onClick={() => onRemoveMember(name)}
 												>
 													<i className='bi-trash-fill pe-none' width='16' height='16' />
 												</button>
 											)}
 										</td>
-										<td>{member}</td>
-										<td>{member === currentOrg.owner ? 'Owner' : 'Member'}</td>
+										<td>{name}</td>
+										<td>
+											<span suppressHydrationWarning>
+												{data?.addedDate
+													? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+														.format(new Date(data.addedDate))
+													: ''}
+											</span>
+										</td>
+										<td>{name === currentOrg.owner ? 'Owner' : 'Member'}</td>
 									</tr>
 								))}
 
@@ -120,7 +129,7 @@ function OrganisationPage(props) {
 
 								{isOwner && (
 									<tr>
-										<td colSpan='3'>
+										<td colSpan='4'>
 											<form className='d-flex' onSubmit={onAddMember}>
 												<input
 													className='form-control w-100'

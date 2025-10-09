@@ -89,6 +89,7 @@ function Onboarding(props) {
 			ip: e.target.ip?.value,
 			onboarding: e.target.onboarding.value,
 			geo: e.target.geo.value,
+			xp: e.target.cn.value,
 		}, dispatch, setError, router);
 		await API.getAccount(dispatch, setError, router);
 		e.target.reset();
@@ -242,6 +243,7 @@ function Onboarding(props) {
 							<input type='hidden' name='_csrf' value={csrf} />
 							<input type='hidden' name='onboarding' value='1' />
 							<input type='hidden' name='geo' value='XX' />
+							<input type='hidden' name='xp' value='1' />
 							<select className='form-select mb-3' name='key' defaultValue=''
 								disabled={backendAdded}
 								required>
@@ -251,7 +253,7 @@ function Onboarding(props) {
 							<input
 								className='form-control mb-3'
 								type='text'
-								name='ip'
+								name='h'
 								placeholder='backend ip:port'
 								disabled={backendAdded}
 								required

@@ -25,6 +25,8 @@ import {
 import { useHaproxy } from './lib/middleware/haproxy.js';
 import { useVarnish } from './lib/middleware/varnish.js';
 import { useOvenMedia } from './lib/middleware/oven.js';
+import { hasCapability } from './lib/middleware/capabilities.js';
+import Capabilities from './lib/capabilities.js';
 
 const mapNamesOrString = [
 	process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME, process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
@@ -107,9 +109,10 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson,);
 
 	const formsRouter = express.Router({ caseSensitive: true });
-	formsRouter.post('/orgs/switch', sessionChain, csrfMiddleware, orgsController.switchOrg);
-	formsRouter.post('/orgs/members', sessionChain, csrfMiddleware, orgsController.addMember);
-	formsRouter.delete('/orgs/members', sessionChain, csrfMiddleware, orgsController.removeMember);
+	formsRouter.post('/orgs/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
+	formsRouter.post('/orgs/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
+	// formsRouter.post('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
+	formsRouter.delete('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL,);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, accountController.globalToggle,);
 	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm,);
