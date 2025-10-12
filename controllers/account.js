@@ -53,6 +53,61 @@ export async function onboardingData(_req, res, _next) {
 }
 
 /**
+ * account list data for admin/management page
+ * now accepts (page, search) instead of req/res
+ */
+const PAGE_SIZE = 50;
+export async function accountsData(page, search) {
+	let skip = 0;
+	const limit = PAGE_SIZE;
+	if (page !== null && typeof page === 'number' && Number.isInteger(page) && page > 1) { //0 and 1 are first page
+		skip = page * PAGE_SIZE;
+	}
+	const query = {};
+	if (search) {
+		const re = new RegExp(search.replace(/[^A-Za-z0-9_.-]/g, ''));
+		query.$or = [
+			{ _id: { $regex: re } },
+			{ domains: { $elemMatch: { $regex: re } } }, //admin route so index not so important
+		];
+	}
+	const accounts = await db.db().collection('accounts').find(query, { projection: { passwordHash: 0 } }).skip(skip).limit(limit).toArray();
+	return {
+		accounts: accounts,
+		page: page === null ? null : (page + 1),
+		pageSize: PAGE_SIZE,
+		search: search || null,
+	};
+};
+
+/**
+ * GET /accounts
+ * accounts page (admin/management) html
+ */
+export async function accountsPage(app, req, res, _next) {
+	const page = req.query && typeof req.query.page !== 'undefined' && !isNaN(req.query.page) && parseInt(req.query.page, 10) === +req.query.page
+		? parseInt(req.query.page, 10) : null;
+	const search = req.query && typeof req.query.search === 'string' && req.query.search.length > 0 && req.query.search.length < 100
+		? req.query.search : null;
+	const data = await accountsData(page, search);
+	res.locals.data = { ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username };
+	return app.render(req, res, '/accounts');
+}
+
+/**
+ * GET /account.json
+ * account page json data
+ */
+export async function accountsJson(req, res, _next) {
+	const page = req.query && typeof req.query.page !== 'undefined' && !isNaN(req.query.page) && parseInt(req.query.page, 10) === +req.query.page
+		? parseInt(req.query.page, 10) : null;
+	const search = req.query && typeof req.query.search === 'string' && req.query.search.length > 0 && req.query.search.length < 100
+		? req.query.search : null;
+	const data = await accountsData(page, search);
+	return res.json({ ...data, user: res.locals.user, originalUser: res.locals.originalUser, impersonating: res.locals.originalUser.username !== res.locals.user.username });
+}
+
+/**
  * GET /account
  * account page html
  */
@@ -393,4 +448,29 @@ export async function verifyEmail(req, res) {
 
 	return dynamicResponse(req, res, 302, { redirect: '/login?verify_email=1' });
 
+}
+
+/**
+ * DELETE /forms/account/:accountId
+ * Delete an account (admin)
+ */
+export async function deleteAccount(req, res, _next) {
+	const { accountId } = req.params;
+	if (!accountId || typeof accountId !== 'string') {
+		return dynamicResponse(req, res, 400, { error: 'Invalid inputs' });
+
+	}
+	if (res.locals && res.locals.originalUser && res.locals.originalUser.username === accountId) {
+		return dynamicResponse(req, res, 400, { error: 'You cannot self-terminate' });
+	}
+
+	//TODO: set account inactive, delete all sessions, haproxy checks for deleting all domains, all map entries, delete all domains DNS records
+	return dynamicResponse(req, res, 400, { error: 'Not implemented' });
+
+	// const result = await db.db().collection('accounts').deleteOne({ _id: accountId });
+	// if (result.deletedCount === 1) {
+	// 	return res.json({ ok: true });
+	// } else {
+	// 	return dynamicResponse(req, res, 400, { error: 'Invalid account id' });
+	// }
 }

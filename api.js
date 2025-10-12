@@ -3,6 +3,12 @@ import NProgress from 'nprogress';
 export async function getAccount(dispatch, errorCallback, router, customHeaders = {}) {
 	return ApiCall('/account.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
+export async function getAccounts(dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall('/accounts.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
+}
+export async function deleteAccount(body, dispatch, errorCallback, router, customHeaders = {}) {
+	return ApiCall(`/forms/account/${body.accountId}`, 'DELETE', body, dispatch, errorCallback, router, 1, customHeaders);
+}
 export async function getCsrf(dispatch, errorCallback, router, customHeaders = {}) {
 	return ApiCall('/forms/csrf', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }

@@ -110,7 +110,7 @@ function OrganisationPage(props) {
 										</td>
 										<td>{name}</td>
 										<td>
-											<span suppressHydrationWarning>
+											<span suppressHydrationWarning={true}>
 												{data?.addedDate
 													? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
 														.format(new Date(data.addedDate))
