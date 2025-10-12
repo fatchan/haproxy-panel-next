@@ -37,8 +37,9 @@ function OrganisationPage(props) {
 
 	async function onAddMember(e) {
 		e.preventDefault();
+		setError();
 		setAdding(true);
-		await API.addOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername: e.target.member?.value }, setState, setError, router);
+		await API.addOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername: e.target.member?.value }, null, setError, router);
 		await API.getOrgs(setState, setError, router);
 		setAdding(false);
 	};
@@ -47,7 +48,8 @@ function OrganisationPage(props) {
 		if (!confirm(`Remove member "${memberUsername}" from this organisation?`)) {
 			return;
 		}
-		await API.removeOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername }, setState, setError, router);
+		setError();
+		await API.removeOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername }, null, setError, router);
 		await API.getOrgs(setState, setError, router);
 	}
 

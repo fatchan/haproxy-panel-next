@@ -115,7 +115,7 @@ export default function router(server, app) {
 	formsRouter.post('/orgs/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
 	// formsRouter.post('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
 	formsRouter.delete('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
-	formsRouter.delete('/forms/account/:accountId', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, accountController.deleteAccount);
+	formsRouter.delete('/account/:accountId', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, accountController.deleteAccount);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, fetchAdmin, accountController.globalToggle);
 	formsRouter.post(`/map/:name(${mapNamesOrString})/add`, sessionChain, haproxyCsrfChain, mapsController.patchMapForm);

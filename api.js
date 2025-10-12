@@ -59,7 +59,7 @@ export async function addOrgMember(body, dispatch, errorCallback, router, custom
 	return ApiCall(`/forms/orgs/${body.orgId}/members`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function removeOrgMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall(`/forms/orgs/${body.orgId}/members/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/orgs/${body.orgId}/member/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 
 export async function getDomains(dispatch, errorCallback, router, customHeaders = {}) {
