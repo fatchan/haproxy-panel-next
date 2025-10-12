@@ -57,7 +57,7 @@ export default function OrgsSwitcher(props) {
 
 	return (
 		<div className='orgs-switcher'>
-			<Link className='orgs-switcher-label text-body' href='/organisation'>
+			<Link className='orgs-switcher-label text-body-secondary' href='/organisation'>
 				Organisation <i className='bi-arrow-right-short' width='16' height='16' />
 			</Link>
 			<div>
