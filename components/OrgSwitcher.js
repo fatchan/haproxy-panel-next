@@ -8,7 +8,7 @@ import Capabilities from '../lib/capabilities.js';
 
 //TODO: move?
 export function shouldShowSwitcher(billingUser, orgs) {
-	if (!billingUser) {return false;}
+	if (!billingUser) { return false; }
 	const caps = billingUser.billing?.capabilities || [];
 	const hasOrgCap = caps.includes(Capabilities.ORGANISATIONS);
 	const memberOfOtherOrg = (orgs || []).some(o => o.owner !== billingUser.username);
@@ -35,7 +35,7 @@ export default function OrgsSwitcher(props) {
 			label: `${o.owner === originalUser.username ? '🏠 ' : ''}${o.owner || o._id}'s Org`,
 			owner: o.owner,
 		}));
-	}, [state]);
+	}, [orgs, originalUser]);
 
 	const handleChange = async selected => {
 		if (!selected) { return; }
@@ -62,6 +62,8 @@ export default function OrgsSwitcher(props) {
 			</Link>
 			<div>
 				<Select
+					instanceId='org-switcher'
+					suppressHydrationWarning={true}
 					classNamePrefix='select'
 					className='basic-multi-select'
 					isLoading={loading || switching}
