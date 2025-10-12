@@ -4,7 +4,7 @@ import * as db from './db.js';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 
-async function reset () {
+async function reset() {
 	await db.connect();
 	const numAccounts = await db.db().collection('accounts').countDocuments();
 	const randomPassword = randomBytes(20).toString('base64');
@@ -20,10 +20,8 @@ async function reset () {
 				displayName: 'admin',
 				passwordHash: passwordHash,
 				domains: ['localhost'],
-				allowedTemplates: ['basic'],
 				onboarding: true,
-				maxDomains: 5,
-				billing: { price: 1, description: 'Free trial' },
+				billing: { price: 1, description: 'Free trial', capabilities: ['organisations'], maxDomains: 100, allowedTemplates: ['basic'], },
 				inactive: false,
 			});
 	} else {

@@ -1185,18 +1185,6 @@
             "type": "boolean",
             "example": true
           },
-          "allowedTemplates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "example": [
-              "basic",
-              "nocogent",
-              "anycast",
-              "cn2"
-            ]
-          },
           "numCerts": {
             "type": "integer",
             "example": 34
@@ -1216,12 +1204,24 @@
                 "type": "number",
                 "format": "float",
                 "example": 100
+              },
+              "maxDomains": {
+                "type": "integer",
+                "example": 5
+              },
+              "allowedTemplates": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "basic",
+                  "nocogent",
+                  "anycast",
+                  "cn2"
+                ]
               }
             }
-          },
-          "maxDomains": {
-            "type": "integer",
-            "example": 5
           },
           "cc": {
             "type": "string",

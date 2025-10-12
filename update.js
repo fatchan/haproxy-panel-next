@@ -22,9 +22,9 @@ async function processKey(domainKey) {
 			let updated = false;
 			let defaultTemplate = 'basic';
 			const domainAccount = await db.db().collection('accounts').findOne({ domains: domain });
-			if (domainAccount && domainAccount.allowedTemplates[0] !== 'basic') {
+			if (domainAccount && domainAccount.billing.allowedTemplates[0] !== 'basic') {
 				//For initial sync of accounts that dont have access to the public template
-				defaultTemplate = domainAccount.allowedTemplates[0];
+				defaultTemplate = domainAccount.billing.allowedTemplates[0];
 			}
 			if (records['a'] && records['a'][0]['t'] === true) {
 				const templateName = records['a'][0]['tn'] || defaultTemplate;

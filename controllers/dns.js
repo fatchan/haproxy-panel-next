@@ -140,7 +140,7 @@ export async function dnsRecordUpdate(req, res) {
 			case type === 'a_template' || type.startsWith('a_template:'): {
 				//extract template name from the value
 				const [_, templateName] = type.split(':');
-				if (templateName && !res.locals.user.allowedTemplates.includes(templateName)) {
+				if (templateName && !res.locals.user.billing.allowedTemplates.includes(templateName)) {
 					//permission check, only certain users can access non default template
 					return dynamicResponse(req, res, 403, { error: 'You don\'t have permission to use this template type' });
 				}
@@ -151,7 +151,7 @@ export async function dnsRecordUpdate(req, res) {
 			}
 			case type === 'aaaa_template' || type.startsWith('aaaa_template:'): {
 				const [_, templateName] = type.split(':');
-				if (templateName && !res.locals.user.allowedTemplates.includes(templateName)) {
+				if (templateName && !res.locals.user.billing.allowedTemplates.includes(templateName)) {
 					return dynamicResponse(req, res, 403, { error: 'You don\'t have permission to use this template type' });
 				}
 				records = JSON.parse(JSON.stringify((await aaaaTemplate(templateName))));
@@ -176,10 +176,10 @@ export async function dnsRecordUpdate(req, res) {
 	} else {
 		//TODO: not required the "all" ones
 		const allAs = await getAllTemplateIps('a');
-		const allowedAIps = await getAllTemplateIps('a', res.locals.user.allowedTemplates);
+		const allowedAIps = await getAllTemplateIps('a', res.locals.user.billing.allowedTemplates);
 		const allAAAAs = (await getAllTemplateIps('aaaa'))
 			.map(x => parse(x).toString({ zeroElide: false, zeroPad: false })); // prevent bypass with compressed addresses
-		const allowedAAAAIps = (await getAllTemplateIps('aaaa', res.locals.user.allowedTemplates))
+		const allowedAAAAIps = (await getAllTemplateIps('aaaa', res.locals.user.billing.allowedTemplates))
 			.map(x => parse(x).toString({ zeroElide: false, zeroPad: false })); // prevent bypass with compressed addresses
 		switch (type) {
 			default: {

@@ -69,7 +69,7 @@ function AccountPage(props) {
 					<div className='card-body'>
 						<h6 className='card-title'>Domains</h6>
 						<p className='card-text'>
-							<strong>{originalUser.domains.length}</strong> Domains / <strong>{originalUser.maxDomains ? originalUser.maxDomains : '∞'}</strong> Max
+							<strong>{originalUser.domains.length}</strong> Domains / <strong>{originalUser.billing.maxDomains ? originalUser.billing.maxDomains : '∞'}</strong> Max
 						</p>
 					</div>
 				</div>

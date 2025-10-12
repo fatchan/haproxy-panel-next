@@ -178,7 +178,7 @@ const DnsEditRecordPage = (props) => {
 										{templateOptions
 											.filter(({ value }) => {
 												const [_, templateName] = value.split(':');
-												return user.allowedTemplates.includes(templateName);
+												return user.billing.allowedTemplates.includes(templateName);
 											})
 											.map(({ value, label }) => (
 												<option key={value} value={value}>

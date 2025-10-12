@@ -84,7 +84,7 @@ export async function addDomain(req, res, next) {
 	if (
 		res.locals.isAdmin &&
 		res.locals.user.domains &&
-		res.locals.user.domains.length >= (res.locals.user.maxDomains || 5)
+		res.locals.user.domains.length >= (res.locals.user.billing.maxDomains || 5)
 	) {
 		return dynamicResponse(req, res, 403, { error: 'Domain limit reached' });
 	}

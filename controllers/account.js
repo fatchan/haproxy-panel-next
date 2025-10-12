@@ -231,10 +231,8 @@ export async function register(req, res) {
 			displayName: req.body.username,
 			passwordHash: passwordHash,
 			domains: [],
-			allowedTemplates: ['basic'],
 			onboarding: true,
-			maxDomains: 5,
-			billing: { price: 0, description: 'Free trial' },
+			billing: { price: 0, description: 'Free trial', capabilities: [], maxDomains: 5, allowedTemplates: ['basic'] },
 			inactive: false,
 		});
 
