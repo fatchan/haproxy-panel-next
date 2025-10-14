@@ -24,6 +24,15 @@ async function reset() {
 				billing: { price: 1, description: 'Free trial', capabilities: ['organisations'], maxDomains: 100, allowedTemplates: ['basic'], },
 				inactive: false,
 			});
+		await db.db().collection('orgs').insertOne({
+			owner: 'admin',
+			members: {
+				'admin': {
+					addedDate: new Date(),
+				}
+			},
+			createdAt: new Date(),
+		});
 	} else {
 		await db.db().collection('accounts')
 			.updateOne({

@@ -26,6 +26,10 @@ import { useHaproxy } from './lib/middleware/haproxy.js';
 import { useVarnish } from './lib/middleware/varnish.js';
 import { useOvenMedia } from './lib/middleware/oven.js';
 import { hasCapability } from './lib/middleware/capabilities.js';
+import applyPermissions from './lib/middleware/permissions.js';
+import * as hasPerms from './lib/middleware/hasperms.js';
+
+import { Permissions } from './lib/permissions/permissions.js';
 import Capabilities from './lib/capabilities.js';
 
 const mapNamesOrString = [
@@ -144,8 +148,8 @@ export default function router(server, app) {
 	}
 
 	if (process.env.NEXT_PUBLIC_ENABLE_SHKEEPER) {
-		server.get('/billing', sessionChain, csrfMiddleware, billingController.billingPage.bind(null, app));
-		server.get('/billing.json', sessionChain, csrfMiddleware, billingController.billingJson);
+		server.get('/billing', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.BILLING), billingController.billingPage.bind(null, app));
+		server.get('/billing.json', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.BILLING), billingController.billingJson);
 		formsRouter.post('/billing/payment_request', sessionChain, csrfMiddleware, billingController.createPaymentRequest);
 		server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
 	}

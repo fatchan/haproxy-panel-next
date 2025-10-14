@@ -1,10 +1,11 @@
 import bcrypt from 'bcrypt';
 import * as db from '../db.js';
-import { ObjectId } from 'mongodb';
+import { Binary, ObjectId } from 'mongodb';
 import { extractMap, dynamicResponse } from '../util.js';
 import sendEmail from '../lib/email/send.js';
 import { randomBytes } from 'node:crypto';
 import { getNameserverTxtRecords, checkPublicDNSRecord, expectedNSRecords } from '../lib/nameservers.js';
+import Roles from '../lib/permissions/roles.js';
 
 /**
  * account page data shared between html/json routes
@@ -296,7 +297,12 @@ export async function register(req, res) {
 	}
 	await db.db().collection('orgs').insertOne({
 		owner: newAccount.insertedId,
-		members: [newAccount.insertedId],
+		members: {
+			[newAccount.insertedId]: {
+				addedDate: new Date(),
+				permissions: Binary(Roles.roles.ORG_OWNER.array)
+			},
+		},
 		createdAt: new Date(),
 	});
 

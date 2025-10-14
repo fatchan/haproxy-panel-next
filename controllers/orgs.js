@@ -1,6 +1,7 @@
 import * as db from '../db.js';
-import { ObjectId } from 'mongodb';
+import { Binary, ObjectId } from 'mongodb';
 import { dynamicResponse } from '../util.js';
+import Roles from '../lib/permissions/roles.js';
 
 async function getOrgsForUser(username) {
 	return db.db().collection('orgs')
@@ -102,6 +103,7 @@ export async function addMember(req, res, _next) {
 				[`members.${memberUsername}`]: {
 					/* TODO: properties for perms matrix, metadata, etc */
 					'addedDate': new Date(),
+					permissions: Binary(Roles.roles.ORG_MEMBER.array)
 				}
 			}
 		}
