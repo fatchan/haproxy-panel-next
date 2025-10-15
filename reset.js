@@ -1,8 +1,9 @@
 import 'dotenv/config';
-import { ObjectId } from 'mongodb';
+import { Binary, ObjectId } from 'mongodb';
 import * as db from './db.js';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
+import Roles from './lib/permissions/roles.js';
 
 async function reset() {
 	await db.connect();
@@ -29,6 +30,7 @@ async function reset() {
 			members: {
 				'admin': {
 					addedDate: new Date(),
+					permissions: Binary(Roles.roles.ORG_OWNER.array)
 				}
 			},
 			createdAt: new Date(),

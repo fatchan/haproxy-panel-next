@@ -84,8 +84,10 @@ export default function router(server, app) {
 	server.post('/forms/verifyemail', useSession, accountController.verifyEmail);
 
 	//authed pages
-	server.get('/orgs', sessionChain, csrfMiddleware, orgsController.orgsPage.bind(null, app));
-	server.get('/orgs.json', sessionChain, csrfMiddleware, orgsController.orgsJson);
+	server.get('/organisation', sessionChain, csrfMiddleware, orgsController.organisationPage.bind(null, app));
+	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+)/edit', sessionChain, csrfMiddleware, orgsController.organisationMemberEditPage.bind(null, app));
+	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+).json', sessionChain, csrfMiddleware, orgsController.organisationMemberJson);
+	server.get('/organisations.json', sessionChain, csrfMiddleware, orgsController.organisationsJson);
 	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app));
 	server.get('/cache', sessionChain, checkOnboarding, haproxyCsrfChain, cacheController.cachePage.bind(null, app));
 	server.get('/account', sessionChain, checkOnboarding, csrfMiddleware, accountController.accountPage.bind(null, app));
@@ -115,10 +117,10 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson);
 
 	const formsRouter = express.Router({ caseSensitive: true });
-	formsRouter.post('/orgs/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
-	formsRouter.post('/orgs/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
-	// formsRouter.post('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
-	formsRouter.delete('/orgs/:orgId([a-f0-9]{24})/member/:memberUsername', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
+	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
+	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
+	// formsRouter.post('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
+	formsRouter.delete('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
 	formsRouter.delete('/account/:accountId', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, accountController.deleteAccount);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, fetchAdmin, accountController.globalToggle);

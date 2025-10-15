@@ -12,7 +12,7 @@ const MapFormFields = ({ map, formType, mapName, mapValueNames, user, editValue,
 
 	switch (mapName) {
 		case 'ddos': {
-			const mapValueOptions = Object.entries(mapValueNames).reduce((acc, [v, mvn]) => {
+			const mapValueOptions = Object.entries(mapValueNames||{}).reduce((acc, [v, mvn]) => {
 				const valueOptions = Object.entries(mvn).map((entry, i) => (
 					<option key={`option${i}`} value={entry[0].toString()}>{entry[1]}</option>
 				));

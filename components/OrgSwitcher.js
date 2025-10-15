@@ -26,7 +26,7 @@ export default function OrgsSwitcher(props) {
 
 	useEffect(() => {
 		setLoading(true);
-		API.getOrgs(setState, setError, router).finally(() => setLoading(false));
+		API.getOrganisations(setState, setError, router).finally(() => setLoading(false));
 	}, []);
 
 	const orgOptions = useMemo(() => {
@@ -41,8 +41,8 @@ export default function OrgsSwitcher(props) {
 		if (!selected) { return; }
 		setError();
 		setSwitching(true);
-		await API.switchOrg({ _csrf: csrf, orgId: selected.value }, null, setError, router);
-		await API.getOrgs(setState, setError, router);
+		await API.switchOrganisation({ _csrf: csrf, orgId: selected.value }, null, setError, router);
+		await API.getOrganisations(setState, setError, router);
 		setSwitching(false);
 		router.reload(); //easiest thing
 	};

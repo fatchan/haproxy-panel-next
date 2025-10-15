@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import * as API from '../api.js';
-import ErrorAlert from '../components/ErrorAlert.js';
-import withAuth from '../components/withAuth.js';
+import * as API from '../../api.js';
+import ErrorAlert from '../../components/ErrorAlert.js';
+import withAuth from '../../components/withAuth.js';
 
 function OrganisationPage(props) {
 	const router = useRouter();
 	const [state, setState] = useState(props);
 	const [error, setError] = useState();
 	const [adding, setAdding] = useState(false);
-
 	const { originalUser, orgs, currentOrgId, csrf } = state || {};
 	const currentOrg = (orgs || []).find(o => o._id === currentOrgId)
 		|| (orgs || []).find(o => o.owner === originalUser.username) //should default to own org when none selected
 		|| null;
-
 	const isOwner = currentOrg && originalUser && currentOrg.owner === originalUser.username;
 
 	useEffect(() => {
-		API.getOrgs(setState, setError, router);
+		API.getOrganisations(setState, setError, router);
 	}, []);
 
 	if (!state || !state.originalUser) {
@@ -39,8 +38,8 @@ function OrganisationPage(props) {
 		e.preventDefault();
 		setError();
 		setAdding(true);
-		await API.addOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername: e.target.member?.value }, null, setError, router);
-		await API.getOrgs(setState, setError, router);
+		await API.addOrganisationMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername: e.target.member?.value }, null, setError, router);
+		await API.getOrganisations(setState, setError, router);
 		setAdding(false);
 	};
 
@@ -49,8 +48,8 @@ function OrganisationPage(props) {
 			return;
 		}
 		setError();
-		await API.removeOrgMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername }, null, setError, router);
-		await API.getOrgs(setState, setError, router);
+		await API.removeOrganisationMember({ _csrf: csrf, orgId: currentOrg._id, memberUsername }, null, setError, router);
+		await API.getOrganisations(setState, setError, router);
 	}
 
 	return (
@@ -99,7 +98,8 @@ function OrganisationPage(props) {
 								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
 									<tr className='align-middle' key={mi}>
 										<td className='col-1 text-center'>
-											{isOwner && (
+											{isOwner && (<>
+												{/*TODO: once perms, make visibility depend on org perm*/}
 												<button
 													disabled={name === currentOrg.owner}
 													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
@@ -108,7 +108,10 @@ function OrganisationPage(props) {
 												>
 													<i className='bi-trash-fill pe-none' width='16' height='16' />
 												</button>
-											)}
+												<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}>
+													<i className='bi-pencil pe-none' width='16' height='16' />
+												</Link>
+											</>)}
 										</td>
 										<td>{name}</td>
 										<td>

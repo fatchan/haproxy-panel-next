@@ -109,6 +109,11 @@ tr:last-of-type td {
 	color: #6c757d !important;
 }
 
+input[type="checkbox"] {
+	width: 24px;
+	height: 24px;
+}
+
 input:autofill,
 input:-webkit-autofill {
 	background-color: initial !important;

@@ -2,6 +2,7 @@ import * as db from '../db.js';
 import { Binary, ObjectId } from 'mongodb';
 import { dynamicResponse } from '../util.js';
 import Roles from '../lib/permissions/roles.js';
+import Permission from '../lib/permissions/permission.js';
 
 async function getOrgsForUser(username) {
 	return db.db().collection('orgs')
@@ -52,20 +53,57 @@ export async function switchOrg(req, res, _next) {
 }
 
 /**
- * GET /orgs (page)
+ * GET /organisation (page)
  */
-export async function orgsPage(app, req, res, _next) {
+export async function organisationPage(app, req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const orgs = await getOrgsForUser(username);
 	const currentOrgId = req.session?.currentOrg;
 	res.locals.data = { csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser };
-	return app.render(req, res, '/orgs');
+	return app.render(req, res, '/organisation');
 }
 
 /**
- * GET /orgs.json
+ * GET /organisation/member/:memberUsername (page)
  */
-export async function orgsJson(req, res, _next) {
+export async function organisationMemberEditPage(app, req, res, next) {
+	const username = res.locals.originalUser.username;
+	const currentOrgId = req.session?.currentOrg;
+	const orgs = await getOrgsForUser(username);
+
+	const { memberUsername } = req.params;
+	const member = res.locals.org.members[memberUsername];
+	if (!member) {
+		return next();
+	}
+	member.permissions = new Permission(member.permissions.toString('base64')).toJSON();
+
+	res.locals.data = { member, csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser };
+	return app.render(req, res, `/organisation/member/${memberUsername}/edit`);
+}
+
+/**
+ * GET /organisation/member/:memberUsername.json
+ */
+export async function organisationMemberJson(req, res, _next) {
+	const username = res.locals.originalUser.username;
+	const currentOrgId = req.session?.currentOrg;
+	const orgs = await getOrgsForUser(username);
+
+	const { memberUsername } = req.params;
+	const member = res.locals.org.members[memberUsername];
+	if (!member) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+	member.permissions = new Permission(member.permissions.toString('base64')).toJSON();
+
+	return dynamicResponse(req, res, 200, { member, csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser });
+}
+
+/**
+ * GET /organisations.json
+ */
+export async function organisationsJson(req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
@@ -73,7 +111,7 @@ export async function orgsJson(req, res, _next) {
 }
 
 /**
- * POST /orgs/members
+ * POST /organisation/:orgId/members
  */
 export async function addMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
@@ -113,7 +151,7 @@ export async function addMember(req, res, _next) {
 }
 
 /**
- * DELETE /orgs/members
+ * DELETE /organisation/:orgId/members
  */
 export async function removeMember(req, res, _next) {
 	const username = res.locals.originalUser.username;
