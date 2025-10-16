@@ -25,7 +25,7 @@ async function getOrgsForUser(username) {
  */
 export async function switchOrg(req, res, _next) {
 	const username = res.locals.originalUser.username;
-	const { orgId } = req.params;
+	const { orgId } = req.body;
 
 	if (!orgId || typeof orgId !== 'string' || orgId.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'orgId required' });
@@ -76,7 +76,6 @@ export async function organisationMemberEditPage(app, req, res, next) {
 	if (!member) {
 		return next();
 	}
-	member.permissions = new Permission(member.permissions.toString('base64')).toJSON();
 
 	res.locals.data = { member, csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser };
 	return app.render(req, res, `/organisation/member/${memberUsername}/edit`);
@@ -95,7 +94,6 @@ export async function organisationMemberJson(req, res, _next) {
 	if (!member) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
-	member.permissions = new Permission(member.permissions.toString('base64')).toJSON();
 
 	return dynamicResponse(req, res, 200, { member, csrf: req.csrfToken(), orgs, currentOrgId, originalUser: res.locals.originalUser });
 }
@@ -114,18 +112,20 @@ export async function organisationsJson(req, res, _next) {
  * POST /organisation/:orgId/members
  */
 export async function addMember(req, res, _next) {
-	const username = res.locals.originalUser.username;
-	const { orgId } = req.params;
 	const { memberUsername } = req.body;
 
-	if (!orgId || typeof orgId !== 'string' || orgId.length === 0
+	if (!res.locals.org
 		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId) });
-	if (!org || org.owner !== username) {
+	const org = res.locals.org;
+	if (!org) {
 		return dynamicResponse(req, res, 404, { error: 'Org not found' });
+	}
+
+	if (org.members[memberUsername]) {
+		return dynamicResponse(req, res, 409, { error: 'Member already exists' });
 	}
 
 	const userExists = await db.db().collection('accounts').findOne({ _id: memberUsername }, { projection: { _id: 1 } });
@@ -154,15 +154,14 @@ export async function addMember(req, res, _next) {
  * DELETE /organisation/:orgId/members
  */
 export async function removeMember(req, res, _next) {
-	const username = res.locals.originalUser.username;
-	const { orgId, memberUsername } = req.params;
+	const { memberUsername } = req.body;
 
-	if (!orgId || typeof orgId !== 'string' || orgId.length !== 24
+	if (!res.locals.org
 		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId), owner: username });
+	const org = res.locals.org;
 	if (!org) {
 		return dynamicResponse(req, res, 404, { error: 'Org not found' });
 	}
@@ -187,23 +186,17 @@ export async function removeMember(req, res, _next) {
  * POST /organisation/:orgId/members/:memberUsername
  */
 export async function updateMember(req, res, _next) {
-	const username = res.locals.originalUser.username;
-	const { orgId, memberUsername } = req.params;
+	const { memberUsername } = req.params;
 
-	if (!orgId || typeof orgId !== 'string' || orgId.length !== 24
+	if (!res.locals.org
 		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}
 
-	//TODO: make res.locals.org check for owner?
-	//TODO: perms check in router for editing org members (better)
-	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId), owner: username });
-	if (!org) {
-		return dynamicResponse(req, res, 404, { error: 'Org not found' });
-	}
+	const org = res.locals.org;
 
 	if (!org.members[memberUsername]) {
-		return dynamicResponse(req, res, 404, { error: 'Org not found' });
+		return dynamicResponse(req, res, 404, { error: 'Member not found' });
 	}
 
 	if (memberUsername === org.owner) {

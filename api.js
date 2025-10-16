@@ -53,19 +53,19 @@ export async function getOrganisations(dispatch, errorCallback, router, customHe
 	return ApiCall('/organisations.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
 export async function switchOrganisation(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall(`/forms/organisation/${body.orgId}/switch`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall('/forms/organisation/switch', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function getOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}) {
 	return ApiCall(`/organisation/member/${body.memberUsername}.json`, 'GET', null, dispatch, errorCallback, router, 1, customHeaders);
 }
 export async function addOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall(`/forms/organisation/${body.orgId}/members`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall('/forms/organisation/members', 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function removeOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall(`/forms/organisation/${body.orgId}/member/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/organisation/member/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 export async function updateOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
-	return ApiCall(`/forms/organisation/${body.orgId}/member/${body.memberUsername}`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+	return ApiCall(`/forms/organisation/member/${body.memberUsername}`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
 
 export async function getDomains(dispatch, errorCallback, router, customHeaders = {}) {

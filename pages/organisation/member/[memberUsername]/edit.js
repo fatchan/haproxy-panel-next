@@ -65,8 +65,8 @@ function EditMemberPage(props) {
 				: (
 					<form onSubmit={handleSubmit}>
 						<PermissionsForm
-							// jsonPermissions={member.permissions}
-							permissions={member.permissions}
+							currentPermissions={currentOrg.members[originalUser.username].permissions}
+							editingPermissions={member.permissions}
 						/>
 
 						<div className='mt-3'>

@@ -117,10 +117,10 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson);
 
 	const formsRouter = express.Router({ caseSensitive: true });
-	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
-	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
-	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
-	formsRouter.delete('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
+	formsRouter.post('/organisation/switch', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
+	formsRouter.post('/organisation/members', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.MANAGE_ORG), hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
+	formsRouter.post('/organisation/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.MANAGE_ORG), hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
+	formsRouter.delete('/organisation/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.MANAGE_ORG), hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
 	formsRouter.delete('/account/:accountId', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, accountController.deleteAccount);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, fetchAdmin, accountController.globalToggle);
@@ -150,8 +150,8 @@ export default function router(server, app) {
 	}
 
 	if (process.env.NEXT_PUBLIC_ENABLE_SHKEEPER) {
-		server.get('/billing', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.BILLING), billingController.billingPage.bind(null, app));
-		server.get('/billing.json', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.BILLING), billingController.billingJson);
+		server.get('/billing', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.MANAGE_BILLING), billingController.billingPage.bind(null, app));
+		server.get('/billing.json', sessionChain, csrfMiddleware, applyPermissions, hasPerms.one(Permissions.MANAGE_BILLING), billingController.billingJson);
 		formsRouter.post('/billing/payment_request', sessionChain, csrfMiddleware, billingController.createPaymentRequest);
 		server.post('/forms/billing/callback', (req, res, _next) => shkeeperManager.handleCallback(req, res));
 	}

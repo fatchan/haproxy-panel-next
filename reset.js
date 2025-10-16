@@ -44,6 +44,17 @@ async function reset() {
 					passwordHash,
 				}
 			});
+		await db.db().collection('orgs').updateOne({
+			owner: 'admin'
+		}, {
+			members: {
+				'admin': {
+					addedDate: new Date(),
+					permissions: Binary(Roles.roles.ORG_OWNER.array)
+				}
+			},
+			createdAt: new Date(),
+		});
 	}
 	await db.db().collection('streams').createIndex({ userName: 1, appName: 1 });
 	db.client().close();

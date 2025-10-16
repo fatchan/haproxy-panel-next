@@ -98,20 +98,18 @@ function OrganisationPage(props) {
 								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
 									<tr className='align-middle' key={mi}>
 										<td className='col-1 text-center'>
-											{isOwner && (<>
-												{/*TODO: once perms, make visibility depend on org perm*/}
-												<button
-													disabled={name === currentOrg.owner}
-													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
-													title='Remove member'
-													onClick={() => onRemoveMember(name)}
-												>
-													<i className='bi-trash-fill pe-none' width='16' height='16' />
-												</button>
-												<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-primary' : 'btn-secondary'}`}>
-													<i className='bi-pencil pe-none' width='16' height='16' />
-												</Link>
-											</>)}
+											{/*TODO: once perms, make visibility depend on org perm*/}
+											{isOwner && <button
+												disabled={name === currentOrg.owner}
+												className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
+												title='Remove member'
+												onClick={() => onRemoveMember(name)}
+											>
+												<i className='bi-trash-fill pe-none' width='16' height='16' />
+											</button>}
+											<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-primary' : 'btn-secondary'}`}>
+												<i className='bi-pencil pe-none' width='16' height='16' />
+											</Link>
 										</td>
 										<td>{name}</td>
 										<td>
@@ -155,7 +153,8 @@ function OrganisationPage(props) {
 						</table>
 					</div>
 				</>
-			)}
+			)
+			}
 		</>
 	);
 }
