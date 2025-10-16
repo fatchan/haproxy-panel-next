@@ -15,7 +15,10 @@ function EditMemberPage(props) {
 	const [error, setError] = useState();
 	const [loadingMember, setLoadingMember] = useState(false);
 	const { memberUsername } = params;
-	const { member, csrf: _csrf } = state || {};
+	const { member, csrf, orgs, currentOrgId, originalUser } = state || {};
+	const currentOrg = (orgs || []).find(o => o._id === currentOrgId)
+		|| (orgs || []).find(o => o.owner === originalUser.username) //should default to own org when none selected
+		|| null;
 
 	useEffect(() => {
 		if (memberUsername === member?.username) {
@@ -31,7 +34,10 @@ function EditMemberPage(props) {
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		//TODO
+		setError(null);
+		const formObj = Object.fromEntries(new FormData(e.target).entries());
+		await API.updateOrganisationMember({ _csrf: csrf, memberUsername, orgId: currentOrg._id, ...formObj }, setState, setError, router);
+		await API.getOrganisationMember({ memberUsername }, setState, setError, router);
 	}
 
 	return (

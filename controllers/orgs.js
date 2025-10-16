@@ -182,3 +182,45 @@ export async function removeMember(req, res, _next) {
 
 	return dynamicResponse(req, res, 200, {});
 }
+
+/**
+ * POST /organisation/:orgId/members/:memberUsername
+ */
+export async function updateMember(req, res, _next) {
+	const username = res.locals.originalUser.username;
+	const { orgId, memberUsername } = req.params;
+
+	if (!orgId || typeof orgId !== 'string' || orgId.length !== 24
+		|| !memberUsername || typeof memberUsername !== 'string' || memberUsername.length === 0) {
+		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
+	}
+
+	//TODO: make res.locals.org check for owner?
+	//TODO: perms check in router for editing org members (better)
+	const org = await db.db().collection('orgs').findOne({ _id: new ObjectId(orgId), owner: username });
+	if (!org) {
+		return dynamicResponse(req, res, 404, { error: 'Org not found' });
+	}
+
+	if (!org.members[memberUsername]) {
+		return dynamicResponse(req, res, 404, { error: 'Org not found' });
+	}
+
+	if (memberUsername === org.owner) {
+		return dynamicResponse(req, res, 400, { error: 'Cannot modify org owner permission' });
+	}
+
+	const updatingPermissions = new Permission(org.members[memberUsername].permissions.toString('base64'));
+	updatingPermissions.handleBody(req.body, res.locals.permissions, true);
+
+	await db.db().collection('orgs').updateOne(
+		{ _id: org._id },
+		{
+			$set: {
+				[`members.${memberUsername}.permissions`]: Binary(updatingPermissions.array),
+			}
+		}
+	);
+
+	return dynamicResponse(req, res, 200, {});
+}

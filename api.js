@@ -64,6 +64,9 @@ export async function addOrganisationMember(body, dispatch, errorCallback, route
 export async function removeOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
 	return ApiCall(`/forms/organisation/${body.orgId}/member/${body.memberUsername}`, 'DELETE', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
 }
+export async function updateOrganisationMember(body, dispatch, errorCallback, router, customHeaders = {}, progress) {
+	return ApiCall(`/forms/organisation/${body.orgId}/member/${body.memberUsername}`, 'POST', body, dispatch, errorCallback, router, progress || 0.5, customHeaders);
+}
 
 export async function getDomains(dispatch, errorCallback, router, customHeaders = {}) {
 	return ApiCall('/domains.json', 'GET', null, dispatch, errorCallback, router, 1, customHeaders);

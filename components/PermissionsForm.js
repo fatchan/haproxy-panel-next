@@ -44,8 +44,6 @@ function PermissionRow({ bit, permissions }) {
 
 export default function PermissionsForm({ permissions }) {
 
-	console.log(permissions);
-
 	const bits = Object.keys(permissions)
 		.filter((p) => Permissions._ORG_BITS.includes(parseInt(p, 10)))
 		.map((p) => parseInt(p, 10));

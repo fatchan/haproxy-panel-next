@@ -46,22 +46,22 @@ export default function Register() {
 				<form className='mb-3' onSubmit={register} action='/forms/register' method='POST'>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Username
-							<input className='form-control' type='text' name='username' maxLength='50' required='required'/>
+							<input className='form-control' type='text' name='username' maxLength='50' required='required' />
 						</label>
 					</div>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Email
-							<input className='form-control' type='email' name='email' maxLength='200' required='required'/>
+							<input className='form-control' type='email' name='email' maxLength='200' required='required' />
 						</label>
 					</div>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Password
-							<input className='form-control' type='password' name='password' required='required'/>
+							<input className='form-control' type='password' name='password' required='required' />
 						</label>
 					</div>
 					<div className='mb-2'>
 						<label className='form-label w-100'>Repeat Password
-							<input className='form-control' type='password' name='repeat_password' required='required'/>
+							<input className='form-control' type='password' name='repeat_password' required='required' />
 						</label>
 					</div>
 					<div className='mb-3'>
@@ -70,7 +70,7 @@ export default function Register() {
 							<label className='form-check-label' htmlFor='tos'>I agree to the <Link href='/tos' passHref target='_blank'>terms of service</Link>.</label>
 						</div>
 					</div>
-					<input className='btn btn-primary w-100' type='submit' value='Register'/>
+					<input className='btn btn-primary w-100' type='submit' value='Register' />
 				</form>
 				<span className='fs-xs'>Already have an account? <Link href='/login'>Login here</Link>.</span>
 			</span>

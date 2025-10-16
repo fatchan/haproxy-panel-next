@@ -117,10 +117,10 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, certsController.certsJson);
 
 	const formsRouter = express.Router({ caseSensitive: true });
-	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
-	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
-	// formsRouter.post('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
-	formsRouter.delete('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
+	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/switch', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.switchOrg);
+	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/members', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.addMember);
+	formsRouter.post('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.updateMember);
+	formsRouter.delete('/organisation/:orgId([a-f0-9]{24})/member/:memberUsername([a-zA-Z0-9]+)', sessionChain, csrfMiddleware, applyPermissions, hasCapability(Capabilities.ORGANISATIONS), orgsController.removeMember);
 	formsRouter.delete('/account/:accountId', sessionChain, csrfMiddleware, fetchAdmin, adminCheck, accountController.deleteAccount);
 	formsRouter.post('/cache/purge', sessionChain, useVarnish, fetchAdmin, csrfMiddleware, cacheController.purgeURL);
 	formsRouter.post('/global/toggle', sessionChain, haproxyCsrfChain, fetchAdmin, accountController.globalToggle);
