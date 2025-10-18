@@ -4,14 +4,33 @@ import * as db from './db.js';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import Roles from './lib/permissions/roles.js';
+import packageJson from './package.json' with { type: 'json' };
 
 async function reset() {
 	await db.connect();
 	const numAccounts = await db.db().collection('accounts').countDocuments();
 	const randomPassword = randomBytes(20).toString('base64');
+
+	//set current version on reset for bootstrap
+	await db.db().collection('version').updateOne({
+		'_id': 'version'
+	}, {
+		$set: { version: packageJson.version }
+	});
+
 	console.log(randomPassword);
 	const passwordHash = await bcrypt.hash(randomPassword, 12);
 	if (numAccounts === 0) {
+		const createdOrg = await db.db().collection('orgs').insertOne({
+			owner: 'admin',
+			members: {
+				'admin': {
+					addedDate: new Date(),
+					permissions: Binary(Roles.roles.ORG_OWNER.array)
+				}
+			},
+			createdAt: new Date(),
+		});
 		await db.db().collection('accounts')
 			.insertOne({
 				_id: 'admin',
@@ -24,17 +43,9 @@ async function reset() {
 				onboarding: true,
 				billing: { price: 1, description: 'Free trial', capabilities: ['organisations'], maxDomains: 100, allowedTemplates: ['basic'], },
 				inactive: false,
+				orgId: createdOrg.insertedId,
 			});
-		await db.db().collection('orgs').insertOne({
-			owner: 'admin',
-			members: {
-				'admin': {
-					addedDate: new Date(),
-					permissions: Binary(Roles.roles.ORG_OWNER.array)
-				}
-			},
-			createdAt: new Date(),
-		});
+
 	} else {
 		await db.db().collection('accounts')
 			.updateOne({

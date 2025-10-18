@@ -37,6 +37,7 @@ export function OrgProvider({ children, initialState = {} }) {
 		loading,
 		currentOrg,
 		viewPerms,
+		getOrganisations,
 	};
 
 	return <OrgContext.Provider value={value}>{children}</OrgContext.Provider>;

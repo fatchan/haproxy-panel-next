@@ -276,6 +276,21 @@ export async function register(req, res) {
 
 	const passwordHash = await bcrypt.hash(req.body.password, 12);
 
+	const createdOrg = await db.db().collection('orgs').insertOne({
+		owner: username,
+		members: {
+			[username]: {
+				addedDate: new Date(),
+				permissions: Binary(Roles.roles.ORG_OWNER.array)
+			},
+		},
+		createdAt: new Date(),
+	});
+
+	if (!createdOrg?.insertedId) {
+		return dynamicResponse(req, res, 400, { error: 'Account creation failed, please contact support' });
+	}
+
 	const newAccount = await db.db().collection('accounts')
 		.insertOne({
 			_id: username,
@@ -288,21 +303,12 @@ export async function register(req, res) {
 			onboarding: true,
 			billing: { price: 0, description: 'Free trial', capabilities: [], maxDomains: 5, allowedTemplates: ['basic'] },
 			inactive: false,
+			orgId: createdOrg.insertedId,
 		});
 
 	if (!newAccount?.insertedId) {
 		return dynamicResponse(req, res, 400, { error: 'Account creation failed, please contact support' });
 	}
-	await db.db().collection('orgs').insertOne({
-		owner: newAccount.insertedId,
-		members: {
-			[username]: {
-				addedDate: new Date(),
-				permissions: Binary(Roles.roles.ORG_OWNER.array)
-			},
-		},
-		createdAt: new Date(),
-	});
 
 	const token = randomBytes(32).toString('hex');
 	await db.db().collection('verifications').insertOne({
