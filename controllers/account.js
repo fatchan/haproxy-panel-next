@@ -6,6 +6,7 @@ import sendEmail from '../lib/email/send.js';
 import { randomBytes } from 'node:crypto';
 import { getNameserverTxtRecords, checkPublicDNSRecord, expectedNSRecords } from '../lib/nameservers.js';
 import Roles from '../lib/permissions/roles.js';
+import EmailTypes from '../lib/email/types.js';
 
 /**
  * account page data shared between html/json routes
@@ -295,7 +296,7 @@ export async function register(req, res) {
 	await db.db().collection('orgs').insertOne({
 		owner: newAccount.insertedId,
 		members: {
-			[newAccount.insertedId]: {
+			[username]: {
 				addedDate: new Date(),
 				permissions: Binary(Roles.roles.ORG_OWNER.array)
 			},
@@ -308,7 +309,7 @@ export async function register(req, res) {
 		accountId: username,
 		token,
 		date: new Date(),
-		type: 'verify_email'
+		type: EmailTypes.VERIFY_EMAIL,
 	});
 	const verifyLink = `${process.env.FRONTEND_URL}/verifyemail?token=${token}`;
 	const emailBody = `To verify your email and complete registration, please click the link below:\n\n${verifyLink}\n\nIf you didn't request this, please ignore this email.`;
@@ -366,7 +367,7 @@ export async function requestPasswordChange(req, res) {
 			accountId: account._id,
 			token,
 			date: new Date(),
-			type: 'change_password'
+			type: EmailTypes.CHANGE_PASSWORD,
 		});
 		const resetLink = `${process.env.FRONTEND_URL}/changepassword?token=${token}`;
 		const emailBody = `To reset your password, please click the link below:\n\n${resetLink}\n\nIf you didn't request this, please ignore this email.`;
@@ -400,7 +401,7 @@ export async function changePassword(req, res) {
 
 	const resetToken = await db.db().collection('verifications').findOneAndDelete({
 		token,
-		type: 'change_password'
+		type: EmailTypes.CHANGE_PASSWORD
 	});
 
 	if (!resetToken || !resetToken.value) {
@@ -437,7 +438,7 @@ export async function verifyEmail(req, res) {
 
 	const verifyToken = await db.db().collection('verifications').findOneAndDelete({
 		token,
-		type: 'verify_email' //todo: put consts in lib
+		type: EmailTypes.VERIFY_EMAIL
 	});
 
 	if (!verifyToken || !verifyToken.value) {
