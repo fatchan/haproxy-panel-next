@@ -8,7 +8,7 @@ Internally uses [haproxy dataplaneapi](https://gitgud.io/fatchan/dataplaneapi/).
 ##### Features:
 
 - Domains and DNS management with geo routing, health checks, fallbacks.
-- Backend server management with load balancing and geo routing.
+- Backend server management with load balancing, geo routing and health checks.
 - Easily generate and automatically renew ssl certs with Letsencrypt.
 - Built in private CA and CSR's for proper origin ssl validation.
 - Blacklist IPs, subnets or whole ASNs.
@@ -23,6 +23,7 @@ Internally uses [haproxy dataplaneapi](https://gitgud.io/fatchan/dataplaneapi/).
 - Integration with SHKeeper for invoicing and payments.
 - Integration with OvenMediaEngine for managed livestreaming support.
 - API keys for programmatic management of all aspects.
+- Organisations with granular permissions to share access within teams.
 - Customisable branding for the panel itself.
 
 ## License
