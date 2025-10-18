@@ -7,6 +7,8 @@ import ErrorAlert from '../../../../components/ErrorAlert.js';
 import withAuth from '../../../../components/withAuth.js';
 import PermissionsForm from '../../../../components/PermissionsForm'; // the form component from earlier
 import { useParams } from 'next/navigation.js';
+import { useOrgContext } from '../../../../components/orgContext.js';
+import { Permissions } from '../../../../lib/permissions/permissions.js';
 
 function EditMemberPage(props) {
 	const router = useRouter();
@@ -14,11 +16,9 @@ function EditMemberPage(props) {
 	const [state, setState] = useState(props);
 	const [error, setError] = useState();
 	const [loadingMember, setLoadingMember] = useState(false);
+	const { viewPerms, currentOrg } = useOrgContext();
 	const { memberUsername } = params;
-	const { member, csrf, orgs, currentOrgId, originalUser } = state || {};
-	const currentOrg = (orgs || []).find(o => o._id === currentOrgId)
-		|| (orgs || []).find(o => o.owner === originalUser.username) //should default to own org when none selected
-		|| null;
+	const { member, csrf, originalUser } = state || {};
 
 	useEffect(() => {
 		if (memberUsername === member?.username) {
@@ -40,21 +40,24 @@ function EditMemberPage(props) {
 		await API.getOrganisationMember({ memberUsername }, setState, setError, router);
 	}
 
+	const editing = viewPerms.get(Permissions.MANAGE_ORG);
+	const title = `${editing ? 'Edit' : 'View'} Org Member`;
+
 	return (
 		<>
 			<Head>
-				<title>Edit Org Member</title>
+				<title>{title}</title>
 			</Head>
 
-			<h5 className='fw-bold'>Edit Org Member</h5>
+			<h5 className='fw-bold'>{title}</h5>
 
 			{error && <ErrorAlert error={error} />}
 
 			<div className='mb-3'>
-				<strong>Editing Org Member:</strong> {memberUsername}
+				<strong>Username:</strong> {memberUsername}
 			</div>
 
-			{(!member || loadingMember)
+			{(!member || loadingMember || !currentOrg)
 				? (
 					<div className='text-center mb-4'>
 						<div className='spinner-border mt-5' role='status'>
@@ -69,9 +72,9 @@ function EditMemberPage(props) {
 							editingPermissions={member.permissions}
 						/>
 
-						<div className='mt-3'>
+						{editing && <div className='mt-3'>
 							<button type='submit' className='btn btn-primary'>Save</button>
-						</div>
+						</div>}
 					</form>
 				)}
 		</>

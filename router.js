@@ -36,10 +36,10 @@ const mapNamesOrString = [
 	process.env.NEXT_PUBLIC_BLOCKED_IP_MAP_NAME, process.env.NEXT_PUBLIC_BLOCKED_ASN_MAP_NAME,
 	process.env.NEXT_PUBLIC_BLOCKED_CC_MAP_NAME, process.env.NEXT_PUBLIC_BLOCKED_CN_MAP_NAME,
 	process.env.NEXT_PUBLIC_MAINTENANCE_MAP_NAME, process.env.NEXT_PUBLIC_WHITELIST_MAP_NAME,
-	process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME, process.env.NEXT_PUBLIC_BACKENDS_MAP_NAME,
+	process.env.NEXT_PUBLIC_REDIRECT_MAP_NAME, process.env.NEXT_PUBLIC_CSS_MAP_NAME,
 	process.env.NEXT_PUBLIC_DDOS_MAP_NAME, process.env.NEXT_PUBLIC_DDOS_CONFIG_MAP_NAME,
 	process.env.NEXT_PUBLIC_HOSTS_MAP_NAME, process.env.NEXT_PUBLIC_REWRITE_MAP_NAME,
-	process.env.NEXT_PUBLIC_IMAGES_MAP_NAME, process.env.NEXT_PUBLIC_CSS_MAP_NAME].join('|');
+	process.env.NEXT_PUBLIC_IMAGES_MAP_NAME].join('|');
 
 export default function router(server, app) {
 	const shkeeperManager = new ShkeeperManager();
@@ -90,8 +90,8 @@ export default function router(server, app) {
 	server.get('/onboarding.json', sessionChain, haproxyCsrfChain, accountController.onboardingJson);
 
 	server.get('/organisation', sessionChain, csrfMiddleware, orgsController.organisationPage.bind(null, app));
-	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+)/edit', sessionChain, csrfMiddleware, hasPerms.one(Permissions.MANAGE_ORG), orgsController.organisationMemberEditPage.bind(null, app));
-	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+).json', sessionChain, csrfMiddleware, hasPerms.one(Permissions.MANAGE_ORG), orgsController.organisationMemberJson);
+	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+)/edit', sessionChain, csrfMiddleware, orgsController.organisationMemberEditPage.bind(null, app));
+	server.get('/organisation/member/:memberUsername([a-zA-Z0-9]+).json', sessionChain, csrfMiddleware, orgsController.organisationMemberJson);
 	server.get('/organisations.json', sessionChain, csrfMiddleware, orgsController.organisationsJson);
 
 	server.get('/dashboard', sessionChain, checkOnboarding, haproxyCsrfChain, accountController.dashboardPage.bind(null, app));
@@ -106,8 +106,8 @@ export default function router(server, app) {
 	server.get('/certs.json', sessionChain, checkOnboarding, haproxyCsrfChain, hasPerms.one(Permissions.MANAGE_CERTS), certsController.certsJson);
 
 	//TODO: make MANAGE_BACKENDS apply to backends map (in controller? hmmmm)
-	server.get(`/map/:name(${mapNamesOrString})`, sessionChain, checkOnboarding, haproxyCsrfChain, hasPerms.one(Permissions.MANAGE_MAPS), mapsController.mapPage.bind(null, app));
-	server.get(`/map/:name(${mapNamesOrString}).json`, sessionChain, checkOnboarding, haproxyCsrfChain, hasPerms.one(Permissions.MANAGE_MAPS), mapsController.mapJson);
+	server.get(`/map/:name(${mapNamesOrString})`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapPage.bind(null, app));
+	server.get(`/map/:name(${mapNamesOrString}).json`, sessionChain, checkOnboarding, haproxyCsrfChain, mapsController.mapJson);
 	server.get('/blacklist', sessionChain, checkOnboarding, haproxyCsrfChain, hasPerms.one(Permissions.MANAGE_MAPS), mapsController.blacklistPage.bind(null, app));
 
 	server.get('/domains', sessionChain, csrfMiddleware, hasPerms.one(Permissions.MANAGE_API_KEYS), domainsController.domainsPage.bind(null, app));

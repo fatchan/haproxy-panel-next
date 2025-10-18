@@ -157,7 +157,7 @@ const MenuLinks = ({ router, user, originalUser }) => {
 				</button>
 				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length * 60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
 					<ul className='nav nav-pills mb-auto'>
-						{section.links.filter(l => viewPerms.get(l.permission)).map((link, linkIndex) => (
+						{section.links.filter(l => l.permission == null || viewPerms.get(l.permission)).map((link, linkIndex) => (
 							<li className='nav-item w-100' key={`${section.name}_${linkIndex}`}>
 								<Link
 									href={link.href}
@@ -205,7 +205,7 @@ const MenuLinks = ({ router, user, originalUser }) => {
 						Onboarding
 					</Link>
 				</li>
-				{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER
+				{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER && viewPerms.get(Permissions.MANAGE_BILLING)
 					&& (<li className='nav-item'>
 						<Link href='/billing' className={path.startsWith('/billing') ? 'nav-link active' : 'nav-link text-body'} aria-current='page'>
 							<i className='bi-wallet2 pe-none me-2' width='16' height='16' />

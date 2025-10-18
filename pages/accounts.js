@@ -88,9 +88,9 @@ function AccountsPage(props) {
 							return (
 								<tr className='align-middle' key={idx}>
 									<td className='text-left'>
-										<a className='btn btn-sm btn-primary me-2' onClick={() => {/* TODO: change to lnik and go to /account/:accountid/edit page */ }} role='button'>
+										{/*<a className='btn btn-sm btn-primary me-2' onClick={() => {}} role='button'>
 											<i className='bi-pencil-fill pe-none' width='16' height='16' />
-										</a>
+										</a>*/}
 										<a className='btn btn-sm btn-danger' onClick={() => handleDelete(a._id)} role='button' disabled={deleting === a._id}>
 											<i className='bi-trash-fill pe-none' width='16' height='16' />
 										</a>

@@ -14,7 +14,7 @@ function OrganisationPage(props) {
 	const [error, setError] = useState();
 	const [adding, setAdding] = useState(false);
 	const { currentOrg, viewPerms } = useOrgContext();
-	const { csrf } = state || {};
+	const { csrf, originalUser } = state || {};
 
 	useEffect(() => {
 		API.getOrganisations(setState, setError, router);
@@ -97,17 +97,17 @@ function OrganisationPage(props) {
 								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
 									<tr className='align-middle' key={mi}>
 										<td className='col-1 text-center'>
-											{viewPerms.get(Permissions.MANAGE_ORG) || 1 && <>
-												<button
+											{(viewPerms.get(Permissions.MANAGE_ORG) || name === originalUser.username) && <>
+												{viewPerms.get(Permissions.MANAGE_ORG) && <button
 													disabled={name === currentOrg.owner}
 													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
 													title='Remove member'
 													onClick={() => onRemoveMember(name)}
 												>
 													<i className='bi-trash-fill pe-none' width='16' height='16' />
-												</button>
+												</button>}
 												<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-primary' : 'btn-secondary'}`}>
-													<i className='bi-pencil pe-none' width='16' height='16' />
+													<i className={`bi-${viewPerms.get(Permissions.MANAGE_ORG) ? 'pencil' : 'eye'} pe-none`} width='16' height='16' />
 												</Link>
 											</>}
 										</td>

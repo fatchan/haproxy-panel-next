@@ -3,6 +3,7 @@ import * as db from '../db.js';
 import { getMapNotes, nameToProcessors } from '../lib/maps/processors.js';
 import { mapValueNames } from '../lib/maps/labels.js';
 import { backendIpAllowed, handleMapKey, handleMapValue } from '../lib/maps/converters.js';
+import { Permissions } from '../lib/permissions/permissions.js';
 
 /**
  * GET /maps/:name
@@ -61,6 +62,13 @@ export async function mapData(req, res, next) {
 }
 
 export async function mapPage(app, req, res, next) {
+	//meh
+	if (res.locals.permissions.get(Permissions.MANAGE_MAPS) === false && req.params.name !== process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+	if (res.locals.permissions.get(Permissions.MANAGE_BACKENDS) === false && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
 	const data = await mapData(req, res, next);
 	res.locals.data = { ...data, user: res.locals.user };
 	return app.render(req, res, `/map/${data.name}`);
@@ -75,6 +83,12 @@ export async function blacklistPage(app, req, res, _next) {
 }
 
 export async function mapJson(req, res, next) {
+	if (res.locals.perms.get(Permissions.MANAGE_MAPS) === false && req.params.name !== process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+	if (res.locals.perms.get(Permissions.MANAGE_BACKENDS) === false && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
 	const data = await mapData(req, res, next);
 	return res.json({ ...data, user: res.locals.user });
 }
@@ -84,7 +98,12 @@ export async function mapJson(req, res, next) {
  * Delete the map entries of the body 'domain'
  */
 export async function deleteMapForm(req, res, next) {
-
+	if (res.locals.permissions.get(Permissions.MANAGE_MAPS) === false && req.params.name !== process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+	if (res.locals.permissions.get(Permissions.MANAGE_BACKENDS) === false && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
 	if (!req.body || !req.body.key || typeof req.body.key !== 'string' || req.body.key.length === 0) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid value' });
 	}
@@ -240,7 +259,12 @@ export async function deleteMapForm(req, res, next) {
  * Add map entries of the body 'domain'
  */
 export async function patchMapForm(req, res, next) {
-
+	if (res.locals.permissions.get(Permissions.MANAGE_MAPS) === false && req.params.name !== process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+	if (res.locals.permissions.get(Permissions.MANAGE_BACKENDS) === false && req.params.name === process.env.NEXT_PUBLIC_HOSTS_MAP_NAME) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
 	if (!req.body || !req.body.key || typeof req.body.key !== 'string') {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
 	}

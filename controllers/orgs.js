@@ -3,6 +3,7 @@ import { Binary, ObjectId } from 'mongodb';
 import { dynamicResponse } from '../util.js';
 import Roles from '../lib/permissions/roles.js';
 import Permission from '../lib/permissions/permission.js';
+import { Permissions } from '../lib/permissions/permissions.js';
 
 async function getOrgsForUser(username) {
 	return db.db().collection('orgs')
@@ -70,8 +71,12 @@ export async function organisationMemberEditPage(app, req, res, next) {
 	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
-
 	const { memberUsername } = req.params;
+
+	if (!res.locals.permissions.get(Permissions.MANAGE_ORG) && memberUsername !== username) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+
 	const member = res.locals.org.members[memberUsername];
 	if (!member) {
 		return next();
@@ -88,8 +93,12 @@ export async function organisationMemberJson(req, res, _next) {
 	const username = res.locals.originalUser.username;
 	const currentOrgId = req.session?.currentOrg;
 	const orgs = await getOrgsForUser(username);
-
 	const { memberUsername } = req.params;
+
+	if (!res.locals.permissions.get(Permissions.MANAGE_ORG) && memberUsername !== username) {
+		return dynamicResponse(req, res, 403, { error: 'no permission' });
+	}
+
 	const member = res.locals.org.members[memberUsername];
 	if (!member) {
 		return dynamicResponse(req, res, 400, { error: 'Invalid input' });
