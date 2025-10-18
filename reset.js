@@ -47,13 +47,15 @@ async function reset() {
 		await db.db().collection('orgs').updateOne({
 			owner: 'admin'
 		}, {
-			members: {
-				'admin': {
-					addedDate: new Date(),
-					permissions: Binary(Roles.roles.ORG_OWNER.array)
-				}
-			},
-			createdAt: new Date(),
+			$set: {
+				members: {
+					'admin': {
+						addedDate: new Date(),
+						permissions: Binary(Roles.roles.ORG_OWNER.array)
+					}
+				},
+				createdAt: new Date(),
+			}
 		});
 	}
 	await db.db().collection('streams').createIndex({ userName: 1, appName: 1 });

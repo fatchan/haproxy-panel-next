@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { withRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Router from 'next/router';
-import OrgsSwitcher from './OrgSwitcher';
+import OrgsSwitcher from './OrgSwitcher.js';
+import { Permissions } from '../lib/permissions/permissions.js';
+import { useOrgContext } from './orgContext.js';
 
 export const sections = [
 	{
@@ -16,28 +18,32 @@ export const sections = [
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_DNS],
 		links: [
 			{ href: '/domains', subpaths: ['/dns/'], label: 'DNS', icon: 'bi-layers' },
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_BACKENDS, Permissions.MANAGE_CERTS],
 		name: 'Proxying',
 		icon: 'bi-hdd-network',
 		links: [
-			{ href: '/map/hosts', label: 'Backends', icon: 'bi-hdd-network' },
-			{ href: '/certs', label: 'HTTPS Certificates', icon: 'bi-file-earmark-lock' },
-			{ href: '/csr', label: 'Origin CSR', icon: 'bi-building-lock' },
+			{ href: '/map/hosts', label: 'Backends', icon: 'bi-hdd-network', permission: Permissions.MANAGE_BACKENDS },
+			{ href: '/certs', label: 'HTTPS Certificates', icon: 'bi-file-earmark-lock', permission: Permissions.MANAGE_CERTS },
+			{ href: '/csr', label: 'Origin CSR', icon: 'bi-building-lock', permission: Permissions.MANAGE_CERTS },
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_MAPS],
 		name: 'Protection',
 		icon: 'bi-shield-check',
 		links: [
-			{ href: '/map/ddos', label: 'Protection Rules', icon: 'bi-shield-check' },
-			{ href: '/map/ddos_config', label: 'Protection Settings', icon: 'bi-sliders2' },
+			{ href: '/map/ddos', label: 'Protection Rules', icon: 'bi-shield-check', permission: Permissions.MANAGE_MAPS },
+			{ href: '/map/ddos_config', label: 'Protection Settings', icon: 'bi-sliders2', permission: Permissions.MANAGE_MAPS },
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_MAPS],
 		name: 'Edge Rules',
 		icon: 'bi-globe2',
 		links: [
@@ -53,6 +59,7 @@ export const sections = [
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_MAPS],
 		name: 'Customisation',
 		icon: 'bi-brush',
 		links: [
@@ -62,22 +69,26 @@ export const sections = [
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_CACHE],
 		links: [
 			{ href: '/cache', label: 'Cache Purge', icon: 'bi-trash' },
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_STATS],
 		links: [
 			{ href: '/stats', label: 'Statistics', icon: 'bi-graph-up' },
 		],
 		disabled: !process.env.NEXT_PUBLIC_ENABLE_STATS,
 	},
 	{
+		permissions: [Permissions.MANAGE_API_KEYS],
 		links: [
 			{ href: '/apikeys', label: 'Api Keys', icon: 'bi-key' },
 		],
 	},
 	{
+		permissions: [Permissions.MANAGE_STREAMING],
 		links: [
 			{ href: '/streams', label: 'Live Streaming', icon: 'bi-cast' },
 		],
@@ -100,6 +111,7 @@ export const sections = [
 const MenuLinks = ({ router, user, originalUser }) => {
 	const [path, setPath] = useState(router.asPath);
 	const [openSections, setOpenSections] = useState({});
+	const { viewPerms } = useOrgContext();
 
 	const toggleSection = (section) => {
 		setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -110,7 +122,10 @@ const MenuLinks = ({ router, user, originalUser }) => {
 	};
 
 	const renderSection = (section, index) => {
-		if (section.disabled) { return null; }
+		if (section.disabled
+			|| (section.permissions && !viewPerms.hasAny(...section.permissions))) {
+			return null;
+		}
 		return section.links.length === 1
 			? <ul key={`section_${section.links[0].name}_${index}`} className='nav nav-pills mb-2'>
 				<li className='nav-item w-100' key={`${section.name}_${index}`}>
@@ -142,7 +157,7 @@ const MenuLinks = ({ router, user, originalUser }) => {
 				</button>
 				<div className='ps-3 my-1' style={{ borderLeft: '1px solid var(--bs-dark-text-emphasis)!important', maxHeight: openSections[section.name] ? `${section.links.length * 60}px` : '0', overflow: 'hidden', transition: 'max-height 0.2s ease-in-out' }}>
 					<ul className='nav nav-pills mb-auto'>
-						{section.links.map((link, linkIndex) => (
+						{section.links.filter(l => viewPerms.get(l.permission)).map((link, linkIndex) => (
 							<li className='nav-item w-100' key={`${section.name}_${linkIndex}`}>
 								<Link
 									href={link.href}

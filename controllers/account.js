@@ -177,9 +177,6 @@ export async function onboardingJson(req, res, next) {
  * toggle global ACL
  */
 export async function globalToggle(req, res, next) {
-	if (!res.locals.isAdmin) { //already a middleware but meh
-		return dynamicResponse(req, res, 403, { error: 'Global ACL can only be toggled by an administrator' });
-	}
 	try {
 		const globalAcl = await res.locals
 			.dataPlaneRetry('getOneRuntimeMap', 'ddos_global')

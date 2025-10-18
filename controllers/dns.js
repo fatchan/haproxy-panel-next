@@ -348,9 +348,6 @@ export async function dnsRecordUpdate(req, res) {
 * downed ips page
 */
 export async function downPage(app, req, res) {
-	if (!res.locals.isAdmin) {
-		return dynamicResponse(req, res, 302, { redirect: '/dashboard' });
-	}
 	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
 	res.locals.data = {
 		user: res.locals.user,
@@ -365,9 +362,6 @@ export async function downPage(app, req, res) {
 * downed ips json
 */
 export async function downJson(req, res) {
-	if (!res.locals.isAdmin) {
-		return dynamicResponse(req, res, 403, { error: 'No permission' });
-	}
 	const ipsRecord = await db.db().collection('down').findOne({ _id: 'down' });
 	return res.json({
 		csrf: req.csrfToken(),

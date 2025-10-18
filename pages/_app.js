@@ -7,6 +7,7 @@ import Router from 'next/router';
 import '@fontsource/inter';
 import './global.css';
 import { ToasterWithMax } from '../components/ToasterWithMax.js';
+import { OrgProvider } from '../components/orgContext.js';
 
 const loadRoutes = ['/login', '/register', '/changepassword', '/requestchangepassword', '/'];
 NProgress.configure({ showSpinner: false });
@@ -14,8 +15,8 @@ Router.events.on('routeChangeStart', (url) => loadRoutes.includes(url) && NProgr
 Router.events.on('routeChangeComplete', (url) => loadRoutes.includes(url) && NProgress.done());
 Router.events.on('routeChangeError', () => NProgress.done());
 
-export default function App ({ Component, pageProps }) {
-	return (
+export default function App({ Component, pageProps }) {
+	return (<OrgProvider initialState={pageProps}>
 		<Layout {...pageProps}>
 			<ToasterWithMax
 				position='bottom-right'
@@ -28,5 +29,5 @@ export default function App ({ Component, pageProps }) {
 			/>
 			<Component {...pageProps} />
 		</Layout>
-	);
+	</OrgProvider>);
 }

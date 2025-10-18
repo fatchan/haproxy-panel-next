@@ -186,6 +186,7 @@ export async function removeMember(req, res, _next) {
  * POST /organisation/:orgId/members/:memberUsername
  */
 export async function updateMember(req, res, _next) {
+	const username = res.locals.originalUser.username;
 	const { memberUsername } = req.params;
 
 	if (!res.locals.org
@@ -200,7 +201,11 @@ export async function updateMember(req, res, _next) {
 	}
 
 	if (memberUsername === org.owner) {
-		return dynamicResponse(req, res, 400, { error: 'Cannot modify org owner permission' });
+		return dynamicResponse(req, res, 400, { error: 'Cannot modify org owner permissions' });
+	}
+
+	if (memberUsername === username) {
+		return dynamicResponse(req, res, 400, { error: 'Cannot modify your own permissions' });
 	}
 
 	const updatingPermissions = new Permission(org.members[memberUsername].permissions.toString('base64'));

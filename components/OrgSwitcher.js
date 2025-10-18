@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import ErrorAlert from '../components/ErrorAlert.js';
-import * as API from '../api.js';
 import Capabilities from '../lib/capabilities.js';
+import { useOrgContext } from '../components/orgContext.js';
+import * as API from '../api.js';
 
-//TODO: move?
 export function shouldShowSwitcher(billingUser, orgs) {
 	if (!billingUser) { return false; }
 	const caps = billingUser.billing?.capabilities || [];
@@ -17,17 +17,11 @@ export function shouldShowSwitcher(billingUser, orgs) {
 
 export default function OrgsSwitcher(props) {
 	const router = useRouter();
-	const [state, setState] = useState(props);
-	const [loading, setLoading] = useState(false);
+	const { state, loading } = useOrgContext(props);
 	const [switching, setSwitching] = useState(false);
 	const [error, setError] = useState();
 	const { orgs, user, originalUser, currentOrgId, csrf } = state || {};
 	const billingUser = originalUser || user;
-
-	useEffect(() => {
-		setLoading(true);
-		API.getOrganisations(setState, setError, router).finally(() => setLoading(false));
-	}, []);
 
 	const orgOptions = useMemo(() => {
 		return (orgs || []).map(o => ({
@@ -38,13 +32,15 @@ export default function OrgsSwitcher(props) {
 	}, [orgs, originalUser]);
 
 	const handleChange = async selected => {
-		if (!selected) { return; }
-		setError();
+		if (!selected) {return;}
+		setError(undefined);
 		setSwitching(true);
-		await API.switchOrganisation({ _csrf: csrf, orgId: selected.value }, null, setError, router);
-		await API.getOrganisations(setState, setError, router);
-		setSwitching(false);
-		router.reload(); //easiest thing
+		try {
+			await API.switchOrganisation({ _csrf: csrf, orgId: selected.value }, null, setError, router);
+			router.reload();
+		} finally {
+			setSwitching(false);
+		}
 	};
 
 	const selectedOption = orgOptions.find(o => o.value === currentOrgId)

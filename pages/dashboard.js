@@ -5,20 +5,23 @@ import ErrorAlert from '../components/ErrorAlert.js';
 import * as API from '../api.js';
 import { useRouter } from 'next/router';
 import withAuth from '../components/withAuth.js';
+import { useOrgContext } from '../components/orgContext.js';
+import { Permissions } from '../lib/permissions/permissions.js';
 
 function DashboardHome(props) {
 	const router = useRouter();
 	const [state, dispatch] = useState(props);
 	const [error, setError] = useState();
+	const { viewPerms } = useOrgContext();
 
-	const { globalAcl, csrf, user } = state || {};
+	const { globalAcl, csrf, user, originalUser } = state || {};
 	const domainCount = user?.domains?.length || 0;
-	const isAdmin = user && user.username === 'admin';
+	const isAdmin = originalUser?.username === 'admin';
 	//impersonation wont let global toggle work in backend, ErrorAlert for now
 
 	async function toggleGlobal(e) {
 		e.preventDefault();
-		await API.globalToggle({ _csrf: csrf }, dispatch, setError, router);
+		await API.globalToggle({ _csrf: csrf }, null, setError, router);
 		await API.getAccount(dispatch, setError, router);
 	}
 
@@ -81,7 +84,7 @@ function DashboardHome(props) {
 				{/* Grid layout for links */}
 				<div className='row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 text-center'>
 					{/* DNS */}
-					<div className='col'>
+					{viewPerms.get(Permissions.MANAGE_DNS) && <div className='col'>
 						<Link href='/domains' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-cloud fs-2'></i>
@@ -93,20 +96,20 @@ function DashboardHome(props) {
 								</p>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Backends */}
-					<div className='col'>
+					{viewPerms.get(Permissions.MANAGE_BACKENDS) && <div className='col'>
 						<Link href='/map/hosts' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-hdd-network fs-2'></i>
 								<h5 className='card-title'>Backends</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* HTTPS Certificates */}
-					<div className='col'>
+					{viewPerms.get(Permissions.MANAGE_CERTS) && <div className='col'>
 						<Link href='/certs' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-file-earmark-lock fs-2'></i>
@@ -118,10 +121,10 @@ function DashboardHome(props) {
 								</p>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Statistics Card */}
-					{process.env.NEXT_PUBLIC_ENABLE_STATS && <div className='col'>
+					{process.env.NEXT_PUBLIC_ENABLE_STATS && viewPerms.get(Permissions.MANAGE_STATS) && <div className='col'>
 						<Link href='/stats' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-graph-up fs-2'></i>
@@ -131,17 +134,17 @@ function DashboardHome(props) {
 					</div>}
 
 					{/* Cache Card */}
-					<div className='col'>
+					{viewPerms.get(Permissions.MANAGE_CACHE) && <div className='col'>
 						<Link href='/cache' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-trash fs-2'></i>
 								<h5 className='card-title'>Cache Purge</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Streams Card */}
-					{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME && <div className='col'>
+					{process.env.NEXT_PUBLIC_OME_ORIGIN_HOSTNAME && viewPerms.get(Permissions.MANAGE_STREAMING) && <div className='col'>
 						<Link href='/streams' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-cast fs-2'></i>
@@ -151,14 +154,14 @@ function DashboardHome(props) {
 					</div>}
 
 					{/* API keys Card */}
-					<div className='col'>
+					{viewPerms.get(Permissions.MANAGE_API_KEYS) && <div className='col'>
 						<Link href='/apikeys' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-key fs-2'></i>
 								<h5 className='card-title'>API Keys</h5>
 							</div>
 						</Link>
-					</div>
+					</div>}
 
 					{/* Account */}
 					<div className='col'>
@@ -171,7 +174,7 @@ function DashboardHome(props) {
 					</div>
 
 					{/* Billing */}
-					{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER && <div className='col'>
+					{process.env.NEXT_PUBLIC_ENABLE_SHKEEPER && viewPerms.get(Permissions.MANAGE_BILLING) && <div className='col'>
 						<Link href='/billing' className='card text-decoration-none bg-light'>
 							<div className='card-body d-flex flex-column justify-content-center align-items-center p-4' style={{ minHeight: '200px' }}>
 								<i className='bi bi-credit-card fs-2'></i>

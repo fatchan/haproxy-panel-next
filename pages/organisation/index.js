@@ -5,17 +5,16 @@ import { useRouter } from 'next/router';
 import * as API from '../../api.js';
 import ErrorAlert from '../../components/ErrorAlert.js';
 import withAuth from '../../components/withAuth.js';
+import { Permissions } from '../../lib/permissions/permissions.js';
+import { useOrgContext } from '../../components/orgContext.js';
 
 function OrganisationPage(props) {
 	const router = useRouter();
 	const [state, setState] = useState(props);
 	const [error, setError] = useState();
 	const [adding, setAdding] = useState(false);
-	const { originalUser, orgs, currentOrgId, csrf } = state || {};
-	const currentOrg = (orgs || []).find(o => o._id === currentOrgId)
-		|| (orgs || []).find(o => o.owner === originalUser.username) //should default to own org when none selected
-		|| null;
-	const isOwner = currentOrg && originalUser && currentOrg.owner === originalUser.username;
+	const { currentOrg, viewPerms } = useOrgContext();
+	const { csrf } = state || {};
 
 	useEffect(() => {
 		API.getOrganisations(setState, setError, router);
@@ -98,18 +97,19 @@ function OrganisationPage(props) {
 								{Object.entries(currentOrg.members || {}).map(([name, data], mi) => (
 									<tr className='align-middle' key={mi}>
 										<td className='col-1 text-center'>
-											{/*TODO: once perms, make visibility depend on org perm*/}
-											{isOwner && <button
-												disabled={name === currentOrg.owner}
-												className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
-												title='Remove member'
-												onClick={() => onRemoveMember(name)}
-											>
-												<i className='bi-trash-fill pe-none' width='16' height='16' />
-											</button>}
-											<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-primary' : 'btn-secondary'}`}>
-												<i className='bi-pencil pe-none' width='16' height='16' />
-											</Link>
+											{viewPerms.get(Permissions.MANAGE_ORG) || 1 && <>
+												<button
+													disabled={name === currentOrg.owner}
+													className={`btn btn-sm ${name !== currentOrg.owner ? 'btn-danger' : 'btn-secondary'}`}
+													title='Remove member'
+													onClick={() => onRemoveMember(name)}
+												>
+													<i className='bi-trash-fill pe-none' width='16' height='16' />
+												</button>
+												<Link aria-disabled={name === currentOrg.owner} href={`/organisation/member/${name}/edit`} passHref className={`ms-2 btn btn-sm ${name !== currentOrg.owner ? 'btn-primary' : 'btn-secondary'}`}>
+													<i className='bi-pencil pe-none' width='16' height='16' />
+												</Link>
+											</>}
 										</td>
 										<td>{name}</td>
 										<td>
@@ -130,7 +130,7 @@ function OrganisationPage(props) {
 									</tr>
 								)}
 
-								{isOwner && (
+								{viewPerms.get(Permissions.MANAGE_ORG) && (
 									<tr>
 										<td colSpan='4'>
 											<form className='d-flex' onSubmit={onAddMember}>

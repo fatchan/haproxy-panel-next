@@ -7,11 +7,14 @@ import { footerLinks } from '../instance-config.js';
 import InfoAlert from './InfoAlert';
 import * as API from '../api.js';
 
-export default withRouter(function Layout({ children, router, user, originalUser }) {
+export default withRouter(function Layout({ children, router, user, originalUser, currentOrgId, orgs }) {
 	const [incidents, setIncidents] = useState([]);
 	useEffect(() => {
 		API.getIncidents(setIncidents, (e) => { console.warn('Failed to fetch incident data:', e); });
 	}, []);
+	const currentOrg = (orgs || []).find(o => o._id === currentOrgId)
+		|| (orgs || []).find(o => o.owner === originalUser.username) //should default to own org when none selected
+		|| null;
 
 	const noSidebar = ['/tos', '/login', '/register', '/verifyemail', '/changepassword', '/requestchangepassword', '/', '/menu'].includes(router.pathname);
 	const fullWidth = ['/stats', '/dashboard'].includes(router.pathname);
@@ -29,7 +32,7 @@ export default withRouter(function Layout({ children, router, user, originalUser
 
 				{!noSidebar && <div className='col-auto sidebar h-100 m-0 px-0'>
 					<div className='d-flex flex-column flex-shrink-0 p-3 h-100 overflow-auto' style={{ width: '265px' }}>
-						<MenuLinks user={user} originalUser={originalUser} />
+						<MenuLinks user={user} originalUser={originalUser} currentOrg={currentOrg} />
 					</div>
 				</div>}
 
